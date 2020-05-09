@@ -4,14 +4,12 @@ import { Container, Segment, Message } from 'semantic-ui-react';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom'
 import Header from './components/Header';
 import LoginForm from './components/LoginForm';
-import StaffView from './components/StaffView';
-import StudentView from './components/StudentView';
-import TeacherView from './components/TeacherView';
 import Register from './screens/Register';
 import { makeCall } from "./apis";
 
-export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL || 'Dhanmondi Tutorial';
-const App_LS = `DT_Notify_App`
+export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
+
+const App_LS = `OFI_Alumni_App`
 
 export const PATHS = {
   root: "/",
@@ -88,24 +86,7 @@ export default class App extends Component {
   }
 
   userView(role) {
-    switch (role && role.toUpperCase()) {
-      case 'STUDENT':
-        return <StudentView 
-          isLoggedIn={this.state.loggedIn}
-          user={this.state.userDetails}
-        />
-      case 'STAFF':
-        return <StaffView 
-          isLoggedIn={this.state.loggedIn}
-        />
-      case 'TEACHER':
-        return <TeacherView
-          isLoggedIn={this.state.loggedIn}
-          user={this.state.userDetails}
-        />
-      default:
-        return null
-    }
+    // TODO: return views based on role selected
   }
 
   liftPayload(details) {
