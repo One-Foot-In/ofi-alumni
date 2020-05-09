@@ -3,7 +3,6 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var logger = require('morgan');
 var bcrypt = require('bcrypt');
 const cors = require('cors');
 
@@ -14,14 +13,10 @@ var JWTStrategy = require("passport-jwt").Strategy;
 
 var indexRouter = require('./routes/index');
 var utilRouter = require('./routes/util');
-var studentsRouter = require('./routes/students');
-var staffRouter = require('./routes/staff');
-var teachersRouter = require('./routes/teachers')
 require('dotenv').config();
 
 var app = express();
 // perform actions on the collection object
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -102,16 +97,6 @@ async function main() {
       req.db = db;
       next();
     }, studentsRouter);
-
-    app.use('/staff/', (req, res, next) => {
-      req.db = db;
-      next();
-    }, staffRouter);
-
-    app.use('/teachers/', (req, res, next) => {
-      req.db = db;
-      next();
-    }, teachersRouter);
 
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {
