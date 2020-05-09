@@ -4,9 +4,11 @@ This is the mono-repository that contains the frontend (client) React App and th
 
 ## Getting Started
 
-* In order to run both apps together, run `npm run dev` from the root-level
-* In order to just run the frontend, cd into `frontend/` and run `npm start`
-* In order to just run the backend, cd into `server/` and run `npm start`
+* You need to have [node](https://nodejs.org/en/) installed locally on your machine (node ships with npm).
+
+* In order to run both apps together, run `npm run dev` from the root-level. If you have added new packages/ have uninstalled packages in package.json, you will have to cd into `frontend/` and `server/` and run `npm i` in turn.
+* In order to just run the frontend, cd into `frontend/` and run `npm start`. If you have added new packages/ have uninstalled packages in package.json, you will have to run `npm i` first.
+* In order to just run the backend, cd into `server/` and run `npm start`. If you have added new packages/ have uninstalled packages in package.json, you will have to run `npm i` first.
 
 ## Client
 
