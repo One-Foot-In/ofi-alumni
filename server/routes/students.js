@@ -2,11 +2,9 @@ var express = require('express');
 var router = express.Router();
 var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
-var checkRole = require('../utils/handlers').checkRole;
 var passport = require("passport");
 var sendEmail = require('./helpers/emailHelpers').sendEmail
 var ObjectID = require('mongodb').ObjectID;
-var uploadPdf = require('./helpers/driveHelpers').uploadPdf
 
 const HASH_COST = 10;
 
@@ -71,28 +69,6 @@ router.get('/student/:email', passport.authenticate('jwt', {session: false}), as
     });
   }
 
-});
-
-router.get('/status/:email', passport.authenticate('jwt', {session: false}), async (req,res)=>{
-  const email = req.params.email
-  try {
-      const studentData = await req.db.collection("Student").find({email: email}).project({emailVerified:1,approved:1,_id:0}).toArray();
-      if (studentData.length ){
-      res.json({
-          message: "Successfully got status",
-          emailVerified: studentData[0].emailVerified,
-          approved: studentData[0].approved
-        });
-
-      }
-  }catch(e){
-    console.log("Error student.js#status")
-    res.status(500).json({
-        message: "Error",
-        error: e
-      });
-
-  }
 });
 
 router.get('/verification/:email/:verificationToken', async (req,res)=>{
