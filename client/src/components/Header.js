@@ -156,7 +156,7 @@ export default class Header extends Component {
                         'margin': '0 0 0 10px'
                     }
                 } 
-                class="ui button" 
+                className="ui button" 
                 onClick={this.props.logout}
             >
                 Log Out
@@ -192,7 +192,7 @@ export default class Header extends Component {
                             'margin': '0 0 0 10px'
                         }
                     } 
-                    class="ui button" 
+                    className="ui button" 
                 >
                     Log In
                 </Button>

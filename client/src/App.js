@@ -5,9 +5,12 @@ import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-d
 import Header from './components/Header';
 import LoginForm from './components/LoginForm';
 import Register from './screens/Register';
+import AlumniView from './components/Alumni/AlumniView';
 import { makeCall } from "./apis";
 
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
+
+export const ALUMNI = "ALUMNI"
 
 const App_LS = `OFI_Alumni_App`
 
@@ -21,7 +24,7 @@ export default class App extends Component {
   constructor() {
     super();
     this.state = {
-      loggedIn: false,
+      loggedIn: true, // TODO: change to false for full-stack work
       fetchingAuth: true,
       role: null,
       userDetails: {},
@@ -48,7 +51,7 @@ export default class App extends Component {
           });
         } else {
           this.setState({
-            loggedIn: false,
+            loggedIn: true, // TODO: change to false for full-stack work
             fetchingAuth: false,
           });
         }
@@ -85,8 +88,15 @@ export default class App extends Component {
     });
   }
 
-  userView(role) {
-    // TODO: return views based on role selected
+  userView(role, props) {
+    switch(role) {
+      case ALUMNI:
+        return (
+          <AlumniView/>
+        )
+      default:
+        return null
+    }
   }
 
   liftPayload(details) {
@@ -114,7 +124,7 @@ export default class App extends Component {
             }
           />
           <Route exact path={PATHS.root} render={(props) => 
-              this.state.loggedIn ? this.userView(this.state.role) : <Redirect to="/login" />
+              this.state.loggedIn ? this.userView(ALUMNI, props) : <Redirect to="/login" />
             }
           />
           <Route>
