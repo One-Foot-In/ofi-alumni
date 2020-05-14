@@ -8,10 +8,11 @@ props:
 export default class AlumniDirectory extends Component {
     state = {
         activePage: 1,
-        numEntries: Object.keys(this.props.entries).length,
+        numEntries: this.props.entries.length,
         isLoading: false,
         value: '',
-        totalPages: Math.ceil(Object.keys(this.props.entries).length/3)
+        pageSize: 3,
+        totalPages: Math.ceil(this.props.entries.length/3)
     }
 
     handlePaginationChange = (e, { activePage }) => {
@@ -24,11 +25,12 @@ export default class AlumniDirectory extends Component {
     render(){
         const {
             totalPages,
-            activePage
+            activePage,
+            pageSize
         } = this.state
 
         let profiles=[]
-        for (let post in this.props.entries) {
+        for (let post of this.props.entries) {
             profiles.push(
                 <Grid.Row columns={2}>
                     <Grid.Column width={4}>
@@ -37,19 +39,19 @@ export default class AlumniDirectory extends Component {
                                 fluid
                                 centered
                                 rounded
-                                src={this.props.entries[post]['imageURL']}
+                                src={post.imageURL}
                             />
                         </Card>
                     </Grid.Column>
                     <Grid.Column>
                         <Card fluid>
                             <Card.Content>
-                                <Card.Header>{this.props.entries[post]['name']}</Card.Header>
-                                <Card.Meta>{this.props.entries[post]['jobTitle']}</Card.Meta>
+                                <Card.Header>{post.name}</Card.Header>
+                                <Card.Meta>{post.jobTitle}</Card.Meta>
 
-                                <Card.Description>College: {this.props.entries[post]['college']}</Card.Description>
-                                <Card.Description>Location: {this.props.entries[post]['location']}</Card.Description>
-                                <Card.Description>Company: {this.props.entries[post]['company']}</Card.Description>
+                                <Card.Description>College: {post.college}</Card.Description>
+                                <Card.Description>Location: {post.location}</Card.Description>
+                                <Card.Description>Company: {post.company}</Card.Description>
                                 <br />
                             </Card.Content>
                         </Card>
@@ -72,9 +74,7 @@ export default class AlumniDirectory extends Component {
                     </Grid.Column>
                 </Grid.Row>
                 
-                {profiles[(activePage - 1) * 3]}
-                {profiles[(activePage - 1) * 3 + 1]}
-                {profiles[(activePage - 1) * 3 + 2]}
+                {pageGenerator(profiles, pageSize, activePage)}
 
                 <Grid.Row stretched>
                     <Grid.Column>
@@ -90,4 +90,12 @@ export default class AlumniDirectory extends Component {
             </Grid>
         )
     }
+}
+
+function pageGenerator(profiles, pageSize, activePage) {
+    let display=[]
+    for (let i = 0; i < pageSize; i++) {
+        display.push(profiles[(activePage - 1) * pageSize + i])
+    }
+    return display
 }
