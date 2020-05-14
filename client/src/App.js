@@ -5,8 +5,8 @@ import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-d
 import Header from './components/Header';
 import LoginForm from './components/LoginForm';
 import Register from './screens/Register';
-import AlumniView from './components/Alumni/AlumniView';
 import { makeCall } from "./apis";
+import Navbar from './components/Navbar'
 
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
 
@@ -19,6 +19,54 @@ export const PATHS = {
   login: "/login",
   register: "/register",
 }
+
+// TODO extract Routes into this higher-order component
+function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, activeItem) {
+  return class extends React.Component {
+    constructor(props) {
+      super(props)
+    }
+    render() {
+      return (
+        <Route exact path={routePath} render={(props) => 
+            isLoggedIn ? 
+            <>
+                <Navbar
+                    navItems={navItems}
+                    activeItem={activeItem}
+                />
+                <RouterComponent {...this.props} />
+            </> :
+            <Redirect to={'/login'} />
+          }
+        />
+      )
+    }
+  }
+}
+
+const alumniNavBarItems = [
+  {
+      id: 'home',
+      name: 'Home',
+      navLink: '/'
+  },
+  {
+      id: 'profile',
+      name: 'Profile',
+      navLink: '/profile'
+  },
+  {
+      id: 'alumniDirectory',
+      name: 'Alumni Directory',
+      navLink: '/alumniDirectory'
+  },
+  {
+      id: 'requests',
+      name: 'Requests',
+      navLink: '/requests'
+  }
+]
 
 export default class App extends Component {
   constructor() {
@@ -33,7 +81,7 @@ export default class App extends Component {
     this.login = this.login.bind(this);
     this.liftPayload = this.liftPayload.bind(this);
     this.renderScreens = this.renderScreens.bind(this);
-    this.userView = this.userView.bind(this);
+    this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
   }
 
   componentDidMount() {
@@ -88,17 +136,6 @@ export default class App extends Component {
     });
   }
 
-  userView(role, props) {
-    switch(role) {
-      case ALUMNI:
-        return (
-          <AlumniView/>
-        )
-      default:
-        return null
-    }
-  }
-
   liftPayload(details) {
       this.setState({
         role : details.userRole,
@@ -106,6 +143,66 @@ export default class App extends Component {
       }, () => {
         localStorage.setItem(App_LS, JSON.stringify(this.state))
       });
+  }
+
+  renderLoggedInRoutes(role) {
+    switch (role) {
+      case ALUMNI:
+        return (
+          <>
+          <Route exact path={`/`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems}
+                          activeItem={'home'}
+                      />
+                      <div> Home! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/profile`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems}
+                          activeItem={'profile'}
+                      />
+                      <div> Profile! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/alumniDirectory`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems}
+                          activeItem={'alumniDirectory'}
+                      />
+                      <div> Alumni Directory! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/requests`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems}
+                          activeItem={'requests'}
+                      />
+                      <div> Requests! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          </>
+        )
+      default:
+        return null
+    }
   }
 
   renderScreens() {
@@ -123,10 +220,7 @@ export default class App extends Component {
               />
             }
           />
-          <Route exact path={PATHS.root} render={(props) => 
-              this.state.loggedIn ? this.userView(ALUMNI, props) : <Redirect to="/login" />
-            }
-          />
+          {this.renderLoggedInRoutes(ALUMNI)}
           <Route>
               <Segment>
                   This page does not exist!

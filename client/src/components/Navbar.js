@@ -17,7 +17,6 @@ import { Link } from 'react-router-dom'
         }
     ]
     - activeItem
-    - match (containing params, path, url, isExact from React-Router)
 */
 export default class Navbar extends Component {
     constructor(props) {
@@ -25,12 +24,11 @@ export default class Navbar extends Component {
         this.renderMenuItems = this.renderMenuItems.bind(this);
     }
     renderMenuItems(items, activeItem) {
-        const { match } = this.props
         return items && items.map( item => {
             return (
                 <Menu.Item 
                     as={Link}
-                    to={`${match.url}${item.id}`}
+                    to={item.navLink}
                     name={item.name}
                     active={activeItem === item.id}
                 >
