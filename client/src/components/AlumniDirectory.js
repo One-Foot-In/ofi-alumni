@@ -3,8 +3,7 @@ import { Card, Image, Search, Pagination, Grid, Segment } from 'semantic-ui-reac
 
 /*
 props:
-- entries: dictionary
-- query: string
+- entries: list of alumni profiles
 */
 export default class AlumniDirectory extends Component {
     state = {
@@ -28,47 +27,57 @@ export default class AlumniDirectory extends Component {
             activePage
         } = this.state
 
-        return (
-            <Grid columns={1} divided>
-                <Grid.Row stretched>
+        let profiles=[]
+        for (let post in this.props.entries) {
+            profiles.push(
+                <Grid.Row columns={2}>
+                    <Grid.Column width={4}>
+                        <Card fluid>
+                            <Image
+                                fluid
+                                centered
+                                rounded
+                                src={this.props.entries[post]['imageURL']}
+                            />
+                        </Card>
+                    </Grid.Column>
                     <Grid.Column>
-                        <Segment>
+                        <Card fluid>
+                            <Card.Content>
+                                <Card.Header>{this.props.entries[post]['name']}</Card.Header>
+                                <Card.Meta>{this.props.entries[post]['jobTitle']}</Card.Meta>
+
+                                <Card.Description>College: {this.props.entries[post]['college']}</Card.Description>
+                                <Card.Description>Location: {this.props.entries[post]['location']}</Card.Description>
+                                <Card.Description>Company: {this.props.entries[post]['company']}</Card.Description>
+                                <br />
+                            </Card.Content>
+                        </Card>
+                    </Grid.Column>
+                </Grid.Row>
+            )
+        }
+
+        return (
+            <Grid divided="vertically">
+                <Grid.Row>
+                    <Grid.Column>
                             <Search
+                                open={false}
                                 showNoResults={false}
                                 onSearchChange={this.handleSearchChange}
+                                input={{fluid: true}}
+                                placeholder={"Search"}
                             />
-                        </Segment>
-                        <Segment>
-                            <Card.Group>
-                                <Card fluid>
-                                    <Image 
-                                        floated='left'
-                                        rounded
-                                        size='small'
-                                        src={this.props.entries[0]['imageURL']}
-                                    />
-                                    <Card.Header>{this.props.entries[0]['name']}</Card.Header>
-                                </Card>
-                <Card fluid>
-                    <Image 
-                        floated='left'
-                        rounded
-                        size='small'
-                        src={this.props.entries[1]['imageURL']}
-                    />
-                    <Card.Header>{this.props.entries[1]['name']}</Card.Header>
-                </Card>
-                <Card fluid>
-                    <Image 
-                        floated='left'
-                        rounded
-                        size='small'
-                        src={this.props.entries[2]['imageURL']}
-                    />
-                    <Card.Header>{this.props.entries[2]['name']}</Card.Header>
-                </Card>
-            </Card.Group>
-                        </Segment>
+                    </Grid.Column>
+                </Grid.Row>
+                
+                {profiles[(activePage - 1) * 3]}
+                {profiles[(activePage - 1) * 3 + 1]}
+                {profiles[(activePage - 1) * 3 + 2]}
+
+                <Grid.Row stretched>
+                    <Grid.Column>
                         <Segment>
                             <Pagination
                                 activePage={activePage}
@@ -77,31 +86,8 @@ export default class AlumniDirectory extends Component {
                             />
                         </Segment>
                     </Grid.Column>
-                </Grid.Row>
+                </Grid.Row> 
             </Grid>
         )
     }
-}
-
-function createPage(page, entries) {
-    var cards = []
-    let firstCard = (page - 1) * 3
-    for (let i = firstCard; i < firstCard + 3; i++) {
-        cards.push((
-            <Card fluid>
-                <Image 
-                    floated='right'
-                    rounded
-                    size="medium"
-                    src={entries[i]['imageURL']}
-                />
-                <Card.Content>
-                    <Card.Header>{entries[i]['name']}</Card.Header>
-                </Card.Content>
-
-            </Card>
-        ));
-    }
-
-
 }
