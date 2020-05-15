@@ -6,8 +6,11 @@ import Header from './components/Header';
 import LoginForm from './components/LoginForm';
 import Register from './screens/Register';
 import { makeCall } from "./apis";
+import Navbar from './components/Navbar'
 
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
+
+export const ALUMNI = "ALUMNI"
 
 const App_LS = `OFI_Alumni_App`
 
@@ -17,11 +20,59 @@ export const PATHS = {
   register: "/register",
 }
 
+// TODO extract Routes into this higher-order component
+function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, activeItem) {
+  return class extends React.Component {
+    constructor(props) {
+      super(props)
+    }
+    render() {
+      return (
+        <Route exact path={routePath} render={(props) => 
+            isLoggedIn ? 
+            <>
+                <Navbar
+                    navItems={navItems}
+                    activeItem={activeItem}
+                />
+                <RouterComponent {...this.props} />
+            </> :
+            <Redirect to={'/login'} />
+          }
+        />
+      )
+    }
+  }
+}
+
+const alumniNavBarItems = [
+  {
+      id: 'home',
+      name: 'Home',
+      navLink: '/'
+  },
+  {
+      id: 'profile',
+      name: 'Profile',
+      navLink: '/profile'
+  },
+  {
+      id: 'alumniDirectory',
+      name: 'Alumni Directory',
+      navLink: '/alumniDirectory'
+  },
+  {
+      id: 'requests',
+      name: 'Requests',
+      navLink: '/requests'
+  }
+]
+
 export default class App extends Component {
   constructor() {
     super();
     this.state = {
-      loggedIn: false,
+      loggedIn: true, // TODO: change to false for full-stack work
       fetchingAuth: true,
       role: null,
       userDetails: {},
@@ -30,7 +81,7 @@ export default class App extends Component {
     this.login = this.login.bind(this);
     this.liftPayload = this.liftPayload.bind(this);
     this.renderScreens = this.renderScreens.bind(this);
-    this.userView = this.userView.bind(this);
+    this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
   }
 
   componentDidMount() {
@@ -48,7 +99,7 @@ export default class App extends Component {
           });
         } else {
           this.setState({
-            loggedIn: false,
+            loggedIn: true, // TODO: change to false for full-stack work
             fetchingAuth: false,
           });
         }
@@ -85,10 +136,6 @@ export default class App extends Component {
     });
   }
 
-  userView(role) {
-    // TODO: return views based on role selected
-  }
-
   liftPayload(details) {
       this.setState({
         role : details.userRole,
@@ -96,6 +143,66 @@ export default class App extends Component {
       }, () => {
         localStorage.setItem(App_LS, JSON.stringify(this.state))
       });
+  }
+
+  renderLoggedInRoutes(role) {
+    switch (role) {
+      case ALUMNI:
+        return (
+          <>
+          <Route exact path={`/`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems}
+                          activeItem={'home'}
+                      />
+                      <div> Home! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/profile`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems}
+                          activeItem={'profile'}
+                      />
+                      <div> Profile! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/alumniDirectory`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems}
+                          activeItem={'alumniDirectory'}
+                      />
+                      <div> Alumni Directory! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/requests`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems}
+                          activeItem={'requests'}
+                      />
+                      <div> Requests! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          </>
+        )
+      default:
+        return null
+    }
   }
 
   renderScreens() {
@@ -113,10 +220,7 @@ export default class App extends Component {
               />
             }
           />
-          <Route exact path={PATHS.root} render={(props) => 
-              this.state.loggedIn ? this.userView(this.state.role) : <Redirect to="/login" />
-            }
-          />
+          {this.renderLoggedInRoutes(ALUMNI)}
           <Route>
               <Segment>
                   This page does not exist!
