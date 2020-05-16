@@ -23,9 +23,38 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const MongoClient = require('mongodb').MongoClient;
-const uri = `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
-const client = new MongoClient(uri);
+/* 
+ * If testDB is true, uses a locally hosted mongoDB
+ * Otherwise, it will use a cloud hosted DB set in the .env file
+ * MongoDB must be installed
+ */
+const testDB = true
+
+const mongoose = require('mongoose');
+const uri = testDB ? 'mongodb://localhost:27017/ofi-test' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
+mongoose.connect(uri, {useNewUrlParser: true});
+
+const Schema = mongoose.Schema;
+
+const userSchema = new Schema(
+  {
+    email: {type: String, reguired: true},
+    passwordHash: {type: String, required: true},
+    verificationToken: {type: String, required: true},
+    role: {type: String, required: true},
+    emailVerified: {type: Boolean, required: true},
+    approved: {type: Boolean, required: true}
+  }
+);
+
+module.exports = mongoose.model('User', userSchema)
+
+const client = mongoose.connection;
+client.on('error', console.error.bind(console, 'connection error:'));
+client.once('open', function() {
+  console.log('successful mongoose connection')
+});
+
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_sauce';
 
@@ -46,15 +75,13 @@ app.use(cors(corsOptions));
 
 async function main() {
   try {
-    await client.connect();
-    const db = client.db(process.env.DB);
-
     passport.use(new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',
     }, async (email, password, done) => {
         try {
-            const user = await db.collection('User').findOne({'email': email});
+            var user = mongoose.model('User', userSchema);
+            user.findOne({'email': email}, 'passwordHash');
             if (!user) {
                 return done('User not found');
             }
@@ -83,18 +110,18 @@ async function main() {
     ));
 
     app.use('/', (req, res, next) => {
-      req.db = db;
+      req.db = client;
       next();
     }, indexRouter);
 
     // test Router for testing health, database connection, and post
     app.use('/util/', (req, res, next) => {
-      req.db = db;
+      req.db = client;
       next();
     }, utilRouter);
 
     app.use('/students/', (req, res, next) => {
-      req.db = db;
+      req.db = client;
       next();
     }, studentsRouter);
 
