@@ -13,6 +13,7 @@ var JWTStrategy = require("passport-jwt").Strategy;
 
 var indexRouter = require('./routes/index');
 var utilRouter = require('./routes/util');
+var mongooseUtilRouter = require('./routes/utilMongoose');
 require('dotenv').config();
 
 var app = express();
@@ -28,26 +29,12 @@ app.use(express.static(path.join(__dirname, 'public')));
  * Otherwise, it will use a cloud hosted DB set in the .env file
  * MongoDB must be installed
  */
-const testDB = true
+const testDB = true;
 
+/* Mongoose Setup */
 const mongoose = require('mongoose');
-const uri = testDB ? 'mongodb://localhost:27017/ofi-test' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
+const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
 mongoose.connect(uri, {useNewUrlParser: true});
-
-const Schema = mongoose.Schema;
-
-const userSchema = new Schema(
-  {
-    email: {type: String, reguired: true},
-    passwordHash: {type: String, required: true},
-    verificationToken: {type: String, required: true},
-    role: {type: String, required: true},
-    emailVerified: {type: Boolean, required: true},
-    approved: {type: Boolean, required: true}
-  }
-);
-
-module.exports = mongoose.model('User', userSchema)
 
 const client = mongoose.connection;
 client.on('error', console.error.bind(console, 'connection error:'));
@@ -55,6 +42,8 @@ client.once('open', function() {
   console.log('successful mongoose connection')
 });
 
+/* Mongoose Models */
+const userSchema = require('./models/userSchema')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_sauce';
 
@@ -119,6 +108,11 @@ async function main() {
       req.db = client;
       next();
     }, utilRouter);
+
+    app.use('/mongoose-util/', (req, res, next) => {
+      req.db = client;
+      next();
+    }, mongooseUtilRouter);
 
     app.use('/students/', (req, res, next) => {
       req.db = client;
