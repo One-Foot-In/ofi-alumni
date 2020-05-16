@@ -1,8 +1,8 @@
-export const testAction = () => dispatch => {
-    dispatch({
+export const testAction = () => {
+    return {
         type: 'TEST_ACTION',
         payload: 'test_payload'
-    })
+    }
 }
 
 export const increment = (increase) => {
