@@ -69,8 +69,7 @@ async function main() {
         passwordField: 'password',
     }, async (email, password, done) => {
         try {
-            var user = mongoose.model('User', userSchema);
-            user.findOne({'email': email}, 'passwordHash');
+            var user = await userSchema.findOne({'email': email}, 'passwordHash');
             if (!user) {
                 return done('User not found');
             }
