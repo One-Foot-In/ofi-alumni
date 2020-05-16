@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
+import { connect } from 'react-redux';
 import { Container, Segment, Message } from 'semantic-ui-react';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom'
 import Header from './components/Header';
@@ -68,7 +69,7 @@ const alumniNavBarItems = [
   }
 ]
 
-export default class App extends Component {
+class App extends Component {
   constructor() {
     super();
     this.state = {
@@ -267,3 +268,5 @@ export default class App extends Component {
     )
   }
 }
+
+export default connect()(App);
