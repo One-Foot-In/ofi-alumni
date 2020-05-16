@@ -4,3 +4,10 @@ export const testAction = () => dispatch => {
         payload: 'test_payload'
     })
 }
+
+export const increment = (increase) => {
+    return {
+        type: 'INCREMENT_ACTION',
+        payload: increase
+    }
+}

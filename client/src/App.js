@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { connect } from 'react-redux';
-import { Container, Segment, Message } from 'semantic-ui-react';
+import { Container, Segment, Message , Button} from 'semantic-ui-react';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom'
 import Header from './components/Header';
 import LoginForm from './components/LoginForm';
@@ -9,10 +9,13 @@ import Register from './screens/Register';
 import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
 
+import * as actions from './redux/actions'
+
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
-
+const isDevMode = () => {
+  return !!process.env.REACT_APP_DEV_MODE
+} 
 export const ALUMNI = "ALUMNI"
-
 const App_LS = `OFI_Alumni_App`
 
 export const PATHS = {
@@ -20,6 +23,26 @@ export const PATHS = {
   login: "/login",
   register: "/register",
 }
+
+/*
+  STORE SETUP
+*/
+
+const mapStateToProps = state => {
+  return ({
+    schoolName: state.schoolName,
+    count: state.countState.count
+  })
+}
+
+const mapDispatchToProps = dispatch => ({
+  testAction: () => dispatch(actions.testAction()),
+  increment: num => dispatch(actions.increment(num))
+})
+
+/*
+  STORE SETUP
+*/
 
 // TODO extract Routes into this higher-order component
 function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, activeItem) {
@@ -46,32 +69,42 @@ function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, active
   }
 }
 
-const alumniNavBarItems = [
-  {
-      id: 'home',
-      name: 'Home',
-      navLink: '/'
-  },
-  {
-      id: 'profile',
-      name: 'Profile',
-      navLink: '/profile'
-  },
-  {
-      id: 'alumniDirectory',
-      name: 'Alumni Directory',
-      navLink: '/alumniDirectory'
-  },
-  {
-      id: 'requests',
-      name: 'Requests',
-      navLink: '/requests'
+const alumniNavBarItems = () => {
+  let navBarItems = [
+    {
+        id: 'home',
+        name: 'Home',
+        navLink: '/'
+    },
+    {
+        id: 'profile',
+        name: 'Profile',
+        navLink: '/profile'
+    },
+    {
+        id: 'alumniDirectory',
+        name: 'Alumni Directory',
+        navLink: '/alumniDirectory'
+    },
+    {
+        id: 'requests',
+        name: 'Requests',
+        navLink: '/requests'
+    }
+  ]
+  if (isDevMode()) {
+    navBarItems.push({
+      id: 'playground',
+      name: 'Playground (DEV MODE only)',
+      navLink: '/playground'
+    })
   }
-]
+  return navBarItems;
+}
 
 class App extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       loggedIn: true, // TODO: change to false for full-stack work
       fetchingAuth: true,
@@ -155,7 +188,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems}
+                          navItems={alumniNavBarItems()}
                           activeItem={'home'}
                       />
                       <div> Home! </div>
@@ -167,7 +200,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems}
+                          navItems={alumniNavBarItems()}
                           activeItem={'profile'}
                       />
                       <div> Profile! </div>
@@ -179,7 +212,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems}
+                          navItems={alumniNavBarItems()}
                           activeItem={'alumniDirectory'}
                       />
                       <div> Alumni Directory! </div>
@@ -191,13 +224,31 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems}
+                          navItems={(alumniNavBarItems())}
                           activeItem={'requests'}
                       />
                       <div> Requests! </div>
                   </> :
                   <Redirect to={"/login"}/>
               }
+          />
+          <Route exact path={`/playground`} render={(props) => 
+              <>
+                <Navbar
+                    navItems={alumniNavBarItems()}
+                    activeItem={'playground'}
+                />
+                <Button
+                  primary
+                  onClick={(e) => this.props.increment(1)}
+                >
+                  Click to increase counter
+                </Button>
+                <Segment>
+                  Count in store is {this.props.count ? this.props.count : 0}
+                </Segment>
+              </>
+            }
           />
           </>
         )
@@ -269,4 +320,4 @@ class App extends Component {
   }
 }
 
-export default connect()(App);
+export default connect(mapStateToProps, mapDispatchToProps)(App);
