@@ -34,13 +34,6 @@ const testDB = true;
 /* Mongoose Setup */
 const mongoose = require('mongoose');
 const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
-mongoose.connect(uri, {useNewUrlParser: true});
-
-const client = mongoose.connection;
-client.on('error', console.error.bind(console, 'connection error:'));
-client.once('open', function() {
-  console.log('successful mongoose connection')
-});
 
 /* Mongoose Models */
 const userSchema = require('./models/userSchema')
@@ -64,6 +57,13 @@ app.use(cors(corsOptions));
 
 async function main() {
   try {
+    await mongoose.connect(uri, {useNewUrlParser: true});
+
+    const client = mongoose.connection;
+    await client.on('error', console.error.bind(console, 'connection error:'));
+    await client.once('open', function() {
+      console.log('successful mongoose connection')
+    });
     passport.use(new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',
@@ -98,23 +98,19 @@ async function main() {
     ));
 
     app.use('/', (req, res, next) => {
-      req.db = client;
       next();
     }, indexRouter);
 
     // test Router for testing health, database connection, and post
     app.use('/util/', (req, res, next) => {
-      req.db = client;
       next();
     }, utilRouter);
 
     app.use('/mongoose-util/', (req, res, next) => {
-      req.db = client;
       next();
     }, mongooseUtilRouter);
 
     app.use('/students/', (req, res, next) => {
-      req.db = client;
       next();
     }, studentsRouter);
 

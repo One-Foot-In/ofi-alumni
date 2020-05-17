@@ -2,18 +2,17 @@ var express = require('express');
 var router = express.Router();
 var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
-var mongoose = require('mongoose')
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
 
 const HASH_COST = 10;
 
-router.get('/getAlumni/', async (req, res, next) => {
+router.get('/alumni/', async (req, res, next) => {
     try {
         var dbData = await alumniSchema.findOne({email: req.body.email})
         res.status(200).send({'student' : dbData});
     } catch (e) {
-        console.log("Error: util#getStudent", e);
+        console.log("Error: util#getAlumni", e);
         res.status(500).send({'error' : e});
     }
 });
@@ -23,12 +22,12 @@ router.get('/allAlumni', async (req, res, next) => {
         const dbData = await alumniSchema.find()
         res.json({'alumnus' : dbData});
     } catch (e) {
-        console.log("Error: util#allStudents", e);
+        console.log("Error: util#allAlumni", e);
         res.status(500).send({'error' : e});
     }
 });
 
-router.get('/addAlumni/', async (req, res, next) => {
+router.post('/addAlumni/', async (req, res, next) => {
     try {
 
         const email = req.body.email;
@@ -75,19 +74,15 @@ router.get('/addAlumni/', async (req, res, next) => {
             }
         );
         
-        alumni_instance.save(function (err) {
-            if (err) return handleError(err);
-        });
-        user_instance.save(function (err) {
-            if (err) return handleError(err);
-        });
+        alumni_instance.save();
+        user_instance.save();
         res.status(200).send({
-            message: 'Successfully added student',
+            message: 'Successfully added alumni',
             student: alumni_instance
         });
     } catch (e) {
         res.status(500).send({
-            message: 'Failed adding student' + e
+            message: 'Failed adding alumni: ' + e
         });
     }
 });
@@ -114,7 +109,7 @@ router.get('/data/clear/all', async (req, res, next) => {
 router.get('/data/clear/alumni', async (req, res, next) => {
     try {
         await alumniSchema.remove({});
-        res.status(200).send({'message' : 'deleted all student records!'});
+        res.status(200).send({'message' : 'deleted all alumni records!'});
     } catch (e) {
         res.status(500).send({error: e})
     }
