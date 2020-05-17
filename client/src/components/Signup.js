@@ -61,6 +61,8 @@ export default class Signup extends React.Component {
         this.validateSubmitReadiness = this.validateSubmitReadiness.bind(this);
         this.goBack = this.goBack.bind(this);
         this.comparePasswords = this.comparePasswords.bind(this);
+        this.getAlumniFields = this.getAlumniFields.bind(this);
+        this.getStudentFields = this.getStudentFields.bind(this);
     }
 
     handleChange(e) {
@@ -102,6 +104,44 @@ export default class Signup extends React.Component {
     getAlumniFields() {
         return (
             <>
+                <Form.Field
+                    type="number"
+                    required="true"
+                    style={fieldStyle}
+                >
+                    <label>Graduation Year</label>
+                    <input placeholder='YYYY' name="graduationYear" onChange={this.handleChange} />
+                </Form.Field>
+                <Form.Group>
+                    <Form.Field
+                        type="text"
+                        style={fieldStyle}
+                    >
+                        <label>Location</label>
+                        <input placeholder='City, Country...' name="location" onChange={this.handleChange} />
+                    </Form.Field>
+                    <Form.Field
+                        type="text"
+                        style={fieldStyle}
+                    >
+                        <label>Job Title</label>
+                        <input placeholder='Position...' name="jobTitle" onChange={this.handleChange} />
+                    </Form.Field>
+                    <Form.Field
+                        type="text"
+                        style={fieldStyle}
+                    >
+                        <label>Company</label>
+                        <input placeholder='Company...' name="company" onChange={this.handleChange} />
+                    </Form.Field>
+                    <Form.Field
+                        type="text"
+                        style={fieldStyle}
+                    >
+                        <label>College</label>
+                        <input placeholder='College...' name="college" onChange={this.handleChange} />
+                    </Form.Field>
+                </Form.Group>
             </>
         )
     }
@@ -228,10 +268,10 @@ export default class Signup extends React.Component {
                         >
                             <label>Name</label>
                             <input placeholder='Name' name="name" onChange={this.handleChange} />
-                        </Form.Field>
+                        </Form.Field>      
                         {this.props.isAlumni ? 
-                            null :
-                            null
+                            this.getAlumniFields() :
+                            this.getStudentFields()
                         }
                         <Button 
                             color="blue" 
