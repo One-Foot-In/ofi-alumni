@@ -13,6 +13,7 @@ var JWTStrategy = require("passport-jwt").Strategy;
 
 var indexRouter = require('./routes/index');
 var utilRouter = require('./routes/util');
+var mongooseUtilRouter = require('./routes/utilMongoose');
 require('dotenv').config();
 
 var app = express();
@@ -23,9 +24,19 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const MongoClient = require('mongodb').MongoClient;
-const uri = `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
-const client = new MongoClient(uri);
+/* 
+ * If testDB is true, uses a locally hosted mongoDB
+ * Otherwise, it will use a cloud hosted DB set in the .env file
+ * MongoDB must be installed
+ */
+const testDB = true;
+
+/* Mongoose Setup */
+const mongoose = require('mongoose');
+const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
+
+/* Mongoose Models */
+const userSchema = require('./models/userSchema')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_sauce';
 
@@ -46,15 +57,16 @@ app.use(cors(corsOptions));
 
 async function main() {
   try {
-    await client.connect();
-    const db = client.db(process.env.DB);
+    await mongoose.connect(uri, {useNewUrlParser: true});
 
+    const client = mongoose.connection;
+    await client.on('error', console.error.bind(console, 'connection error:'));
     passport.use(new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',
     }, async (email, password, done) => {
         try {
-            const user = await db.collection('User').findOne({'email': email});
+            var user = await userSchema.findOne({'email': email}, 'passwordHash');
             if (!user) {
                 return done('User not found');
             }
@@ -83,18 +95,19 @@ async function main() {
     ));
 
     app.use('/', (req, res, next) => {
-      req.db = db;
       next();
     }, indexRouter);
 
     // test Router for testing health, database connection, and post
     app.use('/util/', (req, res, next) => {
-      req.db = db;
       next();
     }, utilRouter);
 
+    app.use('/mongoose-util/', (req, res, next) => {
+      next();
+    }, mongooseUtilRouter);
+
     app.use('/students/', (req, res, next) => {
-      req.db = db;
       next();
     }, studentsRouter);
 
