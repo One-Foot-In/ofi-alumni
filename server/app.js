@@ -61,9 +61,6 @@ async function main() {
 
     const client = mongoose.connection;
     await client.on('error', console.error.bind(console, 'connection error:'));
-    await client.once('open', function() {
-      console.log('successful mongoose connection')
-    });
     passport.use(new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',

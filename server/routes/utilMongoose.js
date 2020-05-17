@@ -98,8 +98,8 @@ router.get('/allUsers', async (req, res, next) => {
 
 router.get('/data/clear/all', async (req, res, next) => {
     try {
-        await alumniSchema.remove({});
-        await userSchema.remove({});
+        await alumniSchema.deleteMany({});
+        await userSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});
@@ -108,7 +108,7 @@ router.get('/data/clear/all', async (req, res, next) => {
 
 router.get('/data/clear/alumni', async (req, res, next) => {
     try {
-        await alumniSchema.remove({});
+        await alumniSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all alumni records!'});
     } catch (e) {
         res.status(500).send({error: e})
@@ -117,7 +117,7 @@ router.get('/data/clear/alumni', async (req, res, next) => {
 
 router.get('/data/clear/user', async (req, res, next) => {
     try {
-        await userSchema.remove({});
+        await userSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all user records!'});
     } catch (e) {
         res.status(500).send({error: e})
