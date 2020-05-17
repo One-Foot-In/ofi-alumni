@@ -26,13 +26,13 @@ export default class Register extends React.Component {
                     </Button>
                 </Link>
                 <Button.Or />
-                <Link to={`${match.url}/staff`}>
+                <Link to={`${match.url}/alumni`}>
                     <Button
                         style={{
                             'background': secondary,
                             }}
                     >
-                            Staff
+                            Alumni
                     </Button>
                 </Link>
             </Button.Group>
@@ -43,10 +43,10 @@ export default class Register extends React.Component {
                     <Route exact path={match.url}>
                         {buttonGroup}
                     </Route>
-                    <Route exact path={`${match.url}/staff`} render={
+                    <Route exact path={`${match.url}/alumni`} render={
                         (props) => 
                             <Signup
-                                isStaff={true}
+                                isAlumni={true}
                                 match={props}
                             />
                         }
@@ -54,7 +54,7 @@ export default class Register extends React.Component {
                     <Route exact path={`${match.url}/student`} render={
                         (props) => 
                             <Signup
-                                isStaff={false}
+                                isAlumni={false}
                                 match={props}
                             />
                         }
