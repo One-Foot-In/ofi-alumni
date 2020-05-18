@@ -173,6 +173,14 @@ export default class Signup extends React.Component {
                 payload = Object.assign({}, payload, {
                     grade: this.state.grade
                 });
+            } else {
+                payload = Object.assign({}, payload, {
+                    graduationYear: this.state.graduationYear,
+                    location: this.state.location,
+                    jobTitle: this.state.jobTitle,
+                    company: this.state.company,
+                    college: this.state.college
+                });
             }
             e.preventDefault();
             const endPoint = this.props.isAlumni ? '/alumni' : '/student';
@@ -183,7 +191,7 @@ export default class Signup extends React.Component {
                         title: "Error!",
                         text: "There was an error completing your request, please try again.",
                         icon: "error",
-                        });
+                    });
                 } else {
                     swal({
                         title: "Congratulations!",
@@ -200,7 +208,7 @@ export default class Signup extends React.Component {
         } else {
             swal({
                 title: "Yikes!",
-                text: "Please fill in all fields to continue. Confirm that passwords match!",
+                text: "Please fill in all required fields to continue. Confirm that passwords match!",
                 icon: "error",
             });
         }

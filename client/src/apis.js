@@ -1,4 +1,7 @@
+require('dotenv').config();
+
 export const makeCall = async (payload, api, method) => {
+    const BACKEND = process.env.REACT_APP_BACKEND = "http://localhost:5000"
     method = method.toUpperCase()
     var headers = new Headers();
     headers.append('Content-Type', 'application/json');
@@ -12,7 +15,7 @@ export const makeCall = async (payload, api, method) => {
     if (['POST', 'PUT', 'PATCH'].includes(method)) {
         requestHeader = Object.assign({}, requestHeader, {body: JSON.stringify(payload)})
     }
-    const response = await fetch(api, requestHeader)
+    const response = await fetch(`${BACKEND}${api}`, requestHeader)
     let resolvedRes = await response;
     if (resolvedRes.status === 200) {
         const resJson = await resolvedRes.json()
