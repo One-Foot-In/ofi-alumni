@@ -80,7 +80,7 @@ router.post('/addAlumni/', async (req, res, next) => {
         );
         
         let insert = await alumni_instance.save();
-        user_instance.save();
+        await user_instance.save();
         res.status(200).send({
             message: 'Successfully added alumni',
             student: alumni_instance
@@ -159,7 +159,7 @@ router.post('/addStudent/', async (req, res, next) => {
         );
         
         let insert = await student_instance.save();
-        user_instance.save();
+        await user_instance.save();
         res.status(200).send({
             message: 'Successfully added student',
             student: student_instance
