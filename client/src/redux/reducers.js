@@ -16,12 +16,25 @@ const incrementReducer = (state = {}, action) => {
             return {
                 count: (state.count ? state.count : 0) + action.payload
             }
-            default:
-                return state
-        }
+        default:
+            return state
+    }
+}
+
+const addUserDetailsReducer = (state = {}, action) => {
+    switch (action.type) {
+        case 'ADD_USER_DETAILS':
+            return {
+                role: action.payload && action.payload.role,
+                details: action.payload && action.payload.details
+            }
+        default:
+            return state
+    }
 }
 
 export default combineReducers({
     testState: testReducer,
-    countState: incrementReducer
+    countState: incrementReducer,
+    userDetailsState: addUserDetailsReducer
 });

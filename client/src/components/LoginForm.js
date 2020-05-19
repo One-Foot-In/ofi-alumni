@@ -6,6 +6,9 @@ import { SCHOOL_NAME } from "../App";
 import { makeCall } from "../apis";
 import swal from "sweetalert";
 
+import { connect } from 'react-redux';
+import * as actions from '../redux/actions'
+
 let fieldStyle = {
     width: '100%',
 }
@@ -19,12 +22,24 @@ let buttonStyle = {
 }
 
 /*
+  STORE SETUP
+*/
+
+const mapDispatchToProps = dispatch => ({
+    addUserDetails: userDetails => dispatch(actions.addUserDetails(userDetails))
+})
+
+/*
+STORE SETUP
+*/
+
+/*
 props:
 -isloggedIn
 -liftPayload: ()
 -login: ()
 */
-export default class LoginForm extends React.Component {
+class LoginForm extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -62,6 +77,7 @@ export default class LoginForm extends React.Component {
                 this.setState({
                     loginLoading: false,
                 },() => {
+                    this.props.addUserDetails(result);
                     this.props.liftPayload(result);
                     this.props.login();
                 });
@@ -233,3 +249,5 @@ export default class LoginForm extends React.Component {
         )
     }
 }
+
+export default connect(null, mapDispatchToProps)(LoginForm);

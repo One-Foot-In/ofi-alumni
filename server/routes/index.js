@@ -51,8 +51,12 @@ router.post('/login', (req, res, next) => {
             let userRole = user.role && user.role.toUpperCase()
             if (userRole === "ALUMNI") {
               const alumni = await alumniSchema.findOne({email: user.email});
-              console.log("fetched alumni as ", alumni)
-              res.status(200).send({userRole, alumni});
+              res.status(200).send(
+                {
+                  role: userRole,
+                  details: alumni
+                }
+              );
             } else if (userRole === "STUDENT") {
               // TODO: add login response for student here
             } else {
