@@ -14,6 +14,8 @@ var JWTStrategy = require("passport-jwt").Strategy;
 var indexRouter = require('./routes/index');
 var utilRouter = require('./routes/util');
 var mongooseUtilRouter = require('./routes/utilMongoose');
+var requestRouter = require('./routes/requests');
+
 require('dotenv').config();
 
 var app = express();
@@ -106,6 +108,10 @@ async function main() {
     app.use('/mongoose-util/', (req, res, next) => {
       next();
     }, mongooseUtilRouter);
+
+    app.use('/request/', (req, res, next) => {
+      next();
+    }, requestRouter);
 
     app.use('/students/', (req, res, next) => {
       next();
