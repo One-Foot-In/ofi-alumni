@@ -15,6 +15,8 @@ var indexRouter = require('./routes/index');
 var alumniRouter = require('./routes/alumni');
 var utilRouter = require('./routes/util');
 var mongooseUtilRouter = require('./routes/utilMongoose');
+var requestRouter = require('./routes/requests');
+
 require('dotenv').config();
 
 var app = express();
@@ -102,7 +104,13 @@ async function main() {
 
     app.use('/mongoose-util/', mongooseUtilRouter);
 
+    app.use('/request/', requestRouter);
+    
     app.use('/alumni/', alumniRouter);
+    
+    app.use('/students/', (req, res, next) => {
+      next();
+    }, studentsRouter);
 
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {

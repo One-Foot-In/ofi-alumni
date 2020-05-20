@@ -5,6 +5,7 @@ var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
+var requestSchema = require('../models/requestSchema');
 require('mongoose').Promise = global.Promise
 
 
@@ -199,12 +200,44 @@ router.get('/data/clear/user', async (req, res, next) => {
     }
 });
 
+/* Request Routes */
+router.get('/allRequests', async (req, res, next) => {
+    try {
+        const dbData = await requestSchema.find()
+        res.json({'requests' : dbData});
+    } catch (e) {
+        console.log("Error: util#allRequests", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
+router.get('/populateAllRequests', async (req, res, next) => {
+    try {
+        const dbData = await requestSchema.find().populate('alumni').populate('student')
+        res.json({'requests' : dbData});
+    } catch (e) {
+        console.log("Error: util#allRequests", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
+router.get('/data/clear/requests', async (req, res, next) => {
+    try {
+        await requestSchema.deleteMany({});
+        res.status(200).send({'message' : 'deleted all requests'});
+        
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+});
+
 /* Clear All */
 router.get('/data/clear/all', async (req, res, next) => {
     try {
         await alumniSchema.deleteMany({});
         await studentSchema.deleteMany({});
         await userSchema.deleteMany({});
+        await requestSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});
