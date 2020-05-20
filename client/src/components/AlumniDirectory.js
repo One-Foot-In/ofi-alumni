@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Card, Image, Search, Pagination, Grid, Segment } from 'semantic-ui-react'
+import { Card, Image, Search, Pagination, Grid, Segment, Button } from 'semantic-ui-react'
+import { makeCall } from '../apis';
 
 /*
 props:
@@ -8,11 +9,24 @@ props:
 export default class AlumniDirectory extends Component {
     state = {
         activePage: 1,
-        numEntries: this.props.entries.length,
+        numEntries: 0,
         isLoading: false,
         value: '',
         pageSize: 3,
-        totalPages: Math.ceil(this.props.entries.length/3)
+        totalPages: Math.ceil(0/3),
+        entries:[]
+    }
+
+    componentWillMount() {
+        this.getEntries().then(result => this.setState({
+            entries: result.alumnus,
+            totalPages: Math.ceil(result.alumnus.length/3),
+            numEntries: result.alumnus.length
+        }))
+    }
+
+    getEntries() {
+        return makeCall(null, '/alumni/all', 'get')
     }
 
     handlePaginationChange = (e, { activePage }) => {
@@ -26,11 +40,18 @@ export default class AlumniDirectory extends Component {
         const {
             totalPages,
             activePage,
-            pageSize
+            pageSize,
+            entries
         } = this.state
-
+        console.log(entries)
         let profiles=[]
-        for (let post of this.props.entries) {
+        for (let post of entries) {
+            var requestButton;
+            if ('zoomLink' in post) {
+                requestButton = <Button primary>Make Request</Button>
+            } else {
+                requestButton = <Button disabled>Make Request</Button>
+            }
             profiles.push(
                 <Grid.Row columns={2}>
                     <Grid.Column width={4}>
@@ -54,6 +75,7 @@ export default class AlumniDirectory extends Component {
                                 <Card.Description>Company: {post.company}</Card.Description>
                                 <br />
                             </Card.Content>
+                            {requestButton}
                         </Card>
                     </Grid.Column>
                 </Grid.Row>
