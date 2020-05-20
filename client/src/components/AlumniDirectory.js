@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 
+var yearOptions =[]
+
 const searchOptions = [
     {
         key: 'All Fields',
@@ -53,7 +55,8 @@ export default class AlumniDirectory extends Component {
         pageSize: 3,
         totalPages: Math.ceil(0/3),
         entries:[],
-        filter: 'all'
+        filter: 'all',
+        year: Number
     }
 
     componentWillMount() {
@@ -74,8 +77,8 @@ export default class AlumniDirectory extends Component {
     handleSearchChange = (e, { value }) => {
         this.setState({ value })
     }
-    handleDropdownChange = (e, { value }) => {
-        this.setState({ filter: value })
+    handleDropdownChange = (e, { name, value }) => {
+        this.setState({ [name]: value })
     }
 
     render(){
@@ -86,9 +89,17 @@ export default class AlumniDirectory extends Component {
             entries,
             filter
         } = this.state
-        console.log(entries)
+
         let profiles=[]
+        let gradYears=[]
         for (let post of entries) {
+            if(!gradYears.find(year => year['value'] === post.gradYear)) {
+                gradYears.push({
+                    key: post.gradYear,
+                    text: post.gradYear,
+                    value: post.gradYear
+                });
+            }
             profiles.push(
                 <Grid.Row columns={2}>
                     <Grid.Column width={4}>
@@ -126,13 +137,14 @@ export default class AlumniDirectory extends Component {
                 </Grid.Row>
             )
         }
+        gradYears.sort()
 
-        return (
-            
-            <Grid divided="vertically">
-                <p>{filter}</p>
+        let searchRow;
+        //Search Area
+        if (filter !== 'gradYear') {
+            searchRow = (
                 <Grid.Row columns={2}>
-                    <Grid.Column>
+                <Grid.Column>
                         <Search
                             open={false}
                             showNoResults={false}
@@ -140,17 +152,51 @@ export default class AlumniDirectory extends Component {
                             input={{fluid: true}}
                             placeholder={"Search"}
                         />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <Dropdown
-                            placeholder='Search By:'
+                </Grid.Column>
+                <Grid.Column>
+                    <Dropdown
+                        placeholder='Search By:'
+                        floating
+                        selection
+                        options={searchOptions}
+                        name='filter'
+                        onChange={this.handleDropdownChange}
+                    />
+                </Grid.Column>
+                </Grid.Row>
+            )
+        } else {
+            searchRow = (
+                <Grid.Row columns={2}>
+                <Grid.Column>
+                        <Dropdown 
+                            placeholder='Year:'
+                            fluid
                             floating
                             selection
-                            options={searchOptions}
+                            name='year'
+                            options={gradYears}
                             onChange={this.handleDropdownChange}
                         />
-                    </Grid.Column>
+                </Grid.Column>
+                <Grid.Column>
+                    <Dropdown
+                        placeholder='Search By:'
+                        floating
+                        selection
+                        name='filter'
+                        options={searchOptions}
+                        onChange={this.handleDropdownChange}
+                    />
+                </Grid.Column>
                 </Grid.Row>
+            )
+        }
+
+        return ( 
+            <Grid divided="vertically">
+                
+                {searchRow}
                 
                 {pageGenerator(profiles, pageSize, activePage)}
 
