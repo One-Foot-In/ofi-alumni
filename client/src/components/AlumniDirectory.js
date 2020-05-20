@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 
-var yearOptions =[]
-
+// Filter dropdown options
 const searchOptions = [
     {
         key: 'All Fields',
@@ -66,7 +65,6 @@ export default class AlumniDirectory extends Component {
             numEntries: result.alumnus.length
         }))
     }
-
     getEntries() {
         return makeCall(null, '/alumni/all', 'get')
     }
@@ -92,6 +90,8 @@ export default class AlumniDirectory extends Component {
 
         let profiles=[]
         let gradYears=[]
+        
+        /* Card Creation */
         for (let post of entries) {
             if(!gradYears.find(year => year['value'] === post.gradYear)) {
                 gradYears.push({
@@ -137,10 +137,12 @@ export default class AlumniDirectory extends Component {
                 </Grid.Row>
             )
         }
+        /* Card Creation */
+
         gradYears.sort()
 
+        /* Search Area */
         let searchRow;
-        //Search Area
         if (filter !== 'gradYear') {
             searchRow = (
                 <Grid.Row columns={2}>
@@ -192,6 +194,7 @@ export default class AlumniDirectory extends Component {
                 </Grid.Row>
             )
         }
+        /* Search Area */
 
         return ( 
             <Grid divided="vertically">
@@ -216,6 +219,11 @@ export default class AlumniDirectory extends Component {
     }
 }
 
+// Helper Functions
+
+// Args: list of generated alumni cards(jsx objects)
+//       desired page size (int), active page (int)
+// Returns: jsx for the cards to display on the page the user is viewing
 function pageGenerator(profiles, pageSize, activePage) {
     let display=[]
     for (let i = 0; i < pageSize; i++) {
@@ -224,6 +232,8 @@ function pageGenerator(profiles, pageSize, activePage) {
     return display
 }
 
+// Args: isAlumniView (bool), alumni (object)
+// Returns: jsx for the request button (either active, disabled, hidden)
 function requestVisible(isAlumniView, post) {
     var requestButton;
             if (('zoomLink' in post) && !isAlumniView) {
