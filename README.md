@@ -19,3 +19,7 @@ We rely heavily on the [Semantic UI React library](https://react.semantic-ui.com
 * We separate concerns by ROLES in the system, and each ROLE should get it's own router
 * The `util` router is used to make testing easier
 * The index router contains APIs that span across roles, e.g. authentication and verification end-points
+
+## Starting mongo locally
+
+* Use `mongod --dbpath==data/db`

@@ -31,7 +31,9 @@ export const PATHS = {
 const mapStateToProps = state => {
   return ({
     schoolName: state.schoolName,
-    count: state.countState.count
+    count: state.countState.count,
+    role: state.userDetailsState && state.userDetailsState.role,
+    details: state.userDetailsState && state.userDetailsState.details
   })
 }
 
@@ -106,7 +108,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loggedIn: true, // TODO: change to false for full-stack work
+      loggedIn: false,
       fetchingAuth: true,
       role: null,
       userDetails: {},
@@ -133,7 +135,7 @@ class App extends Component {
           });
         } else {
           this.setState({
-            loggedIn: true, // TODO: change to false for full-stack work
+            loggedIn: false,
             fetchingAuth: false,
           });
         }
@@ -191,7 +193,7 @@ class App extends Component {
                           navItems={alumniNavBarItems()}
                           activeItem={'home'}
                       />
-                      <div> Home! </div>
+                      <div> Home! Welcome {this.props.details && this.props.details.name} ({this.props.role})</div>
                   </> :
                   <Redirect to={"/login"}/>
               }
