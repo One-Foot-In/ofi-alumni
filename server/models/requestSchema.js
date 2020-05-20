@@ -11,6 +11,7 @@ const requestSchema = new Schema(
     topic: {type: String, required: true},
     status: {type: String, 
                 enum: [ 'Awaiting Confirmation',
+                        'Confirmed',
                         'Completed',
                         'Rejected',
                         'Feedback Provided'

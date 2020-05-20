@@ -109,9 +109,7 @@ async function main() {
       next();
     }, mongooseUtilRouter);
 
-    app.use('/request/', (req, res, next) => {
-      next();
-    }, requestRouter);
+    app.use('/request/', requestRouter);
 
     app.use('/students/', (req, res, next) => {
       next();
