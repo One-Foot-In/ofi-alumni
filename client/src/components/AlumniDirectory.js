@@ -89,14 +89,6 @@ export default class AlumniDirectory extends Component {
         console.log(entries)
         let profiles=[]
         for (let post of entries) {
-            var requestButton;
-            if (('zoomLink' in post) && !this.props.isAlumniView) {
-                requestButton = <Button primary>Make Request</Button>
-            } else if (!this.props.isAlumniView){
-                requestButton = <Button disabled>Make Request</Button>
-            } else {
-                requestButton = null;
-            }
             profiles.push(
                 <Grid.Row columns={2}>
                     <Grid.Column width={4}>
@@ -128,7 +120,7 @@ export default class AlumniDirectory extends Component {
                                 <Card.Description>Company: {post.company}</Card.Description>
                                 <br />
                             </Card.Content>
-                            {requestButton}
+                            {requestVisible(this.props.isAlumniView, post)}
                         </Card>
                     </Grid.Column>
                 </Grid.Row>
@@ -184,4 +176,16 @@ function pageGenerator(profiles, pageSize, activePage) {
         display.push(profiles[(activePage - 1) * pageSize + i])
     }
     return display
+}
+
+function requestVisible(isAlumniView, post) {
+    var requestButton;
+            if (('zoomLink' in post) && !isAlumniView) {
+                requestButton = <Button primary>Make Request</Button>
+            } else if (!isAlumniView){
+                requestButton = <Button disabled>Make Request</Button>
+            } else {
+                requestButton = null;
+            }
+    return requestButton
 }
