@@ -13,6 +13,7 @@ var JWTStrategy = require("passport-jwt").Strategy;
 
 var indexRouter = require('./routes/index');
 var alumniRouter = require('./routes/alumni');
+var studentsRouter = require('./routes/students');
 var utilRouter = require('./routes/util');
 var mongooseUtilRouter = require('./routes/utilMongoose');
 require('dotenv').config();
@@ -103,6 +104,8 @@ async function main() {
     app.use('/mongoose-util/', mongooseUtilRouter);
 
     app.use('/alumni/', alumniRouter);
+
+    app.use('/student/', studentsRouter);
 
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {
