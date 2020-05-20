@@ -12,6 +12,7 @@ var LocalStrategy = require("passport-local").Strategy;
 var JWTStrategy = require("passport-jwt").Strategy;
 
 var indexRouter = require('./routes/index');
+var alumniRouter = require('./routes/alumni');
 var utilRouter = require('./routes/util');
 var mongooseUtilRouter = require('./routes/utilMongoose');
 var requestRouter = require('./routes/requests');
@@ -68,7 +69,7 @@ async function main() {
         passwordField: 'password',
     }, async (email, password, done) => {
         try {
-            var user = await userSchema.findOne({'email': email}, 'passwordHash');
+            var user = await userSchema.findOne({'email': email});
             if (!user) {
                 return done('User not found');
             }
@@ -96,21 +97,17 @@ async function main() {
       }
     ));
 
-    app.use('/', (req, res, next) => {
-      next();
-    }, indexRouter);
+    app.use('/', indexRouter);
 
     // test Router for testing health, database connection, and post
-    app.use('/util/', (req, res, next) => {
-      next();
-    }, utilRouter);
+    app.use('/util/', utilRouter);
 
-    app.use('/mongoose-util/', (req, res, next) => {
-      next();
-    }, mongooseUtilRouter);
+    app.use('/mongoose-util/', mongooseUtilRouter);
 
     app.use('/request/', requestRouter);
-
+    
+    app.use('/alumni/', alumniRouter);
+    
     app.use('/students/', (req, res, next) => {
       next();
     }, studentsRouter);

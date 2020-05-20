@@ -5,16 +5,9 @@ var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var crypto = require('crypto-random-string');
 var sendEmail = require('./helpers/emailHelpers').sendEmail
+var alumniSchema = require('../models/alumniSchema');
 
 const HASH_COST = 10;
-
-const collectionByRole = new Map([
-  ["STUDENT_MODERATOR", "StudentModerator"],
-  ["ALUMNI_MODERATOR", "AlumniModerator"],
-  ["STAFF", "Staff"],
-  ["STUDENT", 'Student'],
-  ["ALUMNI", 'Alumni']
-])
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_sauce';
 const JWT_EXPIRATION_MS = process.env.JWT_EXPIRATION_MS || '25000000'; // > 6 hrs;
@@ -56,8 +49,19 @@ router.post('/login', (req, res, next) => {
           res.cookie('jwt', cookie);
           try {
             let userRole = user.role && user.role.toUpperCase()
-            let userToSend  = await req.db.collection(collectionByRole.get(userRole)).findOne({email: user.email});
-            res.status(200).send({userRole, userToSend});
+            if (userRole === "ALUMNI") {
+              const alumni = await alumniSchema.findOne({email: user.email});
+              res.status(200).send(
+                {
+                  role: userRole,
+                  details: alumni
+                }
+              );
+            } else if (userRole === "STUDENT") {
+              // TODO: add login response for student here
+            } else {
+              res.status(500).send({error: true, message: 'Could not determine role.'});
+            }
           } catch (e) {
             console.log("Error: error fetching user after authentication", e);
             res.status(500).send({ error: e });
