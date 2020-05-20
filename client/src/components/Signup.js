@@ -50,7 +50,6 @@ export default class Signup extends React.Component {
             company: '',
             college: '',
             // FORM-CONTROL
-            signUpDone: false,
             submitting: false,
             passwordsMatching: true,
             emailValid: true
@@ -193,14 +192,18 @@ export default class Signup extends React.Component {
                         icon: "error",
                     });
                 } else {
-                    swal({
-                        title: "Congratulations!",
-                        text: "Your submission was successful! Please check your email to confirm your account.",
-                        icon: "success",
-                        });
                     this.setState({
-                        signUpDone: true
+                        submitting: false
+                    }, () => {
+                        swal({
+                            title: "Congratulations!",
+                            text: "Your submission was successful! Please check your email to confirm your account.",
+                            icon: "success",
+                        }).then(() => 
+                            this.props.match.history.push('/login')
+                        );
                     })
+                    
                 }
             } catch (e) {
                 console.log("Error: Signup#handleSubmit", e);
@@ -221,8 +224,6 @@ export default class Signup extends React.Component {
     }
     render() {
         return (
-            <div>
-                {this.state.signUpDone? <Redirect to="/login" /> :
                 <div>
                     <Message
                         style= {messageStyle}
@@ -292,8 +293,6 @@ export default class Signup extends React.Component {
                     </Grid.Row>
                     </Grid>    
                 </div>
-                }
-            </div>
         )
     }
 }
