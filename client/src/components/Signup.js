@@ -222,7 +222,7 @@ export default class Signup extends React.Component {
     render() {
         return (
             <div>
-                {this.state.signUpDone? <Redirect to="/" /> :
+                {this.state.signUpDone? <Redirect to="/login" /> :
                 <div>
                     <Message
                         style= {messageStyle}
@@ -245,7 +245,7 @@ export default class Signup extends React.Component {
                             style={fieldStyle}
                             error={!this.state.emailValid}
                         >
-                            {!this.state.emailValid ? getErrorLabel('Please enter an invalid email!') : null}
+                            {!this.state.emailValid ? getErrorLabel('Please enter a valid email!') : null}
                             <label>Email</label>
                             <input placeholder='Email' name="email" onChange={this.handleChange} />
                         </Form.Field>
