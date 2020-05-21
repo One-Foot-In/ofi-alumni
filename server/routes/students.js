@@ -16,7 +16,6 @@ router.post('/', async (req, res, next) => {
         const password = req.body.password;
         // TODO: need to add timeZone in frontend request
         const timeZone = req.body.timeZone;
-
         const role = "STUDENT"
         const emailVerified = false
         const approved = false
@@ -26,7 +25,6 @@ router.post('/', async (req, res, next) => {
             {
                 name: name,
                 email: email,
-                gradYear: gradYear,
                 grade: grade,
                 // requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
                 // issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]

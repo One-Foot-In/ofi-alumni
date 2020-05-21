@@ -1,7 +1,6 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { Form, Button, Icon, Message, Grid, Dropdown, Label } from 'semantic-ui-react';
-import { Redirect } from "react-router-dom"
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 
@@ -167,6 +166,7 @@ export default class Signup extends React.Component {
                 name: this.state.name,
                 email: this.state.email,
                 password: this.state.password,
+                timeZone: (new Date().getTimezoneOffset())
             }
             if (!this.props.isAlumni) {
                 payload = Object.assign({}, payload, {
@@ -184,13 +184,17 @@ export default class Signup extends React.Component {
             e.preventDefault();
             const endPoint = this.props.isAlumni ? '/alumni' : '/student';
             try {
-                const result = makeCall(payload, endPoint, 'post')
+                const result = await makeCall(payload, endPoint, 'post')
                 if (!result || result.error) {
-                    swal({
-                        title: "Error!",
-                        text: "There was an error completing your request, please try again.",
-                        icon: "error",
-                    });
+                    this.setState({
+                        submitting: false
+                    }, () => {
+                        swal({
+                            title: "Error!",
+                            text: "There was an error completing your request, please try again.",
+                            icon: "error",
+                        });
+                    })
                 } else {
                     this.setState({
                         submitting: false
@@ -206,7 +210,11 @@ export default class Signup extends React.Component {
                     
                 }
             } catch (e) {
-                console.log("Error: Signup#handleSubmit", e);
+                this.setState({
+                    submitting: false
+                }, () => {
+                    console.log("Error: Signup#handleSubmit", e);
+                })
             }
         } else {
             swal({
