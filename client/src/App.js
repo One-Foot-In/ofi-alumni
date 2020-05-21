@@ -219,7 +219,7 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
 
-                      <div> <AlumniDirectory isAlumniView={true}/> </div>
+                      <AlumniDirectory isAlumniView={false}/>
                   </> :
                   <Redirect to={"/login"}/>
               }

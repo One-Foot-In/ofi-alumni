@@ -71,7 +71,7 @@ router.post('/', async (req, res, next) => {
 router.get('/all', async (req, res, next) => {
     try {
         const dbData = await alumniSchema.find()
-        res.json({'alumnus' : dbData});
+        res.json({'alumni' : dbData});
     } catch (e) {
         console.log("Error: util#allAlumni", e);
         res.status(500).send({'error' : e});

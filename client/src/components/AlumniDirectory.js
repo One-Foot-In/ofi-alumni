@@ -52,7 +52,7 @@ export default class AlumniDirectory extends Component {
         isLoading: false,
         value: '',
         pageSize: 3,
-        totalPages: Math.ceil(0/3),
+        totalPages: 0,
         entries:[],
         filter: 'all',
         year: Number
@@ -63,10 +63,10 @@ export default class AlumniDirectory extends Component {
             entries: result.alumnus,
             totalPages: Math.ceil(result.alumnus.length/3),
             numEntries: result.alumnus.length
-        }))
+        }).catch(e => console.log(e)))
     }
-    getEntries() {
-        return makeCall(null, '/alumni/all', 'get')
+    async getEntries() {
+        return await makeCall(null, '/alumni/all', 'get')
     }
 
     handlePaginationChange = (e, { activePage }) => {
