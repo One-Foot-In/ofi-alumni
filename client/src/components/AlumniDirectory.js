@@ -60,13 +60,13 @@ export default class AlumniDirectory extends Component {
 
     componentWillMount() {
         this.getEntries().then(result => this.setState({
-            entries: result.alumnus,
-            totalPages: Math.ceil(result.alumnus.length/3),
-            numEntries: result.alumnus.length
-        }).catch(e => console.log(e)))
+            entries: result.alumni,
+            totalPages: Math.ceil(result.alumni.length/3),
+            numEntries: result.alumni.length
+        }))
     }
     async getEntries() {
-        return await makeCall(null, '/alumni/all', 'get')
+        return await makeCall(null, '/alumni/all', 'get').catch(e => console.log(e))
     }
 
     handlePaginationChange = (e, { activePage }) => {
