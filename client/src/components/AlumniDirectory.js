@@ -41,6 +41,8 @@ const searchOptions = [
     }
 ]
 
+const pageSize = 3;
+
 /*
 props:
 - isAlumniView: shows book request button if false
@@ -51,11 +53,11 @@ export default class AlumniDirectory extends Component {
         numEntries: 0,
         isLoading: false,
         value: '',
-        pageSize: 3,
         totalPages: 0,
         entries:[],
         gradYears: [],
         allText: [],
+        display: [],
         numResults: 0,
         filter: 'all'
     }
@@ -64,35 +66,76 @@ export default class AlumniDirectory extends Component {
         let result = await this.getEntries()
         this.setState({
             entries: result.alumni,
-            totalPages: Math.ceil(result.alumni.length/3),
+            totalPages: Math.ceil(result.alumni.length/pageSize),
             numEntries: result.alumni.length
         })
         this.populateStates(this.state.entries)
     }
 
-    async populateStates(entries) {
+    populateStates(entries) {
         let gradYears = [];
         let allText = [];
+        let display = [];
         for (let post of entries) {
             if(!gradYears.find(year => year['value'] === post.gradYear)) {
-                await gradYears.push({
+                gradYears.push({
                     key: post.gradYear,
                     text: post.gradYear,
                     value: post.gradYear
                 });
             }
-            await allText.push(post.location + ' '
+            allText.push(post.location + ' '
                          + post.college + ' '
                          + post.profession + ' '
                          + post.company + ' '
                          + post.name + ' '
-                         + post.gradYear)
+                         + post.gradYear);
+            display.push(this.constructProfile(post));
         }
-        await gradYears.sort()
-        await this.setState({
-                                gradYears: gradYears,
-                                allText: allText
-                            })
+        gradYears.sort()
+        this.setState({
+                        gradYears: gradYears,
+                        allText: allText,
+                        display: display
+                     })
+    }
+
+    constructProfile(post) {
+        return (
+            <Grid.Row columns={2}>
+                <Grid.Column width={4}>
+                    <Image
+                        size='small'
+                        centered
+                        rounded
+                        src={post.imageURL}
+                    />
+                </Grid.Column>
+                <Grid.Column>
+                    <Card fluid>
+                        <Card.Content>
+                            <Card.Header>
+                            <Grid>
+                                <Grid.Row columns={2}>
+                                    <Grid.Column>{post.name}</Grid.Column>
+                                    <Grid.Column textAlign='right'>
+                                        Graduated: {post.gradYear}
+                                    </Grid.Column>
+                                </Grid.Row>
+                            </Grid>
+                            </Card.Header>
+                                            
+                            <Card.Meta>{post.profession}</Card.Meta>
+                            <Card.Description>College: {post.college}</Card.Description>
+                            <Card.Description>Location: {post.location}</Card.Description>
+                            <Card.Description>Company: {post.company}</Card.Description>
+                            <br />
+                        </Card.Content>
+                        {requestVisible(this.props.isAlumniView, post)}
+                    </Card>
+                </Grid.Column>
+            </Grid.Row>
+        )
     }
 
     getEntries() {
@@ -104,20 +147,25 @@ export default class AlumniDirectory extends Component {
         this.setState({results: 0})
         var numResults = 0;
         let searchPattern = new RegExp(value, 'i');
+        let display = [];
         let i = 0;
         for (let post of this.state.entries) {
             if (this.state.filter !== 'all') {
                 if (post[this.state.filter].toString().match(searchPattern) !== null) {
                     numResults += 1
+                    display.push(this.constructProfile(post));
                 }
             } else {
                 if (this.state.allText[i].match(searchPattern) !== null) {
                     numResults += 1
+                    display.push(this.constructProfile(this.state.entries[i]))
                 }
             }
             i++;
         }
-        this.setState({ numResults: numResults})
+        this.setState({ numResults: numResults,
+                        display: display,
+                        totalPages: Math.ceil(display.length/pageSize)})
     }
 
     handlePaginationChange = (e, { activePage }) => {
@@ -137,61 +185,19 @@ export default class AlumniDirectory extends Component {
         const {
             totalPages,
             activePage,
-            pageSize,
-            entries,
             filter,
             numResults,
-            gradYears
+            gradYears,
+            display,
+            value,
         } = this.state
-
-        let profiles=[]
-        
-        /* Card Creation */
-        for (let post of entries) {
-            profiles.push(
-                <Grid.Row columns={2}>
-                    <Grid.Column width={4}>
-                            <Image
-                                size='small'
-                                centered
-                                rounded
-                                src={post.imageURL}
-                            />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <Card fluid>
-                            <Card.Content>
-                                <Card.Header>
-                                <Grid>
-                                    <Grid.Row columns={2}>
-                                        <Grid.Column>{post.name}</Grid.Column>
-                                        <Grid.Column textAlign='right'>
-                                          Graduated: {post.gradYear}
-                                        </Grid.Column>
-                                    </Grid.Row>
-                                </Grid>
-                                </Card.Header>
-                                
-                                <Card.Meta>{post.profession}</Card.Meta>
-                                <Card.Description>College: {post.college}</Card.Description>
-                                <Card.Description>Location: {post.location}</Card.Description>
-                                <Card.Description>Company: {post.company}</Card.Description>
-                                <br />
-                            </Card.Content>
-                            {requestVisible(this.props.isAlumniView, post)}
-                        </Card>
-                    </Grid.Column>
-                </Grid.Row>
-            )
-        }
-        /* Card Creation */
 
         /* results row */
         let resultsRow;
-        if (numResults !== 0) {
+        if (value !== '') {
             resultsRow = (
                 <Grid.Row centered>
-                        Found {numResults} results!
+                        Found {numResults} results
                 </Grid.Row>
             )
         } else {
@@ -258,7 +264,7 @@ export default class AlumniDirectory extends Component {
                 
                 {searchRow}
                 {resultsRow}
-                {pageGenerator(profiles, pageSize, activePage)}
+                {pageGenerator(display, pageSize, activePage)}
 
                 <Grid.Row stretched>
                     <Grid.Column>
