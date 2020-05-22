@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
+import LinkedInUpdate from "./LinkedInUpdate";
 
 /*
 props:
@@ -22,9 +23,7 @@ export default class Profile extends Component {
         const isViewOnly = this.props.isViewOnly;
 
         const linkedInUpdate = (
-            <Button primary>
-                Update info with LinkedIn
-            </Button>
+            <LinkedInUpdate/>
         )
         const imageUpdate = (
             <Button floated="right" basic color="blue">
@@ -33,7 +32,7 @@ export default class Profile extends Component {
         )
         var canUpdate;
 
-        if (isViewOnly) {
+        if (!isViewOnly) {
             canUpdate = (
                 <Card.Content extra>
                     {linkedInUpdate}
@@ -54,12 +53,12 @@ export default class Profile extends Component {
                     src={imageURL}
                 />
                 <Card.Content>
-                    <Card.Header>{name}</Card.Header>
-                    <Card.Meta>{jobTitle}</Card.Meta>
+                    <Card.Header>{name || 'Unavailable'}</Card.Header>
+                    <Card.Meta>{jobTitle || 'Unavailable'}</Card.Meta>
 
-                    <Card.Description>College: {college}</Card.Description>
-                    <Card.Description>Location: {location}</Card.Description>
-                    <Card.Description>Company: {company}</Card.Description>
+                    <Card.Description>College: {college || 'Unavailable'}</Card.Description>
+                    <Card.Description>Location: {location || 'Unavailable'}</Card.Description>
+                    <Card.Description>Company: {company || 'Unavailable'}</Card.Description>
                     
                 </Card.Content>
                 {canUpdate}

@@ -7,7 +7,6 @@ var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 require('mongoose').Promise = global.Promise
 
-
 const HASH_COST = 10;
 
 /* Alumni Routes */

@@ -8,6 +8,7 @@ import LoginForm from './components/LoginForm';
 import Register from './screens/Register';
 import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
+import Profile from './components/Profile'
 
 import * as actions from './redux/actions'
 
@@ -205,7 +206,15 @@ class App extends Component {
                           navItems={alumniNavBarItems()}
                           activeItem={'profile'}
                       />
-                      <div> Profile! </div>
+                      <Profile
+                        isViewOnly={false}
+                        imageURL={this.props.details && this.props.details.imageURL}
+                        name={this.props.details && this.props.details.name}
+                        college={this.props.details && this.props.details.college}
+                        location={this.props.details && this.props.details.location}
+                        company={this.props.details && this.props.details.company}
+                        jobTitle={this.props.details && this.props.details.jobTitle}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
