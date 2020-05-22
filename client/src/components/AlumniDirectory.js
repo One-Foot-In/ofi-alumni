@@ -56,18 +56,18 @@ export default class AlumniDirectory extends Component {
         entries:[],
         gradYears: [],
         allText: [],
-        results: 0,
+        numResults: 0,
         filter: 'all'
     }
 
     async componentWillMount() {
         let result = await this.getEntries()
-        await this.setState({
+        this.setState({
             entries: result.alumni,
             totalPages: Math.ceil(result.alumni.length/3),
             numEntries: result.alumni.length
         })
-        await this.populateStates(this.state.entries)
+        this.populateStates(this.state.entries)
     }
 
     async populateStates(entries) {
@@ -95,32 +95,29 @@ export default class AlumniDirectory extends Component {
                             })
     }
 
-    async getEntries() {
-        return await makeCall(null, '/alumni/all', 'get').catch(e => console.log(e))
+    getEntries() {
+        return makeCall(null, '/alumni/all', 'get').catch(e => console.log(e))
     }
 
-    async search(value) {
-        await this.setState({value: value})
-        await this.setState({results: 0})
-        var results = 0;
+    search(value) {
+        this.setState({value: value})
+        this.setState({results: 0})
+        var numResults = 0;
         let searchPattern = new RegExp(value, 'i');
-        console.log(searchPattern)
         let i = 0;
         for (let post of this.state.entries) {
-            console.log(post[this.state.filter])
             if (this.state.filter !== 'all') {
                 if (post[this.state.filter].toString().match(searchPattern) !== null) {
-                    results += await 1
+                    numResults += 1
                 }
             } else {
                 if (this.state.allText[i].match(searchPattern) !== null) {
-                    results += await 1
+                    numResults += 1
                 }
             }
-            await i++;
+            i++;
         }
-        console.log(results)
-        await this.setState({ results: results})
+        this.setState({ numResults: numResults})
     }
 
     handlePaginationChange = (e, { activePage }) => {
@@ -143,7 +140,7 @@ export default class AlumniDirectory extends Component {
             pageSize,
             entries,
             filter,
-            results,
+            numResults,
             gradYears
         } = this.state
 
@@ -191,10 +188,10 @@ export default class AlumniDirectory extends Component {
 
         /* results row */
         let resultsRow;
-        if (results !== 0) {
+        if (numResults !== 0) {
             resultsRow = (
                 <Grid.Row centered>
-                        Found {results} results!
+                        Found {numResults} results!
                 </Grid.Row>
             )
         } else {
