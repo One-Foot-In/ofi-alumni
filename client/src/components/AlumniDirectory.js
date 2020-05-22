@@ -54,28 +54,85 @@ export default class AlumniDirectory extends Component {
         pageSize: 3,
         totalPages: 0,
         entries:[],
-        filter: 'all',
-        year: Number
+        gradYears: [],
+        allText: [],
+        results: 0,
+        filter: 'all'
     }
 
-    componentWillMount() {
-        this.getEntries().then(result => this.setState({
+    async componentWillMount() {
+        let result = await this.getEntries()
+        await this.setState({
             entries: result.alumni,
             totalPages: Math.ceil(result.alumni.length/3),
             numEntries: result.alumni.length
-        }))
+        })
+        await this.populateStates(this.state.entries)
     }
+
+    async populateStates(entries) {
+        let gradYears = [];
+        let allText = [];
+        for (let post of entries) {
+            if(!gradYears.find(year => year['value'] === post.gradYear)) {
+                await gradYears.push({
+                    key: post.gradYear,
+                    text: post.gradYear,
+                    value: post.gradYear
+                });
+            }
+            await allText.push(post.location + ' '
+                         + post.college + ' '
+                         + post.profession + ' '
+                         + post.company + ' '
+                         + post.name + ' '
+                         + post.gradYear)
+        }
+        await gradYears.sort()
+        await this.setState({
+                                gradYears: gradYears,
+                                allText: allText
+                            })
+    }
+
     async getEntries() {
         return await makeCall(null, '/alumni/all', 'get').catch(e => console.log(e))
+    }
+
+    async search(value) {
+        await this.setState({value: value})
+        await this.setState({results: 0})
+        var results = 0;
+        let searchPattern = new RegExp(value, 'i');
+        console.log(searchPattern)
+        let i = 0;
+        for (let post of this.state.entries) {
+            console.log(post[this.state.filter])
+            if (this.state.filter !== 'all') {
+                if (post[this.state.filter].toString().match(searchPattern) !== null) {
+                    results += await 1
+                }
+            } else {
+                if (this.state.allText[i].match(searchPattern) !== null) {
+                    results += await 1
+                }
+            }
+            await i++;
+        }
+        console.log(results)
+        await this.setState({ results: results})
     }
 
     handlePaginationChange = (e, { activePage }) => {
         this.setState({ activePage })
     }
     handleSearchChange = (e, { value }) => {
-        this.setState({ value })
+        this.search(value)
     }
     handleDropdownChange = (e, { name, value }) => {
+        if (name == 'year') {
+            this.search(value)
+        }
         this.setState({ [name]: value })
     }
 
@@ -85,33 +142,26 @@ export default class AlumniDirectory extends Component {
             activePage,
             pageSize,
             entries,
-            filter
+            filter,
+            results,
+            gradYears
         } = this.state
 
         let profiles=[]
-        let gradYears=[]
         
         /* Card Creation */
         for (let post of entries) {
-            if(!gradYears.find(year => year['value'] === post.gradYear)) {
-                gradYears.push({
-                    key: post.gradYear,
-                    text: post.gradYear,
-                    value: post.gradYear
-                });
-            }
             profiles.push(
                 <Grid.Row columns={2}>
                     <Grid.Column width={4}>
                             <Image
                                 size='small'
-                                fluid
                                 centered
                                 rounded
                                 src={post.imageURL}
                             />
                     </Grid.Column>
-                    <Grid.Column fluid>
+                    <Grid.Column>
                         <Card fluid>
                             <Card.Content>
                                 <Card.Header>
@@ -139,7 +189,17 @@ export default class AlumniDirectory extends Component {
         }
         /* Card Creation */
 
-        gradYears.sort()
+        /* results row */
+        let resultsRow;
+        if (results !== 0) {
+            resultsRow = (
+                <Grid.Row centered>
+                        Found {results} results!
+                </Grid.Row>
+            )
+        } else {
+            resultsRow = null
+        }
 
         /* Search Area */
         let searchRow;
@@ -200,7 +260,7 @@ export default class AlumniDirectory extends Component {
             <Grid divided="vertically">
                 
                 {searchRow}
-                
+                {resultsRow}
                 {pageGenerator(profiles, pageSize, activePage)}
 
                 <Grid.Row stretched>
