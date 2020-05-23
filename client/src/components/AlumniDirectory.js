@@ -41,7 +41,7 @@ const searchOptions = [
     }
 ]
 
-const pageSize = 3;
+const pageSize = 1;
 
 /*
 props:
@@ -165,7 +165,9 @@ export default class AlumniDirectory extends Component {
         }
         this.setState({ numResults: numResults,
                         display: display,
-                        totalPages: Math.ceil(display.length/pageSize)})
+                        totalPages: Math.ceil(display.length/pageSize),
+                        activePage: 1
+                    })
     }
 
     handlePaginationChange = (e, { activePage }) => {
