@@ -5,6 +5,7 @@ import { Container, Segment, Message , Button} from 'semantic-ui-react';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom'
 import Header from './components/Header';
 import LoginForm from './components/LoginForm';
+import AlumniDirectory from './components/AlumniDirectory'
 import Register from './screens/Register';
 import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
@@ -226,7 +227,8 @@ class App extends Component {
                           navItems={alumniNavBarItems()}
                           activeItem={'alumniDirectory'}
                       />
-                      <div> Alumni Directory! </div>
+
+                      <AlumniDirectory isAlumniView={true}/>
                   </> :
                   <Redirect to={"/login"}/>
               }
