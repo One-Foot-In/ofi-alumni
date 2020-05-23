@@ -69,10 +69,10 @@ export default class AlumniDirectory extends Component {
             totalPages: Math.ceil(result.alumni.length/pageSize),
             numEntries: result.alumni.length
         })
-        this.populateStates(this.state.entries)
+        this.populateSearchDropdownStates(this.state.entries)
     }
 
-    populateStates(entries) {
+    populateSearchDropdownStates(entries) {
         let gradYears = [];
         let allText = [];
         let display = [];
@@ -177,7 +177,7 @@ export default class AlumniDirectory extends Component {
         this.search(value)
     }
     handleDropdownChange = (e, { name, value }) => {
-        if (name == 'year') {
+        if (name === 'year') {
             this.search(value)
         }
         this.setState({ [name]: value })
