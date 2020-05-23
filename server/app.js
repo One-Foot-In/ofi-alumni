@@ -101,9 +101,9 @@ async function main() {
     app.use('/', indexRouter);
 
     // test Router for testing health, database connection, and post
-    app.use('/util/', utilRouter);
+    app.use('/util-deprecated/', utilRouter);
 
-    app.use('/mongoose-util/', mongooseUtilRouter);
+    app.use('/util/', mongooseUtilRouter);
 
     app.use('/request/', requestRouter);
     
