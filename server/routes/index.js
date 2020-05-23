@@ -7,6 +7,8 @@ var crypto = require('crypto-random-string');
 var sendEmail = require('./helpers/emailHelpers').sendEmail
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
+var request = require('superagent')
+require('dotenv').config();
 
 const HASH_COST = 10;
 
@@ -125,5 +127,51 @@ router.post('/password/forgot', async (req, res, next) => {
 router.get('/isLoggedIn', passport.authenticate('jwt', {session: false}), (req, res, next) => {
   res.json({message: "You have a fresh cookie!"});
 });
+
+/*
+  LinkedIn API
+*/
+
+function requestAccessToken(code, state) {
+  return request.post('https://www.linkedin.com/oauth/v2/accessToken')
+    .send('grant_type=authorization_code')
+    .send(`redirect_uri=${process.env.LINKEDIN_REDIRECT_URI}`)
+    .send(`client_id=${process.env.LINKEDIN_CLIENT_ID}`)
+    .send(`client_secret=${process.env.LINKEDIN_CLIENT_SECRET}`)
+    .send(`code=${code}`)
+    .send(`state=${state}`)
+}
+
+function requestProfile(token) {
+  /*
+    Other fields available via projection are firstName, lastName, and id
+  */
+  return request.get('https://api.linkedin.com/v2/me?projection=(profilePicture(displayImage~digitalmediaAsset:playableStreams))')
+  .set('Authorization', `Bearer ${token}`)
+}
+
+// end-point configured as callback for LinkedIn App
+router.get('/linkedin', (req, res, next) => {
+  // state is the email address of member
+  requestAccessToken(req.query.code, req.query.state)
+  .then((response) => {
+    requestProfile(response.body.access_token)
+    .then(response => {
+      // TODO: we can find user record by email provide as query param,
+      // and update imageLink for corresponding student/alumnus record
+      const displayImageLinkLarge = response.body.profilePicture
+        && response.body.profilePicture['displayImage~']
+        && response.body.profilePicture['displayImage~'].elements[3].identifiers[0].identifier
+      res.status(200).send({message: "Extracted Profile Image!", displayImageLinkLarge: displayImageLinkLarge, email: req.query.state})
+    })
+  })
+  .catch((error) => {
+    res.send(`${error}`)
+  })
+})
+
+/*
+  LinkedIn API
+*/
 
 module.exports = router;
