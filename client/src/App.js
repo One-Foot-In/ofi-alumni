@@ -179,7 +179,6 @@ class App extends Component {
         });
         console.log("Error: App#componentDidMount", e)
     }
-    console.log(this.state)
   }
 
   login() {
