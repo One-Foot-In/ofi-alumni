@@ -134,7 +134,7 @@ router.get('/seed/', async (req, res, next) => {
             let picLinkAlumni = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
             let college = randomPickFromArray(colleges)
             let hasZoom = randomPickFromArray([true, false])
-            await createAlumni(alumniEmail, alumniName, location, profession, company, college, picLink, hasZoom)
+            await createAlumni(alumniEmail, alumniName, location, profession, company, college, picLinkAlumni, hasZoom)
 
             // create mock student
             let studentEmail = `student${i}@ofi.com`
@@ -142,7 +142,8 @@ router.get('/seed/', async (req, res, next) => {
             let picLinkStudent = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
             await createStudent(studentEmail, studentName, picLinkStudent)
         }
-    } catch {
+        res.status(200).send({'message' : `Successfully created ${USER_COUNT} alumni and ${USER_COUNT} students`});
+    } catch (e) {
         console.log("Error: util#seed", e);
         res.status(500).send({'error' : e});
     }
