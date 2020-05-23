@@ -41,7 +41,7 @@ const searchOptions = [
     }
 ]
 
-const pageSize = 1;
+const pageSize = 3;
 
 /*
 props:
@@ -92,7 +92,7 @@ export default class AlumniDirectory extends Component {
                          + post.gradYear);
             display.push(this.constructProfile(post));
         }
-        gradYears.sort()
+        gradYears.sort(function(a,b){return a.value-b.value})
         this.setState({
                         gradYears: gradYears,
                         allText: allText,
@@ -309,4 +309,10 @@ function requestVisible(isAlumniView, post) {
                 requestButton = null;
             }
     return requestButton
+}
+
+function compare(a, b) {
+    if (a < b) return -1;
+    if (b < a) return 1;
+    return 0;
 }
