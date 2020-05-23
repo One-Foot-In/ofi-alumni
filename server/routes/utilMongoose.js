@@ -10,6 +10,144 @@ require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
 
+/* Integration Testing Routes */
+const USER_COUNT = 20
+const MOCK_PASSWORD = 'password'
+
+const firstNames = ["Papa", "Great", "Slick", "Hungry", "Liberal", "Conservative", "Sneaky"];
+const lastNames = ["Pete", "Bear", "Besos", "X AE A-12", "Jade", "Finch", "Khaled", "Panda"];
+const locations = ["St Petersburg", "New York City", "Dhaka, Bangladesh", "San Francisco", "Delhi, India", "Dar es Salaam, Tanzania", "Beijing, China"]
+const professionFirst = ["Angsty", "Focused", "Bewitched", "Destitute", "Fumbling", "Grandiose", "Dextrous", "Giant", "Manual", "Thirsty", "Zoned out", "Astute"]
+const professionSecond = ["Trader", "Engineer", "Painter", "Student", "Assistant", "Clerk", "Banker", "Architect", "Addict", "Surgeon", "Designer", "Tailor", "Duck"]
+const companies = ["Global Business Machines", "Butt Book", "Capture Inc", "Amazon (The Rainforest)", "Chirper", "TripGuide", "Minisoft", "AT or T", "Pillow Housing", "Goldman Tax", "Tubspot"]
+const loremPicSumIds = [
+    "1", "1003", "1012", "1025", "1069", 
+    "1074", "111", "169", "237", "304",
+    "395", "428", "433", "45", "453",
+    "50", "513", "593", "633", "660"
+]
+const colleges = [
+    "Hogwarts School of WitchCraft and Wizardry", "Elephants on the Hill", "Larvard", "Pepsodent", "Boston Institute of Technology", "Ben and Jerry's", "Lannister University",
+    "Get Rich Quick College", "Gary Vee's School of Wisdom", "Tik Tok Fine Arts Institute", "Where Science Comes to Die",
+    "5th best on the Red Line", "Lemmings and Family Home Schooling", "Grand Theft Auto - School of Life", "La Casa de Papel",
+    "Training Academy for Hourses", "Two-way petting Zoo"
+]
+
+const randomPickFromArray = (array) => {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+const createAlumni = async (_email, _name, _location, _profession, _company, _college, _picLink, _hasZoom) => {
+    const email = _email;
+    const name = _name;
+    const gradYear = Math.floor((Math.random() * 1000) + 2000);
+    const location = _location;
+    const profession = _profession;
+    const company = _company;
+    const college = _college;
+    const zoomLink = _hasZoom ? 'yourZoomLink' : null;
+    const password = MOCK_PASSWORD;
+    const availabilities = []
+    const picLink = _picLink;
+
+    const role = "ALUMNI"
+    const emailVerified = false
+    const approved = false
+    const verificationToken = crypto({length: 16});
+    var passwordHash = await bcrypt.hash(password, HASH_COST)
+    var alumni_instance = new alumniSchema(
+        {
+            name: name,
+            email: email,
+            gradYear: gradYear,
+            location: location,
+            profession: profession,
+            company: company,
+            college: college,
+            //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
+            //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
+            availabilities: availabilities,
+            zoomLink: zoomLink,
+            imageURL: picLink
+        }
+    )
+    const user_instance = new userSchema(
+        {
+            email: email,
+            passwordHash: passwordHash,
+            verificationToken: verificationToken,
+            role: role,
+            emailVerified: emailVerified,
+            approved: approved
+        }
+    );
+    
+    let insert = await alumni_instance.save();
+    await user_instance.save();
+}
+
+const createStudent = async (_email, _name, _picLink) => {
+    const email = _email;
+    const name = _name;
+    const grade = Math.floor((Math.random() * 10) + 2);
+    const password = MOCK_PASSWORD;
+    const picLink = _picLink;
+
+    const role = "STUDENT"
+    const emailVerified = false
+    const approved = false
+    const verificationToken = crypto({length: 16});
+    var passwordHash = await bcrypt.hash(password, HASH_COST)
+    var student_instance = new studentSchema(
+        {
+            name: name,
+            email: email,
+            grade: grade,
+            //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
+            //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
+        }
+    )
+    const user_instance = new userSchema(
+        {
+          email: email,
+          passwordHash: passwordHash,
+          verificationToken: verificationToken,
+          role: role,
+          emailVerified: emailVerified,
+          approved: approved
+        }
+    );
+    
+    let insert = await student_instance.save();
+    await user_instance.save();
+}
+
+router.get('/seed/', async (req, res, next) => {
+    try {
+        for (let i = 0; i < USER_COUNT; i++) {
+            // create mock alumni
+            let alumniEmail = `alumni${i}@ofi.com`
+            let alumniName = `${randomPickFromArray(firstNames)} ${randomPickFromArray(lastNames)}`
+            let location = randomPickFromArray(locations)
+            let profession = `${randomPickFromArray(professionFirst)} ${randomPickFromArray(professionSecond)}`
+            let company = randomPickFromArray(companies)
+            let picLinkAlumni = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
+            let college = randomPickFromArray(colleges)
+            let hasZoom = randomPickFromArray([true, false])
+            await createAlumni(alumniEmail, alumniName, location, profession, company, college, picLink, hasZoom)
+
+            // create mock student
+            let studentEmail = `student${i}@ofi.com`
+            let studentName = `${randomPickFromArray(firstNames)} ${randomPickFromArray(lastNames)}`
+            let picLinkStudent = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
+            await createStudent(studentEmail, studentName, picLinkStudent)
+        }
+    } catch {
+        console.log("Error: util#seed", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 /* Alumni Routes */
 
 router.get('/alumni/', async (req, res, next) => {
