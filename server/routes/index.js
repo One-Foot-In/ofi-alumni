@@ -6,6 +6,7 @@ var bcrypt = require('bcrypt');
 var crypto = require('crypto-random-string');
 var sendEmail = require('./helpers/emailHelpers').sendEmail
 var alumniSchema = require('../models/alumniSchema');
+var studentSchema = require('../models/studentSchema');
 
 const HASH_COST = 10;
 
@@ -58,7 +59,13 @@ router.post('/login', (req, res, next) => {
                 }
               );
             } else if (userRole === "STUDENT") {
-              // TODO: add login response for student here
+              const student = await studentSchema.findOne({email: user.email});
+              res.status(200).send(
+                {
+                  role: userRole,
+                  details: student
+                }
+              );
             } else {
               res.status(500).send({error: true, message: 'Could not determine role.'});
             }

@@ -15,8 +15,8 @@ const alumniSchema = new Schema(
     //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
     //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
     availabilities: [Date],
-    timeZone: {type: String, required: false},
-    zoomLink: String
+    timeZone: {type: Number, required: false}, // value for Date.getTimezoneOffset (Daylight Savings prevents this from being constant)
+    zoomLink: {type: String, required: false}
   }
 );
 
