@@ -108,10 +108,6 @@ async function main() {
     app.use('/request/', requestRouter);
     
     app.use('/alumni/', alumniRouter);
-    
-    app.use('/students/', (req, res, next) => {
-      next();
-    }, studentsRouter);
 
     app.use('/student/', studentsRouter);
 
