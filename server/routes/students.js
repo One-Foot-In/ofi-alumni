@@ -55,4 +55,14 @@ router.post('/', async (req, res, next) => {
     }
 });
 
+router.get('/one', async (req, res, next) => {
+    try {
+        const dbData = await studentSchema.findOne({email: req.body.email})
+        res.json({'result' : dbData});
+    } catch (e) {
+        console.log("Error: util#oneStudent", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
 module.exports = router;

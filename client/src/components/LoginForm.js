@@ -80,6 +80,8 @@ class LoginForm extends React.Component {
                     this.props.addUserDetails(result);
                     this.props.liftPayload(result);
                     this.props.login();
+                    localStorage.setItem('role', JSON.stringify(result.role))
+                    localStorage.setItem('profile', JSON.stringify(result.details))
                 });
             }
         }
