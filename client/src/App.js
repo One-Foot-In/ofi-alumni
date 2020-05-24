@@ -19,7 +19,6 @@ const isDevMode = () => {
 } 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
-const App_LS = `OFI_Alumni_App`
 
 export const PATHS = {
   root: "/",
@@ -150,8 +149,8 @@ class App extends Component {
   }
 
   async componentWillMount() {
-    var role = await localStorage.getItem('role');
-    var profile = await localStorage.getItem('profile')
+    var role;
+    var profile;
     this.setState({
       fetchingAuth: true
     }) 
@@ -161,9 +160,13 @@ class App extends Component {
         fetchingAuth: false
       });
       if (result && !result.error) {
+        var jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
+        role = parsedJWT.role;
+        profile = parsedJWT.details
         this.setState({
-          role: JSON.parse(role),
-          userDetails: JSON.parse(profile),
+          role: role,
+          userDetails: profile,
           loggedIn: true
         })
       } else {
@@ -199,8 +202,6 @@ class App extends Component {
       this.setState({
         role : details.userRole,
         userDetails: details.userToSend
-      }, () => {
-        localStorage.setItem(App_LS, JSON.stringify(this.state))
       });
       window.location.reload()
   }

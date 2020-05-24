@@ -39,21 +39,23 @@ router.post('/login', (req, res, next) => {
       } else if (!user) {
         next("User not found.")
       } else {
-        const payload = {
+        var payload = {
           email: user.email,
+          role: user.role,
           expires: Date.now() + parseInt(JWT_EXPIRATION_MS),
         };
         req.login(payload, {session: false}, async (error) => {
           if (error) {
             return next(error);
           }
-          const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
-          // set jwt-signed cookie on response
-          res.cookie('jwt', cookie);
           try {
             let userRole = user.role && user.role.toUpperCase()
             if (userRole === "ALUMNI") {
               const alumni = await alumniSchema.findOne({email: user.email});
+              payload.details = alumni
+              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              // set jwt-signed cookie on response
+              res.cookie('jwt', cookie);
               res.status(200).send(
                 {
                   role: userRole,
@@ -62,6 +64,10 @@ router.post('/login', (req, res, next) => {
               );
             } else if (userRole === "STUDENT") {
               const student = await studentSchema.findOne({email: user.email});
+              payload.details = student
+              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              // set jwt-signed cookie on response
+              res.cookie('jwt', cookie);
               res.status(200).send(
                 {
                   role: userRole,
