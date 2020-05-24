@@ -203,7 +203,6 @@ class App extends Component {
   }
 
   async logout() {
-    await localStorage.clear()
     await makeCall({}, '/logout', 'get');
     this.setState({
       loggedIn: false
