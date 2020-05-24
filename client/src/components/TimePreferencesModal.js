@@ -144,7 +144,7 @@ const timeSlotOptions = [
         text: '11pm - 12am'
     },
 ]
-export default class PreferencesModal extends Component {
+export default class TimePreferencesModal extends Component {
     constructor(props){
         super(props)
         this.state = {
@@ -224,7 +224,7 @@ export default class PreferencesModal extends Component {
             <Modal
                 open={this.props.modalOpen}
             >
-                <Modal.Header>Select your availabilities!</Modal.Header>
+                <Modal.Header>Select your time availabilities!</Modal.Header>
                 <Modal.Content>
                     <Segment>
                         <Header>Pick a day and your availabilities</Header>
