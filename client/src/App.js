@@ -12,6 +12,8 @@ import Navbar from './components/Navbar'
 import Profile from './components/Profile'
 
 import * as actions from './redux/actions'
+// TODO: Remove once PreferencesModal can be embedded into Profile
+import PreferencesModal from './components/PreferencesModal';
 
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
 const isDevMode = () => {
@@ -260,6 +262,9 @@ class App extends Component {
                 <Segment>
                   Count in store is {this.props.count ? this.props.count : 0}
                 </Segment>
+                <PreferencesModal
+                  modalOpen={true}
+                />
               </>
             }
           />
