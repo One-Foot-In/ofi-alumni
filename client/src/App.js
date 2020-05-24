@@ -49,29 +49,29 @@ const mapDispatchToProps = dispatch => ({
 */
 
 // TODO extract Routes into this higher-order component
-function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, activeItem) {
-  return class extends React.Component {
-    constructor(props) {
-      super(props)
-    }
-    render() {
-      return (
-        <Route exact path={routePath} render={(props) => 
-            isLoggedIn ? 
-            <>
-                <Navbar
-                    navItems={navItems}
-                    activeItem={activeItem}
-                />
-                <RouterComponent {...this.props} />
-            </> :
-            <Redirect to={'/login'} />
-          }
-        />
-      )
-    }
-  }
-}
+// function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, activeItem) {
+//   return class extends React.Component {
+//     constructor(props) {
+//       super(props)
+//     }
+//     render() {
+//       return (
+//         <Route exact path={routePath} render={(props) => 
+//             isLoggedIn ? 
+//             <>
+//                 <Navbar
+//                     navItems={navItems}
+//                     activeItem={activeItem}
+//                 />
+//                 <RouterComponent {...this.props} />
+//             </> :
+//             <Redirect to={'/login'} />
+//           }
+//         />
+//       )
+//     }
+//   }
+// }
 
 const alumniNavBarItems = () => {
   let navBarItems = [
@@ -151,6 +151,7 @@ class App extends Component {
   async componentWillMount() {
     var role;
     var profile;
+    var email;
     this.setState({
       fetchingAuth: true
     }) 
@@ -163,7 +164,8 @@ class App extends Component {
         var jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
         role = parsedJWT.role;
-        profile = parsedJWT.details
+        email = parsedJWT.email;
+        profile = await this.fetchProfile(role, email);
         this.setState({
           role: role,
           userDetails: profile,
@@ -182,6 +184,16 @@ class App extends Component {
         });
         console.log("Error: App#componentDidMount", e)
     }
+  }
+
+  async fetchProfile(role, email) {
+    let result;
+    if (role === 'STUDENT') {
+      result = await makeCall({email: email}, '/student/one', 'post')
+    } else {
+      result = await makeCall({email: email}, '/alumni/one', 'post')
+    }
+    return result.result
   }
 
   login() {

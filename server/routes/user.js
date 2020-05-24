@@ -3,7 +3,7 @@ var router = express.Router();
 var userSchema = require('../models/userSchema');
 require('mongoose').Promise = global.Promise
 
-router.get('/one', async (req, res, next) => {
+router.post('/one', async (req, res, next) => {
     try {
         const dbData = await userSchema.findOne({email: req.body.email})
         res.json({'result' : dbData});

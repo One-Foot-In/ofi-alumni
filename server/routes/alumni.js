@@ -78,7 +78,7 @@ router.get('/all', async (req, res, next) => {
     }
 });
 
-router.get('/one', async (req, res, next) => {
+router.post('/one', async (req, res, next) => {
     try {
         const dbData = await alumniSchema.findOne({email: req.body.email})
         res.json({'result' : dbData});
