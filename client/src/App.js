@@ -264,6 +264,16 @@ class App extends Component {
                 </Segment>
                 <TimePreferencesModal
                   modalOpen={true}
+                  timePreferences={
+                    [
+                      {
+                        id: 'Sunday-400',
+                        day: 'Sunday',
+                        time: 400,
+                        text: `Sunday (4am - 5am)`
+                      }
+                    ]
+                  }
                 />
               </>
             }

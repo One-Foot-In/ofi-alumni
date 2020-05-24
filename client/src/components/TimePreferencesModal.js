@@ -5,13 +5,18 @@ import { makeCall } from "../apis";
 
 /*
 props:
-- modalOpen: boolean
-- closeModal: ()
-- timePreferences: [
-    {day: 'Sunday', startTime: 700}
-    ...
-]
-- topicPreferences: []
+    - modalOpen: boolean
+    - closeModal: ()
+    - timePreferences: [
+        {
+            id: 'Sunday-400',
+            day: 'Sunday',
+            time: 400,
+            text: `Sunday (4am - 5am)`
+        }
+        ...
+    ]
+    - email
 */
 
 const dayOptions = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -149,14 +154,70 @@ export default class TimePreferencesModal extends Component {
         super(props)
         this.state = {
             day: '',
-            selectedTimes: [],
+            selectedTimes: this.props.timePreferences || [],
             uncommittedTimesForCurrentDay: [],
+            submitting: false
         }
         this.handleDayChange = this.handleDayChange.bind(this)
         this.getSelectedTimes = this.getSelectedTimes.bind(this)
         this.removeSelectedTime = this.removeSelectedTime.bind(this)
         this.handleTimeSlotChange = this.handleTimeSlotChange.bind(this)
         this.commitAvailability = this.commitAvailability.bind(this)
+        this.submitPreferences = this.submitPreferences.bind(this)
+        this.hasNewPreferences = this.hasNewPreferences.bind(this)
+    }
+
+    hasNewPreferences() {
+        let oldTimeIds = this.props.timePreferences && this.props.timePreferences.map(time => time.id)
+        let newTimeIds = this.state.selectedTimes.map(time => time.id)
+        if (newTimeIds.length !== oldTimeIds.length) {
+            return true
+        }
+        return newTimeIds.filter(time => !oldTimeIds.includes(time)).length
+    }
+
+    submitPreferences(e) {
+        e.preventDefault()
+        this.setState({
+            submitting: true
+        }, async () => {
+            let payload = {
+                selectedTimes: this.state.selectedTimes,
+                email: this.props.email
+            }
+            try {
+                // TODO: Need to add end-point
+                const result = await makeCall(payload, '/alumni/updateTimePreferences', 'post')
+                if (!result || result.error) {
+                    this.setState({
+                        submitting: false
+                    }, () => {
+                        swal({
+                            title: "Error!",
+                            text: "There was an error updating your time preferences, please try again.",
+                            icon: "error",
+                        });
+                    })
+                } else {
+                    this.setState({
+                        submitting: false
+                    }, () => {
+                        swal({
+                            title: "Done!",
+                            text: "Your time preferences were successfully updated!",
+                            icon: "success",
+                        })
+                    })
+                    
+                }
+            } catch (e) {
+                this.setState({
+                    submitting: false
+                }, () => {
+                    console.log("Error: TimePreferencesModal#submitPreferences", e);
+                })
+            }
+        })
     }
 
     handleDayChange(e, {value}) {
@@ -273,8 +334,15 @@ export default class TimePreferencesModal extends Component {
                     </Segment>
                 </Modal.Content>
                 <Modal.Actions>
+                    <Button
+                        primary
+                        disabled={!this.hasNewPreferences()}
+                        onClick={this.submitPreferences}
+                    >
+                        Submit New Preferences
+                    </Button>
                     <Button onClick={this.closeModal}>
-                        Done
+                        Close
                     </Button>
                 </Modal.Actions>
             </Modal>
