@@ -207,7 +207,8 @@ export default class TimePreferencesModal extends Component {
     getSelectedTimes() {
         return this.state.selectedTimes && this.state.selectedTimes.map(time => {
             return (
-            <Label 
+            <Label
+                key={time.text}
                 style={{'margin': '2px'}}
             >
                 {time.text}
@@ -246,18 +247,22 @@ export default class TimePreferencesModal extends Component {
                             value={this.state.day}
                             name='day'
                         />
-                        <Dropdown
-                            style={{ 'margin': '5px'}}
-                            placeholder='Time Slot'
-                            fluid
-                            multiple
-                            selection
-                            disabled={!this.state.day}
-                            options={timeSlotOptions}
-                            value={this.state.uncommittedTimesForCurrentDay}
-                            onChange={this.handleTimeSlotChange}
-                            name='timeSlots'
-                        />
+                        {
+                            this.state.day ? 
+                            <Dropdown
+                                style={{ 'margin': '5px'}}
+                                placeholder='Time Slot'
+                                fluid
+                                multiple
+                                selection
+                                disabled={!this.state.day}
+                                options={timeSlotOptions}
+                                value={this.state.uncommittedTimesForCurrentDay}
+                                onChange={this.handleTimeSlotChange}
+                                name='timeSlots'
+                            /> :
+                            null
+                        }
                         <Button
                             primary
                             onClick={this.commitAvailability}
