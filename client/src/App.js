@@ -151,7 +151,7 @@ class App extends Component {
   async componentWillMount() {
     var role;
     var profile;
-    var email;
+    var id;
     this.setState({
       fetchingAuth: true
     }) 
@@ -164,8 +164,8 @@ class App extends Component {
         var jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
         role = parsedJWT.role;
-        email = parsedJWT.email;
-        profile = await this.fetchProfile(role, email);
+        id = parsedJWT.id;
+        profile = await this.fetchProfile(role, id);
         this.setState({
           role: role,
           userDetails: profile,
@@ -186,12 +186,12 @@ class App extends Component {
     }
   }
 
-  async fetchProfile(role, email) {
+  async fetchProfile(role, id) {
     let result;
     if (role === 'STUDENT') {
-      result = await makeCall({email: email}, '/student/one', 'post')
+      result = await makeCall({}, ('/student/'+id), 'get')
     } else {
-      result = await makeCall({email: email}, '/alumni/one', 'post')
+      result = await makeCall({}, ('/alumni/'+id), 'get')
     }
     return result.result
   }

@@ -3,9 +3,9 @@ var router = express.Router();
 var userSchema = require('../models/userSchema');
 require('mongoose').Promise = global.Promise
 
-router.post('/one', async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
     try {
-        const dbData = await userSchema.findOne({email: req.body.email})
+        const dbData = await userSchema.findOne({_id: req.params.id})
         res.json({'result' : dbData});
     } catch (e) {
         console.log("Error: util#oneUser", e);

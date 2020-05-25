@@ -55,9 +55,9 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.post('/one', async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
     try {
-        const dbData = await studentSchema.findOne({email: req.body.email})
+        const dbData = await studentSchema.findOne({_id: req.params.id})
         res.json({'result' : dbData});
     } catch (e) {
         console.log("Error: util#oneStudent", e);
