@@ -18,7 +18,7 @@ const isDevMode = () => {
   return !!process.env.REACT_APP_DEV_MODE
 } 
 export const ALUMNI = "ALUMNI"
-const App_LS = `OFI_Alumni_App`
+export const STUDENT = "STUDENT"
 
 export const PATHS = {
   root: "/",
@@ -49,29 +49,29 @@ const mapDispatchToProps = dispatch => ({
 */
 
 // TODO extract Routes into this higher-order component
-function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, activeItem) {
-  return class extends React.Component {
-    constructor(props) {
-      super(props)
-    }
-    render() {
-      return (
-        <Route exact path={routePath} render={(props) => 
-            isLoggedIn ? 
-            <>
-                <Navbar
-                    navItems={navItems}
-                    activeItem={activeItem}
-                />
-                <RouterComponent {...this.props} />
-            </> :
-            <Redirect to={'/login'} />
-          }
-        />
-      )
-    }
-  }
-}
+// function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, activeItem) {
+//   return class extends React.Component {
+//     constructor(props) {
+//       super(props)
+//     }
+//     render() {
+//       return (
+//         <Route exact path={routePath} render={(props) => 
+//             isLoggedIn ? 
+//             <>
+//                 <Navbar
+//                     navItems={navItems}
+//                     activeItem={activeItem}
+//                 />
+//                 <RouterComponent {...this.props} />
+//             </> :
+//             <Redirect to={'/login'} />
+//           }
+//         />
+//       )
+//     }
+//   }
+// }
 
 const alumniNavBarItems = () => {
   let navBarItems = [
@@ -106,6 +106,32 @@ const alumniNavBarItems = () => {
   return navBarItems;
 }
 
+const studentNavBarItems = () => {
+  let navBarItems = [
+    {
+        id: 'home',
+        name: 'Home',
+        navLink: '/'
+    },
+    {
+        id: 'profile',
+        name: 'Profile',
+        navLink: '/profile'
+    },
+    {
+        id: 'alumniDirectory',
+        name: 'Alumni Directory',
+        navLink: '/alumniDirectory'
+    },
+    {
+        id: 'schedulings',
+        name: 'Schedulings',
+        navLink: '/schedulings'
+    }
+  ]
+  return navBarItems;
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -113,7 +139,7 @@ class App extends Component {
       loggedIn: false,
       fetchingAuth: true,
       role: null,
-      userDetails: {},
+      userDetails: {}
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
@@ -122,43 +148,52 @@ class App extends Component {
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
   }
 
-  componentDidMount() {
+  async componentWillMount() {
+    var role;
+    var profile;
+    var id;
     this.setState({
       fetchingAuth: true
-    }, async () => {
-      try {
-        const result = await makeCall({}, '/isLoggedIn', 'get')
+    }) 
+    try {
+      const result = await makeCall({}, '/isLoggedIn', 'get')
+      this.setState({
+        fetchingAuth: false
+      });
+      if (result && !result.error) {
+        var jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
+        role = parsedJWT.role;
+        id = parsedJWT.id;
+        profile = await this.fetchProfile(role, id);
         this.setState({
-          fetchingAuth: false
+          role: role,
+          userDetails: profile,
+          loggedIn: true
+        })
+      } else {
+        this.setState({
+          loggedIn: false,
+          fetchingAuth: false,
         });
-        if (result && !result.error) {
-          this.setState({
-            loggedIn: true
-          });
-        } else {
-          this.setState({
-            loggedIn: false,
-            fetchingAuth: false,
-          });
-        }
-      } catch (e) {
-          this.setState({
-            loggedIn: false,
-            fetchingAuth: false,
-          });
-          console.log("Error: App#componentDidMount", e)
       }
-    })
-    const persistedState = JSON.parse(localStorage.getItem(App_LS));
-    if (persistedState) {
-      try {
-        const role = persistedState.role;
-        const userDetails = persistedState.userDetails;
-        this.setState({role, userDetails});
-      } catch (e) {
-        console.log(`Could not get fetch state from local storage for ${App_LS}`, e);
-      }
+    } catch (e) {
+        this.setState({
+          loggedIn: false,
+          fetchingAuth: false,
+        });
+        console.log("Error: App#componentDidMount", e)
     }
+  }
+
+  async fetchProfile(role, id) {
+    let result;
+    if (role === 'STUDENT') {
+      result = await makeCall({}, ('/student/'+id), 'get')
+    } else {
+      result = await makeCall({}, ('/alumni/'+id), 'get')
+    }
+    return result.result
   }
 
   login() {
@@ -178,9 +213,8 @@ class App extends Component {
       this.setState({
         role : details.userRole,
         userDetails: details.userToSend
-      }, () => {
-        localStorage.setItem(App_LS, JSON.stringify(this.state))
       });
+      window.location.reload()
   }
 
   renderLoggedInRoutes(role) {
@@ -195,7 +229,7 @@ class App extends Component {
                           navItems={alumniNavBarItems()}
                           activeItem={'home'}
                       />
-                      <div> Home! Welcome {this.props.details && this.props.details.name} ({this.props.role})</div>
+                      <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -209,7 +243,7 @@ class App extends Component {
                       />
                       <Profile
                         isViewOnly={false}
-                        imageURL={this.props.details && this.props.details.imageURL}
+                        imageURL={this.state.userDetails && this.state.userDetails.imageURL}
                         name={this.props.details && this.props.details.name}
                         college={this.props.details && this.props.details.college}
                         location={this.props.details && this.props.details.location}
@@ -265,12 +299,87 @@ class App extends Component {
           />
           </>
         )
+      case STUDENT:
+        return (
+          <>
+          <Route exact path={`/`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={studentNavBarItems()}
+                          activeItem={'home'}
+                      />
+                      <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/profile`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={studentNavBarItems()}
+                          activeItem={'profile'}
+                      />
+                      <Profile
+                        isViewOnly={false}
+                        imageURL={this.state.userDetails && this.state.userDetails.imageURL}
+                        name={this.props.details && this.props.details.name}
+                        college={this.props.details && this.props.details.college}
+                        location={this.props.details && this.props.details.location}
+                        company={this.props.details && this.props.details.company}
+                        jobTitle={this.props.details && this.props.details.jobTitle}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/alumniDirectory`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={studentNavBarItems()}
+                          activeItem={'alumniDirectory'}
+                      />
+
+                      <AlumniDirectory isAlumniView={false}/>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/schedulings`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={studentNavBarItems()}
+                          activeItem={'schedulings'}
+                      />
+                      <div> Schedulings! </div>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          </>
+        )
       default:
-        return null
+        return (
+          <Route exact path={`/`} render={(props) => 
+            this.state.loggedIn ?
+            <>
+                <Navbar
+                    navItems={studentNavBarItems()}
+                    activeItem={'home'}
+                />
+                <div> Home! Welcome!</div>
+            </> :
+            <Redirect to={"/login"}/>
+            }
+          />
+        )
     }
   }
 
-  renderScreens() {
+  renderScreens(role) {
     return (
         <Switch>
           <Route exact path={PATHS.register} render={(props) => 
@@ -285,7 +394,7 @@ class App extends Component {
               />
             }
           />
-          {this.renderLoggedInRoutes(ALUMNI)}
+          {this.renderLoggedInRoutes(role)}
           <Route>
               <Segment>
                   This page does not exist!
@@ -324,7 +433,7 @@ class App extends Component {
               email={this.state.userDetails && this.state.userDetails.email}
             />
             <Container>
-              {this.renderScreens()}
+              {this.renderScreens(this.state.role)}
             </Container>
             </>
           }
