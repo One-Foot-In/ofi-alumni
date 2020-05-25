@@ -39,14 +39,18 @@ const timezoneUtil = {
         }
         return timeSlots.map( timeSlot => {
             let newTimeRaw = timeSlot.time + (timezone * (-1))
+            let newTime = (2400 + newTimeRaw) % 2400
             if (newTimeRaw < 0) {
                 // move day backward
                 timeSlot.day = getPrevDay(timeSlot.day)
-            } else if ((Math.floor((Math.abs(newTimeRaw) / 2400)) > 0)) {
+            } else if (
+                (Math.floor((Math.abs(newTimeRaw) / 2400)) > 0) ||
+                (newTime === 0 && timezone < 0)
+            ) {
                 // move day forward
                 timeSlot.day = getNextDay(timeSlot.day)
             }
-            timeSlot.time = (2400 + newTimeRaw) % 2400
+            timeSlot.time = newTime
             timeSlot.id = `${timeSlot.day}-${(timeSlot.time).toString()}`
             delete timeSlot.text
             return timeSlot
@@ -65,14 +69,18 @@ const timezoneUtil = {
             // if timezone is positive, we need to add offset
             // if timezone is negative, we need to substract offset 
             let newTimeRaw = timeSlot.time + timezone
+            let newTime = (2400 + newTimeRaw) % 2400
             if (newTimeRaw < 0) {
                 // move day backward
                 timeSlot.day = getPrevDay(timeSlot.day)
-            } else if (Math.floor((Math.abs(newTimeRaw) / 2400)) > 0) {
+            } else if (
+                Math.floor((Math.abs(newTimeRaw) / 2400)) > 0 ||
+                newTime === 0 && timezone > 0
+            ) {
                 // move day forward
                 timeSlot.day = getNextDay(timeSlot.day)
             }
-            timeSlot.time = (2400 + newTimeRaw) % 2400
+            timeSlot.time = newTime
             timeSlot.id = `${timeSlot.day}-${(timeSlot.time).toString()}`
             delete timeSlot.text
             return timeSlot

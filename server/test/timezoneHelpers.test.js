@@ -174,6 +174,44 @@ describe("test timezoneHelpers#stripTimezone", () => {
     ]
     assert.deepEqual(timezoneHelpers.stripTimezone(timeSlots, 0), expectedTimeSlots);
   });
+
+  it("does not change day when time brought to zero with positive timezone", function() {
+    let timeSlots = [
+      {
+        id: 'Sunday-400',
+        day: 'Sunday',
+        time: 400,
+        text: 'Sunday (4am - 5am)'
+      }
+    ]
+    let expectedTimeSlots = [
+      {
+        id: 'Sunday-0',
+        day: 'Sunday',
+        time: 0,
+      }
+    ]
+    assert.deepEqual(timezoneHelpers.stripTimezone(timeSlots, 400), expectedTimeSlots);
+  });
+
+  it("moves day forward when time brought to zero with negative timezone", function() {
+    let timeSlots = [
+      {
+        id: 'Sunday-2100',
+        day: 'Sunday',
+        time: 2100,
+        text: 'Sunday (9pm - 10m)'
+      }
+    ]
+    let expectedTimeSlots = [
+      {
+        id: 'Monday-0',
+        day: 'Monday',
+        time: 0,
+      }
+    ]
+    assert.deepEqual(timezoneHelpers.stripTimezone(timeSlots, -300), expectedTimeSlots);
+  });
 });
 
 describe("test timezoneHelpers#applyTimezone", () => {
@@ -348,5 +386,43 @@ describe("test timezoneHelpers#applyTimezone", () => {
       }
     ]
     assert.deepEqual(timezoneHelpers.applyTimezone(timeSlots, 0), expectedTimeSlots);
+  });
+
+  it("does not change day when time brought to zero with negative timezone", function() {
+    let timeSlots = [
+      {
+        id: 'Sunday-400',
+        day: 'Sunday',
+        time: 400,
+        text: 'Sunday (4am - 5am)'
+      }
+    ]
+    let expectedTimeSlots = [
+      {
+        id: 'Sunday-0',
+        day: 'Sunday',
+        time: 0,
+      }
+    ]
+    assert.deepEqual(timezoneHelpers.applyTimezone(timeSlots, -400), expectedTimeSlots);
+  });
+
+  it("moves day forward when time brought to zero with positive timezone", function() {
+    let timeSlots = [
+      {
+        id: 'Sunday-2100',
+        day: 'Sunday',
+        time: 2100,
+        text: 'Sunday (9pm - 10m)'
+      }
+    ]
+    let expectedTimeSlots = [
+      {
+        id: 'Monday-0',
+        day: 'Monday',
+        time: 0,
+      }
+    ]
+    assert.deepEqual(timezoneHelpers.applyTimezone(timeSlots, 300), expectedTimeSlots);
   });
 });
