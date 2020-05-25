@@ -55,4 +55,14 @@ router.post('/', async (req, res, next) => {
     }
 });
 
+router.get('/:id', async (req, res, next) => {
+    try {
+        const dbData = await studentSchema.findOne({_id: req.params.id})
+        res.json({'result' : dbData});
+    } catch (e) {
+        console.log("Error: util#oneStudent", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
 module.exports = router;
