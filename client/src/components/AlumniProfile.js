@@ -11,6 +11,7 @@ props:
     - location: string
     - company: string
     - jobTitle: string
+    - email: string
 - isViewOnly: bool
 */
 export default class AlumniProfile extends Component {

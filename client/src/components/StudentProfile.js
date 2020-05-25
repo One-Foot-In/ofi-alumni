@@ -7,10 +7,8 @@ props:
 - details: Object containing:
     - imageURL: string
     - name: string
-    - college: string
-    - location: string
-    - company: string
-    - jobTitle: string
+    - grade: string
+    - email: string
 - isViewOnly: bool
 */
 export default class StudentProfile extends Component {
