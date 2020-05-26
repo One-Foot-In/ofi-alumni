@@ -20,7 +20,9 @@ export default class AlumniProfile extends Component {
         const isViewOnly = this.props.isViewOnly;
 
         const linkedInUpdate = (
-            <LinkedInUpdate/>
+            <LinkedInUpdate
+                email={details.email}
+            />
         )
         const imageUpdate = (
             <Button floated="right" basic color="blue">
