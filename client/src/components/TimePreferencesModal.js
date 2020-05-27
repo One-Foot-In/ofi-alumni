@@ -11,7 +11,7 @@ const dayOptions = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
             value: day
         }
     })
-const timeSlotOptions = [
+export const timeSlotOptions = [
     {
         key: 'slot1',
         value: 0,
