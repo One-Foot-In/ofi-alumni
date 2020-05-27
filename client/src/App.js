@@ -9,7 +9,8 @@ import AlumniDirectory from './components/AlumniDirectory'
 import Register from './screens/Register';
 import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
-import Profile from './components/Profile'
+import AlumniProfile from './components/AlumniProfile'
+import StudentProfile from './components/StudentProfile'
 
 import * as actions from './redux/actions'
 // TODO: Remove once TimePreferencesModal can be embedded into Profile
@@ -243,14 +244,9 @@ class App extends Component {
                           navItems={alumniNavBarItems()}
                           activeItem={'profile'}
                       />
-                      <Profile
+                      <AlumniProfile
                         isViewOnly={false}
-                        imageURL={this.state.userDetails && this.state.userDetails.imageURL}
-                        name={this.props.details && this.props.details.name}
-                        college={this.props.details && this.props.details.college}
-                        location={this.props.details && this.props.details.location}
-                        company={this.props.details && this.props.details.company}
-                        jobTitle={this.props.details && this.props.details.jobTitle}
+                        details={this.state.userDetails}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -336,14 +332,9 @@ class App extends Component {
                           navItems={studentNavBarItems()}
                           activeItem={'profile'}
                       />
-                      <Profile
+                      <StudentProfile
                         isViewOnly={false}
-                        imageURL={this.state.userDetails && this.state.userDetails.imageURL}
-                        name={this.props.details && this.props.details.name}
-                        college={this.props.details && this.props.details.college}
-                        location={this.props.details && this.props.details.location}
-                        company={this.props.details && this.props.details.company}
-                        jobTitle={this.props.details && this.props.details.jobTitle}
+                        details={this.state.userDetails}
                       />
                   </> :
                   <Redirect to={"/login"}/>

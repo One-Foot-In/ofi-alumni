@@ -4,26 +4,22 @@ import LinkedInUpdate from "./LinkedInUpdate";
 
 /*
 props:
-- imageURL: string
-- name: string
-- college: string
-- location: string
-- company: string
-- jobTitle: string
+- details: Object containing:
+    - imageURL: string
+    - name: string
+    - grade: string
+    - email: string
 - isViewOnly: bool
 */
-export default class Profile extends Component {
+export default class StudentProfile extends Component {
     render(){
-        const imageURL = this.props.imageURL;
-        const name = this.props.name;
-        const college = this.props.college;
-        const location = this.props.location;
-        const company = this.props.company;
-        const jobTitle = this.props.jobTitle;
+        const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
 
         const linkedInUpdate = (
-            <LinkedInUpdate/>
+            <LinkedInUpdate
+                email={details.email}
+            />
         )
         const imageUpdate = (
             <Button floated="right" basic color="blue">
@@ -50,16 +46,12 @@ export default class Profile extends Component {
                     centered
                     rounded
                     size="medium"
-                    src={imageURL}
+                    src={details.imageURL}
                 />
                 <Card.Content>
-                    <Card.Header>{name || 'Unavailable'}</Card.Header>
-                    <Card.Meta>{jobTitle || 'Unavailable'}</Card.Meta>
+                    <Card.Header>{details.name || 'Unavailable'}</Card.Header>
 
-                    <Card.Description>College: {college || 'Unavailable'}</Card.Description>
-                    <Card.Description>Location: {location || 'Unavailable'}</Card.Description>
-                    <Card.Description>Company: {company || 'Unavailable'}</Card.Description>
-                    
+                    <Card.Description>Grade: {details.grade || 'Unavailable'}</Card.Description>
                 </Card.Content>
                 {canUpdate}
             </Card>
