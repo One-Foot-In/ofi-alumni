@@ -4,6 +4,7 @@ var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
+var timezoneHelpers = require("../helpers/timezoneHelpers")
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -84,6 +85,19 @@ router.get('/:id', async (req, res, next) => {
         res.json({'result' : dbData});
     } catch (e) {
         console.log("Error: util#oneAlumni", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
+router.patch('/timePreferences/:id', async (req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        const timezoneAgnosticPreferences = timezoneHelpers.stripTimezone(req.body.timePreferences, alumni.timeZone || 0)
+        alumni.availabilities = timezoneAgnosticPreferences
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's time preferences"})
+    } catch (e) {
+        console.log("Error: util#timePreferences", e);
         res.status(500).send({'error' : e});
     }
 });
