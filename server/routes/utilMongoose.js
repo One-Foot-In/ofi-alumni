@@ -108,7 +108,7 @@ const createStudent = async (_email, _name, _picLink, timezone) => {
             name: name,
             email: email,
             grade: grade,
-            timeZone: timezone
+            timeZone: timezone,
             //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
             //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
             imageURL: picLink

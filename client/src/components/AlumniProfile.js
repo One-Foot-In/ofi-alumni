@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
 import LinkedInUpdate from "./LinkedInUpdate";
+import TimePreferencesModal from './TimePreferencesModal';
 
 /*
 props:
 - details: Object containing:
+    - _id: string
     - imageURL: string
     - name: string
     - college: string
@@ -12,9 +14,28 @@ props:
     - company: string
     - jobTitle: string
     - email: string
+    - availabilities
 - isViewOnly: bool
 */
 export default class AlumniProfile extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            preferencesModalOpen: false
+        }
+        this.openPreferencesModal = this.openPreferencesModal.bind(this)
+        this.closePreferencesModal = this.closePreferencesModal.bind(this)
+    }
+    closePreferencesModal() {
+        this.setState({
+            preferencesModalOpen: false
+        })
+    }
+    openPreferencesModal() {
+        this.setState({
+            preferencesModalOpen: true
+        })
+    }
     render(){
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
@@ -29,12 +50,31 @@ export default class AlumniProfile extends Component {
                 Update Image
             </Button>
         )
+        const timeAvailabilitiesUpdate = (
+            <>
+            <Button
+                floated='right'
+                basic
+                color="blue"
+                onClick={this.openPreferencesModal}
+            >
+                Update Time Availabilities
+            </Button>
+            <TimePreferencesModal
+                modalOpen={this.state.preferencesModalOpen}
+                timePreferences={details.availabilities || []}
+                closeModal={this.closePreferencesModal}
+                id={details._id}
+            />
+            </>
+        )
         var canUpdate;
 
         if (!isViewOnly) {
             canUpdate = (
                 <Card.Content extra>
                     {linkedInUpdate}
+                    {timeAvailabilitiesUpdate}
                     {imageUpdate}
                 </Card.Content>
             )

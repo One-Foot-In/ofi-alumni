@@ -206,6 +206,8 @@ export default class TimePreferencesModal extends Component {
                             title: "Done!",
                             text: "Your time preferences were successfully updated!",
                             icon: "success",
+                        }).then(() => {
+                            this.props.closeModal();
                         })
                     })
                     
@@ -341,7 +343,7 @@ export default class TimePreferencesModal extends Component {
                     >
                         Submit New Preferences
                     </Button>
-                    <Button onClick={this.closeModal}>
+                    <Button onClick={this.props.closeModal}>
                         Close
                     </Button>
                 </Modal.Actions>
