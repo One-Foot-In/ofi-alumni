@@ -105,6 +105,7 @@ const createStudent = async (_email, _name, _picLink) => {
             grade: grade,
             //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
             //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
+            imageURL: picLink
         }
     )
     const user_instance = new userSchema(
