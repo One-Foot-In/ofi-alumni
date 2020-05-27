@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Segment, Dropdown, Card, Image, Button } from 'semantic-ui-react';
+import { Segment, Dropdown, Card, Image, Button, Modal, Header, Grid } from 'semantic-ui-react';
 import { makeCall } from '../apis'
-import { Profiler } from 'react';
+import AlumniProfile from './AlumniProfile'
 
 export default class AlumniVerification extends Component {
     state={
@@ -14,37 +14,49 @@ export default class AlumniVerification extends Component {
     async componentWillMount(){
         let result = await this.getEntries()
         this.setState({
-            entries: result.unverified
+            entries: result.unapproved.reverse()
         })
         this.populateDropdownOptions()
         this.createDisplay()
     }
 
     getEntries() {
-        return makeCall(null, '/alumni/unverified', 'get').catch(e => console.log(e))
+        return makeCall(null, '/alumni/unapproved', 'get').catch(e => console.log(e))
     }
 
     constructProfile(profile) {
         return (
             <div style={{padding: 10}} key={profile._id}>
                 <Card fluid>
-                    <Card.Content
-                        data-id={profile._id}
-                    >
-                        <Image
-                        floated='left'
-                        size='mini'
-                        src={profile.imageURL}
-                        />
-                        <Card.Header>{profile.name}</Card.Header>
-                        <Card.Meta>Graduated {profile.gradYear}</Card.Meta>
-                    </Card.Content>
+                    <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
+                        <Card.Content data-id={profile._id}>
+                            <Image
+                            floated='left'
+                            size='mini'
+                            src={profile.imageURL}
+                            />
+                            <Card.Header>{profile.name}</Card.Header>
+                            <Card.Meta>Graduated {profile.gradYear}</Card.Meta>
+                        </Card.Content>
+                    }>
+                        <Header>
+                            <Grid>
+                                <Grid.Row columns={2}>
+                                    <Grid.Column>Details for {profile.name}</Grid.Column>
+                                    <Grid.Column textAlign='right'>Graduated: {profile.gradYear}</Grid.Column>
+                                </Grid.Row>
+                            </Grid>
+                        </Header>
+                        <Modal.Content>
+                            <AlumniProfile details={profile} isViewOnly={true} />
+                        </Modal.Content>
+                    </Modal>
                     <Card.Content extra>
                         <Button 
-                            basic color='green'
-                            onClick={this.handleClick.bind(this)}
-                            data-id={profile._id}
-                            fluid
+                        inverted color='green'
+                        onClick={this.handleClick.bind(this)}
+                        data-id={profile._id}
+                        fluid
                         >
                             Approve
                         </Button>
@@ -92,11 +104,10 @@ export default class AlumniVerification extends Component {
         alert(e.currentTarget.dataset.id)
     }
 
-
     render(){
         return (
             <>
-            <Segment inverted color='red' secondary>Please only verify individuals that you know personally!</Segment>
+            <Segment inverted color='blue' tertiary>Please only verify individuals that you know personally!</Segment>
             <Dropdown 
                 value={this.state.dropdownValue}
                 fluid

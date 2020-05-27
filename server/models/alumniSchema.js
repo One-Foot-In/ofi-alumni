@@ -17,7 +17,7 @@ const alumniSchema = new Schema(
     availabilities: [Date],
     timeZone: {type: Number, required: false}, // value for Date.getTimezoneOffset (Daylight Savings prevents this from being constant)
     zoomLink: {type: String, required: false},
-    verified: {type: Boolean, default: false}
+    approved: {type: Boolean, default: false}
   }
 );
 

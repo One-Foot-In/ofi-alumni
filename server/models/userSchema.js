@@ -8,8 +8,7 @@ const userSchema = new Schema(
     passwordHash: {type: String, required: true},
     verificationToken: {type: String, required: true},
     role: {type: String, required: true},
-    emailVerified: {type: Boolean, required: true},
-    approved: {type: Boolean, required: true}
+    emailVerified: {type: Boolean, required: true}
   }
 );
 

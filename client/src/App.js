@@ -75,7 +75,7 @@ const mapDispatchToProps = dispatch => ({
 //   }
 // }
 
-var alumniNavBarItems = (verified) => {
+var alumniNavBarItems = (approved) => {
   let navBarItems = [
     {
         id: 'home',
@@ -98,7 +98,7 @@ var alumniNavBarItems = (verified) => {
         navLink: '/requests'
     }
   ]
-  if (verified) {
+  if (approved) {
     navBarItems.push({
         id: 'verification',
         name: 'Verify Alumni',
@@ -147,7 +147,7 @@ class App extends Component {
     this.state = {
       loggedIn: false,
       fetchingAuth: true,
-      verified: Boolean,
+      approved: false,
       role: null,
       userDetails: {}
     };
@@ -179,7 +179,7 @@ class App extends Component {
         this.setState({
           role: role,
           userDetails: profile,
-          verified: profile.verified,
+          approved: profile.approved,
           loggedIn: true
         })
       } else {
@@ -237,7 +237,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems(this.state.verified)}
+                          navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'home'}
                       />
                       <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
@@ -249,7 +249,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems(this.state.verified)}
+                          navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'profile'}
                       />
                       <AlumniProfile
@@ -264,7 +264,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems(this.state.verified)}
+                          navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'alumniDirectory'}
                       />
 
@@ -277,7 +277,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={(alumniNavBarItems(this.state.verified))}
+                          navItems={(alumniNavBarItems(this.state.approved))}
                           activeItem={'requests'}
                       />
                       <div> Requests! </div>
@@ -285,13 +285,13 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
-          { this.state.userDetails.verified &&
+          { this.state.userDetails.approved &&
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
-                    this.state.verified ? 
+                    this.state.approved ? 
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems(this.state.verified)}
+                          navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'verification'}
                       />
                       <AlumniVerification gradYear={this.state.userDetails.gradYear}/>
@@ -299,7 +299,7 @@ class App extends Component {
                   :<Redirect to={"/login"}/>
               }
           />
-          }    
+          }
           <Route exact path={`/playground`} render={(props) => 
               <>
                 <Navbar

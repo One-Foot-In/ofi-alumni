@@ -42,7 +42,7 @@ router.post('/', async (req, res, next) => {
                 availabilities: availabilities,
                 timeZone: timeZone,
                 zoomLink: zoomLink,
-                verified: true
+                approved: true
             }
         )
         const user_instance = new userSchema(
@@ -79,12 +79,12 @@ router.get('/all', async (req, res, next) => {
     }
 });
 
-router.get('/unverified/', async(req, res, next) => {
+router.get('/unapproved/', async(req, res, next) => {
     try {
-        const dbData = await alumniSchema.find({verified: false})
-        res.json({'unverified': dbData})
+        const dbData = await alumniSchema.find({approved: false})
+        res.json({'unapproved': dbData})
     } catch (e) {
-        console.log("Error: util#unverifiedAlumni", e);
+        console.log("Error: util#unapprovedAlumni", e);
         res.status(500).send({'error' : e});
     }
 });

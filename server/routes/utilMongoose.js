@@ -68,7 +68,8 @@ const createAlumni = async (_email, _name, _location, _profession, _company, _co
             //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
             availabilities: availabilities,
             zoomLink: zoomLink,
-            imageURL: picLink
+            imageURL: picLink,
+            approved: approved
         }
     )
     const user_instance = new userSchema(
@@ -77,8 +78,7 @@ const createAlumni = async (_email, _name, _location, _profession, _company, _co
             passwordHash: passwordHash,
             verificationToken: verificationToken,
             role: role,
-            emailVerified: emailVerified,
-            approved: approved
+            emailVerified: emailVerified
         }
     );
     
@@ -114,8 +114,7 @@ const createStudent = async (_email, _name, _picLink) => {
           passwordHash: passwordHash,
           verificationToken: verificationToken,
           role: role,
-          emailVerified: emailVerified,
-          approved: approved
+          emailVerified: emailVerified
         }
     );
     
