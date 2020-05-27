@@ -79,6 +79,16 @@ router.get('/all', async (req, res, next) => {
     }
 });
 
+router.get('/unverified/', async(req, res, next) => {
+    try {
+        const dbData = await alumniSchema.find({verified: false})
+        res.json({'unverified': dbData})
+    } catch (e) {
+        console.log("Error: util#unverifiedAlumni", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
 router.get('/:id', async (req, res, next) => {
     try {
         const dbData = await alumniSchema.findOne({_id: req.params.id})

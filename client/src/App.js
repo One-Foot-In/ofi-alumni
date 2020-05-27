@@ -294,7 +294,7 @@ class App extends Component {
                           navItems={alumniNavBarItems(this.state.verified)}
                           activeItem={'verification'}
                       />
-                      <AlumniVerification />
+                      <AlumniVerification gradYear={this.state.userDetails.gradYear}/>
                   </> :<Redirect to={'/'}/>
                   :<Redirect to={"/login"}/>
               }
