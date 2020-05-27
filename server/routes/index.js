@@ -7,7 +7,7 @@ var crypto = require('crypto-random-string');
 var sendEmail = require('./helpers/emailHelpers').sendEmail
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
-var request = require('superagent')
+var timezoneHelpers = require("../helpers/timezoneHelpers")
 require('dotenv').config();
 
 const HASH_COST = 10;
@@ -54,6 +54,7 @@ router.post('/login', (req, res, next) => {
               payload.id = alumni._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response
+              alumni.availabilities = timezoneHelpers.applyTimezone(alumni.availabilities, alumni.timeZone)
               res.cookie('jwt', cookie);
               res.status(200).send(
                 {

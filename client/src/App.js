@@ -260,7 +260,10 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
 
-                      <AlumniDirectory isAlumniView={true}/>
+                      <AlumniDirectory
+                        isAlumniView={true}
+                        timezone={this.state.userDetails.timeZone}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -292,19 +295,6 @@ class App extends Component {
                 <Segment>
                   Count in store is {this.props.count ? this.props.count : 0}
                 </Segment>
-                <TimePreferencesModal
-                  modalOpen={true}
-                  timePreferences={
-                    [
-                      {
-                        id: 'Sunday-400',
-                        day: 'Sunday',
-                        time: 400,
-                        text: `Sunday (4am - 5am)`
-                      }
-                    ]
-                  }
-                />
               </>
             }
           />
@@ -348,7 +338,10 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
 
-                      <AlumniDirectory isAlumniView={false}/>
+                      <AlumniDirectory
+                        isAlumniView={false}
+                        timezone={this.state.userDetails.timeZone}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }

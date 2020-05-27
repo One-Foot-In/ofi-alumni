@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
 import LinkedInUpdate from "./LinkedInUpdate";
 import TimePreferencesModal from './TimePreferencesModal';
-var timezoneHelpers = require("../helpers/timezoneHelpers")
 
 export const timeToSlot = {
     0: '(12am - 1am)',
@@ -67,12 +66,11 @@ export default class AlumniProfile extends Component {
     render(){
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-        const availabilities = timezoneHelpers.applyTimezone(details.availabilities, details.timeZone)
-            .map(timeSlot => {
+        let availabilities = details.availabilities
+        availabilities = availabilities.map(timeSlot => {
                 timeSlot.text = `${timeSlot.day} ${timeToSlot[timeSlot.time]}`
                 return timeSlot
             })
-
         const linkedInUpdate = (
             <LinkedInUpdate
                 email={details.email}
