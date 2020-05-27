@@ -91,9 +91,9 @@ router.get('/:id', async (req, res, next) => {
 
 router.patch('/timePreferences/:id', async (req, res, next) => {
     try {
-        const alumni = await alumniSchema.findOne({_id: req.body.id})
-        const timezoneAgnosticPreferences = timezoneHelpers.stripTimezone(req.body.timePreferences, alumni.timeZone)
-        alumni.timePreferences = timezoneAgnosticPreferences
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        const timezoneAgnosticPreferences = timezoneHelpers.stripTimezone(req.body.timePreferences, alumni.timeZone || 0)
+        alumni.availabilities = timezoneAgnosticPreferences
         await alumni.save()
         res.status(200).send({message: "Successfully updated alumni's time preferences"})
     } catch (e) {
