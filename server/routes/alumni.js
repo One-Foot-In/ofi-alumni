@@ -41,7 +41,8 @@ router.post('/', async (req, res, next) => {
                 //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
                 availabilities: availabilities,
                 timeZone: timeZone,
-                zoomLink: zoomLink
+                zoomLink: zoomLink,
+                verified: true
             }
         )
         const user_instance = new userSchema(

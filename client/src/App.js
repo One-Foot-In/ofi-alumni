@@ -11,6 +11,7 @@ import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
 import AlumniProfile from './components/AlumniProfile'
 import StudentProfile from './components/StudentProfile'
+import AlumniVerification from './components/AlumniVerification'
 
 import * as actions from './redux/actions'
 
@@ -74,7 +75,7 @@ const mapDispatchToProps = dispatch => ({
 //   }
 // }
 
-const alumniNavBarItems = () => {
+var alumniNavBarItems = (verified) => {
   let navBarItems = [
     {
         id: 'home',
@@ -97,6 +98,13 @@ const alumniNavBarItems = () => {
         navLink: '/requests'
     }
   ]
+  if (verified) {
+    navBarItems.push({
+        id: 'verification',
+        name: 'Verify Alumni',
+        navLink: '/verify'
+    })
+  }
   if (isDevMode()) {
     navBarItems.push({
       id: 'playground',
@@ -139,6 +147,7 @@ class App extends Component {
     this.state = {
       loggedIn: false,
       fetchingAuth: true,
+      verified: Boolean,
       role: null,
       userDetails: {}
     };
@@ -170,6 +179,7 @@ class App extends Component {
         this.setState({
           role: role,
           userDetails: profile,
+          verified: profile.verified,
           loggedIn: true
         })
       } else {
@@ -227,7 +237,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems()}
+                          navItems={alumniNavBarItems(this.state.verified)}
                           activeItem={'home'}
                       />
                       <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
@@ -239,7 +249,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems()}
+                          navItems={alumniNavBarItems(this.state.verified)}
                           activeItem={'profile'}
                       />
                       <AlumniProfile
@@ -254,7 +264,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems()}
+                          navItems={alumniNavBarItems(this.state.verified)}
                           activeItem={'alumniDirectory'}
                       />
 
@@ -267,7 +277,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={(alumniNavBarItems())}
+                          navItems={(alumniNavBarItems(this.state.verified))}
                           activeItem={'requests'}
                       />
                       <div> Requests! </div>
@@ -275,6 +285,21 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          { this.state.userDetails.verified &&
+          <Route exact path={`/verify`} render={(props) => 
+                  this.state.loggedIn ?
+                    this.state.verified ? 
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems(this.state.verified)}
+                          activeItem={'verification'}
+                      />
+                      <AlumniVerification />
+                  </> :<Redirect to={'/'}/>
+                  :<Redirect to={"/login"}/>
+              }
+          />
+          }    
           <Route exact path={`/playground`} render={(props) => 
               <>
                 <Navbar
@@ -349,7 +374,7 @@ class App extends Component {
                   </> :
                   <Redirect to={"/login"}/>
               }
-          />
+          />      
           </>
         )
       default:
