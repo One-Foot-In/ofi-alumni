@@ -3,22 +3,6 @@ import {Button, Modal, Segment, Header, Dropdown, Label, Icon} from 'semantic-ui
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 
-/*
-props:
-    - modalOpen: boolean
-    - closeModal: ()
-    - timePreferences: [
-        {
-            id: 'Sunday-400',
-            day: 'Sunday',
-            time: 400,
-            text: `Sunday (4am - 5am)`
-        }
-        ...
-    ]
-    - email
-*/
-
 const dayOptions = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     .map(day => {
         return {
@@ -149,6 +133,22 @@ const timeSlotOptions = [
         text: '11pm - 12am'
     },
 ]
+
+/*
+props:
+    - modalOpen: boolean
+    - closeModal: ()
+    - timePreferences: [
+        {
+            id: 'Sunday-400',
+            day: 'Sunday',
+            time: 400,
+            text: `Sunday (4am - 5am)`
+        }
+        ...
+    ]
+    - id
+*/
 export default class TimePreferencesModal extends Component {
     constructor(props){
         super(props)
@@ -182,12 +182,12 @@ export default class TimePreferencesModal extends Component {
             submitting: true
         }, async () => {
             let payload = {
-                selectedTimes: this.state.selectedTimes,
+                timePreferences: this.state.selectedTimes,
                 email: this.props.email
             }
             try {
                 // TODO: Need to add end-point
-                const result = await makeCall(payload, '/alumni/updateTimePreferences', 'post')
+                const result = await makeCall(payload, `/alumni/timePreferences/${this.props.id}`, 'patch')
                 if (!result || result.error) {
                     this.setState({
                         submitting: false
