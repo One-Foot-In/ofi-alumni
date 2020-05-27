@@ -27,6 +27,7 @@ export default class Navbar extends Component {
         return items && items.map( item => {
             return (
                 <Menu.Item 
+                    key={item.id}
                     as={Link}
                     to={item.navLink}
                     name={item.name}

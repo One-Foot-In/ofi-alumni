@@ -13,6 +13,8 @@ import AlumniProfile from './components/AlumniProfile'
 import StudentProfile from './components/StudentProfile'
 
 import * as actions from './redux/actions'
+// TODO: Remove once TimePreferencesModal can be embedded into Profile
+import TimePreferencesModal from './components/TimePreferencesModal';
 
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
 const isDevMode = () => {
@@ -258,7 +260,10 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
 
-                      <AlumniDirectory isAlumniView={true}/>
+                      <AlumniDirectory
+                        isAlumniView={true}
+                        timezone={this.state.userDetails.timeZone}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -333,7 +338,10 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
 
-                      <AlumniDirectory isAlumniView={false}/>
+                      <AlumniDirectory
+                        isAlumniView={false}
+                        timezone={this.state.userDetails.timeZone}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }

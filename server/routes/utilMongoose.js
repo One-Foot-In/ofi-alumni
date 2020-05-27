@@ -33,11 +33,15 @@ const colleges = [
     "Training Academy for Hourses", "Two-way petting Zoo"
 ]
 
+const timezones = [
+    -1200, -1100, -1000, -900, -800, -700, -600, -500, -400, -300, -200, -100, 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200
+]
+
 const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-const createAlumni = async (_email, _name, _location, _profession, _company, _college, _picLink, _hasZoom) => {
+const createAlumni = async (_email, _name, _location, _profession, _company, _college, _picLink, _hasZoom, timezone) => {
     const email = _email;
     const name = _name;
     const gradYear = Math.floor((Math.random() * 1000) + 2000);
@@ -68,7 +72,8 @@ const createAlumni = async (_email, _name, _location, _profession, _company, _co
             //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
             availabilities: availabilities,
             zoomLink: zoomLink,
-            imageURL: picLink
+            imageURL: picLink,
+            timeZone: timezone
         }
     )
     const user_instance = new userSchema(
@@ -86,7 +91,7 @@ const createAlumni = async (_email, _name, _location, _profession, _company, _co
     await user_instance.save();
 }
 
-const createStudent = async (_email, _name, _picLink) => {
+const createStudent = async (_email, _name, _picLink, timezone) => {
     const email = _email;
     const name = _name;
     const grade = Math.floor((Math.random() * 10) + 2);
@@ -103,6 +108,7 @@ const createStudent = async (_email, _name, _picLink) => {
             name: name,
             email: email,
             grade: grade,
+            timeZone: timezone,
             //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
             //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
             imageURL: picLink
@@ -135,13 +141,15 @@ router.get('/seed/', async (req, res, next) => {
             let picLinkAlumni = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
             let college = randomPickFromArray(colleges)
             let hasZoom = randomPickFromArray([true, false])
-            await createAlumni(alumniEmail, alumniName, location, profession, company, college, picLinkAlumni, hasZoom)
+            let timezoneAlumni = randomPickFromArray(timezones)
+            await createAlumni(alumniEmail, alumniName, location, profession, company, college, picLinkAlumni, hasZoom, timezoneAlumni)
 
             // create mock student
             let studentEmail = `student${i}@ofi.com`
             let studentName = `${randomPickFromArray(firstNames)} ${randomPickFromArray(lastNames)}`
             let picLinkStudent = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
-            await createStudent(studentEmail, studentName, picLinkStudent)
+            let timezoneStudent = randomPickFromArray(timezones)
+            await createStudent(studentEmail, studentName, picLinkStudent, timezoneStudent)
         }
         res.status(200).send({'message' : `Successfully created ${USER_COUNT} alumni and ${USER_COUNT} students`});
     } catch (e) {
@@ -223,7 +231,7 @@ router.post('/addAlumni/', async (req, res, next) => {
         await user_instance.save();
         res.status(200).send({
             message: 'Successfully added alumni',
-            student: alumni_instance
+            alumni: alumni_instance
         });
     } catch (e) {
         res.status(500).send({
