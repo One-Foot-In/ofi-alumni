@@ -4,6 +4,7 @@ var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
+var timezoneHelpers = require("../helpers/timezoneHelpers")
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -69,10 +70,15 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/all', async (req, res, next) => {
+router.get('/all/:timezone', async (req, res, next) => {
     try {
-        const dbData = await alumniSchema.find()
-        res.json({'alumni' : dbData});
+        let timezone = req.params.timezone
+        let alumni = await alumniSchema.find()
+        alumni = alumni.map(alumnus => {
+            alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, timezone)
+            return alumnus
+        })
+        res.json({'alumni' : alumni});
     } catch (e) {
         console.log("Error: util#allAlumni", e);
         res.status(500).send({'error' : e});
@@ -91,10 +97,24 @@ router.get('/unapproved/', async(req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
     try {
-        const dbData = await alumniSchema.findOne({_id: req.params.id})
-        res.json({'result' : dbData});
+        let alumnus = await alumniSchema.findOne({_id: req.params.id})
+        alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
+        res.json({'result' : alumnus});
     } catch (e) {
         console.log("Error: util#oneAlumni", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
+router.patch('/timePreferences/:id', async (req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        const timezoneAgnosticPreferences = timezoneHelpers.stripTimezone(req.body.timePreferences, alumni.timeZone || 0)
+        alumni.availabilities = timezoneAgnosticPreferences
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's time preferences"})
+    } catch (e) {
+        console.log("Error: util#timePreferences", e);
         res.status(500).send({'error' : e});
     }
 });
