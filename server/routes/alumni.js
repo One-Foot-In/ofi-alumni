@@ -43,7 +43,7 @@ router.post('/', async (req, res, next) => {
                 availabilities: availabilities,
                 timeZone: timeZone,
                 zoomLink: zoomLink,
-                approved: true
+                approved: approved
             }
         )
         const user_instance = new userSchema(

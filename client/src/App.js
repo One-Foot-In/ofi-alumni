@@ -293,14 +293,15 @@ class App extends Component {
           { this.state.userDetails.approved &&
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
-                    this.state.approved ? 
-                  <>
-                      <Navbar
+                    (this.state.approved ?
+                      <>
+                        <Navbar
                           navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'verification'}
-                      />
-                      <AlumniVerification gradYear={this.state.userDetails.gradYear}/>
-                  </> :<Redirect to={'/'}/>
+                        />
+                        <AlumniVerification gradYear={this.state.userDetails.gradYear}/>
+                      </> 
+                    :<Redirect to={'/'}/> )
                   :<Redirect to={"/login"}/>
               }
           />
