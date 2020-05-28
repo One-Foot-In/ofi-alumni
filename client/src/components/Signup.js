@@ -166,7 +166,7 @@ export default class Signup extends React.Component {
                 name: this.state.name,
                 email: this.state.email,
                 password: this.state.password,
-                timeZone: (new Date().getTimezoneOffset())
+                timeZone: ((new Date().getTimezoneOffset())*100)/60 // getTimezoneOffset fetches offset in minutes
             }
             if (!this.props.isAlumni) {
                 payload = Object.assign({}, payload, {
