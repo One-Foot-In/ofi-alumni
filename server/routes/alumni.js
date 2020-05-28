@@ -79,21 +79,26 @@ router.get('/all/:timezone', async (req, res, next) => {
         })
         res.json({'alumni' : alumni});
     } catch (e) {
-        console.log("Error: util#allAlumni", e);
+        console.log("Error: alumni#allAlumni", e);
         res.status(500).send({'error' : e});
     }
 });
 
-router.get('/:id', async (req, res, next) => {
+router.get('/one/:id', async (req, res, next) => {
     try {
         let alumnus = await alumniSchema.findOne({_id: req.params.id})
         alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
         res.json({'result' : alumnus});
     } catch (e) {
-        console.log("Error: util#oneAlumni", e);
+        console.log("Error: alumni#oneAlumni", e);
         res.status(500).send({'error' : e});
     }
 });
+
+router.get('/topicOptions', async (req, res, next) => {
+    const preloadedTopics = ['College Shortlisting', 'Career Counseling', 'Essay/Personal Statement Brainstorming', 'Motivation/Performance Coaching', 'Extra-curricular Activity Strategy', 'General Counsultation']
+    res.status(200).send({topics: preloadedTopics})
+})
 
 router.patch('/timePreferences/:id', async (req, res, next) => {
     try {
@@ -103,9 +108,21 @@ router.patch('/timePreferences/:id', async (req, res, next) => {
         await alumni.save()
         res.status(200).send({message: "Successfully updated alumni's time preferences"})
     } catch (e) {
-        console.log("Error: util#timePreferences", e);
+        console.log("Error: alumni#timePreferences", e);
         res.status(500).send({'error' : e});
     }
 });
+
+router.patch('/topicPreferences/:id', async (req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.topics = req.body.topicPreferences
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's topic preferences"})
+    } catch (e) {
+        console.log("Error: alumni#topicPreferences", e);
+        res.status(500).send({'error' : e});
+    }
+})
 
 module.exports = router;

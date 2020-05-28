@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
 import LinkedInUpdate from "./LinkedInUpdate";
 import TimePreferencesModal from './TimePreferencesModal';
+import TopicPreferencesModal from './TopicPreferencesModal';
 
 export const timeToSlot = {
     0: '(12am - 1am)',
@@ -48,25 +49,39 @@ export default class AlumniProfile extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            preferencesModalOpen: false
+            timePreferencesModalOpen: false,
+            topicPreferencesModalOpen: false
         }
-        this.openPreferencesModal = this.openPreferencesModal.bind(this)
-        this.closePreferencesModal = this.closePreferencesModal.bind(this)
+        this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
+        this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
+        this.openTopicPreferencesModal = this.openTopicPreferencesModal.bind(this)
+        this.closeTopicPreferencesModal = this.closeTopicPreferencesModal.bind(this)
     }
-    closePreferencesModal() {
+    closeTimePreferencesModal() {
         this.setState({
-            preferencesModalOpen: false
+            timePreferencesModalOpen: false
         })
     }
-    openPreferencesModal() {
+    openTimePreferencesModal() {
         this.setState({
-            preferencesModalOpen: true
+            timePreferencesModalOpen: true
+        })
+    }
+    closeTopicPreferencesModal() {
+        this.setState({
+            topicPreferencesModalOpen: false
+        })
+    }
+    openTopicPreferencesModal() {
+        this.setState({
+            topicPreferencesModalOpen: true
         })
     }
     render(){
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-        let availabilities = details.availabilities
+        let availabilities = details.availabilities;
+        let topics = details.topics;
         availabilities = availabilities.map(timeSlot => {
                 timeSlot.text = `${timeSlot.day} ${timeToSlot[timeSlot.time]}`
                 return timeSlot
@@ -87,14 +102,32 @@ export default class AlumniProfile extends Component {
                 floated='right'
                 basic
                 color="blue"
-                onClick={this.openPreferencesModal}
+                onClick={this.openTimePreferencesModal}
             >
                 Update Time Availabilities
             </Button>
             <TimePreferencesModal
-                modalOpen={this.state.preferencesModalOpen}
+                modalOpen={this.state.timePreferencesModalOpen}
                 timePreferences={availabilities || []}
-                closeModal={this.closePreferencesModal}
+                closeModal={this.closeTimePreferencesModal}
+                id={details._id}
+            />
+            </>
+        )
+        const topicAvailabilitiesUpdate = (
+            <>
+            <Button
+                floated='right'
+                basic
+                color="blue"
+                onClick={this.openTopicPreferencesModal}
+            >
+                Update Topic Preferences
+            </Button>
+            <TopicPreferencesModal
+                modalOpen={this.state.topicPreferencesModalOpen}
+                topicPreferences={topics || []}
+                closeModal={this.closeTopicPreferencesModal}
                 id={details._id}
             />
             </>
@@ -106,6 +139,7 @@ export default class AlumniProfile extends Component {
                 <Card.Content extra>
                     {linkedInUpdate}
                     {timeAvailabilitiesUpdate}
+                    {topicAvailabilitiesUpdate}
                     {imageUpdate}
                 </Card.Content>
             )

@@ -192,9 +192,9 @@ class App extends Component {
   async fetchProfile(role, id) {
     let result;
     if (role === 'STUDENT') {
-      result = await makeCall({}, ('/student/'+id), 'get')
+      result = await makeCall({}, ('/student/one/'+id), 'get')
     } else {
-      result = await makeCall({}, ('/alumni/'+id), 'get')
+      result = await makeCall({}, ('/alumni/one/'+id), 'get')
     }
     return result.result
   }

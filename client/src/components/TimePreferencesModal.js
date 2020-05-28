@@ -182,8 +182,7 @@ export default class TimePreferencesModal extends Component {
             submitting: true
         }, async () => {
             let payload = {
-                timePreferences: this.state.selectedTimes,
-                email: this.props.email
+                timePreferences: this.state.selectedTimes
             }
             try {
                 // TODO: Need to add end-point
@@ -208,6 +207,7 @@ export default class TimePreferencesModal extends Component {
                             icon: "success",
                         }).then(() => {
                             this.props.closeModal();
+                            window.location.reload();
                         })
                     })
                     
