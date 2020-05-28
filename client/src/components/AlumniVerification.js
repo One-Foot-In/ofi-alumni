@@ -9,6 +9,8 @@ export default class AlumniVerification extends Component {
         dropdownOptions: [],
         dropdownValue: this.props.gradYear,
         display: [],
+        showApproved: false,
+        recentName: ''
     }
 
     async componentWillMount(){
@@ -56,6 +58,7 @@ export default class AlumniVerification extends Component {
                         inverted color='green'
                         onClick={this.handleClick.bind(this)}
                         data-id={profile._id}
+                        key={profile.name}
                         fluid
                         >
                             Approve
@@ -68,6 +71,9 @@ export default class AlumniVerification extends Component {
 
     createDisplay(value) {
         let display = []
+        if (this.state.showApproved) {
+            display.push(<Segment inverted color='green' tertiary>Approved {this.state.recentName}</Segment>)
+        }
         for (let profile of this.state.entries) {
             if ((value === profile.gradYear) || value === 'all') {
                 display.push(this.constructProfile(profile))
@@ -100,8 +106,14 @@ export default class AlumniVerification extends Component {
         this.createDisplay(value)
     }
 
-    handleClick(e) {
-        alert(e.currentTarget.dataset.id)
+    async handleClick(e, key) {
+        let entries = await makeCall({id: e.currentTarget.dataset.id}, '/alumni/approve/', 'post');
+        this.setState({
+            entries: entries.unapproved,
+            showApproved: true,
+            recentName: entries.name
+        })
+        this.createDisplay(this.state.dropdownValue)
     }
 
     render(){

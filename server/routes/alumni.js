@@ -89,6 +89,20 @@ router.get('/unapproved/', async(req, res, next) => {
     }
 });
 
+router.post('/approve/', async(req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.body.id})
+        alumni.approved = true
+        await alumni.save();
+        const dbData = await alumniSchema.find({approved: false})
+        res.json({'unapproved': dbData, 'name': alumni.name})
+
+    } catch (e) {
+        console.log("Error: util#approveAlumni");
+        res.status(500).send({'error': e});
+    }
+});
+
 router.get('/:id', async (req, res, next) => {
     try {
         const dbData = await alumniSchema.findOne({_id: req.params.id})
