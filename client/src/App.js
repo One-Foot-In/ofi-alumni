@@ -11,6 +11,7 @@ import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
 import AlumniProfile from './components/AlumniProfile'
 import StudentProfile from './components/StudentProfile'
+import AlumniVerification from './components/AlumniVerification'
 
 import * as actions from './redux/actions'
 // TODO: Remove once TimePreferencesModal can be embedded into Profile
@@ -76,7 +77,7 @@ const mapDispatchToProps = dispatch => ({
 //   }
 // }
 
-const alumniNavBarItems = () => {
+var alumniNavBarItems = (approved) => {
   let navBarItems = [
     {
         id: 'home',
@@ -99,6 +100,13 @@ const alumniNavBarItems = () => {
         navLink: '/requests'
     }
   ]
+  if (approved) {
+    navBarItems.push({
+        id: 'verification',
+        name: 'Verify Alumni',
+        navLink: '/verify'
+    })
+  }
   if (isDevMode()) {
     navBarItems.push({
       id: 'playground',
@@ -141,6 +149,7 @@ class App extends Component {
     this.state = {
       loggedIn: false,
       fetchingAuth: true,
+      approved: false,
       role: null,
       userDetails: {}
     };
@@ -172,6 +181,7 @@ class App extends Component {
         this.setState({
           role: role,
           userDetails: profile,
+          approved: profile.approved,
           loggedIn: true
         })
       } else {
@@ -229,7 +239,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems()}
+                          navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'home'}
                       />
                       <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
@@ -241,7 +251,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems()}
+                          navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'profile'}
                       />
                       <AlumniProfile
@@ -256,7 +266,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={alumniNavBarItems()}
+                          navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'alumniDirectory'}
                       />
 
@@ -272,7 +282,7 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={(alumniNavBarItems())}
+                          navItems={(alumniNavBarItems(this.state.approved))}
                           activeItem={'requests'}
                       />
                       <div> Requests! </div>
@@ -280,6 +290,22 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          { this.state.userDetails.approved &&
+          <Route exact path={`/verify`} render={(props) => 
+                  this.state.loggedIn ?
+                    (this.state.approved ?
+                      <>
+                        <Navbar
+                          navItems={alumniNavBarItems(this.state.approved)}
+                          activeItem={'verification'}
+                        />
+                        <AlumniVerification gradYear={this.state.userDetails.gradYear}/>
+                      </> 
+                    :<Redirect to={'/'}/> )
+                  :<Redirect to={"/login"}/>
+              }
+          />
+          }
           <Route exact path={`/playground`} render={(props) => 
               <>
                 <Navbar
@@ -357,7 +383,7 @@ class App extends Component {
                   </> :
                   <Redirect to={"/login"}/>
               }
-          />
+          />      
           </>
         )
       default:

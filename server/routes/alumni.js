@@ -42,7 +42,8 @@ router.post('/', async (req, res, next) => {
                 //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
                 availabilities: availabilities,
                 timeZone: timeZone,
-                zoomLink: zoomLink
+                zoomLink: zoomLink,
+                approved: approved
             }
         )
         const user_instance = new userSchema(
@@ -81,6 +82,30 @@ router.get('/all/:timezone', async (req, res, next) => {
     } catch (e) {
         console.log("Error: util#allAlumni", e);
         res.status(500).send({'error' : e});
+    }
+});
+
+router.get('/unapproved/', async(req, res, next) => {
+    try {
+        const dbData = await alumniSchema.find({approved: false})
+        res.json({'unapproved': dbData})
+    } catch (e) {
+        console.log("Error: util#unapprovedAlumni", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
+router.post('/approve/', async(req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.body.id})
+        alumni.approved = true
+        await alumni.save();
+        const dbData = await alumniSchema.find({approved: false})
+        res.json({'unapproved': dbData, 'name': alumni.name})
+
+    } catch (e) {
+        console.log("Error: util#approveAlumni");
+        res.status(500).send({'error': e});
     }
 });
 

@@ -73,6 +73,7 @@ const createAlumni = async (_email, _name, _location, _profession, _company, _co
             availabilities: availabilities,
             zoomLink: zoomLink,
             imageURL: picLink,
+            approved: approved,
             timeZone: timezone
         }
     )
@@ -82,8 +83,7 @@ const createAlumni = async (_email, _name, _location, _profession, _company, _co
             passwordHash: passwordHash,
             verificationToken: verificationToken,
             role: role,
-            emailVerified: emailVerified,
-            approved: approved
+            emailVerified: emailVerified
         }
     );
     
@@ -120,8 +120,7 @@ const createStudent = async (_email, _name, _picLink, timezone) => {
           passwordHash: passwordHash,
           verificationToken: verificationToken,
           role: role,
-          emailVerified: emailVerified,
-          approved: approved
+          emailVerified: emailVerified
         }
     );
     
