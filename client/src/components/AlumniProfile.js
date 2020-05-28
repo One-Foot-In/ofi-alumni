@@ -3,6 +3,7 @@ import { Button, Card, Image } from 'semantic-ui-react';
 import LinkedInUpdate from "./LinkedInUpdate";
 import TimePreferencesModal from './TimePreferencesModal';
 import TopicPreferencesModal from './TopicPreferencesModal';
+import ZoomUpdateModal from './ZoomUpdateModal';
 
 export const timeToSlot = {
     0: '(12am - 1am)',
@@ -50,12 +51,15 @@ export default class AlumniProfile extends Component {
         super(props)
         this.state = {
             timePreferencesModalOpen: false,
-            topicPreferencesModalOpen: false
+            topicPreferencesModalOpen: false,
+            zoomUpdateOpen: false
         }
         this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
         this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
         this.openTopicPreferencesModal = this.openTopicPreferencesModal.bind(this)
         this.closeTopicPreferencesModal = this.closeTopicPreferencesModal.bind(this)
+        this.openZoomUpdateModal = this.openZoomUpdateModal.bind(this)
+        this.closeZoomUpdateModal = this.closeZoomUpdateModal.bind(this)
     }
     closeTimePreferencesModal() {
         this.setState({
@@ -77,11 +81,22 @@ export default class AlumniProfile extends Component {
             topicPreferencesModalOpen: true
         })
     }
+    closeZoomUpdateModal() {
+        this.setState({
+            zoomUpdateOpen: false
+        })
+    }
+    openZoomUpdateModal() {
+        this.setState({
+            zoomUpdateOpen: true
+        })
+    }
     render(){
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
         let availabilities = details.availabilities;
         let topics = details.topics;
+        let zoomLink = details.zoomLink;
         availabilities = availabilities.map(timeSlot => {
                 timeSlot.text = `${timeSlot.day} ${timeToSlot[timeSlot.time]}`
                 return timeSlot
@@ -132,12 +147,31 @@ export default class AlumniProfile extends Component {
             />
             </>
         )
+        const zoomLinkUpdate = (
+            <>
+             <Button
+                floated='right'
+                basic
+                color="blue"
+                onClick={this.openZoomUpdateModal}
+            >
+                Update Zoom Meeting ID
+            </Button>
+            <ZoomUpdateModal
+                modalOpen={this.state.zoomUpdateOpen}
+                zoomLink={zoomLink || ''}
+                closeModal={this.closeZoomUpdateModal}
+                id={details._id}
+            />
+            </>
+        )
         var canUpdate;
 
         if (!isViewOnly) {
             canUpdate = (
                 <Card.Content extra>
                     {linkedInUpdate}
+                    {zoomLinkUpdate}
                     {timeAvailabilitiesUpdate}
                     {topicAvailabilitiesUpdate}
                     {imageUpdate}

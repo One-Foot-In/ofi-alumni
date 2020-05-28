@@ -125,4 +125,16 @@ router.patch('/topicPreferences/:id', async (req, res, next) => {
     }
 })
 
+router.patch('/zoomLink/:id', async (req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.zoomLink = req.body.zoomLink
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's zoom link"})
+    } catch (e) {
+        console.log("Error: alumni#zoomLink", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 module.exports = router;

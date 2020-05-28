@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Modal, Segment, Header, Dropdown } from 'semantic-ui-react';
+import {Button, Modal, Dropdown } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 
@@ -61,7 +61,6 @@ export default class TopicPreferencesModal extends Component {
                 topicPreferences: this.state.topics
             }
             try {
-                // TODO: Need to add end-point
                 const result = await makeCall(payload, `/alumni/topicPreferences/${this.props.id}`, 'patch')
                 if (!result || result.error) {
                     this.setState({
