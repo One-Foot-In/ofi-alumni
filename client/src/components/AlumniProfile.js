@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
 import LinkedInUpdate from "./LinkedInUpdate";
 import TimePreferencesModal from './TimePreferencesModal';
+import TopicPreferencesModal from './TopicPreferencesModal';
+import ZoomUpdateModal from './ZoomUpdateModal';
+
+const ALUMNI = "ALUMNI"
 
 export const timeToSlot = {
     0: '(12am - 1am)',
@@ -43,30 +47,65 @@ props:
     - email: string
     - availabilities
 - isViewOnly: bool
+- refreshProfile: (ROLE, id)
 */
 export default class AlumniProfile extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            preferencesModalOpen: false
+            timePreferencesModalOpen: false,
+            topicPreferencesModalOpen: false,
+            zoomUpdateOpen: false
         }
-        this.openPreferencesModal = this.openPreferencesModal.bind(this)
-        this.closePreferencesModal = this.closePreferencesModal.bind(this)
+        this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
+        this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
+        this.openTopicPreferencesModal = this.openTopicPreferencesModal.bind(this)
+        this.closeTopicPreferencesModal = this.closeTopicPreferencesModal.bind(this)
+        this.openZoomUpdateModal = this.openZoomUpdateModal.bind(this)
+        this.closeZoomUpdateModal = this.closeZoomUpdateModal.bind(this)
     }
-    closePreferencesModal() {
+    closeTimePreferencesModal() {
         this.setState({
-            preferencesModalOpen: false
+            timePreferencesModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
     }
-    openPreferencesModal() {
+    openTimePreferencesModal() {
         this.setState({
-            preferencesModalOpen: true
+            timePreferencesModalOpen: true
+        })
+    }
+    closeTopicPreferencesModal() {
+        this.setState({
+            topicPreferencesModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    openTopicPreferencesModal() {
+        this.setState({
+            topicPreferencesModalOpen: true
+        })
+    }
+    closeZoomUpdateModal() {
+        this.setState({
+            zoomUpdateOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    openZoomUpdateModal() {
+        this.setState({
+            zoomUpdateOpen: true
         })
     }
     render(){
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-        let availabilities = details.availabilities
+        let availabilities = details.availabilities;
+        let topics = details.topics;
+        let zoomLink = details.zoomLink;
         availabilities = availabilities.map(timeSlot => {
                 timeSlot.text = `${timeSlot.day} ${timeToSlot[timeSlot.time]}`
                 return timeSlot
@@ -87,14 +126,50 @@ export default class AlumniProfile extends Component {
                 floated='right'
                 basic
                 color="blue"
-                onClick={this.openPreferencesModal}
+                onClick={this.openTimePreferencesModal}
             >
                 Update Time Availabilities
             </Button>
             <TimePreferencesModal
-                modalOpen={this.state.preferencesModalOpen}
+                modalOpen={this.state.timePreferencesModalOpen}
                 timePreferences={availabilities || []}
-                closeModal={this.closePreferencesModal}
+                closeModal={this.closeTimePreferencesModal}
+                id={details._id}
+            />
+            </>
+        )
+        const topicAvailabilitiesUpdate = (
+            <>
+            <Button
+                floated='right'
+                basic
+                color="blue"
+                onClick={this.openTopicPreferencesModal}
+            >
+                Update Topic Preferences
+            </Button>
+            <TopicPreferencesModal
+                modalOpen={this.state.topicPreferencesModalOpen}
+                topicPreferences={topics || []}
+                closeModal={this.closeTopicPreferencesModal}
+                id={details._id}
+            />
+            </>
+        )
+        const zoomLinkUpdate = (
+            <>
+             <Button
+                floated='right'
+                basic
+                color="blue"
+                onClick={this.openZoomUpdateModal}
+            >
+                Update Zoom Meeting ID
+            </Button>
+            <ZoomUpdateModal
+                modalOpen={this.state.zoomUpdateOpen}
+                zoomLink={zoomLink || ''}
+                closeModal={this.closeZoomUpdateModal}
                 id={details._id}
             />
             </>
@@ -105,7 +180,9 @@ export default class AlumniProfile extends Component {
             canUpdate = (
                 <Card.Content extra>
                     {linkedInUpdate}
+                    {zoomLinkUpdate}
                     {timeAvailabilitiesUpdate}
+                    {topicAvailabilitiesUpdate}
                     {imageUpdate}
                 </Card.Content>
             )

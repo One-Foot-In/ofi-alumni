@@ -55,7 +55,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/:id', async (req, res, next) => {
+router.get('/one/:id', async (req, res, next) => {
     try {
         const dbData = await studentSchema.findOne({_id: req.params.id})
         res.json({'result' : dbData});

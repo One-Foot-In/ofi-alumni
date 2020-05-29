@@ -158,6 +158,7 @@ class App extends Component {
     this.liftPayload = this.liftPayload.bind(this);
     this.renderScreens = this.renderScreens.bind(this);
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
+    this.refreshProfile = this.refreshProfile.bind(this);
   }
 
   async componentWillMount() {
@@ -199,12 +200,18 @@ class App extends Component {
     }
   }
 
+  async refreshProfile(role, id) {
+    this.setState({
+      userDetails: await this.fetchProfile(role, id)
+    })
+  }
+
   async fetchProfile(role, id) {
     let result;
     if (role === 'STUDENT') {
-      result = await makeCall({}, ('/student/'+id), 'get')
+      result = await makeCall({}, ('/student/one/'+id), 'get')
     } else {
-      result = await makeCall({}, ('/alumni/'+id), 'get')
+      result = await makeCall({}, ('/alumni/one/'+id), 'get')
     }
     return result.result
   }
@@ -257,6 +264,7 @@ class App extends Component {
                       <AlumniProfile
                         isViewOnly={false}
                         details={this.state.userDetails}
+                        refreshProfile={this.refreshProfile}
                       />
                   </> :
                   <Redirect to={"/login"}/>
