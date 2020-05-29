@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
 import { makeCall } from '../apis';
+import RequestModal from './RequestModal'
 
 // Filter dropdown options
 const searchOptions = [
@@ -49,18 +50,36 @@ props:
 - timezone: Number
 */
 export default class AlumniDirectory extends Component {
-    state = {
-        activePage: 1,
-        numEntries: 0,
-        isLoading: false,
-        value: '',
-        totalPages: 0,
-        entries:[],
-        gradYears: [],
-        allText: [],
-        display: [],
-        numResults: 0,
-        filter: 'all'
+    constructor(props) {
+        super(props)
+        this.state = {
+            activePage: 1,
+            numEntries: 0,
+            isLoading: false,
+            value: '',
+            totalPages: 0,
+            entries:[],
+            gradYears: [],
+            allText: [],
+            display: [],
+            numResults: 0,
+            filter: 'all',
+            requestModalOpen: false,
+            alumniDetails: null,
+        }
+        this.openRequestModal = this.openRequestModal.bind(this)
+        this.closeRequestModal = this.closeRequestModal.bind(this)
+    }
+
+    closeRequestModal() {
+        this.setState({
+            requestModalOpen: false
+        })
+    }
+    openRequestModal() {
+        this.setState({
+            requestModalOpen: true
+        })
     }
 
     async componentWillMount() {
@@ -77,6 +96,7 @@ export default class AlumniDirectory extends Component {
         let gradYears = [];
         let allText = [];
         let display = [];
+        let i = 0;
         for (let post of entries) {
             if(!gradYears.find(year => year['value'] === post.gradYear)) {
                 gradYears.push({
@@ -91,7 +111,8 @@ export default class AlumniDirectory extends Component {
                          + post.company + ' '
                          + post.name + ' '
                          + post.gradYear);
-            display.push(this.constructProfile(post));
+            display.push(this.constructProfile(post, i));
+            i++;
         }
         gradYears.sort(function(a,b){return a.value-b.value})
         this.setState({
@@ -101,7 +122,7 @@ export default class AlumniDirectory extends Component {
                      })
     }
 
-    constructProfile(post) {
+    constructProfile(post, i) {
         return (
             <Grid.Row columns={2}>
                 <Grid.Column width={4}>
@@ -132,11 +153,28 @@ export default class AlumniDirectory extends Component {
                             <Card.Description>Company: {post.company}</Card.Description>
                             <br />
                         </Card.Content>
-                        {requestVisible(this.props.isAlumniView, post)}
+                        {this.requestVisible(this.props.isAlumniView, post, i)}
                     </Card>
                 </Grid.Column>
             </Grid.Row>
         )
+    }
+
+    requestVisible(isAlumniView, post, i) {
+        var requestButton;
+                if (('zoomLink' in post) && !isAlumniView) {
+                    requestButton = <Button 
+                                    primary 
+                                    data-id={i}
+                                    onClick={this.handleRequestButton.bind(this)}>
+                                        Make Request
+                                    </Button>
+                } else if (!isAlumniView){
+                    requestButton = <Button disabled>Make Request</Button>
+                } else {
+                    requestButton = null;
+                }
+        return requestButton
     }
 
     getEntries() {
@@ -159,7 +197,7 @@ export default class AlumniDirectory extends Component {
             } else {
                 if (this.state.allText[i].match(searchPattern) !== null) {
                     numResults += 1
-                    display.push(this.constructProfile(this.state.entries[i]))
+                    display.push(this.constructProfile(this.state.entries[i]), i)
                 }
             }
             i++;
@@ -182,6 +220,11 @@ export default class AlumniDirectory extends Component {
             this.search(value)
         }
         this.setState({ [name]: value })
+    }
+    handleRequestButton(e) {
+        this.setState({alumniDetails: this.state.entries[e.currentTarget.dataset.id]})
+        console.log(this.state.alumniDetails)
+        this.openRequestModal()
     }
 
     render(){
@@ -267,6 +310,14 @@ export default class AlumniDirectory extends Component {
                 
                 {searchRow}
                 {resultsRow}
+                {this.state.requestModalOpen && 
+                    <RequestModal
+                    modalOpen={this.state.requestModalOpen}
+                    closeModal={this.closeRequestModal}
+                    alumni={this.state.alumniDetails}
+                    />
+                }
+                
                 {pageGenerator(display, pageSize, activePage)}
 
                 <Grid.Row stretched>
@@ -296,18 +347,4 @@ function pageGenerator(profiles, pageSize, activePage) {
         display.push(profiles[(activePage - 1) * pageSize + i])
     }
     return display
-}
-
-// Args: isAlumniView (bool), alumni (object)
-// Returns: jsx for the request button (either active, disabled, hidden)
-function requestVisible(isAlumniView, post) {
-    var requestButton;
-            if (('zoomLink' in post) && !isAlumniView) {
-                requestButton = <Button primary>Make Request</Button>
-            } else if (!isAlumniView){
-                requestButton = <Button disabled>Make Request</Button>
-            } else {
-                requestButton = null;
-            }
-    return requestButton
 }
