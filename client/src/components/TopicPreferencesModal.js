@@ -82,7 +82,6 @@ export default class TopicPreferencesModal extends Component {
                             icon: "success",
                         }).then(() => {
                             this.props.closeModal();
-                            window.location.reload();
                         })
                     })
                     

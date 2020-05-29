@@ -206,7 +206,6 @@ export default class TimePreferencesModal extends Component {
                             icon: "success",
                         }).then(() => {
                             this.props.closeModal();
-                            window.location.reload();
                         })
                     })
                     

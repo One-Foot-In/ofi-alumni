@@ -149,6 +149,7 @@ class App extends Component {
     this.liftPayload = this.liftPayload.bind(this);
     this.renderScreens = this.renderScreens.bind(this);
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
+    this.refreshProfile = this.refreshProfile.bind(this);
   }
 
   async componentWillMount() {
@@ -187,6 +188,12 @@ class App extends Component {
         });
         console.log("Error: App#componentDidMount", e)
     }
+  }
+
+  async refreshProfile(role, id) {
+    this.setState({
+      userDetails: await this.fetchProfile(role, id)
+    })
   }
 
   async fetchProfile(role, id) {
@@ -247,6 +254,7 @@ class App extends Component {
                       <AlumniProfile
                         isViewOnly={false}
                         details={this.state.userDetails}
+                        refreshProfile={this.refreshProfile}
                       />
                   </> :
                   <Redirect to={"/login"}/>

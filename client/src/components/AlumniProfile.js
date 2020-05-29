@@ -5,6 +5,8 @@ import TimePreferencesModal from './TimePreferencesModal';
 import TopicPreferencesModal from './TopicPreferencesModal';
 import ZoomUpdateModal from './ZoomUpdateModal';
 
+const ALUMNI = "ALUMNI"
+
 export const timeToSlot = {
     0: '(12am - 1am)',
     100: '(1am - 2am)',
@@ -45,6 +47,7 @@ props:
     - email: string
     - availabilities
 - isViewOnly: bool
+- refreshProfile: (ROLE, id)
 */
 export default class AlumniProfile extends Component {
     constructor(props) {
@@ -64,6 +67,8 @@ export default class AlumniProfile extends Component {
     closeTimePreferencesModal() {
         this.setState({
             timePreferencesModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
     }
     openTimePreferencesModal() {
@@ -74,6 +79,8 @@ export default class AlumniProfile extends Component {
     closeTopicPreferencesModal() {
         this.setState({
             topicPreferencesModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
     }
     openTopicPreferencesModal() {
@@ -84,6 +91,8 @@ export default class AlumniProfile extends Component {
     closeZoomUpdateModal() {
         this.setState({
             zoomUpdateOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
     }
     openZoomUpdateModal() {
