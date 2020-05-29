@@ -182,11 +182,9 @@ export default class TimePreferencesModal extends Component {
             submitting: true
         }, async () => {
             let payload = {
-                timePreferences: this.state.selectedTimes,
-                email: this.props.email
+                timePreferences: this.state.selectedTimes
             }
             try {
-                // TODO: Need to add end-point
                 const result = await makeCall(payload, `/alumni/timePreferences/${this.props.id}`, 'patch')
                 if (!result || result.error) {
                     this.setState({
