@@ -14,8 +14,8 @@ import StudentProfile from './components/StudentProfile'
 import AlumniVerification from './components/AlumniVerification'
 
 import * as actions from './redux/actions'
-// TODO: Remove once TimePreferencesModal can be embedded into Profile
-import TimePreferencesModal from './components/TimePreferencesModal';
+// TODO: remove once used elsewhere
+import SearchablePooledDropdown from './components/SearchablePooledDropdown';
 
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
 const isDevMode = () => {
@@ -151,7 +151,8 @@ class App extends Component {
       fetchingAuth: true,
       approved: false,
       role: null,
-      userDetails: {}
+      userDetails: {},
+      dropdownValue: null
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
@@ -159,6 +160,7 @@ class App extends Component {
     this.renderScreens = this.renderScreens.bind(this);
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
     this.refreshProfile = this.refreshProfile.bind(this);
+    this.getInputs = this.getInputs.bind(this);
   }
 
   async componentWillMount() {
@@ -235,6 +237,14 @@ class App extends Component {
         userDetails: details.userToSend
       });
       window.location.reload()
+  }
+
+  getInputs(inputs) {
+    this.setState({
+      dropdownValue: inputs
+    }, () => {
+      console.log("dropdown value extracted is", this.state.dropdownValue)
+    })
   }
 
   renderLoggedInRoutes(role) {
@@ -329,6 +339,14 @@ class App extends Component {
                 <Segment>
                   Count in store is {this.props.count ? this.props.count : 0}
                 </Segment>
+                <SearchablePooledDropdown
+                  endpoint={'/drop/countries'}
+                  isSingleSelect={false}
+                  placeholder={'This is the placeholder'}
+                  textForCustomEntry={'This is where custom label goes'}
+                  learnNewInputValues={true}
+                  getInputs={this.getInputs}
+                />
               </>
             }
           />

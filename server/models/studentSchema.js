@@ -10,7 +10,9 @@ const studentSchema = new Schema(
     grade: {type: Number, required: true},
     //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
     //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
-    timeZone: {type: Number, required: false}, // value for Date.getTimezoneOffset (Daylight Savings prevents this from being constant)
+    timeZone: {type: Number, required: false}, // value for Date.getTimezoneOffset (Daylight Savings prevents this from being constant),
+    approved: {type: Boolean, default: false},
+    school: {type: Schema.Types.ObjectId, ref: 'School', required: true}
   }
 );
 
