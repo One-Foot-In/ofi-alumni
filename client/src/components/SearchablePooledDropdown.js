@@ -26,6 +26,7 @@ export default class SearchablePooledDropdown extends Component {
         this.getEnteredCustomValues = this.getEnteredCustomValues.bind(this)
         this.commitSelection = this.commitSelection.bind(this)
         this.handleChange = this.handleChange.bind(this)
+        this.disableCommitButton = this.disableCommitButton.bind(this)
     }
 
     async componentWillMount() {
@@ -61,7 +62,14 @@ export default class SearchablePooledDropdown extends Component {
 
     commitSelection(e) {
         e.preventDefault()
-        let newSelections = this.state.customValues
+        let newSelections = []
+        if (!this.props.isSingleSelect) {
+            newSelections = this.state.customValues
+        } else {
+            this.setState({
+                value: null
+            })
+        }
         newSelections.push(this.state.customValue)
         this.setState({
             customValues: newSelections,
@@ -103,85 +111,80 @@ export default class SearchablePooledDropdown extends Component {
         })
     }
 
+    disableCommitButton() {
+        if (this.props.isSingleSelect) {
+            return (this.state.customValues.includes(this.state.customValue) || !this.state.customValue || (this.state.customValues && this.state.customValues.length > 0))
+        } else {
+            return (this.state.customValues.includes(this.state.customValue) || !this.state.customValue)
+        }
+    }
+
     render() {
         return (
-            <Grid
-                padded
-            >
+            <Grid>
                 <Grid.Column>
-                    <Segment>
-                        <Grid.Row
-                            centered
-                        >
-                            <Header>{this.props.title || 'Title here'}</Header>
-                        </Grid.Row>
-                        {
-                        this.props.isSingleSelect ?
-                            <Input
-                                placeholder={this.props.placeholder}
-                                style={{'margin': '5px'}}
-                                onChange={this.handleChange}
-                                name='customValue'
-                                value={this.state.customValue}
-                            /> :
-                            <Grid>
+                    <Grid.Row
+                        centered
+                    >
+                        <Header>{this.props.title || 'Title here'}</Header>
+                    </Grid.Row>
+                        <Grid>
+                            <Grid.Row
+                                centered
+                            >
+                                <Dropdown
+                                    style={{ 'margin': '5px', 'width': '80%'}}
+                                    placeholder={this.props.placeholder}
+                                    fluid
+                                    multiple={!this.props.isSingleSelect}
+                                    disabled={this.props.isSingleSelect && this.state.customValues && this.state.customValues.length > 0}
+                                    search
+                                    selection
+                                    options={this.state.options}
+                                    value={this.state.value}
+                                    onChange={this.handleSelection}
+                                />
+                            </Grid.Row>
+                            <Grid.Row
+                                centered
+                            >
+                                <Message
+                                    style={{'width': '80%', 'margin': '5px'}}
+                                > 
+                                    Your custom inputs (Please add only if there isn't an existing option)
+                                </Message>
+                            </Grid.Row>
+                            {
+                                this.state.customValues && this.state.customValues.length ? 
                                 <Grid.Row
                                     centered
                                 >
-                                    <Dropdown
-                                        style={{ 'margin': '5px', 'width': '80%'}}
-                                        placeholder={this.props.placeholder}
-                                        fluid
-                                        multiple={!this.props.isSingleSelect}
-                                        disabled={this.props.isSingleSelect && this.state.customValue}
-                                        search
-                                        selection
-                                        options={this.state.options}
-                                        value={this.state.value}
-                                        onChange={this.handleSelection}
-                                    />
-                                </Grid.Row>
-                                <Grid.Row
-                                    centered
+                                    {this.getEnteredCustomValues()}
+                                </Grid.Row> :
+                                null
+                            }
+                            <Grid.Row
+                                centered
+                            >
+                                <Input
+                                    placeholder={'Custom input here...'}
+                                    style={{'margin': '5px', 'width': '50%'}}
+                                    onChange={this.handleChange}
+                                    name='customValue'
+                                    value={this.state.customValue}
+                                    disabled={this.props.isSingleSelect && (this.state.customValues && this.state.customValues.length > 0) }
+                                />
+                                <Button
+                                    primary
+                                    style={{'margin': '5px'}}
+                                    color='blue'
+                                    disabled={this.disableCommitButton()}
+                                    onClick={this.commitSelection}
                                 >
-                                    <Message
-                                        style={{'width': '80%', 'margin': '5px'}}
-                                    > 
-                                        Your custom inputs (Please add only if there isn't an existing option)
-                                    </Message>
-                                </Grid.Row>
-                                {
-                                    this.state.customValues && this.state.customValues.length ? 
-                                    <Grid.Row
-                                        centered
-                                    >
-                                        {this.getEnteredCustomValues()}
-                                    </Grid.Row> :
-                                    null
-                                }
-                                <Grid.Row
-                                    centered
-                                >
-                                    <Input
-                                        placeholder={'Custom input here...'}
-                                        style={{'margin': '5px', 'width': '50%'}}
-                                        onChange={this.handleChange}
-                                        name='customValue'
-                                        value={this.state.customValue}
-                                    />
-                                    <Button
-                                        primary
-                                        style={{'margin': '5px'}}
-                                        color='blue'
-                                        disabled={this.state.customValues.includes(this.state.customValue) || !this.state.customValue}
-                                        onClick={this.commitSelection}
-                                    >
-                                        Commit Entry
-                                    </Button>
-                                </Grid.Row>
-                            </Grid>
-                        }
-                    </Segment>
+                                    Commit Entry
+                                </Button>
+                            </Grid.Row>
+                        </Grid>
                 </Grid.Column>
             </Grid>
         )

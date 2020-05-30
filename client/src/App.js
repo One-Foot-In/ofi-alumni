@@ -347,6 +347,14 @@ class App extends Component {
                   learnNewInputValues={true}
                   getInputs={this.getInputs}
                 />
+                <SearchablePooledDropdown
+                  endpoint={'/drop/countries'}
+                  isSingleSelect={true}
+                  placeholder={'This is the placeholder'}
+                  textForCustomEntry={'This is where custom label goes'}
+                  learnNewInputValues={false}
+                  getInputs={this.getInputs}
+                />
               </>
             }
           />
