@@ -23,7 +23,7 @@ const gradeOptions = [9, 10, 11, 12].map(val => {
 
 function getErrorLabel(content) {
     return (
-        <Label pointing='below' style={{'background-color': '#F6C7BD'}}> {content} </Label>
+        <Label pointing='below' style={{'backgroundColor': '#F6C7BD'}}> {content} </Label>
     )
 }
 
@@ -40,6 +40,8 @@ export default class Signup extends React.Component {
             email: '', // required
             password: '', // required
             confirmPassword: '', // required
+            schoolSelection: '', // required (id of school selected)
+            schoolOptions: [],
             // STUDENT ONLY
             grade: null, // required
             // ALUMNI ONLY
@@ -61,6 +63,19 @@ export default class Signup extends React.Component {
         this.comparePasswords = this.comparePasswords.bind(this);
         this.getAlumniFields = this.getAlumniFields.bind(this);
         this.getStudentFields = this.getStudentFields.bind(this);
+        this.handleSchoolSelection = this.handleSchoolSelection.bind(this);
+    }
+
+    async componentWillMount() {
+        let result = await makeCall(null, '/drop/schoolsOptions', 'get')
+        this.setState({
+            schoolOptions: result.options
+        })
+    }
+
+    handleSchoolSelection(e, {value}) {
+        e.preventDefault()
+        this.setState({schoolSelection : value})
     }
 
     handleChange(e) {
@@ -92,7 +107,7 @@ export default class Signup extends React.Component {
     }
 
     validateSubmitReadiness() {
-        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password);
+        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password);
         if (this.props.isAlumni) {
             return baseCondition && this.state.graduationYear;
         }
@@ -104,7 +119,7 @@ export default class Signup extends React.Component {
             <>
                 <Form.Field
                     type="number"
-                    required="true"
+                    required={true}
                     style={fieldStyle}
                 >
                     <label>Graduation Year</label>
@@ -149,7 +164,7 @@ export default class Signup extends React.Component {
             <>
                 <Form.Field>
                     <label>Grade</label>
-                    <Dropdown placeholder='Select the grade you attend...' fluid selection options={gradeOptions} onChange={this.handleChangeGrade} name="grade" value={this.state.grade}/>
+                    <Dropdown placeholder='Select the grade you attend...' selection options={gradeOptions} onChange={this.handleChangeGrade} name="grade" value={this.state.grade}/>
                 </Form.Field>
             </>
         )
@@ -166,7 +181,8 @@ export default class Signup extends React.Component {
                 name: this.state.name,
                 email: this.state.email,
                 password: this.state.password,
-                timeZone: ((new Date().getTimezoneOffset())*100)/60 // getTimezoneOffset fetches offset in minutes
+                timeZone: ((new Date().getTimezoneOffset())*100)/60, // getTimezoneOffset fetches offset in minutes
+                schoolId: this.state.schoolSelection
             }
             if (!this.props.isAlumni) {
                 payload = Object.assign({}, payload, {
@@ -250,7 +266,7 @@ export default class Signup extends React.Component {
                     <Form onSubmit={this.handleSubmit}>
                         <Form.Field
                             type="email"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                             error={!this.state.emailValid}
                         >
@@ -260,7 +276,7 @@ export default class Signup extends React.Component {
                         </Form.Field>
                         <Form.Field
                             type="password"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                             error={!this.state.passwordsMatching}
                         >
@@ -270,7 +286,7 @@ export default class Signup extends React.Component {
                         </Form.Field>
                         <Form.Field
                             type="password"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                             error={!this.state.passwordsMatching}
                         >
@@ -280,12 +296,24 @@ export default class Signup extends React.Component {
                         </Form.Field>
                         <Form.Field
                             type="text"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                         >
                             <label>Name</label>
                             <input placeholder='Name' name="name" onChange={this.handleChange} />
-                        </Form.Field>      
+                        </Form.Field>
+                        <Form.Field>
+                            <label>High School</label>
+                            <Dropdown
+                                style={{ 'margin': '5px', 'width': '80%'}}
+                                placeholder={'Select your high school network'}
+                                search
+                                selection
+                                options={this.state.schoolOptions}
+                                value={this.state.value}
+                                onChange={this.handleSchoolSelection}
+                            />
+                        </Form.Field>
                         {this.props.isAlumni ? 
                             this.getAlumniFields() :
                             this.getStudentFields()

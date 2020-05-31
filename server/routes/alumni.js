@@ -23,6 +23,7 @@ router.post('/', async (req, res, next) => {
         const availabilities = [];
         const timeZone = req.body.timeZone;
         const zoomLink = req.body.zoomLink;
+        const schoolId = req.body.schoolId;
 
         const role = "ALUMNI"
         const emailVerified = false
@@ -43,7 +44,8 @@ router.post('/', async (req, res, next) => {
                 availabilities: availabilities,
                 timeZone: timeZone,
                 zoomLink: zoomLink,
-                approved: approved
+                approved: approved,
+                school: schoolId
             }
         )
         const user_instance = new userSchema(
