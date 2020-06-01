@@ -3,6 +3,7 @@ import 'semantic-ui-css/semantic.min.css';
 import { Form, Button, Icon, Message, Grid, Dropdown, Label } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
+import LocationSelectionModal from './LocationSelectionModal';
 
 let fieldStyle = {
     width: '100%',
@@ -46,14 +47,16 @@ export default class Signup extends React.Component {
             grade: null, // required
             // ALUMNI ONLY
             graduationYear: null, // required
-            location: '',
+            country: '',
+            city: '',
             jobTitle: '',
             company: '',
             college: '',
             // FORM-CONTROL
             submitting: false,
             passwordsMatching: true,
-            emailValid: true
+            emailValid: true,
+            locationModalOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
@@ -64,6 +67,34 @@ export default class Signup extends React.Component {
         this.getAlumniFields = this.getAlumniFields.bind(this);
         this.getStudentFields = this.getStudentFields.bind(this);
         this.handleSchoolSelection = this.handleSchoolSelection.bind(this);
+        this.getLocationInput = this.getLocationInput.bind(this);
+        this.handleLocationModal = this.handleLocationModal.bind(this);
+    }
+
+    getLocationInput(country, city) {
+        this.setState({country, city})
+    }
+
+    handleLocationModal() {
+        this.setState({locationModalOpen: !this.state.locationModalOpen})
+    }
+
+    getLocationDisplay() {
+        return (
+            <Label
+                large
+                style={{'margin': '2px'}}
+            >
+                {this.state.city} ({this.state.country})
+                <Icon
+                    onClick={() => this.setState({
+                        country: '',
+                        city: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
     }
 
     async componentWillMount() {
@@ -126,12 +157,25 @@ export default class Signup extends React.Component {
                     <input placeholder='YYYY' name="graduationYear" onChange={this.handleChange} />
                 </Form.Field>
                 <Form.Group>
-                    <Form.Field
-                        type="text"
-                        style={fieldStyle}
-                    >
-                        <label>Location</label>
-                        <input placeholder='City, Country...' name="location" onChange={this.handleChange} />
+                    <Form.Field>
+                        {(this.state.country && this.state.city) ?
+                        this.getLocationDisplay() :
+                        <>
+                            <Button
+                                primary
+                                color="blue"
+                                type="button"
+                                onClick={() => {this.setState({locationModalOpen: true})}}
+                            >
+                                Add Location
+                            </Button>
+                            <LocationSelectionModal
+                                getInput={this.getLocationInput}
+                                modalOpen={this.state.locationModalOpen}
+                                closeModal={this.handleLocationModal}
+                            />
+                        </>
+                        }
                     </Form.Field>
                     <Form.Field
                         type="text"
@@ -191,7 +235,8 @@ export default class Signup extends React.Component {
             } else {
                 payload = Object.assign({}, payload, {
                     graduationYear: this.state.graduationYear,
-                    location: this.state.location,
+                    country: this.state.country,
+                    city: this.state.city,
                     jobTitle: this.state.jobTitle,
                     company: this.state.company,
                     college: this.state.college

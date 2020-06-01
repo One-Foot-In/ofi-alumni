@@ -19,7 +19,7 @@ const MOCK_PASSWORD = 'password'
 
 const firstNames = ["Papa", "Great", "Slick", "Hungry", "Liberal", "Conservative", "Sneaky"];
 const lastNames = ["Pete", "Bear", "Besos", "X AE A-12", "Jade", "Finch", "Khaled", "Panda"];
-const locations = ["St Petersburg", "New York City", "Dhaka, Bangladesh", "San Francisco", "Delhi, India", "Dar es Salaam, Tanzania", "Beijing, China"]
+const cities = ["St Johnsberg", "Old York City", "Khola", "San Disco", "Jelhi", "Dar es Goodbye", "Grazing"]
 const professionFirst = ["Angsty", "Focused", "Bewitched", "Destitute", "Fumbling", "Grandiose", "Dextrous", "Giant", "Manual", "Thirsty", "Zoned out", "Astute"]
 const professionSecond = ["Trader", "Engineer", "Painter", "Student", "Assistant", "Clerk", "Banker", "Architect", "Addict", "Surgeon", "Designer", "Tailor", "Duck"]
 const companies = ["Global Business Machines", "Butt Book", "Capture Inc", "Amazon (The Rainforest)", "Chirper", "TripGuide", "Minisoft", "AT or T", "Pillow Housing", "Goldman Tax", "Tubspot"]
@@ -51,18 +51,12 @@ const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-const createAlumni = async (_email, _name, _location, _profession, _company, _college, _picLink, _hasZoom, timezone, _school) => {
+const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school) => {
     const email = _email;
-    const name = _name;
     const gradYear = Math.floor((Math.random() * 1000) + 2000);
-    const location = _location;
-    const profession = _profession;
-    const company = _company;
-    const college = _college;
     const zoomLink = _hasZoom ? 'yourZoomLink' : null;
     const password = MOCK_PASSWORD;
     const availabilities = []
-    const picLink = _picLink;
 
     const role = "ALUMNI"
     const emailVerified = false
@@ -71,18 +65,19 @@ const createAlumni = async (_email, _name, _location, _profession, _company, _co
     var passwordHash = await bcrypt.hash(password, HASH_COST)
     var alumni_instance = new alumniSchema(
         {
-            name: name,
-            email: email,
+            name: _name,
+            email: _email,
             gradYear: gradYear,
-            location: location,
-            profession: profession,
-            company: company,
-            college: college,
+            country: _country,
+            city: _city,
+            profession: _profession,
+            company: _company,
+            college: _college,
             //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
             //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
             availabilities: availabilities,
             zoomLink: zoomLink,
-            imageURL: picLink,
+            imageURL: _picLink,
             approved: approved,
             timeZone: timezone,
             school: _school
@@ -104,10 +99,8 @@ const createAlumni = async (_email, _name, _location, _profession, _company, _co
 
 const createStudent = async (_email, _name, _picLink, timezone, _school) => {
     const email = _email;
-    const name = _name;
     const grade = Math.floor((Math.random() * 10) + 2);
     const password = MOCK_PASSWORD;
-    const picLink = _picLink;
 
     const role = "STUDENT"
     const emailVerified = false
@@ -116,13 +109,13 @@ const createStudent = async (_email, _name, _picLink, timezone, _school) => {
     var passwordHash = await bcrypt.hash(password, HASH_COST)
     var student_instance = new studentSchema(
         {
-            name: name,
-            email: email,
+            name: _name,
+            email: _email,
             grade: grade,
             timeZone: timezone,
             //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
             //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
-            imageURL: picLink,
+            imageURL: _picLink,
             approved: approved,
             school: _school
         }
@@ -165,14 +158,15 @@ router.get('/seed/', async (req, res, next) => {
             let school = randomPickFromArray(schoolsSaved)
             let alumniEmail = `alumni${i}@ofi.com`
             let alumniName = `${randomPickFromArray(firstNames)} ${randomPickFromArray(lastNames)}`
-            let location = randomPickFromArray(locations)
+            let country = randomPickFromArray(countries)
+            let city = randomPickFromArray(cities)
             let profession = `${randomPickFromArray(professionFirst)} ${randomPickFromArray(professionSecond)}`
             let company = randomPickFromArray(companies)
             let picLinkAlumni = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
             let college = randomPickFromArray(colleges)
             let hasZoom = randomPickFromArray([true, false])
             let timezoneAlumni = randomPickFromArray(timezones)
-            await createAlumni(alumniEmail, alumniName, location, profession, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school)
+            await createAlumni(alumniEmail, alumniName, country, city, profession, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school)
 
             // create mock student
             let studentEmail = `student${i}@ofi.com`

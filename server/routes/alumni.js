@@ -14,7 +14,8 @@ router.post('/', async (req, res, next) => {
         const email = req.body.email;
         const name = req.body.name;
         const gradYear = parseInt(req.body.graduationYear);
-        const location = req.body.location;
+        const country = req.body.country;
+        const city = req.body.city;
         const profession = req.body.jobTitle;
         const company = req.body.company;
         const college = req.body.college;
@@ -35,7 +36,8 @@ router.post('/', async (req, res, next) => {
                 name: name,
                 email: email,
                 gradYear: gradYear,
-                location: location,
+                country: country,
+                city: city,
                 profession: profession,
                 company: company,
                 college: college,
@@ -66,6 +68,7 @@ router.post('/', async (req, res, next) => {
             alumni: alumni_instance
         });
     } catch (e) {
+        console.error('Error in alumni#add', e)
         res.status(500).send({
             message: 'Failed adding alumni: ' + e
         });

@@ -1,6 +1,7 @@
 var mongoose = require('mongoose')
 
 const Schema = mongoose.Schema;
+var COUNTRIES = require("../countries").COUNTRIES
 
 /*
   All Time Availabilities are to be stored in GMT+0 timezone
@@ -23,7 +24,8 @@ const alumniSchema = new Schema(
     name: {type: String, required: true},
     email: {type: String, reguired: true, unique: true},
     gradYear: {type: Number, required: true},
-    location: {type: String, required: false},
+    country: {type: String, enum: COUNTRIES, required: true},
+    city: {type: String, required: true},
     profession: {type: String, required: false},
     company: {type: String, required: false},
     college: {type: String, required: false},
