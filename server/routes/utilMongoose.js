@@ -7,6 +7,7 @@ var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
 var schoolSchema = require('../models/schoolSchema');
+var collegeSchema = require('../models/collegeSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
 
@@ -15,6 +16,7 @@ const HASH_COST = 10;
 /* Integration Testing Routes */
 const USER_COUNT = 20
 const SCHOOL_COUNT = 3
+const COLLEGE_COUNT = 10
 const MOCK_PASSWORD = 'password'
 
 const firstNames = ["Papa", "Great", "Slick", "Hungry", "Liberal", "Conservative", "Sneaky"];
@@ -38,7 +40,6 @@ const colleges = [
 const schools = [
     "Zuckerberg's Privacy Bootcamp", "Elon Musk's Day Care", "Bear Grylls Cullinary Arts", "Joe Rogan's Production Engineering", "Flat Earth Geography Society", "Gengis Khan's School of Peace and Justice"
 ]
-
 const countries = [
     COUNTRIES[0], COUNTRIES[5], COUNTRIES[10], COUNTRIES[15], COUNTRIES[20], COUNTRIES[25], COUNTRIES[30]
 ]
@@ -73,8 +74,6 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             profession: _profession,
             company: _company,
             college: _college,
-            //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-            //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
             availabilities: availabilities,
             zoomLink: zoomLink,
             imageURL: _picLink,
@@ -113,8 +112,6 @@ const createStudent = async (_email, _name, _picLink, timezone, _school) => {
             email: _email,
             grade: grade,
             timeZone: timezone,
-            //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-            //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
             imageURL: _picLink,
             approved: approved,
             school: _school
@@ -143,6 +140,15 @@ const createSchool = async (_name, _country, _logoURL) => {
     await school_instance.save()
 }
 
+const createCollege = async (_name, _country, _logoURL) => {
+    var college_instance = new collegeSchema({
+        name: _name,
+        country: _country,
+        logoURL: _logoURL
+    })
+    await college_instance.save()
+}
+
 router.get('/seed/', async (req, res, next) => {
     try {
         // Create 3 schools
@@ -153,6 +159,16 @@ router.get('/seed/', async (req, res, next) => {
             await createSchool(schoolName, country, logoUrl)
         }
         let schoolsSaved = await schoolSchema.find()
+
+        // create 10 colleges
+        for (let i = 0; i < COLLEGE_COUNT; i++) {
+            const collegeName = colleges[i]
+            const country = randomPickFromArray(countries)
+            const logoUrl = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/400/400.jpg`
+            await createCollege(collegeName, country, logoUrl)
+        }
+        let collegesSaved = await collegeSchema.find()
+
         for (let i = 0; i < USER_COUNT; i++) {
             // create mock alumni
             let school = randomPickFromArray(schoolsSaved)
@@ -163,7 +179,7 @@ router.get('/seed/', async (req, res, next) => {
             let profession = `${randomPickFromArray(professionFirst)} ${randomPickFromArray(professionSecond)}`
             let company = randomPickFromArray(companies)
             let picLinkAlumni = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
-            let college = randomPickFromArray(colleges)
+            let college = randomPickFromArray(collegesSaved)
             let hasZoom = randomPickFromArray([true, false])
             let timezoneAlumni = randomPickFromArray(timezones)
             await createAlumni(alumniEmail, alumniName, country, city, profession, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school)
@@ -412,6 +428,16 @@ router.get('/allSchools', async (req, res) => {
     }
 })
 
+/* College Routes */
+router.get('/allColleges', async (req, res) => {
+    try {
+        let colleges = await collegeSchema.find()
+        res.status(200).send(colleges)
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
 /* Clear All */
 router.get('/data/clear/all', async (req, res, next) => {
     try {
@@ -420,6 +446,7 @@ router.get('/data/clear/all', async (req, res, next) => {
         await userSchema.deleteMany({});
         await requestSchema.deleteMany({});
         await schoolSchema.deleteMany({});
+        await collegeSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});

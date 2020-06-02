@@ -28,7 +28,7 @@ const alumniSchema = new Schema(
     city: {type: String, required: true},
     profession: {type: String, required: false},
     company: {type: String, required: false},
-    college: {type: String, required: false},
+    college: {type: Schema.Types.ObjectId, ref: 'College', required: false},
     //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
     //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
     availabilities: [timeAvailabilitySchema],

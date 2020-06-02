@@ -1,23 +1,22 @@
 import React, { Component } from 'react';
-import {Dropdown, Segment, Button, Input, Icon, Label, Grid, Message, Header} from 'semantic-ui-react';
+import {Dropdown, Button, Input, Icon, Label, Grid, Message } from 'semantic-ui-react';
 import { makeCall } from "../apis";
 
 /*
 props:
     - endpoint 
     - isSingleSelect
-    - placeholder
-    - textForCustomEntry
+    - placeholderExisting
+    - placeholderCustom
     - getInputs: ()
-    - learnNewInputValues
-    - title
+    - dataType
 */
 export default class SearchablePooledDropdown extends Component {
     constructor(props){
         super(props)
         this.state = {
             options: [],
-            value: this.props.isSingleSelect ? null : [],
+            value: this.props.isSingleSelect ? {} : [],
             customValue: '',
             customValues: [] // used when !isSingleSelect
         }
@@ -36,19 +35,19 @@ export default class SearchablePooledDropdown extends Component {
         })
     }
 
-    handleSelection(e, {value}) {
+    handleSelection(e, {value, text}) {
+        e.persist()
         e.preventDefault()
         this.setState({
-            value
+            value: {
+                value,
+                text: e.target && e.target.textContent
+            }
         },() => {
-            if (this.props.isSingleSelect) {
-                this.props.getInputs(this.state.customValue)
+            if (this.state.isSingleSelect) {
+                this.props.getInputs({customValue: this.state.customValue, value: this.state.value})
             } else {
-                if (this.props.learnNewInputValues) {
-                    this.props.getInputs({customValues: this.state.customValues, values: this.state.value})
-                } else {
-                    this.props.getInputs([...this.state.customValues, ...this.state.value])
-                }
+                this.props.getInputs({customValues: this.state.customValues, value: this.state.value})
             }
         })
     }
@@ -62,29 +61,23 @@ export default class SearchablePooledDropdown extends Component {
 
     commitSelection(e) {
         e.preventDefault()
-        let newSelections = []
         if (!this.props.isSingleSelect) {
-            newSelections = this.state.customValues
+            let newSelections = []
+            newSelections.push(this.state.customValue)
+            this.setState({
+                customValue: '',
+                customValues: newSelections,
+            }, () => {
+                this.props.getInputs({customValues: this.state.customValues, value: this.state.value})
+            })
         } else {
             this.setState({
-                value: null
+                customValues: [],
+                customValue: this.state.customValue
+            }, () => {
+                this.props.getInputs({customValue: this.state.customValue, value: this.state.value})
             })
         }
-        newSelections.push(this.state.customValue)
-        this.setState({
-            customValues: newSelections,
-            customValue: ''
-        }, () => {
-            if (this.props.isSingleSelect) {
-                this.props.getInputs(this.state.customValue)
-            } else {
-                if (this.props.learnNewInputValues) {
-                    this.props.getInputs({customValues: this.state.customValues, values: this.state.value})
-                } else {
-                    this.props.getInputs([...this.state.customValues, ...this.state.value])
-                }
-            }
-        })
     }
 
     removeCustomValue(e, toRemove) {
@@ -126,16 +119,15 @@ export default class SearchablePooledDropdown extends Component {
                     <Grid.Row
                         centered
                     >
-                        <Header>{this.props.title || 'Title here'}</Header>
                     </Grid.Row>
                         <Grid>
                             <Grid.Row
                                 centered
                             >
                                 <Dropdown
-                                    style={{ 'margin': '5px', 'width': '80%'}}
-                                    placeholder={this.props.placeholder}
+                                    style={{ 'margin': '5px'}}
                                     fluid
+                                    placeholder={`Select ${this.props.dataType}`}
                                     multiple={!this.props.isSingleSelect}
                                     disabled={this.props.isSingleSelect && this.state.customValues && this.state.customValues.length > 0}
                                     search
@@ -144,15 +136,6 @@ export default class SearchablePooledDropdown extends Component {
                                     value={this.state.value}
                                     onChange={this.handleSelection}
                                 />
-                            </Grid.Row>
-                            <Grid.Row
-                                centered
-                            >
-                                <Message
-                                    style={{'width': '80%', 'margin': '5px'}}
-                                > 
-                                    Your custom inputs (Please add only if there isn't an existing option)
-                                </Message>
                             </Grid.Row>
                             {
                                 this.state.customValues && this.state.customValues.length ? 
@@ -165,24 +148,34 @@ export default class SearchablePooledDropdown extends Component {
                             }
                             <Grid.Row
                                 centered
+                                columns={2}
                             >
-                                <Input
-                                    placeholder={'Custom input here...'}
-                                    style={{'margin': '5px', 'width': '50%'}}
-                                    onChange={this.handleChange}
-                                    name='customValue'
-                                    value={this.state.customValue}
-                                    disabled={this.props.isSingleSelect && (this.state.customValues && this.state.customValues.length > 0) }
-                                />
-                                <Button
-                                    primary
-                                    style={{'margin': '5px'}}
-                                    color='blue'
-                                    disabled={this.disableCommitButton()}
-                                    onClick={this.commitSelection}
+                                <Grid.Column
+                                    width={10}
                                 >
-                                    Commit Entry
-                                </Button>
+                                    <Input
+                                        label={`Add New ${this.props.dataType}`}
+                                        placeholder={`Enter ${this.props.dataType} name...`}
+                                        style={{'margin': '5px', 'width': '50%'}}
+                                        onChange={this.handleChange}
+                                        name='customValue'
+                                        value={this.state.customValue}
+                                        disabled={this.props.isSingleSelect && (this.state.customValues && this.state.customValues.length > 0) }
+                                    />
+                                </Grid.Column>
+                                <Grid.Column
+                                    width={6}
+                                >
+                                    <Button
+                                        primary
+                                        style={{'margin': '5px'}}
+                                        color='blue'
+                                        disabled={this.disableCommitButton()}
+                                        onClick={this.commitSelection}
+                                    >
+                                        Commit {this.props.dataType}
+                                    </Button>
+                                </Grid.Column>
                             </Grid.Row>
                         </Grid>
                 </Grid.Column>

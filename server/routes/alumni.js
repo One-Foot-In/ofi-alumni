@@ -4,6 +4,7 @@ var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
+var collegeSchema = require('../models/collegeSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 require('mongoose').Promise = global.Promise
 
@@ -26,6 +27,19 @@ router.post('/', async (req, res, next) => {
         const zoomLink = req.body.zoomLink;
         const schoolId = req.body.schoolId;
 
+        // find or create College
+        const newCollege = req.body.newCollege
+        const collegeCountry = req.body.collegeCountry
+        let existingCollegeId = req.body.existingCollegeId
+        if (newCollege) {
+            var newCollegeCreated = new collegeSchema({
+                name: newCollege,
+                country: collegeCountry
+            })
+            await newCollegeCreated.save()
+            existingCollegeId = newCollegeCreated._id
+        }
+
         const role = "ALUMNI"
         const emailVerified = false
         const approved = false
@@ -41,13 +55,12 @@ router.post('/', async (req, res, next) => {
                 profession: profession,
                 company: company,
                 college: college,
-                //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-                //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
                 availabilities: availabilities,
                 timeZone: timeZone,
                 zoomLink: zoomLink,
                 approved: approved,
-                school: schoolId
+                school: schoolId,
+                college: existingCollegeId
             }
         )
         const user_instance = new userSchema(

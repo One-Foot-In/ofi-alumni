@@ -4,6 +4,7 @@ import { Form, Button, Icon, Message, Grid, Dropdown, Label } from 'semantic-ui-
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 import LocationSelectionModal from './LocationSelectionModal';
+import CollegeSelectionModal from './CollegeSelectionModal';
 
 let fieldStyle = {
     width: '100%',
@@ -51,12 +52,16 @@ export default class Signup extends React.Component {
             city: '',
             jobTitle: '',
             company: '',
-            college: '',
+            newCollege: '', // when new college is being entered
+            existingCollegeId: '', // when alumni selects from existing colleges
+            collegeDisplayName: '', // used for display when selecting colleges
+            collegeCountry: '', // when alumni selects old college
             // FORM-CONTROL
             submitting: false,
             passwordsMatching: true,
             emailValid: true,
-            locationModalOpen: false
+            locationModalOpen: false,
+            collegeModalOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
@@ -69,14 +74,35 @@ export default class Signup extends React.Component {
         this.handleSchoolSelection = this.handleSchoolSelection.bind(this);
         this.getLocationInput = this.getLocationInput.bind(this);
         this.handleLocationModal = this.handleLocationModal.bind(this);
+        this.getCollegeInput = this.getCollegeInput.bind(this);
+        this.handleCollegeSelectionModal = this.handleCollegeSelectionModal.bind(this);
     }
 
     getLocationInput(country, city) {
         this.setState({country, city})
     }
 
+    getCollegeInput(country, collegeName, collegeId) {
+        if (!collegeId) {
+            this.setState({
+                collegeCountry: country,
+                newCollege: collegeName,
+                collegeDisplayName: collegeName
+            }, () => console.log("state is ", this.state))
+        } else {
+            this.setState({
+                existingCollegeId: collegeId,
+                collegeDisplayName: collegeName
+            }, () => console.log("state is ", this.state))
+        }
+    }
+
     handleLocationModal() {
         this.setState({locationModalOpen: !this.state.locationModalOpen})
+    }
+
+    handleCollegeSelectionModal() {
+        this.setState({collegeModalOpen: !this.state.collegeModalOpen})
     }
 
     getLocationDisplay() {
@@ -90,6 +116,25 @@ export default class Signup extends React.Component {
                     onClick={() => this.setState({
                         country: '',
                         city: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
+    }
+
+    getCollegeDisplay() {
+        return (
+            <Label
+                large
+                style={{'margin': '2px'}}
+            >
+                {this.state.collegeDisplayName}
+                <Icon
+                    onClick={() => this.setState({
+                        collegeDisplayName: '',
+                        newCollege: '',
+                        existingCollegeId: ''
                     })}
                     name='delete'
                 />
@@ -191,12 +236,26 @@ export default class Signup extends React.Component {
                         <label>Company</label>
                         <input placeholder='Company...' name="company" onChange={this.handleChange} />
                     </Form.Field>
-                    <Form.Field
-                        type="text"
-                        style={fieldStyle}
-                    >
-                        <label>College</label>
-                        <input placeholder='College...' name="college" onChange={this.handleChange} />
+                    <Form.Field>
+                        {
+                            (this.state.collegeDisplayName) ?
+                            this.getCollegeDisplay() :
+                            <>
+                                <Button
+                                    primary
+                                    color="blue"
+                                    type="button"
+                                    onClick={() => {this.setState({collegeModalOpen: true})}}
+                                >
+                                    Add College
+                                </Button>
+                                <CollegeSelectionModal
+                                    getInput={this.getCollegeInput}
+                                    modalOpen={this.state.collegeModalOpen}
+                                    closeModal={this.handleCollegeSelectionModal}
+                                />
+                            </>
+                        }
                     </Form.Field>
                 </Form.Group>
             </>
@@ -239,7 +298,10 @@ export default class Signup extends React.Component {
                     city: this.state.city,
                     jobTitle: this.state.jobTitle,
                     company: this.state.company,
-                    college: this.state.college
+                    newCollege: this.state.newCollege, // when new college is being entered
+                    existingCollegeId: this.state.existingCollegeId, // when alumni selects from existing colleges
+                    collegeDisplayName: this.state.collegeDisplayName, // used for display when selecting colleges
+                    collegeCountry: this.state.collegeCountry
                 });
             }
             e.preventDefault();
