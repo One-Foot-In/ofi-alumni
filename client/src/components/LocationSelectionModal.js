@@ -36,7 +36,6 @@ export default class LocationSelectionModal extends Component {
 
     handleCityChange(e) {
         e.preventDefault()
-        console.log(e.target.value)
         this.setState({
             city: e.target.value 
         })
