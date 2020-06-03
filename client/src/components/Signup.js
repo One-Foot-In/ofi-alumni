@@ -88,12 +88,13 @@ export default class Signup extends React.Component {
                 collegeCountry: country,
                 newCollege: collegeName,
                 collegeDisplayName: collegeName
-            }, () => console.log("state is ", this.state))
+            })
         } else {
             this.setState({
+                collegeCountry: country,
                 existingCollegeId: collegeId,
-                collegeDisplayName: collegeName
-            }, () => console.log("state is ", this.state))
+                collegeDisplayName: `${collegeName} (${this.state.country})`
+            })
         }
     }
 

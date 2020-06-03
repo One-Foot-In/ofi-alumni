@@ -5,6 +5,9 @@ import { makeCall } from "../apis";
 
 /*
     props:
+    - modalOpen
+    - closeModal
+    - getInput
 */
 export default class CollegeSelectionModal extends Component {
     constructor(props){
