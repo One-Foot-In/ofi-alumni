@@ -3,12 +3,29 @@ var router = express.Router();
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
+var timezoneHelpers = require("../helpers/timezoneHelpers")
 require('mongoose').Promise = global.Promise
 
 router.get('/', async (req, res, next) => {
     res.status(200).send({
         message: "requests page!"
     })
+})
+
+router.patch('/applyRequesterTimezone', async (req, res, next) => {
+    try {
+        const agnosticAvailabilities = req.body.availabilities;
+        const timezone = req.body.offset
+        const availabilities = await timezoneHelpers.applyTimezone(agnosticAvailabilities, timezone)
+        res.status(200).send({
+            availabilities: availabilities
+        })
+    } catch (e) {
+        console.log(e)
+        res.status(500).send({
+            message: ('failed to apply timezone. Reason: ' + e)
+        })
+    }
 })
 
 router.post('/addRequest/', async (req, res, next) => {

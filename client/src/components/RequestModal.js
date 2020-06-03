@@ -147,42 +147,39 @@ export default class RequestModal extends Component {
         this.state = {
             alumni: null,
             studentId: '',
-            dayOptions: [],
-            day: '',
+            options: [],
+            value: '',
             topic: '',
             notes: '',
             submitting: false
         }
-        this.handleDayChange = this.handleDayChange.bind(this)
+        this.handleValueChange = this.handleValueChange.bind(this)
         this.submitRequest = this.submitRequest.bind(this)
     }
 
     async componentWillMount() {
         await this.setState({alumni: this.props.alumni})
-        this.createDayOptions(this.state.alumni.availabilities)
+        this.createOptions(this.state.alumni.availabilities)
     }
 
-    createDayOptions(availabilities) {
-        let days = [];
-        let timeOffset = new Date().getTimezoneOffset()
-        for (let day of availabilities) {
-            let adjustedTime = day.time + timeOffset
-            console.log(adjustedTime)
-            if (adjustedTime < 0) {
-                //TODO
-            } else if (adjustedTime > 2400) {
-                //TODO
-            } else {
-                if (!days.find(d => d['value'] === day.day)) {
-                    days.push({
-                        key: day.day.toLowerCase(),
-                        text: day.day,
-                        value: day.day
-                    })
-                }
-            }
-        }
-        this.setState({dayOptions: days})
+    async createOptions(availabilities) {
+        console.log(availabilities)
+        /* 
+         * Offset is in minutes, annoyingly, and in the opposite direction 
+         * that you'd expect. This means that if you are in UTC -4 (EST), 
+         * it returns 240 (not -240 to reflect being 4 hours behind)
+         * That's why there's a tiny bit of math in the payload, to conform
+         * with our date model (which makes more sense)
+         */
+        let timeOffset = await new Date().getTimezoneOffset()
+        console.log(timeOffset)
+        console.log(this.props.alumni.timeZone)
+        let adjustedAvailabilities = await makeCall({availabilities: availabilities,
+                                                    offset: (-(timeOffset/60)*100)}, 
+                                                    '/request/applyRequesterTimezone', 
+                                                    'patch')
+        console.log(adjustedAvailabilities)
+        this.setState({options: adjustedAvailabilities})
     }
 
     submitRequest(e) {
@@ -226,10 +223,10 @@ export default class RequestModal extends Component {
         })
     }
 
-    handleDayChange(e, {value}) {
+    handleValueChange(e, {value}) {
         e.preventDefault();
         this.setState({
-            day: value
+            value: value
         })
     }
 
@@ -261,7 +258,7 @@ export default class RequestModal extends Component {
                             fluid
                             selection
                             options={this.state.dayOptions} 
-                            onChange={this.handleDayChange}
+                            onChange={this.handleValueChange}
                             value={this.state.day}
                             name='day'
                         />

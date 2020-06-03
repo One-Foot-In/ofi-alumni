@@ -197,7 +197,7 @@ export default class AlumniDirectory extends Component {
             } else {
                 if (this.state.allText[i].match(searchPattern) !== null) {
                     numResults += 1
-                    display.push(this.constructProfile(this.state.entries[i]), i)
+                    display.push(this.constructProfile(this.state.entries[i], i))
                 }
             }
             i++;
