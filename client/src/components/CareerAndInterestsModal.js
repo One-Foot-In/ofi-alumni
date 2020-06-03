@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Modal, Grid, Label, Icon, Dropdown } from 'semantic-ui-react';
+import {Button, Modal } from 'semantic-ui-react';
 import SearchablePooledSingleSelectDropdown from "./SearchablePooledSingleSelectDropdown"
 import { makeCall } from "../apis";
 import SearchablePooledMultiSelectDropdown from './SearchablePooledMultiSelectDropdown';
@@ -37,7 +37,7 @@ export default class CareerAndInterestsModal extends Component {
         this.setState({countryOptions: result.options})
     }
 
-    getJobTitleInput(selection, isNew) {
+    getCompanyInput(selection, isNew) {
         if (selection) {
             if (isNew) {
                 this.setState({
@@ -61,7 +61,7 @@ export default class CareerAndInterestsModal extends Component {
         }
     }
 
-    getCompanyInput(selection, isNew) {
+    getJobTitleInput(selection, isNew) {
         if (selection) {
             if (isNew) {
                 this.setState({
@@ -94,6 +94,7 @@ export default class CareerAndInterestsModal extends Component {
 
     submit(e) {
         e.preventDefault()
+        console.log(this.state)
         // TODO: lift jobTitle, company, and interests info into signup form
         this.props.closeModal()
     }

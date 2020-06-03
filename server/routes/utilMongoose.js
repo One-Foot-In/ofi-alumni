@@ -8,6 +8,9 @@ var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
 var schoolSchema = require('../models/schoolSchema');
 var collegeSchema = require('../models/collegeSchema');
+var companySchema = require('../models/companySchema');
+var jobTitleSchema = require('../models/companySchema');
+var interestsSchema = require('../models/interestsSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
 
@@ -17,6 +20,8 @@ const HASH_COST = 10;
 const USER_COUNT = 20
 const SCHOOL_COUNT = 3
 const COLLEGE_COUNT = 10
+const COMPANY_COUNT = 10
+const JOB_TITLE_COUNT = 10
 const MOCK_PASSWORD = 'password'
 
 const firstNames = ["Papa", "Great", "Slick", "Hungry", "Liberal", "Conservative", "Sneaky"];
@@ -43,16 +48,18 @@ const schools = [
 const countries = [
     COUNTRIES[0], COUNTRIES[5], COUNTRIES[10], COUNTRIES[15], COUNTRIES[20], COUNTRIES[25], COUNTRIES[30]
 ]
-
 const timezones = [
     -1200, -1100, -1000, -900, -800, -700, -600, -500, -400, -300, -200, -100, 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200
+]
+const interests = [
+    "3D Printing", "Entrepreneurship", "Sleuthing", "Quantum Computing", "Bird Watching", "Drums", "Guitar", "Social Justice", "Politics", "Community Service", "Mental Health Awareness"
 ]
 
 const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school) => {
+const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _interests) => {
     const email = _email;
     const gradYear = Math.floor((Math.random() * 1000) + 2000);
     const zoomLink = _hasZoom ? 'yourZoomLink' : null;
@@ -71,8 +78,9 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             gradYear: gradYear,
             country: _country,
             city: _city,
-            profession: _profession,
+            jobTitle: _profession,
             company: _company,
+            interests: _interests,
             college: _college,
             availabilities: availabilities,
             zoomLink: zoomLink,
@@ -168,6 +176,32 @@ router.get('/seed/', async (req, res, next) => {
             await createCollege(collegeName, country, logoUrl)
         }
         let collegesSaved = await collegeSchema.find()
+        
+        // create 10 companies
+        for (let i = 0; i < COMPANY_COUNT; i++) {
+            let company_instance = new companySchema({
+                name: companies[i]
+            })
+            await company_instance.save()
+        }
+        let companiesSaved = await companySchema.find()
+        // create 10 jobTitles
+        for (let i = 0; i < JOB_TITLE_COUNT; i++) {
+            let jobTitle_instance = new jobTitleSchema({
+                name: `${randomPickFromArray(professionFirst)} ${randomPickFromArray(professionSecond)} ${i}`
+            })
+            await jobTitle_instance.save()
+        }
+        let jobTitlesSaved = await jobTitleSchema.find()
+
+        // create interests
+        for (let i = 0; i < interests.length; i++) {
+            let interest_instance = new interestsSchema({
+                name: interests[i]
+            })
+            await interest_instance.save()
+        }
+        let interestsSaved = await interestsSchema.find()
 
         for (let i = 0; i < USER_COUNT; i++) {
             // create mock alumni
@@ -176,13 +210,14 @@ router.get('/seed/', async (req, res, next) => {
             let alumniName = `${randomPickFromArray(firstNames)} ${randomPickFromArray(lastNames)}`
             let country = randomPickFromArray(countries)
             let city = randomPickFromArray(cities)
-            let profession = `${randomPickFromArray(professionFirst)} ${randomPickFromArray(professionSecond)}`
-            let company = randomPickFromArray(companies)
+            let jobTitle = randomPickFromArray(jobTitlesSaved)
+            let company = randomPickFromArray(companiesSaved)
+            let interests = [randomPickFromArray(interestsSaved), randomPickFromArray(interestsSaved)]
             let picLinkAlumni = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
             let college = randomPickFromArray(collegesSaved)
             let hasZoom = randomPickFromArray([true, false])
             let timezoneAlumni = randomPickFromArray(timezones)
-            await createAlumni(alumniEmail, alumniName, country, city, profession, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school)
+            await createAlumni(alumniEmail, alumniName, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school, interests)
 
             // create mock student
             let studentEmail = `student${i}@ofi.com`
@@ -438,6 +473,34 @@ router.get('/allColleges', async (req, res) => {
     }
 })
 
+/* Career Routes */
+router.get('/allInterests', async (req, res) => {
+    try {
+        let interests = await interestsSchema.find()
+        res.status(200).send(interests)
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
+router.get('/allJobTitles', async (req, res) => {
+    try {
+        let jobTitles = await jobTitleSchema.find()
+        res.status(200).send(jobTitles)
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
+router.get('/allCompanies', async (req, res) => {
+    try {
+        let companies = await companySchema.find()
+        res.status(200).send(companies)
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
 /* Clear All */
 router.get('/data/clear/all', async (req, res, next) => {
     try {
@@ -447,6 +510,9 @@ router.get('/data/clear/all', async (req, res, next) => {
         await requestSchema.deleteMany({});
         await schoolSchema.deleteMany({});
         await collegeSchema.deleteMany({});
+        await jobTitleSchema.deleteMany({});
+        await interestsSchema.deleteMany({});
+        await companySchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});
