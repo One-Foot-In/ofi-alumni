@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
-import {Dropdown, Icon, Label, Grid } from 'semantic-ui-react';
+import {Dropdown, Icon, Label, Grid, Segment } from 'semantic-ui-react';
 import { makeCall } from "../apis";
 
 const NEW_ENTRY_TEXT = "Add new entry "
 
 /*
+    NOTE: There is a bug on using `allowableAdditions` on dropdowns as here:
+    https://github.com/Semantic-Org/Semantic-UI-React/issues/2624
+*/
+
+/*
 props:
     - endpoint 
-    - getInputs: ()
-    - dataType
+    - getInputs: ({old: {value, text}, new: {value, text}}) // value for entries is old is mongoId
+    - dataType: string
     - allowAddition: Boolean
 */
 export default class SearchablePooledMultiSelectDropdown extends Component {
@@ -104,20 +109,31 @@ export default class SearchablePooledMultiSelectDropdown extends Component {
     }
 
     getEnteredCustomValues() {
-        return this.state.customSelections && this.state.customSelections.map(selection => {
-            return (
-            <Label
-                key={selection.value}
-                style={{'margin': '2px'}}
-            >
-                {selection.value}
-                <Icon
-                    onClick={(e) => this.removeCustomValue(e, selection.value)}
-                    name='delete'
-                />
-            </Label>
-            )
-        })
+        return (
+            this.state.customSelections && this.state.customSelections.length ?
+            <Segment>
+                <Label color='blue' ribbon>
+                    Your entries for {this.props.dataType}
+                </Label>
+                {
+                    this.state.customSelections.map(selection => {
+                        return (
+                            <Label
+                                key={selection.value}
+                                style={{'margin': '2px'}}
+                            >
+                                {selection.value}
+                                <Icon
+                                    onClick={(e) => this.removeCustomValue(e, selection.value)}
+                                    name='delete'
+                                />
+                            </Label>
+                        )
+                    })
+                }
+            </Segment> :
+            null
+        )
     }
 
     render() {

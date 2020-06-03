@@ -16,6 +16,7 @@ import AlumniVerification from './components/AlumniVerification'
 import * as actions from './redux/actions'
 // TODO: remove once used elsewhere
 import SearchablePooledMultiSelectDropdown from './components/SearchablePooledMultiSelectDropdown';
+import SearchablePooledSingleSelectDropdown from './components/SearchablePooledSingleSelectDropdown';
 
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
 const isDevMode = () => {
@@ -341,10 +342,15 @@ class App extends Component {
                 </Segment>
                 <SearchablePooledMultiSelectDropdown
                   endpoint={'/drop/colleges/Cambodia'}
-                  isSingleSelect={false}
                   getInputs={this.getInputs}
                   dataType={'Colleges'}
                   allowAdditions={true}
+                />
+                <SearchablePooledSingleSelectDropdown
+                  endpoint={'/drop/colleges/Cambodia'}
+                  getInput={this.getInputs}
+                  dataType={'Colleges'}
+                  allowAddition={true}
                 />
               </>
             }

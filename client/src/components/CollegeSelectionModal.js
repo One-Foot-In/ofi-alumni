@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import {Button, Modal, Grid, Label, Icon, Dropdown } from 'semantic-ui-react';
-import SearchablePooledMultiSelectDropdown from "./SearchablePooledMultiSelectDropdown"
+import SearchablePooledSingleSelectDropdown from "./SearchablePooledSingleSelectDropdown"
 import { makeCall } from "../apis";
 
 /*
-props:
+    props:
 */
 export default class CollegeSelectionModal extends Component {
     constructor(props){
@@ -19,7 +19,6 @@ export default class CollegeSelectionModal extends Component {
         }
         this.handleCountrySelection = this.handleCountrySelection.bind(this)
         this.getCollegeInput = this.getCollegeInput.bind(this)
-        this.deleteCollege = this.deleteCollege.bind(this)
         this.deleteCountry = this.deleteCountry.bind(this)
         this.submit = this.submit.bind(this)
     }
@@ -36,12 +35,28 @@ export default class CollegeSelectionModal extends Component {
         })
     }
 
-    getCollegeInput(selection) {
-        this.setState({
-            newCollege: selection.customValue,
-            existingCollegeId: selection.value && selection.value.value,
-            existingCollegeName: selection.value && selection.value.text
-        })
+    getCollegeInput(selection, isNew) {
+        if (selection) {
+            if (isNew) {
+                this.setState({
+                    newCollege: selection.value,
+                    existingCollegeId: '',
+                    existingCollegeName: ''
+                })
+            } else {
+                this.setState({
+                    newCollege: '',
+                    existingCollegeId: selection.value,
+                    existingCollegeName: selection.text
+                })
+            }
+        } else {
+            this.setState({
+                newCollege: '',
+                existingCollegeId: '',
+                existingCollegeName: ''
+            })
+        }
     }
 
     deleteCountry(e) {
@@ -51,14 +66,6 @@ export default class CollegeSelectionModal extends Component {
             newCollege: '',
             existingCollegeId: '',
             existingCollegeName: ''
-        })
-    }
-
-    deleteCollege(e) {
-        e.preventDefault()
-        this.setState({
-            newCollege: '',
-            existingCollegeId: ''
         })
     }
 
@@ -89,25 +96,12 @@ export default class CollegeSelectionModal extends Component {
                                     </Label>
                                 </Grid.Row>
                                 <Grid.Row>
-                                    {
-                                        (!this.state.newCollege && !this.state.existingCollegeId) ? 
-                                        <SearchablePooledMultiSelectDropdown
-                                            endpoint={`/drop/colleges/${this.state.country}`}
-                                            isSingleSelect={true}
-                                            placeholderExisting={`Select your college from list`}
-                                            placeholderCustom={`Enter your college/university name (if not in list)`}
-                                            dataType={"College"}
-                                            getInputs={this.getCollegeInput}
-                                        /> 
-                                        :
-                                        <Label>
-                                            {this.state.newCollege || this.state.existingCollegeName}
-                                            <Icon
-                                                onClick={this.deleteCollege}
-                                                name='delete'
-                                            />
-                                        </Label>
-                                    }
+                                    <SearchablePooledSingleSelectDropdown
+                                        endpoint={`/drop/colleges/${this.state.country}`}
+                                        allowAddition={true}
+                                        dataType={"College"}
+                                        getInput={this.getCollegeInput}
+                                    /> 
                                 </Grid.Row>
                             </Grid>
                         </> : 
