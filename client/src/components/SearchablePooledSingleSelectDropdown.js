@@ -34,7 +34,6 @@ export default class SearchablePooledSingleSelectDropdown extends Component {
         let result = await makeCall(null, this.props.endpoint, 'get')
         this.setState({
             options: result.options,
-
         })
     }
 
@@ -114,30 +113,25 @@ export default class SearchablePooledSingleSelectDropdown extends Component {
     render() {
         return (
             <Grid>
-                {
-                    this.state.customSelection ? 
-                    <Grid.Row
-                        centered
-                    >
-                        {this.getEnteredCustomValue()}
-                    </Grid.Row> :
-                    null
-                }
                 <Grid.Row
                     centered
                 >
-                    <Dropdown
-                        placeholder={`Select ${this.props.dataType}`}
-                        search
-                        selection
-                        allowAdditions={this.props.allowAddition}
-                        additionLabel={NEW_ENTRY_TEXT}
-                        options={this.state.options}
-                        value={this.state.value}
-                        clearable
-                        disabled={this.state.customSelection}
-                        onChange={this.handleSelection}
-                    />
+                    {
+                        this.state.customSelection ? 
+                        this.getEnteredCustomValue()
+                        :
+                        <Dropdown
+                            placeholder={`Select ${this.props.dataType}`}
+                            search
+                            selection
+                            allowAdditions={this.props.allowAddition}
+                            additionLabel={NEW_ENTRY_TEXT}
+                            options={this.state.options}
+                            value={this.state.value}
+                            disabled={this.state.customSelection}
+                            onChange={this.handleSelection}
+                        />
+                    }
                 </Grid.Row>
             </Grid>
         )

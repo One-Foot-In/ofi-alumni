@@ -5,6 +5,7 @@ import swal from "sweetalert";
 import { makeCall } from "../apis";
 import LocationSelectionModal from './LocationSelectionModal';
 import CollegeSelectionModal from './CollegeSelectionModal';
+import CareerAndInterestsModal from './CareerAndInterestsModal';
 
 let fieldStyle = {
     width: '100%',
@@ -61,7 +62,8 @@ export default class Signup extends React.Component {
             passwordsMatching: true,
             emailValid: true,
             locationModalOpen: false,
-            collegeModalOpen: false
+            collegeModalOpen: false,
+            careerModalOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
@@ -76,6 +78,7 @@ export default class Signup extends React.Component {
         this.handleLocationModal = this.handleLocationModal.bind(this);
         this.getCollegeInput = this.getCollegeInput.bind(this);
         this.handleCollegeSelectionModal = this.handleCollegeSelectionModal.bind(this);
+        this.handleCareerModal = this.handleCareerModal.bind(this);
     }
 
     getLocationInput(country, city) {
@@ -104,6 +107,10 @@ export default class Signup extends React.Component {
 
     handleCollegeSelectionModal() {
         this.setState({collegeModalOpen: !this.state.collegeModalOpen})
+    }
+
+    handleCareerModal() {
+        this.setState({careerModalOpen: !this.state.careerModalOpen})
     }
 
     getLocationDisplay() {
@@ -230,12 +237,22 @@ export default class Signup extends React.Component {
                         <label>Job Title</label>
                         <input placeholder='Position...' name="jobTitle" onChange={this.handleChange} />
                     </Form.Field>
-                    <Form.Field
-                        type="text"
-                        style={fieldStyle}
-                    >
-                        <label>Company</label>
-                        <input placeholder='Company...' name="company" onChange={this.handleChange} />
+                    <Form.Field>
+                        <>
+                            <Button
+                                primary
+                                color="blue"
+                                type="button"
+                                onClick={() => {this.setState({careerModalOpen: true})}}
+                            >
+                                Add Career and Interests
+                            </Button>
+                            <CareerAndInterestsModal
+                                // getInput={this.getCollegeInput}
+                                modalOpen={this.state.careerModalOpen}
+                                closeModal={this.handleCareerModal}
+                            />
+                        </>
                     </Form.Field>
                     <Form.Field>
                         {

@@ -27,8 +27,10 @@ const alumniSchema = new Schema(
     country: {type: String, enum: COUNTRIES, required: true},
     city: {type: String, required: true},
     profession: {type: String, required: false},
-    company: {type: String, required: false},
+    company: {type: Schema.Types.ObjectId, ref: 'Company', required: false},
+    jobTitle: {type: Schema.Types.ObjectId, ref: 'JobTitle', required: false},
     college: {type: Schema.Types.ObjectId, ref: 'College', required: false},
+    interests: {type: Array, required: false},
     //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
     //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
     availabilities: [timeAvailabilitySchema],

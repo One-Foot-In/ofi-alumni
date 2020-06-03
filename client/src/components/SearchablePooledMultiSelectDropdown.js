@@ -160,7 +160,6 @@ export default class SearchablePooledMultiSelectDropdown extends Component {
                         additionLabel={NEW_ENTRY_TEXT}
                         options={this.state.options}
                         value={this.state.value}
-                        clearable
                         onChange={this.handleSelection}
                     />
                 </Grid.Row>
