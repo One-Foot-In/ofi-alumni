@@ -41,6 +41,8 @@ export default class PooledSingleSelectDropdown extends Component {
             },
             customValue: '',
             value: null
+        }, () => {
+            this.props.getInput(this.state.customSelection, true)
         })
     }
 
@@ -110,7 +112,6 @@ export default class PooledSingleSelectDropdown extends Component {
     render() {
         return (
             <Grid>
-
                     {
                         this.state.customSelection ? 
                         <Grid.Row
@@ -122,6 +123,7 @@ export default class PooledSingleSelectDropdown extends Component {
                     <>
                     <Grid.Row centered>
                         <Dropdown
+                            style={{'margin':'5px'}}
                             placeholder={`Select ${this.props.dataType}`}
                             search
                             fluid
@@ -149,7 +151,7 @@ export default class PooledSingleSelectDropdown extends Component {
                             </Grid.Column>
                             <Grid.Column centered width={4}>
                                 <Button
-                                    disabled={this.state.value}
+                                    disabled={this.state.value || !this.state.customValue}
                                     primary
                                     color="blue"
                                     onClick={this.commitCustomValue}

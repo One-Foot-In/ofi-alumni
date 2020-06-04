@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import {Button, Modal } from 'semantic-ui-react';
-import SearchablePooledSingleSelectDropdown from "./SearchablePooledSingleSelectDropdown"
+import {Button, Modal, Divider, Step, Segment } from 'semantic-ui-react';
+import PooledSingleSelectDropdown from "./PooledSingleSelectDropdown"
+import PooledMultiSelectDropdown from './PooledMultiSelectDropdown';
 import { makeCall } from "../apis";
-import SearchablePooledMultiSelectDropdown from './SearchablePooledMultiSelectDropdown';
 
 /*
     props:
@@ -13,23 +13,26 @@ import SearchablePooledMultiSelectDropdown from './SearchablePooledMultiSelectDr
 export default class CareerAndInterestsModal extends Component {
     constructor(props){
         super(props)
+        // props are currently not being used to populate input fields
+        // this can be added as a future enhancement
         this.state = {
             // Job Title
-            existingjobTitleId: '',
-            existingjobTitleName: '',
-            newJobTitle: '',
+            existingJobTitleId: this.props.existingJobTitleId || '',
+            existingJobTitleName: this.props.existingJobTitleName || '',
+            newJobTitle: this.props.newJobTitle || '',
             // Company
-            existingcompanyId: '',
-            existingcompanyName: '',
-            newCompany: '',
+            existingCompanyId: this.props.existingCompanyId ||'',
+            existingCompanyName: this.props.existingCompanyName || '',
+            newCompany: this.props.newCompany ||'',
             // Interests
-            existingInterests: [],
-            newInterests: []
+            existingInterests: this.props.existingInterests || [],
+            newInterests: this.props.newInterests || []
         }
         this.getJobTitleInput = this.getJobTitleInput.bind(this)
         this.getCompanyInput = this.getCompanyInput.bind(this)
         this.getInterestsInput = this.getInterestsInput.bind(this)
         this.submit = this.submit.bind(this)
+        this.submitReady = this.submitReady.bind(this)
     }
 
     async componentWillMount() {
@@ -42,7 +45,7 @@ export default class CareerAndInterestsModal extends Component {
             if (isNew) {
                 this.setState({
                     existingCompanyId: '',
-                    existingCompanyName: selection.value,
+                    existingCompanyName: '',
                     newCompany: selection.value,
                 })
             } else {
@@ -65,22 +68,22 @@ export default class CareerAndInterestsModal extends Component {
         if (selection) {
             if (isNew) {
                 this.setState({
-                    existingjobTitleId: '',
-                    existingjobTitleName: selection.value,
+                    existingJobTitleId: '',
+                    existingJobTitleName: '',
                     newJobTitle: selection.value,
                 })
             } else {
                 this.setState({
                     newJobTitle: '',
-                    existingjobTitleId: selection.value,
-                    existingjobTitleName: selection.text
+                    existingJobTitleId: selection.value,
+                    existingJobTitleName: selection.text
                 })
             }
         } else {
             this.setState({
                 newJobTitle: '',
-                existingjobTitleId: '',
-                existingjobTitleName: ''
+                existingJobTitleId: '',
+                existingJobTitleName: ''
             })
         }
     }
@@ -92,10 +95,35 @@ export default class CareerAndInterestsModal extends Component {
         })
     }
 
+    submitReady() {
+        return (
+            this.state.existingJobTitleId ||
+            this.state.newJobTitle ||
+            this.state.existingCompanyId ||
+            this.state.newCompany ||
+            this.state.existingInterests.length ||
+            this.state.newInterests.length
+        ) 
+    }
+
     submit(e) {
         e.preventDefault()
-        console.log(this.state)
-        // TODO: lift jobTitle, company, and interests info into signup form
+        this.props.getInput(
+            {
+                existingJobTitleId: this.state.existingJobTitleId,
+                existingJobTitleName: this.state.existingJobTitleName,
+                newJobTitle: this.state.newJobTitle
+            },
+            {
+                existingCompanyId: this.state.existingJobTitleId,
+                existingCompanyName: this.state.existingCompanyName,
+                newCompany: this.state.newCompany
+            },
+            {
+                existingInterests: this.state.existingInterests,
+                newInterests: this.state.newInterests
+            }
+        )
         this.props.closeModal()
     }
 
@@ -106,29 +134,68 @@ export default class CareerAndInterestsModal extends Component {
             >
                 <Modal.Header>Career and Interests Modal</Modal.Header>
                 <Modal.Content>
-                    <SearchablePooledSingleSelectDropdown
-                        endpoint={'/drop/jobTitles'}
-                        dataType={'Job Title'}
-                        getInput={this.getJobTitleInput}
-                        allowAddition={true}
-                    />
-                    <SearchablePooledSingleSelectDropdown
-                        endpoint={'/drop/companies'}
-                        dataType={'Company'}
-                        getInput={this.getCompanyInput}
-                        allowAddition={true}
-                    />
-                    <SearchablePooledMultiSelectDropdown
-                        endpoint={'/drop/interests'}
-                        dataType={'Interests'}
-                        getInputs={this.getInterestsInput}
-                        allowAdditions={true}
-                    />
+                    <Segment color='green'>
+                        <Step.Group>
+                        <Step>
+                            <Step.Title>
+                                Select your job title
+                            </Step.Title>
+                            <Step.Description>
+                                (Only add a new entry if it doesn't exist in dropdown!)
+                            </Step.Description>
+                        </Step>
+                        </Step.Group>
+                        <PooledSingleSelectDropdown
+                            endpoint={'/drop/jobTitles'}
+                            dataType={'Job Title'}
+                            getInput={this.getJobTitleInput}
+                            allowAddition={true}
+                        />
+                    </Segment>
+                    <Divider/>
+                    <Segment color='teal'>
+                        <Step.Group>
+                        <Step>
+                            <Step.Title>
+                                Select your company
+                            </Step.Title>
+                            <Step.Description>
+                                (Only add a new entry if it doesn't exist in dropdown!)
+                            </Step.Description>
+                        </Step>
+                        </Step.Group>
+                        <PooledSingleSelectDropdown
+                            endpoint={'/drop/companies'}
+                            dataType={'Company'}
+                            getInput={this.getCompanyInput}
+                            allowAddition={true}
+                        />
+                    </Segment>
+                    <Divider/>
+                    <Segment color='blue'>
+                        <Step.Group>
+                        <Step>
+                            <Step.Title>
+                                Select your interests, professional or otherwise
+                            </Step.Title>
+                            <Step.Description>
+                                (Only add new entries if they don't exist in dropdown!)
+                            </Step.Description>
+                        </Step>
+                        </Step.Group>
+                        <PooledMultiSelectDropdown
+                            endpoint={'/drop/interests'}
+                            dataType={'Interests'}
+                            getInputs={this.getInterestsInput}
+                            allowAddition={true}
+                        />
+                    </Segment>
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
+                        disabled={!this.submitReady()}
                         onClick={this.submit}>
-                        Submit
+                        Add
                     </Button>
                     <Button onClick={this.props.closeModal}>
                         Done

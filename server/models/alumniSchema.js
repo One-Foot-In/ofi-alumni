@@ -26,7 +26,6 @@ const alumniSchema = new Schema(
     gradYear: {type: Number, required: true},
     country: {type: String, enum: COUNTRIES, required: true},
     city: {type: String, required: true},
-    profession: {type: String, required: false},
     company: {type: {}, required: false},
     jobTitle: {type: {}, required: false},
     college: {type: {}, required: false},

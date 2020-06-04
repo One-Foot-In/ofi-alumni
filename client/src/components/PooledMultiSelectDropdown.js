@@ -141,6 +141,7 @@ export default class PooledMultiSelectDropdown extends Component {
                     centered
                 >
                     <Dropdown
+                        style={{'margin':'5px'}}
                         placeholder={`Select ${this.props.dataType}`}
                         fluid
                         multiple
@@ -169,7 +170,7 @@ export default class PooledMultiSelectDropdown extends Component {
                                 primary
                                 color="blue"
                                 onClick={this.commitCustomValue}
-                                disabled={this.customValueAlreadyAdded()}
+                                disabled={this.customValueAlreadyAdded() || !this.state.customValue}
                             >
                                 Commit {this.props.dataType}
                             </Button>

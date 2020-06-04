@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Button, Modal, Grid, Label, Icon, Dropdown } from 'semantic-ui-react';
-import SearchablePooledSingleSelectDropdown from "./SearchablePooledSingleSelectDropdown"
+import PooledSingleSelectDropdown from "./PooledSingleSelectDropdown"
 import { makeCall } from "../apis";
 
 /*
@@ -99,7 +99,7 @@ export default class CollegeSelectionModal extends Component {
                                     </Label>
                                 </Grid.Row>
                                 <Grid.Row>
-                                    <SearchablePooledSingleSelectDropdown
+                                    <PooledSingleSelectDropdown
                                         endpoint={`/drop/colleges/${this.state.country}`}
                                         allowAddition={true}
                                         dataType={"College"}
