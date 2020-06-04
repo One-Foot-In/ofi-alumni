@@ -1,138 +1,36 @@
 import React, { Component } from 'react';
-import {Button, Modal, Segment, Header, Dropdown, Image, Grid} from 'semantic-ui-react';
+import {Button, Modal, Image, Grid, Form} from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 
-const dayOptions = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    .map(day => {
-        return {
-            key: day.toLowerCase(),
-            text: day,
-            value: day
-        }
-    })
+
 export const timeSlotOptions = [
-    {
-        key: 'slot1',
-        value: 0,
-        text: '12am - 1am'
-    },
-    {
-        key: 'slot2',
-        value: 100,
-        text: '1am - 2am'
-    },
-    {
-        key: 'slot3',
-        value: 200,
-        text: '2am - 3am'
-    },
-    {
-        key: 'slot4',
-        value: 300,
-        text: '3am - 4am'
-    },
-    {
-        key: 'slot5',
-        value: 400,
-        text: '4am - 5am'
-    },
-    {
-        key: 'slot6',
-        value: 500,
-        text: '5am - 6am'
-    },
-    {
-        key: 'slot7',
-        value: 600,
-        text: '6am - 7am'
-    },
-    {
-        key: 'slot8',
-        value: 700,
-        text: '7am - 8am'
-    },
-    {
-        key: 'slot9',
-        value: 800,
-        text: '8am - 9am'
-    },
-    {
-        key: 'slot10',
-        value: 900,
-        text: '9am - 10am'
-    },
-    {
-        key: 'slot11',
-        value: 1000,
-        text: '10am - 11am'
-    },
-    {
-        key: 'slot12',
-        value: 1100,
-        text: '11am - 12pm'
-    },
-    {
-        key: 'slot13',
-        value: 1200,
-        text: '12p - 1pm'
-    },
-    {
-        key: 'slot14',
-        value: 1300,
-        text: '1pm - 2pm'
-    },
-    {
-        key: 'slot15',
-        value: 1400,
-        text: '2pm - 3pm'
-    },
-    {
-        key: 'slot16',
-        value: 1500,
-        text: '3pm - 4pm'
-    },
-    {
-        key: 'slot17',
-        value: 1600,
-        text: '4pm - 5pm'
-    },
-    {
-        key: 'slot18',
-        value: 1700,
-        text: '5pm - 6pm'
-    },
-    {
-        key: 'slot19',
-        value: 1800,
-        text: '6pm - 7pm'
-    },
-    {
-        key: 'slot20',
-        value: 1900,
-        text: '7pm - 8pm'
-    },
-    {
-        key: 'slot21',
-        value: 2000,
-        text: '8pm - 9pm'
-    },
-    {
-        key: 'slot22',
-        value: 2100,
-        text: '9pm - 10pm'
-    },
-    {
-        key: 'slot23',
-        value: 2200,
-        text: '10pm - 11pm'
-    },
-    {
-        key: 'slot24',
-        value: 2300,
-        text: '11pm - 12am'
-    },
+    '12am - 1am',
+    '1am - 2am',
+    '2am - 3am',
+    '3am - 4am',
+    '4am - 5am',
+    '5am - 6am',
+    '6am - 7am',
+    '7am - 8am',
+    '8am - 9am',
+    '9am - 10am',
+    '10am - 11am',
+    '11am - 12pm',
+    '12p - 1pm',
+    '1pm - 2pm',
+    '2pm - 3pm',
+    '3pm - 4pm',
+    '4pm - 5pm',
+    '5pm - 6pm',
+    '6pm - 7pm',
+    '7pm - 8pm',
+    '8pm - 9pm',
+    '9pm - 10pm',
+    '10pm - 11pm',
+    '11pm - 12am'
 ]
+
 
 /*
 props:
@@ -147,10 +45,11 @@ export default class RequestModal extends Component {
         this.state = {
             alumni: null,
             studentId: '',
-            options: [],
-            value: '',
-            topic: '',
-            notes: '',
+            availabilityOptions: [],
+            availabilityValue: '',
+            topicOptions: [],
+            topicValue: '',
+            note: '',
             submitting: false
         }
         this.handleValueChange = this.handleValueChange.bind(this)
@@ -159,10 +58,11 @@ export default class RequestModal extends Component {
 
     async componentWillMount() {
         await this.setState({alumni: this.props.alumni})
-        this.createOptions(this.state.alumni.availabilities)
+        this.createAvailabilityOptions(this.state.alumni.availabilities)
+        this.createTopicOptions(this.state.alumni.topics)
     }
 
-    async createOptions(availabilities) {
+    async createAvailabilityOptions(availabilities) {
         console.log(availabilities)
         /* 
          * Offset is in minutes, annoyingly, and in the opposite direction 
@@ -178,8 +78,29 @@ export default class RequestModal extends Component {
                                                     offset: (-(timeOffset/60)*100)}, 
                                                     '/request/applyRequesterTimezone', 
                                                     'patch')
-        console.log(adjustedAvailabilities)
-        this.setState({options: adjustedAvailabilities})
+        let availabilityOptions = []
+        for (let option of adjustedAvailabilities.availabilities) {
+            let readableOption = option.day + ', ' + timeSlotOptions[(option.time/100)]
+            availabilityOptions.push({
+                key: option.id,
+                text: readableOption,
+                value: option.id,
+            })
+        }
+        console.log(availabilityOptions)
+        this.setState({availabilityOptions: availabilityOptions})
+    }
+
+    createTopicOptions(topics) {
+        let topicOptions = []
+        for (let topic of topics) {
+            topicOptions.push({
+                key: topic,
+                text: topic,
+                value: topic  
+            })
+        }
+        this.setState({topicOptions: topicOptions})
     }
 
     submitRequest(e) {
@@ -223,10 +144,10 @@ export default class RequestModal extends Component {
         })
     }
 
-    handleValueChange(e, {value}) {
+    handleValueChange(e, {name, value}) {
         e.preventDefault();
         this.setState({
-            value: value
+            [name]: value
         })
     }
 
@@ -239,38 +160,59 @@ export default class RequestModal extends Component {
                 <Modal.Header>Schedule a meeting with {this.state.alumni.name}!</Modal.Header>
                 <Modal.Content>
                     <Grid>
-                    <Grid.Row columns={"equal"}>
-                    <Grid.Column width={3}>
-                    <Image
-                        floated='left'
-                        size='small'
-                        src={this.state.alumni.imageURL}
-                        rounded
-                    />
-                    </Grid.Column>
-                    <Grid.Column>
-                    <Segment fluid>
-                        <Header>Choose a day:</Header>
-                        
-                        <Dropdown
-                            style={{ 'margin': '5px'}}
-                            placeholder='Day'
-                            fluid
-                            selection
-                            options={this.state.dayOptions} 
-                            onChange={this.handleValueChange}
-                            value={this.state.day}
-                            name='day'
-                        />
-                    </Segment>
-                    </Grid.Column>
-                    </Grid.Row>
+                        <Grid.Row columns={"equal"}>
+                            <Grid.Column width={3}>
+                                <Image
+                                    floated='left'
+                                    size='small'
+                                    src={this.state.alumni.imageURL}
+                                    rounded
+                                />
+                            </Grid.Column>
+                            <Grid.Column>
+                                <Form>
+                                    <Form.Dropdown 
+                                        label='Choose an availability:'
+                                        placeholder='Day of the Week, Time'
+                                        fluid
+                                        selection
+                                        search
+                                        options={this.state.availabilityOptions} 
+                                        onChange={this.handleValueChange}
+                                        value={this.state.availabilityValue}
+                                        name='availabilityValue'
+                                    />
+                                    <Form.Dropdown
+                                        label={'Choose a topic offered by ' + this.state.alumni.name + ':'}
+                                        placeholder='Topic'
+                                        fluid
+                                        selection
+                                        options={this.state.topicOptions} 
+                                        onChange={this.handleValueChange}
+                                        value={this.state.topicValue}
+                                        name='topicValue'
+                                    />
+                                    <Form.TextArea 
+                                        label={'Leave a note for ' + this.state.alumni.name + ':'}
+                                        placeholder='Provide extra information here'
+                                        fluid
+                                        onChange={this.handleValueChange}
+                                        value={this.state.note}
+                                        name='note'
+                                    />
+                                </Form>
+                            </Grid.Column>
+                        </Grid.Row>
                     </Grid>
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
                         primary
                         onClick={this.submitRequest}
+                        disabled={
+                                (this.state.topicValue === '') || 
+                                (this.state.availabilityValue === '')
+                            }
                     >
                         Submit Request
                     </Button>

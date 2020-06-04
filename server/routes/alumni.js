@@ -70,14 +70,9 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/all/:timezone', async (req, res, next) => {
+router.get('/all/', async (req, res, next) => {
     try {
-        let timezone = req.params.timezone
         let alumni = await alumniSchema.find()
-        alumni = alumni.map(alumnus => {
-            alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, timezone)
-            return alumnus
-        })
         res.json({'alumni' : alumni});
     } catch (e) {
         console.log("Error: alumni#allAlumni", e);

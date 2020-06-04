@@ -178,7 +178,7 @@ export default class AlumniDirectory extends Component {
     }
 
     getEntries() {
-        return makeCall(null, `/alumni/all/${this.props.timezone}`, 'get').catch(e => console.log(e))
+        return makeCall(null, `/alumni/all/`, 'get').catch(e => console.log(e))
     }
 
     search(value) {
