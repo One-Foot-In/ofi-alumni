@@ -230,13 +230,6 @@ export default class Signup extends React.Component {
                         </>
                         }
                     </Form.Field>
-                    <Form.Field
-                        type="text"
-                        style={fieldStyle}
-                    >
-                        <label>Job Title</label>
-                        <input placeholder='Position...' name="jobTitle" onChange={this.handleChange} />
-                    </Form.Field>
                     <Form.Field>
                         <>
                             <Button

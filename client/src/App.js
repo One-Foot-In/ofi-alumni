@@ -17,6 +17,8 @@ import * as actions from './redux/actions'
 // TODO: remove once used elsewhere
 import SearchablePooledMultiSelectDropdown from './components/SearchablePooledMultiSelectDropdown';
 import SearchablePooledSingleSelectDropdown from './components/SearchablePooledSingleSelectDropdown';
+import PooledSingleSelectDropdown from './components/PooledSingleSelectDropdown';
+import PooledMultiSelectDropdown from './components/PooledMultiSelectDropdown';
 
 export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
 const isDevMode = () => {
@@ -351,6 +353,18 @@ class App extends Component {
                   getInput={this.getInputs}
                   dataType={'Colleges'}
                   allowAddition={true}
+                />
+                <PooledSingleSelectDropdown
+                    endpoint={'/drop/jobTitles'}
+                    getInput={this.getInputs}
+                    dataType={'Job Title'}
+                    allowAddition={true}
+                />
+                <PooledMultiSelectDropdown
+                    endpoint={'/drop/jobTitles'}
+                    getInputs={this.getInputs}
+                    dataType={'Job Title'}
+                    allowAddition={true}
                 />
               </>
             }
