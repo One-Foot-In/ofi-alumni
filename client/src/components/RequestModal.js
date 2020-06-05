@@ -101,11 +101,26 @@ export default class RequestModal extends Component {
 
     submitRequest(e) {
         e.preventDefault()
+        
         this.setState({
             submitting: true
         }, async () => {
             try {
-                const result = true;
+                const jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
+                const requesterId = parsedJWT.id
+                let timeOffset = new Date().getTimezoneOffset()
+                timeOffset = -((timeOffset/60)*100)
+                const payload = {
+                    studentId: requesterId,
+                    alumniId: this.state.alumni._id,
+                    zoomLink: this.state.alumni.zoomLink,
+                    timeId: this.state.availabilityValue,
+                    topic: this.state.topicValue,
+                    note: this.state.note,
+                    timezone: timeOffset
+                }
+                const result = await makeCall(payload, `/request/addRequest/`, 'post')
                 if (!result || result.error) {
                     this.setState({
                         submitting: false

@@ -28,38 +28,44 @@ router.patch('/applyRequesterTimezone', async (req, res, next) => {
     }
 })
 
-router.post('/addRequest/', async (req, res, next) => {
+router.post('/addRequest', async (req, res, next) => {
     try {
-        const student_email = req.body.student_email;
-        const alumni_email = req.body.alumni_email;
-        const time = req.body.time;
+        const studentId = req.body.studentId;
+        const alumniId = req.body.alumniId;
+        const timeId = req.body.timeId;
         const topic = req.body.topic;
         const status = 'Awaiting Confirmation';
-        const intro = req.body.intro;
         const note = req.body.note;
 
-        var student = await studentSchema.findOne({email: student_email});
-        var alumni = await alumniSchema.findOne({email: alumni_email});
-
+        // timeSegments = [day, hour]
+        timeSegments = timeId.split('-')
+        let time = [{
+            day: timeSegments[0],
+            time: (parseInt(timeSegments[1]))
+        }]
+        time = timezoneHelpers.stripTimezone(time, parseInt(req.body.timezone))
         var request_instance = new requestSchema(
             {
-                student: student._id,
-                alumni: alumni._id,
-                time: time,
-                zoomLink: alumni.zoomLink,
+                student: studentId,
+                alumni: alumniId,
+                zoomLink: req.body.zoomLink,
                 topic: topic,
                 status: status,
-                intro: intro,
                 note: note
             }
         )
-        
+        request_instance.time.push({
+            day: time[0].day,
+            time: time[0].time,
+            id: time[0].id
+        })
         let insert = await request_instance.save();
         res.status(200).send({
             message: 'Successfully added request',
             request: request_instance
         });
     } catch (e) {
+        console.log('request/addRequest Error: ' + e)
         res.status(500).send({
             message: 'Failed creating request: ' + e
         });
