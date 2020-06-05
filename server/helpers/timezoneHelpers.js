@@ -38,7 +38,7 @@ const timezoneUtil = {
             return timeSlots
         }
         return timeSlots.map( timeSlot => {
-            let newTimeRaw = timeSlot.time + (timezone * (-1))
+            let newTimeRaw = timeSlot.time - timezone
             let newTime = (2400 + newTimeRaw) % 2400
             if (newTimeRaw < 0) {
                 // move day backward
@@ -68,7 +68,7 @@ const timezoneUtil = {
         return timeSlots.map( timeSlot => {
             // if timezone is positive, we need to add offset
             // if timezone is negative, we need to substract offset 
-            let newTimeRaw = timeSlot.time + timezone
+            let newTimeRaw = timeSlot.time + (timezone)
             let newTime = (2400 + newTimeRaw) % 2400
             if (newTimeRaw < 0) {
                 // move day backward
