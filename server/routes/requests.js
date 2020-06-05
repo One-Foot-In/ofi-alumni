@@ -23,7 +23,7 @@ router.patch('/applyRequesterTimezone', async (req, res, next) => {
     } catch (e) {
         console.log(e)
         res.status(500).send({
-            message: ('failed to apply timezone. Reason: ' + e)
+            message: ('failed to apply timezone (request/applyRequesterTimezone) Reason: ' + e)
         })
     }
 })

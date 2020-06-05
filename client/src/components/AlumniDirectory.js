@@ -67,18 +67,12 @@ export default class AlumniDirectory extends Component {
             requestModalOpen: false,
             alumniDetails: null,
         }
-        this.openRequestModal = this.openRequestModal.bind(this)
-        this.closeRequestModal = this.closeRequestModal.bind(this)
+        this.toggleRequestModal = this.toggleRequestModal.bind(this)
     }
 
-    closeRequestModal() {
+    toggleRequestModal() {
         this.setState({
-            requestModalOpen: false
-        })
-    }
-    openRequestModal() {
-        this.setState({
-            requestModalOpen: true
+            requestModalOpen: !this.state.requestModalOpen
         })
     }
 
@@ -223,8 +217,7 @@ export default class AlumniDirectory extends Component {
     }
     handleRequestButton(e) {
         this.setState({alumniDetails: this.state.entries[e.currentTarget.dataset.id]})
-        console.log(this.state.alumniDetails)
-        this.openRequestModal()
+        this.toggleRequestModal()
     }
 
     render(){
@@ -313,7 +306,7 @@ export default class AlumniDirectory extends Component {
                 {this.state.requestModalOpen && 
                     <RequestModal
                     modalOpen={this.state.requestModalOpen}
-                    closeModal={this.closeRequestModal}
+                    closeModal={this.toggleRequestModal}
                     alumni={this.state.alumniDetails}
                     />
                 }

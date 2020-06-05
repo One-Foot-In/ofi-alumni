@@ -63,17 +63,14 @@ export default class RequestModal extends Component {
     }
 
     async createAvailabilityOptions(availabilities) {
-        console.log(availabilities)
         /* 
-         * Offset is in minutes, annoyingly, and in the opposite direction 
-         * that you'd expect. This means that if you are in UTC -4 (EST), 
-         * it returns 240 (not -240 to reflect being 4 hours behind)
+         * Offset is in minutes and in the opposite direction 
+         * that you'd expect. For UTC -4 (EST), it returns 240 
+         * (not -240 to reflect being 4 hours behind)
          * That's why there's a tiny bit of math in the payload, to conform
-         * with our date model (which makes more sense)
+         * with our date model
          */
-        let timeOffset = await new Date().getTimezoneOffset()
-        console.log(timeOffset)
-        console.log(this.props.alumni.timeZone)
+        let timeOffset = new Date().getTimezoneOffset()
         let adjustedAvailabilities = await makeCall({availabilities: availabilities,
                                                     offset: (-(timeOffset/60)*100)}, 
                                                     '/request/applyRequesterTimezone', 
@@ -87,7 +84,6 @@ export default class RequestModal extends Component {
                 value: option.id,
             })
         }
-        console.log(availabilityOptions)
         this.setState({availabilityOptions: availabilityOptions})
     }
 
@@ -195,7 +191,6 @@ export default class RequestModal extends Component {
                                     <Form.TextArea 
                                         label={'Leave a note for ' + this.state.alumni.name + ':'}
                                         placeholder='Provide extra information here'
-                                        fluid
                                         onChange={this.handleValueChange}
                                         value={this.state.note}
                                         name='note'
