@@ -8,6 +8,7 @@ var collegeSchema = require('../models/collegeSchema');
 var jobTitleSchema = require('../models/jobTitleSchema');
 var interestsSchema = require('../models/interestsSchema');
 var companySchema = require('../models/companySchema');
+var schoolSchema = require('../models/schoolSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 require('mongoose').Promise = global.Promise
 
@@ -40,7 +41,7 @@ router.post('/', async (req, res, next) => {
             await newCollegeCreated.save()
             college = newCollegeCreated
         } else {
-            college = collegeSchema.findOne({_id: existingCollegeId})
+            college = await collegeSchema.findOne({_id: existingCollegeId})
         }
 
         // find or create Job Title
@@ -54,7 +55,7 @@ router.post('/', async (req, res, next) => {
             await newJobTitleCreated.save()
             jobTitle = newJobTitleCreated
         } else {
-            jobTitle = jobTitleSchema.findOne({_id: existingJobTitleId})
+            jobTitle = await jobTitleSchema.findOne({_id: existingJobTitleId})
         }
 
         // find or create Company
@@ -68,22 +69,24 @@ router.post('/', async (req, res, next) => {
             await newCompanyCreated.save()
             var company = newCompanyCreated
         } else {
-            company = companySchema.findOne({_id: existingCompanyId})
+            company = await companySchema.findOne({_id: existingCompanyId})
         }
 
-        // create interests added
         const existingInterests = req.body.existingInterests
+        // find existing interests
+        const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
+        let existingInterestsRecords = await interestsSchema.find().where('_id').in(existingInterestsIds).exec()
         const newInterests = req.body.newInterests || []
+        // create interests added
         if (newInterests.length) {
             for (let i = 0; i < newInterests.length; i++) {
                 var newInterestCreated = new interestsSchema({
                     name: newInterests[i].value
                 })
                 await newInterestCreated.save()
-                existingInterests.push(newInterestCreated)
+                existingInterestsRecords.push(newInterestCreated)
             }
         }
-
         const role = "ALUMNI"
         const emailVerified = false
         const approved = false
@@ -99,13 +102,12 @@ router.post('/', async (req, res, next) => {
                 company: company,
                 college: college,
                 jobTitle: jobTitle,
-                interests: existingInterests,
+                interests: existingInterestsRecords,
                 availabilities: availabilities,
                 timeZone: timeZone,
                 zoomLink: zoomLink,
                 approved: approved,
-                school: schoolId,
-                college: existingCollegeId
+                school: schoolId
             }
         )
         const user_instance = new userSchema(
@@ -118,7 +120,6 @@ router.post('/', async (req, res, next) => {
               approved: approved
             }
         );
-        
         await alumni_instance.save();
         await user_instance.save();
         res.status(200).send({
@@ -176,6 +177,10 @@ router.post('/approve/', async(req, res, next) => {
 router.get('/one/:id', async (req, res, next) => {
     try {
         let alumnus = await alumniSchema.findOne({_id: req.params.id})
+        alumnus.school = await schoolSchema.findOne({_id: alumnus.school})
+        alumnus.college = alumnus.college && await collegeSchema.findOne({_id: alumnus.college})
+        alumnus.jobTitle = alumnus.jobTitle && await jobTitleSchema.findOne({_id: alumnus.jobTitle})
+        alumnus.company = alumnus.company && await companySchema.findOne({_id: alumnus.company})
         alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
         res.json({'result' : alumnus});
     } catch (e) {
