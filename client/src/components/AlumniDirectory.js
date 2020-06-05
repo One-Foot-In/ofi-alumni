@@ -85,10 +85,11 @@ export default class AlumniDirectory extends Component {
                     value: post.gradYear
                 });
             }
-            allText.push(post.location + ' '
-                         + post.college + ' '
-                         + post.profession + ' '
-                         + post.company + ' '
+            allText.push(
+                        post.city + ' '
+                         + post.country + ' '
+                         + post.jobTitleName + ' '
+                         + post.companyName + ' '
                          + post.name + ' '
                          + post.gradYear);
             display.push(this.constructProfile(post));
@@ -127,9 +128,9 @@ export default class AlumniDirectory extends Component {
                             </Card.Header>
                                             
                             <Card.Meta>{post.profession}</Card.Meta>
-                            <Card.Description>College: {post.college}</Card.Description>
-                            <Card.Description>Location: {post.location}</Card.Description>
-                            <Card.Description>Company: {post.company}</Card.Description>
+                            <Card.Description>College: {post.collegeName}</Card.Description>
+                            <Card.Description>Location: {(post.city && post.country) && `${post.city} (${post.country})`}</Card.Description>
+                            <Card.Description>Company: {post.companyName}</Card.Description>
                             <br />
                         </Card.Content>
                         {requestVisible(this.props.isAlumniView, post)}

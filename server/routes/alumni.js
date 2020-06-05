@@ -100,8 +100,11 @@ router.post('/', async (req, res, next) => {
                 country: country,
                 city: city,
                 company: company,
+                companyName: company && company.name,
                 college: college,
+                collegeName: college && college.name,
                 jobTitle: jobTitle,
+                jobTitleName: jobTitle && jobTitle.name,
                 interests: existingInterestsRecords,
                 availabilities: availabilities,
                 timeZone: timeZone,
@@ -177,10 +180,6 @@ router.post('/approve/', async(req, res, next) => {
 router.get('/one/:id', async (req, res, next) => {
     try {
         let alumnus = await alumniSchema.findOne({_id: req.params.id})
-        alumnus.school = await schoolSchema.findOne({_id: alumnus.school})
-        alumnus.college = alumnus.college && await collegeSchema.findOne({_id: alumnus.college})
-        alumnus.jobTitle = alumnus.jobTitle && await jobTitleSchema.findOne({_id: alumnus.jobTitle})
-        alumnus.company = alumnus.company && await companySchema.findOne({_id: alumnus.company})
         alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
         res.json({'result' : alumnus});
     } catch (e) {
