@@ -156,7 +156,9 @@ export default class AlumniDirectory extends Component {
 
     requestVisible(isAlumniView, post, i) {
         var requestButton;
-                if (('zoomLink' in post) && !isAlumniView) {
+                if (('zoomLink' in post && 
+                    (post.zoomLink !== null && post.zoomLink !== '')) && 
+                    !isAlumniView) {
                     requestButton = <Button 
                                     primary 
                                     data-id={i}
