@@ -29,8 +29,8 @@ router.post('/', async (req, res, next) => {
                 grade: grade,
                 // requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
                 // issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
-                timeZone: timeZone,
-                school: schoolId
+                school: schoolId,
+                timeZone: -timeZone,
             }
         )
         const user_instance = new userSchema(
