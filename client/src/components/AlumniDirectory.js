@@ -12,22 +12,22 @@ const searchOptions = [
     {
         key: 'Location',
         text: 'Location',
-        value: 'location'
+        value: 'country'
     },
     {
         key: 'College',
         text: 'College',
-        value: 'college'
+        value: 'collegeName'
     },
     {
         key: 'Profession',
         text: 'Profession',
-        value: 'profession'
+        value: 'jobTitleName'
     },
     {
         key: 'Company',
         text: 'Company',
-        value: 'company'
+        value: 'companyName'
     },
     {
         key: 'Name',
