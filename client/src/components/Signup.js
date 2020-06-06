@@ -314,7 +314,7 @@ export default class Signup extends React.Component {
                                 type="button"
                                 onClick={() => {this.setState({locationModalOpen: true})}}
                             >
-                                Add Location
+                                Add Location (required)
                             </Button>
                             <LocationSelectionModal
                                 getInput={this.getLocationInput}
@@ -522,7 +522,9 @@ export default class Signup extends React.Component {
                             <label>Name</label>
                             <input placeholder='Name' name="name" onChange={this.handleChange} />
                         </Form.Field>
-                        <Form.Field>
+                        <Form.Field
+                            required={true}
+                        >
                             <label>High School</label>
                             <Dropdown
                                 style={{ 'margin': '5px', 'width': '80%'}}
