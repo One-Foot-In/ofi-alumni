@@ -17,16 +17,16 @@ export default class CareerAndInterestsModal extends Component {
         // this can be added as a future enhancement
         this.state = {
             // Job Title
-            existingJobTitleId: this.props.existingJobTitleId || '',
-            existingJobTitleName: this.props.existingJobTitleName || '',
-            newJobTitle: this.props.newJobTitle || '',
+            existingJobTitleId: '',
+            existingJobTitleName: '',
+            newJobTitle: '',
             // Company
-            existingCompanyId: this.props.existingCompanyId ||'',
-            existingCompanyName: this.props.existingCompanyName || '',
-            newCompany: this.props.newCompany ||'',
+            existingCompanyId: '',
+            existingCompanyName: '',
+            newCompany: '',
             // Interests
-            existingInterests: this.props.existingInterests || [],
-            newInterests: this.props.newInterests || []
+            existingInterests: [],
+            newInterests: []
         }
         this.getJobTitleInput = this.getJobTitleInput.bind(this)
         this.getCompanyInput = this.getCompanyInput.bind(this)
@@ -185,7 +185,7 @@ export default class CareerAndInterestsModal extends Component {
                         </Step.Group>
                         <PooledMultiSelectDropdown
                             endpoint={'/drop/interests'}
-                            dataType={'Interests'}
+                            dataType={'Interest'}
                             getInputs={this.getInterestsInput}
                             allowAddition={true}
                         />

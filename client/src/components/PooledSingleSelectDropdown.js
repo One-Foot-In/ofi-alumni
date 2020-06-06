@@ -16,7 +16,8 @@ export default class PooledSingleSelectDropdown extends Component {
             options: [],
             value: null,
             customValue: '', // for input control
-            customSelection: null
+            customSelection: null,
+            addEntry: false
         }
         this.removeCustomValue = this.removeCustomValue.bind(this)
         this.getEnteredCustomValue = this.getEnteredCustomValue.bind(this)
@@ -40,7 +41,8 @@ export default class PooledSingleSelectDropdown extends Component {
                 text: this.state.customValue
             },
             customValue: '',
-            value: null
+            value: null,
+            addEntry: false
         }, () => {
             this.props.getInput(this.state.customSelection, true)
         })
@@ -124,7 +126,7 @@ export default class PooledSingleSelectDropdown extends Component {
                     <Grid.Row centered>
                         <Dropdown
                             style={{'margin':'5px'}}
-                            placeholder={`Select ${this.props.dataType}`}
+                            placeholder={`Search for ${this.props.dataType}`}
                             search
                             fluid
                             selection
@@ -137,29 +139,42 @@ export default class PooledSingleSelectDropdown extends Component {
                     </Grid.Row>
                     {
                         this.props.allowAddition ?
-                        <Grid.Row centered columns={2}>
-                            <Grid.Column centered width={12}>
-                                <Input
-                                    disabled={this.state.value}
-                                    placeholder={`Add if option not available!`}
-                                    fluid
-                                    label={`Add new ${this.props.dataType}`} 
-                                    name='customValue'
-                                    onChange={this.handleChange}
-                                    value={this.state.customValue}
-                                />
-                            </Grid.Column>
-                            <Grid.Column centered width={4}>
+                            this.state.addEntry ?
+                            <Grid.Row centered columns={2}>
+                                <Grid.Column centered width={12}>
+                                    <Input
+                                        disabled={this.state.value}
+                                        placeholder={`Add if option not available!`}
+                                        fluid
+                                        label={`Add new ${this.props.dataType}`} 
+                                        name='customValue'
+                                        onChange={this.handleChange}
+                                        value={this.state.customValue}
+                                    />
+                                </Grid.Column>
+                                <Grid.Column centered width={4}>
+                                    <Button
+                                        disabled={this.state.value || !this.state.customValue}
+                                        primary
+                                        color="blue"
+                                        onClick={this.commitCustomValue}
+                                    >
+                                        Commit {this.props.dataType}
+                                    </Button>
+                                </Grid.Column>
+                            </Grid.Row> :
+                            <Grid.Row centered>
                                 <Button
-                                    disabled={this.state.value || !this.state.customValue}
                                     primary
                                     color="blue"
-                                    onClick={this.commitCustomValue}
+                                    disabled={this.state.value}
+                                    onClick={() =>{this.setState({addEntry: true})}}
                                 >
-                                    Commit {this.props.dataType}
+                                    {this.state.customSelection ? `Add another ${this.props.dataType}` : `Add your own ${this.props.dataType}` }
                                 </Button>
-                            </Grid.Column>
-                        </Grid.Row> : null
+                            </Grid.Row>   
+                        :
+                        null
                     }
                     </>
                 }

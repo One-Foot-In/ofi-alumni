@@ -7,6 +7,7 @@ const NEW_ENTRY_TEXT = "Add new entry "
 /*
     NOTE: There is a bug on using `allowableAdditions` on dropdowns as here:
     https://github.com/Semantic-Org/Semantic-UI-React/issues/2624
+    Use onAddItem prop to handle change of options when user adds a new option
 */
 
 /*

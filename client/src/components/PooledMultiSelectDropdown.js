@@ -16,7 +16,8 @@ export default class PooledMultiSelectDropdown extends Component {
             options: [],
             value: [],
             customSelections: [],
-            customValue: '' // for input control
+            customValue: '', // for input control
+            addEntry: false,
         }
         this.removeCustomValue = this.removeCustomValue.bind(this)
         this.getEnteredCustomValues = this.getEnteredCustomValues.bind(this)
@@ -48,7 +49,20 @@ export default class PooledMultiSelectDropdown extends Component {
         })
         this.setState({
             customSelections: oldCustomSelections,
-            customValue: ''
+            customValue: '',
+            addEntry: false
+        }, () => {
+            this.props.getInputs({
+                old: this.state.options
+                    .filter(option => this.state.value.includes(option.value))
+                    .map(option => {
+                    return {
+                        value: option.value,
+                        text: option.text
+                    }
+                }),
+                new: this.state.customSelections
+            })
         })
     }
 
@@ -102,7 +116,7 @@ export default class PooledMultiSelectDropdown extends Component {
             this.state.customSelections && this.state.customSelections.length ?
             <Segment>
                 <Label color='blue' ribbon>
-                    Your entries for {this.props.dataType}
+                    Your entries for {this.props.dataType}s
                 </Label>
                 {
                     this.state.customSelections.map(selection => {
@@ -142,7 +156,7 @@ export default class PooledMultiSelectDropdown extends Component {
                 >
                     <Dropdown
                         style={{'margin':'5px'}}
-                        placeholder={`Select ${this.props.dataType}`}
+                        placeholder={`Search for ${this.props.dataType}`}
                         fluid
                         multiple
                         search
@@ -154,28 +168,41 @@ export default class PooledMultiSelectDropdown extends Component {
                 </Grid.Row>
                 {
                     this.props.allowAddition ?
-                    <Grid.Row centered columns={2}>
-                        <Grid.Column centered width={12}>
-                            <Input
-                                placeholder={`Add if option not available!`}
-                                fluid
-                                label={`Add new ${this.props.dataType}`} 
-                                name='customValue'
-                                onChange={this.handleChange}
-                                value={this.state.customValue}
-                            />
-                        </Grid.Column>
-                        <Grid.Column centered width={4}>
+                        this.state.addEntry ?
+                        <Grid.Row centered columns={2}>
+                            <Grid.Column centered width={12}>
+                                <Input
+                                    placeholder={`Add if option not available!`}
+                                    fluid
+                                    label={`Add new ${this.props.dataType}`} 
+                                    name='customValue'
+                                    onChange={this.handleChange}
+                                    value={this.state.customValue}
+                                />
+                            </Grid.Column>
+                            <Grid.Column centered width={4}>
+                                <Button
+                                    primary
+                                    color="blue"
+                                    onClick={this.commitCustomValue}
+                                    disabled={this.customValueAlreadyAdded() || !this.state.customValue}
+                                >
+                                    Commit {this.props.dataType}
+                                </Button>
+                            </Grid.Column>
+                        </Grid.Row>
+                        :
+                        <Grid.Row centered>
                             <Button
                                 primary
                                 color="blue"
-                                onClick={this.commitCustomValue}
-                                disabled={this.customValueAlreadyAdded() || !this.state.customValue}
+                                onClick={() =>{this.setState({addEntry: true})}}
                             >
-                                Commit {this.props.dataType}
+                                {this.state.customSelections.length ? `Add another ${this.props.dataType}` : `Add your own ${this.props.dataType}` }
                             </Button>
-                        </Grid.Column>
-                    </Grid.Row> : null
+                        </Grid.Row>
+                    :
+                    null
                 }
             </Grid>
         )

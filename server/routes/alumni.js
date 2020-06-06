@@ -40,7 +40,7 @@ router.post('/', async (req, res, next) => {
             })
             await newCollegeCreated.save()
             college = newCollegeCreated
-        } else {
+        } else if (existingCollegeId) {
             college = await collegeSchema.findOne({_id: existingCollegeId})
         }
 
@@ -54,7 +54,7 @@ router.post('/', async (req, res, next) => {
             })
             await newJobTitleCreated.save()
             jobTitle = newJobTitleCreated
-        } else {
+        } else if (existingJobTitleId) {
             jobTitle = await jobTitleSchema.findOne({_id: existingJobTitleId})
         }
 
@@ -68,7 +68,7 @@ router.post('/', async (req, res, next) => {
             })
             await newCompanyCreated.save()
             var company = newCompanyCreated
-        } else {
+        } else if (existingCompanyId) {
             company = await companySchema.findOne({_id: existingCompanyId})
         }
 

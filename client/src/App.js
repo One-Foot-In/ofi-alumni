@@ -343,13 +343,13 @@ class App extends Component {
                   Count in store is {this.props.count ? this.props.count : 0}
                 </Segment>
                 <SearchablePooledMultiSelectDropdown
-                  endpoint={'/drop/colleges/Cambodia'}
+                  endpoint={'/drop/jobTitles'}
                   getInputs={this.getInputs}
                   dataType={'Colleges'}
                   allowAdditions={true}
                 />
                 <SearchablePooledSingleSelectDropdown
-                  endpoint={'/drop/colleges/Cambodia'}
+                  endpoint={'/drop/jobTitles'}
                   getInput={this.getInputs}
                   dataType={'Colleges'}
                   allowAddition={true}
