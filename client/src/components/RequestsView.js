@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom'
-import { Menu } from 'semantic-ui-react';
+import { Menu, Label } from 'semantic-ui-react';
 import Navbar from './Navbar'
 import { makeCall } from '../apis'
 
@@ -15,7 +15,6 @@ export default class RequestsView extends Component {
     async componentWillMount() {
         let timeOffset = (-(new Date().getTimezoneOffset())/60)*100
         let requests = await this.getRequests(timeOffset)
-        console.log(requests)
         this.setState({
             unconfirmed: requests.requests[0],
             confirmed: requests.requests[1],
@@ -38,7 +37,10 @@ export default class RequestsView extends Component {
                     name='Unconfirmed Meetings'
                     active={this.state.activeItem === 'unconfirmed'}
                     onClick={this.handleMenuClick}
-                />
+                >
+                    Unconfirmed Meetings
+                    <Label color='teal' >{this.state.unconfirmed.length}</Label>
+                </Menu.Item>
                 <Menu.Item
                     id='confirmed'
                     name='Confirmed Meetings'
@@ -95,7 +97,6 @@ class RequestCards extends Component {
     }
 
     render() {
-        console.log(this.state.requests)
         return(
             <>
             <p>{this.props.activeSet}!</p>
