@@ -127,7 +127,7 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
             imageURL: _picLink,
             approved: approved,
             school: _school,
-            school: _schoolLogo
+            schoolLogo: _schoolLogo
         }
     )
     const user_instance = new userSchema(
@@ -222,14 +222,14 @@ router.get('/seed/', async (req, res, next) => {
             let college = randomPickFromArray(collegesSaved)
             let hasZoom = randomPickFromArray([true, false])
             let timezoneAlumni = randomPickFromArray(timezones)
-            await createAlumni(alumniEmail, alumniName, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school, school.schoolLogo, interests)
+            await createAlumni(alumniEmail, alumniName, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school, school.logoURL, interests)
 
             // create mock student
             let studentEmail = `student${i}@ofi.com`
             let studentName = `${randomPickFromArray(firstNames)} ${randomPickFromArray(lastNames)}`
             let picLinkStudent = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
             let timezoneStudent = randomPickFromArray(timezones)
-            await createStudent(studentEmail, studentName, picLinkStudent, timezoneStudent, school, school.schoolLogo)
+            await createStudent(studentEmail, studentName, picLinkStudent, timezoneStudent, school, school.logoURL)
         }
         res.status(200).send({'message' : `Successfully created ${USER_COUNT} alumni and ${USER_COUNT} students`});
     } catch (e) {
