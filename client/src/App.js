@@ -290,8 +290,8 @@ class App extends Component {
                       />
 
                       <AlumniDirectory
-                        isAlumniView={true}
-                        timezone={this.state.userDetails.timeZone}
+                        userDetails={this.state.userDetails}
+                        role={role}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -396,8 +396,8 @@ class App extends Component {
                       />
 
                       <AlumniDirectory
-                        isAlumniView={false}
-                        timezone={this.state.userDetails.timeZone}
+                        userDetails={this.state.userDetails}
+                        role={role}
                       />
                   </> :
                   <Redirect to={"/login"}/>
