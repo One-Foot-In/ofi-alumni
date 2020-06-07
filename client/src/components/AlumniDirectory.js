@@ -79,9 +79,13 @@ export default class AlumniDirectory extends Component {
 
     async componentWillMount() {
         let result = await this.getEntries()
+        let totalPages = 0;
+        if (result.alumni !== null) {
+            totalPages = Math.ceil(result.alumni.length/pageSize);
+        }
         this.setState({
             entries: result.alumni,
-            totalPages: Math.ceil(result.alumni.length/pageSize),
+            totalPages: totalPages,
             numEntries: result.alumni.length
         })
         this.populateSearchDropdownStates(this.state.entries)

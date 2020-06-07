@@ -74,4 +74,29 @@ router.post('/addRequest', async (req, res, next) => {
     }
 });
 
+router.get('/getRequests/:id/:timeOffset', async (req, res, next) => {
+    let alumniId = req.params.id;
+    let timeOffset = parseInt(req.params.timeOffset)
+    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
+    let requests = []
+    try {
+        for (let status of conditions) {
+            const dbData = await requestSchema.find({mentor: alumniId, status: status})
+            for (let request of dbData) {
+                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                if (request.requesterRole === 'STUDENT') {
+                    request.requesterObj = await studentSchema.findOne({_id: request.requester})
+                } else {
+                    request.requesterObj = await alumniSchema.findOne({_id: request.requester})
+                }
+            }
+            requests.push(dbData)
+        }
+        res.json({'requests' : requests});
+    } catch (e) {
+        console.log('getRequests error: ' + e)
+        res.status(500).send({message: 'getRequests error: ' + e})
+    }
+})
+
 module.exports = router;
