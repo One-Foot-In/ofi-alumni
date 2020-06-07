@@ -30,8 +30,9 @@ router.patch('/applyRequesterTimezone', async (req, res, next) => {
 
 router.post('/addRequest', async (req, res, next) => {
     try {
-        const studentId = req.body.studentId;
-        const alumniId = req.body.alumniId;
+        const requesterId = req.body.requesterId;
+        const requesterRole = req.body.requesterRole
+        const mentorId = req.body.mentorId;
         const timeId = req.body.timeId;
         const topic = req.body.topic;
         const status = 'Awaiting Confirmation';
@@ -46,8 +47,9 @@ router.post('/addRequest', async (req, res, next) => {
         time = timezoneHelpers.stripTimezone(time, parseInt(req.body.timezone))
         var request_instance = new requestSchema(
             {
-                student: studentId,
-                alumni: alumniId,
+                requester: requesterId,
+                requesterRole: requesterRole,
+                mentor: mentorId,
                 zoomLink: req.body.zoomLink,
                 topic: topic,
                 status: status,

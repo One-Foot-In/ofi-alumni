@@ -34,6 +34,8 @@ export const timeSlotOptions = [
 
 /*
 props:
+    - userDetails: logged in user profile
+    - role: user role
     - modalOpen: boolean
     - closeModal: ()
     - alumni (contains all data from alumni schema)
@@ -106,14 +108,13 @@ export default class RequestModal extends Component {
             submitting: true
         }, async () => {
             try {
-                const jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-                const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
-                const requesterId = parsedJWT.id
+                const requesterId = this.props.userDetails._id
                 let timeOffset = new Date().getTimezoneOffset()
                 timeOffset = -((timeOffset/60)*100)
                 const payload = {
-                    studentId: requesterId,
-                    alumniId: this.state.alumni._id,
+                    requesterRole: this.props.role,
+                    requesterId: requesterId,
+                    mentorId: this.state.alumni._id,
                     zoomLink: this.state.alumni.zoomLink,
                     timeId: this.state.availabilityValue,
                     topic: this.state.topicValue,

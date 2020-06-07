@@ -310,6 +310,8 @@ export default class AlumniDirectory extends Component {
                     modalOpen={this.state.requestModalOpen}
                     closeModal={this.toggleRequestModal}
                     alumni={this.state.alumniDetails}
+                    userDetails={this.props.userDetails}
+                    role={this.props.role}
                     />
                 }
                 

@@ -359,7 +359,14 @@ router.get('/allRequests', async (req, res, next) => {
 
 router.get('/populateAllRequests', async (req, res, next) => {
     try {
-        const dbData = await requestSchema.find().populate('alumni').populate('student')
+        const dbData = await requestSchema.find().populate('mentor')
+        for (let request of dbData) {
+            if (request.requesterRole === 'STUDENT') {
+                request.requesterObj = await studentSchema.findOne({_id: request.requester})
+            } else {
+                request.requesterObj = await alumniSchema.findOne({_id: request.requester})
+            }
+        }
         res.json({'requests' : dbData});
     } catch (e) {
         console.log("Error: util#allRequests", e);
