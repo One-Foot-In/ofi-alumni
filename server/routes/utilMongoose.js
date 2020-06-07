@@ -59,7 +59,7 @@ const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _interests) => {
+const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _schoolLogo, _interests) => {
     const email = _email;
     const gradYear = Math.floor((Math.random() * 1000) + 2000);
     const zoomLink = _hasZoom ? 'yourZoomLink' : null;
@@ -90,7 +90,8 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             imageURL: _picLink,
             approved: approved,
             timeZone: timezone,
-            school: _school
+            school: _school,
+            schoolLogo: _schoolLogo
         }
     )
     const user_instance = new userSchema(
@@ -107,7 +108,7 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
     await user_instance.save();
 }
 
-const createStudent = async (_email, _name, _picLink, timezone, _school) => {
+const createStudent = async (_email, _name, _picLink, timezone, _school, _schoolLogo) => {
     const email = _email;
     const grade = Math.floor((Math.random() * 10) + 2);
     const password = MOCK_PASSWORD;
@@ -125,7 +126,8 @@ const createStudent = async (_email, _name, _picLink, timezone, _school) => {
             timeZone: timezone,
             imageURL: _picLink,
             approved: approved,
-            school: _school
+            school: _school,
+            schoolLogo: _schoolLogo
         }
     )
     const user_instance = new userSchema(
@@ -220,14 +222,14 @@ router.get('/seed/', async (req, res, next) => {
             let college = randomPickFromArray(collegesSaved)
             let hasZoom = randomPickFromArray([true, false])
             let timezoneAlumni = randomPickFromArray(timezones)
-            await createAlumni(alumniEmail, alumniName, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school, interests)
+            await createAlumni(alumniEmail, alumniName, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school, school.logoURL, interests)
 
             // create mock student
             let studentEmail = `student${i}@ofi.com`
             let studentName = `${randomPickFromArray(firstNames)} ${randomPickFromArray(lastNames)}`
             let picLinkStudent = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
             let timezoneStudent = randomPickFromArray(timezones)
-            await createStudent(studentEmail, studentName, picLinkStudent, timezoneStudent, school)
+            await createStudent(studentEmail, studentName, picLinkStudent, timezoneStudent, school, school.logoURL)
         }
         res.status(200).send({'message' : `Successfully created ${USER_COUNT} alumni and ${USER_COUNT} students`});
     } catch (e) {

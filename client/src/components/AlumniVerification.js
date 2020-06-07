@@ -3,6 +3,10 @@ import { Segment, Dropdown, Card, Image, Button, Modal, Header, Grid } from 'sem
 import { makeCall } from '../apis'
 import AlumniProfile from './AlumniProfile'
 
+/*
+    props:
+    - schoolId: String
+*/
 export default class AlumniVerification extends Component {
     state={
         entries: [],
@@ -23,7 +27,7 @@ export default class AlumniVerification extends Component {
     }
 
     getEntries() {
-        return makeCall(null, '/alumni/unapproved', 'get').catch(e => console.log(e))
+        return makeCall(null, `/alumni/unapproved/${this.props.schoolId}`, 'get').catch(e => console.log(e))
     }
 
     constructProfile(profile) {

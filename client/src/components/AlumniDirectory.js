@@ -46,8 +46,9 @@ const pageSize = 3;
 
 /*
 props:
-- isAlumniView: shows book request button if false
-- timezone: Number
+- schoolId: String
+- userDetails: {}
+- role
 */
 export default class AlumniDirectory extends Component {
     constructor(props) {
@@ -176,7 +177,7 @@ export default class AlumniDirectory extends Component {
     }
 
     getEntries() {
-        return makeCall(null, `/alumni/all/`, 'get').catch(e => console.log(e))
+        return makeCall(null, `/alumni/all/${this.props.schoolId}`, 'get').catch(e => console.log(e))
     }
 
     search(value) {

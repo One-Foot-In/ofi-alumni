@@ -173,8 +173,8 @@ class LoginForm extends React.Component {
                     style= {messageStyle}
                     attached
                     centered
-                    header={`Welcome to ${SCHOOL_NAME}'s Portal`}
-                    content='Please sign in.'
+                    header={`Welcome to One Foot In`}
+                    content={`Please sign in to access your school's network.`}
                 />
                 {this.renderIncorrectCredentialsMessage()}
                 <Grid>
