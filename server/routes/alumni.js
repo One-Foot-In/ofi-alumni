@@ -22,7 +22,6 @@ router.post('/', async (req, res, next) => {
         const country = req.body.country;
         const city = req.body.city;
         const password = req.body.password;
-        // TODO: need to add timeZone in frontend request
         const availabilities = [];
         const timeZone = req.body.timeZone;
         const zoomLink = req.body.zoomLink;

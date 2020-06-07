@@ -4,6 +4,7 @@ import LinkedInUpdate from "./LinkedInUpdate";
 import TimePreferencesModal from './TimePreferencesModal';
 import TopicPreferencesModal from './TopicPreferencesModal';
 import ZoomUpdateModal from './ZoomUpdateModal';
+import ImageUpdateModal from './ImageUpdateModal';
 
 const ALUMNI = "ALUMNI"
 
@@ -56,7 +57,8 @@ export default class AlumniProfile extends Component {
         this.state = {
             timePreferencesModalOpen: false,
             topicPreferencesModalOpen: false,
-            zoomUpdateOpen: false
+            zoomUpdateOpen: false,
+            imageModalOpen: false
         }
         this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
         this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
@@ -64,6 +66,8 @@ export default class AlumniProfile extends Component {
         this.closeTopicPreferencesModal = this.closeTopicPreferencesModal.bind(this)
         this.openZoomUpdateModal = this.openZoomUpdateModal.bind(this)
         this.closeZoomUpdateModal = this.closeZoomUpdateModal.bind(this)
+        this.openImageModal = this.openImageModal.bind(this)
+        this.closeImageModal = this.closeImageModal.bind(this)
     }
     closeTimePreferencesModal() {
         this.setState({
@@ -101,6 +105,19 @@ export default class AlumniProfile extends Component {
             zoomUpdateOpen: true
         })
     }
+    openImageModal() {
+        this.setState({
+            imageModalOpen: true
+        })
+    }
+    closeImageModal() {
+        this.setState({
+            imageModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+
     render(){
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
@@ -117,9 +134,22 @@ export default class AlumniProfile extends Component {
             />
         )
         const imageUpdate = (
-            <Button floated="right" basic color="blue">
+            <>
+            <Button 
+                floated="right"
+                basic
+                color="blue"
+                onClick={this.openImageModal}
+            >
                 Update Image
             </Button>
+            <ImageUpdateModal
+                modalOpen={this.state.imageModalOpen}
+                id={details._id}
+                isAlumni={true}
+                closeModal={this.closeImageModal}
+            />
+            </>
         )
         const timeAvailabilitiesUpdate = (
             <>
