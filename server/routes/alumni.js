@@ -87,6 +87,9 @@ router.post('/', async (req, res, next) => {
                 existingInterestsRecords.push(newInterestCreated)
             }
         }
+
+        // find schoolLogo
+        let school = await schoolSchema.findOne({_id: schoolId}, {logoURL: 1})
         const role = "ALUMNI"
         const emailVerified = false
         const approved = false
@@ -110,7 +113,8 @@ router.post('/', async (req, res, next) => {
                 timeZone: -timeZone,
                 zoomLink: zoomLink,
                 approved: approved,
-                school: schoolId
+                school: schoolId,
+                schoolLogo: school.logoURL
             }
         )
         const user_instance = new userSchema(
@@ -137,9 +141,9 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/all/', async (req, res, next) => {
+router.get('/all/:schoolId', async (req, res, next) => {
     try {
-        let alumni = await alumniSchema.find()
+        let alumni = await alumniSchema.find({school: req.params.schoolId})
         res.json({'alumni' : alumni});
     } catch (e) {
         console.log("Error: alumni#allAlumni", e);
@@ -148,9 +152,9 @@ router.get('/all/', async (req, res, next) => {
 });
 
 
-router.get('/unapproved/', async(req, res, next) => {
+router.get('/unapproved/:schoolId', async(req, res, next) => {
     try {
-        const dbData = await alumniSchema.find({approved: false})
+        const dbData = await alumniSchema.find({approved: false, school: req.params.schoolId})
         res.json({'unapproved': dbData})
     } catch (e) {
         console.log("Error: util#unapprovedAlumni", e);

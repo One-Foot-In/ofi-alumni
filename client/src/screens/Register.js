@@ -2,7 +2,6 @@ import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { Button, Grid, Segment, Message } from 'semantic-ui-react';
 import { Route, BrowserRouter as Router, Link, Switch } from 'react-router-dom'
-import {primary, secondary} from "../colors";
 import Signup from '../components/Signup';
 
 export default class Register extends React.Component {
@@ -34,9 +33,7 @@ export default class Register extends React.Component {
                 }}>
                     <Link to={`${match.url}/student`}>
                         <Button 
-                            style={{
-                                'background': primary,
-                                }}
+                            color='yellow'
                         >
                                 Student
                         </Button>
@@ -44,9 +41,7 @@ export default class Register extends React.Component {
                     <Button.Or />
                     <Link to={`${match.url}/alumni`}>
                         <Button
-                            style={{
-                                'background': secondary,
-                                }}
+                            color='orange'
                         >
                                 Alumni
                         </Button>

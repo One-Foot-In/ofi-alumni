@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import {Grid, Button, Modal, Form} from 'semantic-ui-react';
+import {Grid, Button, Modal, Form, Image} from 'semantic-ui-react';
 import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
-import {primary, secondary} from "../colors";
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 
@@ -10,6 +9,8 @@ import { makeCall } from "../apis";
 props:
 - loggedIn: boolean
 - logout: ()
+- email
+- schoolLogo
 */
 export default class Header extends Component {
     constructor(props) {
@@ -133,12 +134,12 @@ export default class Header extends Component {
             </Modal>
             <Button
                 disabled={this.state.sendingRequest}
+                basic
+                color='yellow'
                 style={
                     {
                         'height':'80%', 
                         'margin': '2px 0 2px 0',
-                        'background': secondary,
-                        'color': primary,
                         'margin': '0 10px 0 0'
                     }
                 }
@@ -146,13 +147,13 @@ export default class Header extends Component {
             >
                 Change Password
             </Button>
-            <Button 
+            <Button
+                basic
+                color='orange'
                 style={
                     {
                         'height':'80%', 
                         'margin': '2px 0 2px 0',
-                        'background': secondary,
-                        'color': primary,
                         'margin': '0 0 0 10px'
                     }
                 } 
@@ -168,12 +169,12 @@ export default class Header extends Component {
             <Link to="/register">
                 <Button
                     disabled={this.state.sendingRequest}
+                    basic
+                    color='yellow'
                     style={
                         {
                             'height':'80%', 
                             'margin': '2px 0 2px 0',
-                            'background': secondary,
-                            'color': primary,
                             'margin': '0 10px 0 0'
                         }
                     }
@@ -183,12 +184,12 @@ export default class Header extends Component {
             </Link>
             <Link to="/login">
                 <Button 
+                    basic
+                    color='orange'
                     style={
                         {
                             'height':'80%', 
                             'margin': '2px 0 2px 0',
-                            'background': secondary,
-                            'color': primary,
                             'margin': '0 0 0 10px'
                         }
                     } 
@@ -210,8 +211,13 @@ export default class Header extends Component {
     }
 
     renderLogo() {
+        let imageLink = this.props.loggedIn ? this.props.schoolLogo : require('./logo.png')
         return (
-            <img style={{'paddingTop': '30px'}} className="ui small image centered" src={require("./logo.png")} alt="logo"/>
+            <Grid
+                centered
+            >
+                <Image src={imageLink} size='small'/>                
+            </Grid>
         )
     }
     render () {
@@ -221,14 +227,17 @@ export default class Header extends Component {
                     'margin': '5px 0 20px 0'
                 }}
                 columns={3}
+                centered
             >
-                <Grid.Column width = {5}>
+                <Grid.Column width={5}>
                     <div></div>
                 </Grid.Column>
-                <Grid.Column width = {5}>
+                <Grid.Column width={6}>
                     {this.renderLogo()}
                 </Grid.Column>
-                {this.renderLoginStateInfo()}
+                <Grid.Column width={5}>
+                    {this.renderLoginStateInfo()}
+                </Grid.Column>
             </Grid>
         )
     }

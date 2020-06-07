@@ -14,7 +14,7 @@ import StudentProfile from './components/StudentProfile'
 import AlumniVerification from './components/AlumniVerification'
 
 import * as actions from './redux/actions'
-// TODO: remove for release
+// TODO: for demo only, remove for release
 import SearchablePooledMultiSelectDropdown from './components/SearchablePooledMultiSelectDropdown';
 import SearchablePooledSingleSelectDropdown from './components/SearchablePooledSingleSelectDropdown';
 
@@ -152,8 +152,10 @@ class App extends Component {
       fetchingAuth: true,
       approved: false,
       role: null,
+      schoolId: '',
       userDetails: {},
-      dropdownValue: null
+      // TODO: for demo only, remove for release
+      pooledDropdownValueLifted: null
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
@@ -161,6 +163,7 @@ class App extends Component {
     this.renderScreens = this.renderScreens.bind(this);
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
     this.refreshProfile = this.refreshProfile.bind(this);
+    // TODO: for demo only, remove for release
     this.getInputs = this.getInputs.bind(this);
   }
 
@@ -240,11 +243,12 @@ class App extends Component {
       window.location.reload()
   }
 
+  // TODO: for demo only, remove for release
   getInputs(inputs) {
     this.setState({
-      dropdownValue: inputs
+      pooledDropdownValueLifted: inputs
     }, () => {
-      console.log("dropdown value extracted is", this.state.dropdownValue)
+      console.log("dropdown value extracted is", this.state.pooledDropdownValueLifted)
     })
   }
 
@@ -292,6 +296,7 @@ class App extends Component {
                       <AlumniDirectory
                         isAlumniView={true}
                         timezone={this.state.userDetails.timeZone}
+                        schoolId={this.state.userDetails.school}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -318,7 +323,10 @@ class App extends Component {
                           navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'verification'}
                         />
-                        <AlumniVerification gradYear={this.state.userDetails.gradYear}/>
+                        <AlumniVerification
+                          gradYear={this.state.userDetails.gradYear}
+                          schoolId={this.state.userDetails.school}
+                        />
                       </> 
                     :<Redirect to={'/'}/> )
                   :<Redirect to={"/login"}/>
@@ -398,6 +406,7 @@ class App extends Component {
                       <AlumniDirectory
                         isAlumniView={false}
                         timezone={this.state.userDetails.timeZone}
+                        schoolId={this.state.userDetails.school}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -487,6 +496,7 @@ class App extends Component {
               loggedIn={this.state.loggedIn}
               logout={this.logout}
               email={this.state.userDetails && this.state.userDetails.email}
+              schoolLogo={this.state.userDetails && this.state.userDetails.schoolLogo}
             />
             <Container>
               {this.renderScreens(this.state.role)}
