@@ -4,6 +4,7 @@ var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var studentSchema = require('../models/studentSchema');
+var schoolSchema = require('../models/schoolSchema');
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -22,6 +23,8 @@ router.post('/', async (req, res, next) => {
         const approved = false
         const verificationToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
+        // find schoolLogo
+        let school = await schoolSchema.findOne({_id: schoolId}, {logoURL: 1})
         var student_instance = new studentSchema(
             {
                 name: name,
@@ -31,6 +34,7 @@ router.post('/', async (req, res, next) => {
                 // issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
                 school: schoolId,
                 timeZone: -timeZone,
+                schoolLogo: school.logoURL
             }
         )
         const user_instance = new userSchema(
