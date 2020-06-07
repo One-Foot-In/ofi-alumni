@@ -229,13 +229,15 @@ export default class Header extends Component {
                 columns={3}
                 centered
             >
-                <Grid.Column width = {5}>
+                <Grid.Column width={5}>
                     <div></div>
                 </Grid.Column>
-                <Grid.Column width={5}>
+                <Grid.Column width={6}>
                     {this.renderLogo()}
                 </Grid.Column>
+                <Grid.Column width={5}>
                     {this.renderLoginStateInfo()}
+                </Grid.Column>
             </Grid>
         )
     }
