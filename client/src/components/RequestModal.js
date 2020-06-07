@@ -34,6 +34,8 @@ export const timeSlotOptions = [
 
 /*
 props:
+    - userDetails: logged in user profile
+    - role: user role
     - modalOpen: boolean
     - closeModal: ()
     - alumni (contains all data from alumni schema)
@@ -101,11 +103,25 @@ export default class RequestModal extends Component {
 
     submitRequest(e) {
         e.preventDefault()
+        
         this.setState({
             submitting: true
         }, async () => {
             try {
-                const result = true;
+                const requesterId = this.props.userDetails._id
+                let timeOffset = new Date().getTimezoneOffset()
+                timeOffset = -((timeOffset/60)*100)
+                const payload = {
+                    requesterRole: this.props.role,
+                    requesterId: requesterId,
+                    mentorId: this.state.alumni._id,
+                    zoomLink: this.state.alumni.zoomLink,
+                    timeId: this.state.availabilityValue,
+                    topic: this.state.topicValue,
+                    note: this.state.note,
+                    timezone: timeOffset
+                }
+                const result = await makeCall(payload, `/request/addRequest/`, 'post')
                 if (!result || result.error) {
                     this.setState({
                         submitting: false

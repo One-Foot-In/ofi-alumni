@@ -46,9 +46,9 @@ const pageSize = 3;
 
 /*
 props:
-- isAlumniView: shows book request button if false
-- timezone: Number
 - schoolId: String
+- userDetails: {}
+- role
 */
 export default class AlumniDirectory extends Component {
     constructor(props) {
@@ -149,27 +149,30 @@ export default class AlumniDirectory extends Component {
                             <Card.Description>Company: {post.companyName}</Card.Description>
                             <br />
                         </Card.Content>
-                        {this.requestVisible(this.props.isAlumniView, post, i)}
+                        {this.requestVisible(post, i)}
                     </Card>
                 </Grid.Column>
             </Grid.Row>
         )
     }
 
-    requestVisible(isAlumniView, post, i) {
+    requestVisible(post, i) {
         var requestButton;
-                if (('zoomLink' in post) && !isAlumniView) {
+            if (post._id !== this.props.userDetails._id) {
+                if (('zoomLink' in post && 
+                    (post.zoomLink !== null && post.zoomLink !== ''))) {
                     requestButton = <Button 
                                     primary 
                                     data-id={i}
                                     onClick={this.handleRequestButton.bind(this)}>
                                         Make Request
                                     </Button>
-                } else if (!isAlumniView){
-                    requestButton = <Button disabled>Make Request</Button>
                 } else {
-                    requestButton = null;
+                    requestButton = <Button disabled>Make Request</Button>
                 }
+            } else {
+                requestButton = null;
+            }
         return requestButton
     }
 
@@ -310,6 +313,8 @@ export default class AlumniDirectory extends Component {
                     modalOpen={this.state.requestModalOpen}
                     closeModal={this.toggleRequestModal}
                     alumni={this.state.alumniDetails}
+                    userDetails={this.props.userDetails}
+                    role={this.props.role}
                     />
                 }
                 
