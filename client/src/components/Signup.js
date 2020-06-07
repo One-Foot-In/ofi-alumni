@@ -1,8 +1,11 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Icon, Message, Grid, Dropdown, Label } from 'semantic-ui-react';
+import { Form, Button, Icon, Message, Grid, Dropdown, Label, Segment, List } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
+import LocationSelectionModal from './LocationSelectionModal';
+import CollegeSelectionModal from './CollegeSelectionModal';
+import CareerAndInterestsModal from './CareerAndInterestsModal';
 
 let fieldStyle = {
     width: '100%',
@@ -23,7 +26,7 @@ const gradeOptions = [9, 10, 11, 12].map(val => {
 
 function getErrorLabel(content) {
     return (
-        <Label pointing='below' style={{'background-color': '#F6C7BD'}}> {content} </Label>
+        <Label pointing='below' style={{'backgroundColor': '#F6C7BD'}}> {content} </Label>
     )
 }
 
@@ -40,18 +43,36 @@ export default class Signup extends React.Component {
             email: '', // required
             password: '', // required
             confirmPassword: '', // required
+            schoolSelection: '', // required (id of school selected)
+            schoolOptions: [],
             // STUDENT ONLY
             grade: null, // required
             // ALUMNI ONLY
             graduationYear: null, // required
-            location: '',
-            jobTitle: '',
-            company: '',
-            college: '',
+            // location
+            country: '',
+            city: '',
+            // career and interests
+            existingJobTitleId: '',
+            existingJobTitleName: '',
+            newJobTitle: '',
+            existingCompanyId: '',
+            existingCompanyName: '',
+            newCompany: '',
+            existingInterests: [],
+            newInterests: [],
+            // college
+            newCollege: '', // when new college is being entered
+            existingCollegeId: '', // when alumni selects from existing colleges
+            collegeDisplayName: '', // used for display when selecting colleges
+            collegeCountry: '', // when alumni selects old college
             // FORM-CONTROL
             submitting: false,
             passwordsMatching: true,
-            emailValid: true
+            emailValid: true,
+            locationModalOpen: false,
+            collegeModalOpen: false,
+            careerModalOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
@@ -61,6 +82,167 @@ export default class Signup extends React.Component {
         this.comparePasswords = this.comparePasswords.bind(this);
         this.getAlumniFields = this.getAlumniFields.bind(this);
         this.getStudentFields = this.getStudentFields.bind(this);
+        this.handleSchoolSelection = this.handleSchoolSelection.bind(this);
+        this.getLocationInput = this.getLocationInput.bind(this);
+        this.handleLocationModal = this.handleLocationModal.bind(this);
+        this.getCollegeInput = this.getCollegeInput.bind(this);
+        this.handleCollegeSelectionModal = this.handleCollegeSelectionModal.bind(this);
+        this.handleCareerModal = this.handleCareerModal.bind(this);
+        this.getCareerInput = this.getCareerInput.bind(this);
+        this.getCareerAndInterestsDisplay = this.getCareerAndInterestsDisplay.bind(this);
+        this.hansEntriesForCareerAndInterests = this.hansEntriesForCareerAndInterests.bind(this)
+    }
+
+    getCareerInput(jobTitleObject, companyObject, interestsObj) {
+        this.setState({
+            existingJobTitleId: jobTitleObject.existingJobTitleId,
+            existingJobTitleName: jobTitleObject.existingJobTitleName,
+            newJobTitle: jobTitleObject.newJobTitle,
+            existingCompanyId: companyObject.existingCompanyId,
+            existingCompanyName: companyObject.existingCompanyName,
+            newCompany: companyObject.newCompany,
+            existingInterests: interestsObj.existingInterests, // interests are stored whole on alumni models
+            newInterests: interestsObj.newInterests,
+        })
+    }
+
+    getCareerAndInterestsDisplay() {
+        return (
+            <Segment>
+                <Label>
+                    Clear Entries for career and interests
+                    <Icon
+                        onClick={() => this.setState({
+                            existingJobTitleId: '',
+                            existingJobTitleName: '',
+                            newJobTitle: '',
+                            existingCompanyId: '',
+                            existingCompanyName: '',
+                            newCompany: '',
+                            existingInterests: [], // interests are stored whole on alumni models
+                            newInterests: [],
+                        })}
+                        name='delete'
+                    />
+                </Label>
+                <List divided relaxed>
+                    
+                    {
+                    (this.state.existingJobTitleId || this.state.newJobTitle) ?
+                        <List.Item>
+                            <List.Content>
+                                <List.Header>Job Title</List.Header>
+                                <List.Description>{this.state.existingJobTitleName || this.state.newJobTitle}</List.Description>
+                            </List.Content>
+                        </List.Item> : null 
+                    }
+                    {
+                        this.state.existingCompanyId || this.state.newCompany ?
+                        <List.Item>
+                            <List.Content>
+                                <List.Header>Company</List.Header>
+                                <List.Description>{this.state.existingCompanyName || this.state.newCompany}</List.Description>
+                            </List.Content>
+                        </List.Item> : null
+                    }
+                    {
+                        this.state.existingInterests.length || this.state.newInterests.length ?
+                        <List.Item>
+                            <List.Content>
+                                <List.Header>Interests</List.Header>
+                                <List.Description>
+                                    {
+                                        [
+                                            ...this.state.existingInterests.map(interest => interest.text).flat(),
+                                            ...this.state.newInterests.map(interest => interest.text).flat()
+                                        ].join(', ')
+                                    }
+                                </List.Description>
+                            </List.Content>
+                        </List.Item> : null
+                    }   
+                </List>
+            </Segment>
+        )
+    }
+
+    getLocationInput(country, city) {
+        this.setState({country, city})
+    }
+
+    getCollegeInput(country, collegeName, collegeId) {
+        if (!collegeId) {
+            this.setState({
+                collegeCountry: country,
+                newCollege: collegeName,
+                collegeDisplayName: `${collegeName} (${country})`
+            })
+        } else {
+            this.setState({
+                collegeCountry: country,
+                existingCollegeId: collegeId,
+                collegeDisplayName: collegeName
+            })
+        }
+    }
+
+    handleLocationModal() {
+        this.setState({locationModalOpen: !this.state.locationModalOpen})
+    }
+
+    handleCollegeSelectionModal() {
+        this.setState({collegeModalOpen: !this.state.collegeModalOpen})
+    }
+
+    handleCareerModal() {
+        this.setState({careerModalOpen: !this.state.careerModalOpen})
+    }
+
+    getLocationDisplay() {
+        return (
+            <Label
+                style={{'margin': '2px'}}
+            >
+                {this.state.city} ({this.state.country})
+                <Icon
+                    onClick={() => this.setState({
+                        country: '',
+                        city: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
+    }
+
+    getCollegeDisplay() {
+        return (
+            <Label
+                style={{'margin': '2px'}}
+            >
+                {this.state.collegeDisplayName}
+                <Icon
+                    onClick={() => this.setState({
+                        collegeDisplayName: '',
+                        newCollege: '',
+                        existingCollegeId: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
+    }
+
+    async componentWillMount() {
+        let result = await makeCall(null, '/drop/schoolsOptions', 'get')
+        this.setState({
+            schoolOptions: result.options
+        })
+    }
+
+    handleSchoolSelection(e, {value}) {
+        e.preventDefault()
+        this.setState({schoolSelection : value})
     }
 
     handleChange(e) {
@@ -92,11 +274,22 @@ export default class Signup extends React.Component {
     }
 
     validateSubmitReadiness() {
-        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password);
+        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password);
         if (this.props.isAlumni) {
             return baseCondition && this.state.graduationYear;
         }
         return baseCondition && this.state.grade;
+    }
+
+    hansEntriesForCareerAndInterests() {
+        return (
+            this.state.existingJobTitleId || 
+            this.state.newJobTitle || 
+            this.state.existingCompanyId || 
+            this.state.newCompany || 
+            this.state.existingInterests.length ||
+            this.state.newInterests.length
+        )
     }
 
     getAlumniFields() {
@@ -104,42 +297,74 @@ export default class Signup extends React.Component {
             <>
                 <Form.Field
                     type="number"
-                    required="true"
+                    required={true}
                     style={fieldStyle}
                 >
                     <label>Graduation Year</label>
                     <input placeholder='YYYY' name="graduationYear" onChange={this.handleChange} />
                 </Form.Field>
                 <Form.Group>
-                    <Form.Field
-                        type="text"
-                        style={fieldStyle}
-                    >
-                        <label>Location</label>
-                        <input placeholder='City, Country...' name="location" onChange={this.handleChange} />
+                    <Form.Field>
+                        {(this.state.country && this.state.city) ?
+                        this.getLocationDisplay() :
+                        <>
+                            <Button
+                                primary
+                                color="blue"
+                                type="button"
+                                onClick={() => {this.setState({locationModalOpen: true})}}
+                            >
+                                Add Location (required)
+                            </Button>
+                            <LocationSelectionModal
+                                getInput={this.getLocationInput}
+                                modalOpen={this.state.locationModalOpen}
+                                closeModal={this.handleLocationModal}
+                            />
+                        </>
+                        }
                     </Form.Field>
-                    <Form.Field
-                        type="text"
-                        style={fieldStyle}
-                    >
-                        <label>Job Title</label>
-                        <input placeholder='Position...' name="jobTitle" onChange={this.handleChange} />
-                    </Form.Field>
-                    <Form.Field
-                        type="text"
-                        style={fieldStyle}
-                    >
-                        <label>Company</label>
-                        <input placeholder='Company...' name="company" onChange={this.handleChange} />
-                    </Form.Field>
-                    <Form.Field
-                        type="text"
-                        style={fieldStyle}
-                    >
-                        <label>College</label>
-                        <input placeholder='College...' name="college" onChange={this.handleChange} />
+                    <Form.Field>
+                        {
+                            (this.state.collegeDisplayName) ?
+                            this.getCollegeDisplay() :
+                            <>
+                                <Button
+                                    primary
+                                    color="blue"
+                                    type="button"
+                                    onClick={() => {this.setState({collegeModalOpen: true})}}
+                                >
+                                    Add College
+                                </Button>
+                                <CollegeSelectionModal
+                                    getInput={this.getCollegeInput}
+                                    modalOpen={this.state.collegeModalOpen}
+                                    closeModal={this.handleCollegeSelectionModal}
+                                />
+                            </>
+                        }
                     </Form.Field>
                 </Form.Group>
+                {
+                    this.hansEntriesForCareerAndInterests() ?
+                    this.getCareerAndInterestsDisplay() :
+                    <Form.Field>
+                        <Button
+                            primary
+                            color="blue"
+                            type="button"
+                            onClick={() => {this.setState({careerModalOpen: true})}}
+                        >
+                            Add Career and Interests
+                        </Button>
+                        <CareerAndInterestsModal
+                            getInput={this.getCareerInput}
+                            modalOpen={this.state.careerModalOpen}
+                            closeModal={this.handleCareerModal}
+                        />
+                    </Form.Field>
+                }
             </>
         )
     }
@@ -149,7 +374,7 @@ export default class Signup extends React.Component {
             <>
                 <Form.Field>
                     <label>Grade</label>
-                    <Dropdown placeholder='Select the grade you attend...' fluid selection options={gradeOptions} onChange={this.handleChangeGrade} name="grade" value={this.state.grade}/>
+                    <Dropdown placeholder='Select the grade you attend...' selection options={gradeOptions} onChange={this.handleChangeGrade} name="grade" value={this.state.grade}/>
                 </Form.Field>
             </>
         )
@@ -166,7 +391,8 @@ export default class Signup extends React.Component {
                 name: this.state.name,
                 email: this.state.email,
                 password: this.state.password,
-                timeZone: ((new Date().getTimezoneOffset())*100)/60 // getTimezoneOffset fetches offset in minutes
+                timeZone: ((new Date().getTimezoneOffset())*100)/60, // getTimezoneOffset fetches offset in minutes
+                schoolId: this.state.schoolSelection
             }
             if (!this.props.isAlumni) {
                 payload = Object.assign({}, payload, {
@@ -175,10 +401,20 @@ export default class Signup extends React.Component {
             } else {
                 payload = Object.assign({}, payload, {
                     graduationYear: this.state.graduationYear,
-                    location: this.state.location,
-                    jobTitle: this.state.jobTitle,
-                    company: this.state.company,
-                    college: this.state.college
+                    country: this.state.country,
+                    city: this.state.city,
+                    // career
+                    existingJobTitleId: this.state.existingJobTitleId,
+                    newJobTitle: this.state.newJobTitle,
+                    existingCompanyId: this.state.existingCompanyId,
+                    newCompany: this.state.newCompany,
+                    // college
+                    newCollege: this.state.newCollege, // when new college is being entered
+                    existingCollegeId: this.state.existingCollegeId, // when alumni selects from existing colleges
+                    collegeCountry: this.state.collegeCountry,
+                    //interests
+                    existingInterests: this.state.existingInterests, // interests are stored whole on alumni models
+                    newInterests: this.state.newInterests
                 });
             }
             e.preventDefault();
@@ -250,7 +486,7 @@ export default class Signup extends React.Component {
                     <Form onSubmit={this.handleSubmit}>
                         <Form.Field
                             type="email"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                             error={!this.state.emailValid}
                         >
@@ -260,7 +496,7 @@ export default class Signup extends React.Component {
                         </Form.Field>
                         <Form.Field
                             type="password"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                             error={!this.state.passwordsMatching}
                         >
@@ -270,7 +506,7 @@ export default class Signup extends React.Component {
                         </Form.Field>
                         <Form.Field
                             type="password"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                             error={!this.state.passwordsMatching}
                         >
@@ -280,12 +516,26 @@ export default class Signup extends React.Component {
                         </Form.Field>
                         <Form.Field
                             type="text"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                         >
                             <label>Name</label>
                             <input placeholder='Name' name="name" onChange={this.handleChange} />
-                        </Form.Field>      
+                        </Form.Field>
+                        <Form.Field
+                            required={true}
+                        >
+                            <label>High School</label>
+                            <Dropdown
+                                style={{ 'margin': '5px', 'width': '80%'}}
+                                placeholder={'Select your high school network'}
+                                search
+                                selection
+                                options={this.state.schoolOptions}
+                                value={this.state.value}
+                                onChange={this.handleSchoolSelection}
+                            />
+                        </Form.Field>
                         {this.props.isAlumni ? 
                             this.getAlumniFields() :
                             this.getStudentFields()

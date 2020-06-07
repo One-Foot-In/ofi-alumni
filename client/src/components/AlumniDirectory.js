@@ -13,22 +13,22 @@ const searchOptions = [
     {
         key: 'Location',
         text: 'Location',
-        value: 'location'
+        value: 'country'
     },
     {
         key: 'College',
         text: 'College',
-        value: 'college'
+        value: 'collegeName'
     },
     {
         key: 'Profession',
         text: 'Profession',
-        value: 'profession'
+        value: 'jobTitleName'
     },
     {
         key: 'Company',
         text: 'Company',
-        value: 'company'
+        value: 'companyName'
     },
     {
         key: 'Name',
@@ -99,10 +99,11 @@ export default class AlumniDirectory extends Component {
                     value: post.gradYear
                 });
             }
-            allText.push(post.location + ' '
-                         + post.college + ' '
-                         + post.profession + ' '
-                         + post.company + ' '
+            allText.push(
+                        post.city + ' '
+                         + post.country + ' '
+                         + post.jobTitleName + ' '
+                         + post.companyName + ' '
                          + post.name + ' '
                          + post.gradYear);
             display.push(this.constructProfile(post, i));
@@ -142,9 +143,9 @@ export default class AlumniDirectory extends Component {
                             </Card.Header>
                                             
                             <Card.Meta>{post.profession}</Card.Meta>
-                            <Card.Description>College: {post.college}</Card.Description>
-                            <Card.Description>Location: {post.location}</Card.Description>
-                            <Card.Description>Company: {post.company}</Card.Description>
+                            <Card.Description>College: {post.collegeName}</Card.Description>
+                            <Card.Description>Location: {(post.city && post.country) && `${post.city} (${post.country})`}</Card.Description>
+                            <Card.Description>Company: {post.companyName}</Card.Description>
                             <br />
                         </Card.Content>
                         {this.requestVisible(this.props.isAlumniView, post, i)}

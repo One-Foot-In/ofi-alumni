@@ -1,6 +1,7 @@
 var mongoose = require('mongoose')
 
 const Schema = mongoose.Schema;
+var COUNTRIES = require("../countries").COUNTRIES
 
 /*
   All Time Availabilities are to be stored in GMT+0 timezone
@@ -23,17 +24,23 @@ const alumniSchema = new Schema(
     name: {type: String, required: true},
     email: {type: String, reguired: true, unique: true},
     gradYear: {type: Number, required: true},
-    location: {type: String, required: false},
-    profession: {type: String, required: false},
-    company: {type: String, required: false},
-    college: {type: String, required: false},
+    country: {type: String, enum: COUNTRIES, required: true},
+    city: {type: String, required: true},
+    company: {type: Schema.Types.ObjectId, ref: 'Company', required: false},
+    companyName: {type: String, required: false}, // to avoid lookup for display purposes
+    jobTitle: {type: Schema.Types.ObjectId, ref: 'JobTitle', required: false},
+    jobTitleName: {type: String, required: false}, // to avoid lookup for display purposes
+    college: {type: Schema.Types.ObjectId, ref: 'College', required: false},
+    collegeName: {type: String, required: false}, // to avoid lookup for display purposes
+    interests: {type: Array, required: false},
     //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
     //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
     availabilities: [timeAvailabilitySchema],
     topics: {type: Array, required: false},
     timeZone: {type: Number, required: false}, // value for Date.getTimezoneOffset (Daylight Savings prevents this from being constant)
     zoomLink: {type: String, required: false},
-    approved: {type: Boolean, default: false}
+    approved: {type: Boolean, default: false},
+    school: {type: Schema.Types.ObjectId, ref: 'School', required: true}
   }
 );
 

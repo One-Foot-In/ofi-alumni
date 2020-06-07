@@ -7,6 +7,7 @@ var crypto = require('crypto-random-string');
 var sendEmail = require('./helpers/emailHelpers').sendEmail
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
+var schoolSchema = require('../models/schoolSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 require('dotenv').config();
 

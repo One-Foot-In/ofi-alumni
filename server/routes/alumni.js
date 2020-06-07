@@ -4,6 +4,11 @@ var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
+var collegeSchema = require('../models/collegeSchema');
+var jobTitleSchema = require('../models/jobTitleSchema');
+var interestsSchema = require('../models/interestsSchema');
+var companySchema = require('../models/companySchema');
+var schoolSchema = require('../models/schoolSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 require('mongoose').Promise = global.Promise
 
@@ -14,16 +19,74 @@ router.post('/', async (req, res, next) => {
         const email = req.body.email;
         const name = req.body.name;
         const gradYear = parseInt(req.body.graduationYear);
-        const location = req.body.location;
-        const profession = req.body.jobTitle;
-        const company = req.body.company;
-        const college = req.body.college;
+        const country = req.body.country;
+        const city = req.body.city;
         const password = req.body.password;
         // TODO: need to add timeZone in frontend request
         const availabilities = [];
         const timeZone = req.body.timeZone;
         const zoomLink = req.body.zoomLink;
+        const schoolId = req.body.schoolId;
 
+        // find or create College
+        const newCollege = req.body.newCollege
+        const collegeCountry = req.body.collegeCountry
+        let existingCollegeId = req.body.existingCollegeId
+        var college
+        if (newCollege) {
+            var newCollegeCreated = new collegeSchema({
+                name: newCollege,
+                country: collegeCountry
+            })
+            await newCollegeCreated.save()
+            college = newCollegeCreated
+        } else if (existingCollegeId) {
+            college = await collegeSchema.findOne({_id: existingCollegeId})
+        }
+
+        // find or create Job Title
+        const existingJobTitleId = req.body.existingJobTitleId
+        const newJobTitle = req.body.newJobTitle
+        var jobTitle
+        if (newJobTitle) {
+            var newJobTitleCreated = new jobTitleSchema({
+                name: newJobTitle
+            })
+            await newJobTitleCreated.save()
+            jobTitle = newJobTitleCreated
+        } else if (existingJobTitleId) {
+            jobTitle = await jobTitleSchema.findOne({_id: existingJobTitleId})
+        }
+
+        // find or create Company
+        const existingCompanyId = req.body.existingCompanyId
+        const newCompany = req.body.newCompany
+        var company
+        if (newCompany) {
+            var newCompanyCreated = new companySchema({
+                name: newCompany
+            })
+            await newCompanyCreated.save()
+            var company = newCompanyCreated
+        } else if (existingCompanyId) {
+            company = await companySchema.findOne({_id: existingCompanyId})
+        }
+
+        const existingInterests = req.body.existingInterests
+        // find existing interests
+        const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
+        let existingInterestsRecords = await interestsSchema.find().where('_id').in(existingInterestsIds).exec()
+        const newInterests = req.body.newInterests || []
+        // create interests added
+        if (newInterests.length) {
+            for (let i = 0; i < newInterests.length; i++) {
+                var newInterestCreated = new interestsSchema({
+                    name: newInterests[i].value
+                })
+                await newInterestCreated.save()
+                existingInterestsRecords.push(newInterestCreated)
+            }
+        }
         const role = "ALUMNI"
         const emailVerified = false
         const approved = false
@@ -34,16 +97,20 @@ router.post('/', async (req, res, next) => {
                 name: name,
                 email: email,
                 gradYear: gradYear,
-                location: location,
-                profession: profession,
+                country: country,
+                city: city,
                 company: company,
+                companyName: company && company.name,
                 college: college,
-                //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-                //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
+                collegeName: college && college.name,
+                jobTitle: jobTitle,
+                jobTitleName: jobTitle && jobTitle.name,
+                interests: existingInterestsRecords,
                 availabilities: availabilities,
                 timeZone: -timeZone,
                 zoomLink: zoomLink,
-                approved: approved
+                approved: approved,
+                school: schoolId
             }
         )
         const user_instance = new userSchema(
@@ -56,7 +123,6 @@ router.post('/', async (req, res, next) => {
               approved: approved
             }
         );
-        
         await alumni_instance.save();
         await user_instance.save();
         res.status(200).send({
@@ -64,6 +130,7 @@ router.post('/', async (req, res, next) => {
             alumni: alumni_instance
         });
     } catch (e) {
+        console.error('Error in alumni#add', e)
         res.status(500).send({
             message: 'Failed adding alumni: ' + e
         });

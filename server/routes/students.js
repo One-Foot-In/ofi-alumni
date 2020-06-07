@@ -14,6 +14,7 @@ router.post('/', async (req, res, next) => {
         const name = req.body.name;
         const grade = parseInt(req.body.grade);
         const password = req.body.password;
+        const schoolId = req.body.schoolId;
         // TODO: need to add timeZone in frontend request
         const timeZone = req.body.timeZone;
         const role = "STUDENT"
@@ -28,6 +29,7 @@ router.post('/', async (req, res, next) => {
                 grade: grade,
                 // requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
                 // issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
+                school: schoolId,
                 timeZone: -timeZone,
             }
         )
@@ -49,6 +51,7 @@ router.post('/', async (req, res, next) => {
             student: student_instance
         });
     } catch (e) {
+        console.error("Error: students#one", e)
         res.status(500).send({
             message: 'Failed adding student: ' + e
         });

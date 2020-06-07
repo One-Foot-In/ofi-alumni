@@ -40,10 +40,11 @@ props:
     - _id: string
     - imageURL: string
     - name: string
-    - college: string
-    - location: string
-    - company: string
-    - jobTitle: string
+    - collegeName: string
+    - city: string
+    - country: string
+    - companyName: string
+    - jobTitleName: string
     - email: string
     - availabilities
 - isViewOnly: bool
@@ -201,11 +202,11 @@ export default class AlumniProfile extends Component {
                 />
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
-                    <Card.Meta>{details.profession || 'Unavailable'}</Card.Meta>
+                    <Card.Meta>{details.jobTitleName || 'Unavailable'}</Card.Meta>
 
-                    <Card.Description>College: {details.college || 'Unavailable'}</Card.Description>
-                    <Card.Description>Location: {details.location || 'Unavailable'}</Card.Description>
-                    <Card.Description>Company: {details.company || 'Unavailable'}</Card.Description>
+                    <Card.Description>College: {details.collegeName || 'Unavailable'}</Card.Description>
+                    <Card.Description>Location: {(details.city && details.country) ? `${details.city} (${details.country})` : 'Unavailable'}</Card.Description>
+                    <Card.Description>Company: {details.companyName || 'Unavailable'}</Card.Description>
                     
                 </Card.Content>
                 {canUpdate}
