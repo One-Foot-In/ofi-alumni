@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
 import LinkedInUpdate from "./LinkedInUpdate";
+import ImageUpdateModal from './ImageUpdateModal';
+
+const STUDENT = "STUDENT"
 
 /*
 props:
@@ -12,7 +15,27 @@ props:
 - isViewOnly: bool
 */
 export default class StudentProfile extends Component {
-    render(){
+    constructor(props) {
+        super(props)
+        this.state = {
+            imageModalOpen: false
+        }
+        this.openImageModal = this.openImageModal.bind(this)
+        this.closeImageModal = this.closeImageModal.bind(this)
+    }
+    openImageModal() {
+        this.setState({
+            imageModalOpen: true
+        })
+    }
+    closeImageModal() {
+        this.setState({
+            imageModalOpen: false
+        }, () => {
+            this.props.refreshProfile(STUDENT, this.props.details._id)
+        })
+    }
+    render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
 
@@ -22,9 +45,22 @@ export default class StudentProfile extends Component {
             />
         )
         const imageUpdate = (
-            <Button floated="right" basic color="blue">
+            <>
+            <Button 
+                floated="right"
+                basic
+                color="blue"
+                onClick={this.openImageModal}
+            >
                 Update Image
             </Button>
+            <ImageUpdateModal
+                modalOpen={this.state.imageModalOpen}
+                id={details._id}
+                isAlumni={false}
+                closeModal={this.closeImageModal}
+            />
+            </>
         )
         var canUpdate;
 

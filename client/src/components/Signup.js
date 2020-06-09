@@ -90,7 +90,7 @@ export default class Signup extends React.Component {
         this.handleCareerModal = this.handleCareerModal.bind(this);
         this.getCareerInput = this.getCareerInput.bind(this);
         this.getCareerAndInterestsDisplay = this.getCareerAndInterestsDisplay.bind(this);
-        this.hansEntriesForCareerAndInterests = this.hansEntriesForCareerAndInterests.bind(this)
+        this.hansEntriesForCareerAndInterests = this.hansEntriesForCareerAndInterests.bind(this);
     }
 
     getCareerInput(jobTitleObject, companyObject, interestsObj) {
@@ -466,6 +466,7 @@ export default class Signup extends React.Component {
         e.preventDefault();
         this.props.match.history.goBack();
     }
+
     render() {
         return (
                 <div>

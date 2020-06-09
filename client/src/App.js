@@ -390,6 +390,7 @@ class App extends Component {
                       <StudentProfile
                         isViewOnly={false}
                         details={this.state.userDetails}
+                        refreshProfile={this.refreshProfile}
                       />
                   </> :
                   <Redirect to={"/login"}/>

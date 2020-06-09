@@ -2,7 +2,6 @@ import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { Form, Button, Icon, Message, Grid, Modal } from 'semantic-ui-react';
 import { Redirect } from 'react-router-dom'
-import { SCHOOL_NAME } from "../App";
 import { makeCall } from "../apis";
 import swal from "sweetalert";
 
