@@ -83,13 +83,6 @@ router.patch('/updateStatus/:id/:timeOffset', async (req,res, next) => {
     let requests = []
     try {
         let request = await requestSchema.findById(requestId);
-        let matching_queries = await requestSchema.find({
-            'status': 'Confirmed',
-            'time.id': 'request.id'
-        })
-        if (await (matching_queries === [])) {
-            console.log('Success')
-        }
         request.status = newStatus
         await request.save()
         for (let status of conditions) {

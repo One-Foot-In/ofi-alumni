@@ -38,32 +38,44 @@ export default class RequestsView extends Component {
             confirmed: [],
             completed: [],
             timeOffset: 0,
+            confirmedTimes: []
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
     }
     
-    handleStatusUpdate(requests) {
+    async handleStatusUpdate(requests) {
         if (requests.requests === []) return;
+        let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
         this.setState({
             unconfirmed: requests.requests[0],
             confirmed: requests.requests[1],
-            completed: requests.requests[2]
+            completed: requests.requests[2],
+            confirmedTimes: confirmedTimes,
         })
     }
 
     async componentWillMount() {
         let timeOffset = (-(new Date().getTimezoneOffset())/60)*100
         let requests = await this.getRequests(timeOffset)
+        let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
         this.setState({
             timeOffset: timeOffset,
             unconfirmed: requests.requests[0],
             confirmed: requests.requests[1],
-            completed: requests.requests[2]
+            completed: requests.requests[2],
+            confirmedTimes: confirmedTimes
         })
     }
 
     getRequests(timeOffset) {
         return makeCall({}, '/request/getRequests/'+this.props.userDetails._id+'/'+timeOffset, 'get')
+    }
+
+    populateConfirmedTimes(requests) {
+        let confirmedTimes = requests.map(confirmedRequest => {
+            return (confirmedRequest.time[0].id)
+        })
+        return confirmedTimes
     }
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
@@ -104,6 +116,7 @@ export default class RequestsView extends Component {
             {this.state.activeItem === 'unconfirmed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
                     <RequestCards 
+                        confirmedTimes={this.state.confirmedTimes}
                         activeSet={this.state.activeItem}
                         requests={this.state.unconfirmed}
                         liftRequests={this.handleStatusUpdate}
@@ -156,7 +169,7 @@ class RequestCards extends Component {
 
     constructRequest(request) {
         return (
-            <Grid>
+            <Grid key={request._id}>
             <Grid.Row columns={2}>
                 <Grid.Column width={4}>
                     <Image
@@ -188,6 +201,7 @@ class RequestCards extends Component {
 
     buttonDisplay(request) {
         if (this.props.activeSet === 'unconfirmed') {
+            let disableApprove = this.props.confirmedTimes.includes(request.time[0].id)
             return (
                 <Button.Group>
                     <Button
@@ -195,6 +209,7 @@ class RequestCards extends Component {
                         requestid={request._id}
                         newstatus={'Confirmed'}
                         onClick={this.handleClick.bind(this)}
+                        disabled={disableApprove}
                     >
                         Approve meeting
                     </Button>
@@ -252,12 +267,6 @@ class RequestCards extends Component {
     render() {
         return(
             <>
-            {this.props.activeSet === 'unconfirmed' && 
-                <Segment color='blue' inverted tertiary>
-                    Before approving a meeting, please make sure you haven't already scheduled
-                    another meeting for the same time
-                </Segment>
-            }
             {this.state.display}
             </>
         )
