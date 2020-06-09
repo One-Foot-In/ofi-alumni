@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Menu, Label, Card, Grid, Image, Button, Segment } from 'semantic-ui-react';
 import { makeCall } from '../apis'
+import swal from 'sweetalert'
 
 export const timeSlotOptions = [
     '12am - 1am',
@@ -253,7 +254,20 @@ class RequestCards extends Component {
                 requestId: e.currentTarget.getAttribute('requestid'),
                 newStatus: e.currentTarget.getAttribute('newstatus')
             }, '/request/updateStatus/' + this.props.userId + '/' + this.props.timeOffset, 'patch');
-        this.props.liftRequests(requests)
+        if (!requests || requests.error) {
+            swal({
+                title: "Error!",
+                text: "There was an error this request, please try again.",
+                icon: "error",
+            });
+        } else {
+            swal({
+                title: "Done!",
+                text: "Successfully updated this request!",
+                icon: "success"
+            })
+            this.props.liftRequests(requests)
+        }
     }
 
     constructDisplay(requests) {
