@@ -278,7 +278,7 @@ class RequestCards extends Component {
         if (!requests || requests.error) {
             swal({
                 title: "Error!",
-                text: "There was an error this request, please try again.",
+                text: "There was an error updating this request, please try again.",
                 icon: "error",
             });
         } else {
