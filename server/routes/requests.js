@@ -74,6 +74,45 @@ router.post('/addRequest', async (req, res, next) => {
     }
 });
 
+router.patch('/updateStatus/:id/:timeOffset', async (req,res, next) => {
+    let alumniId = req.params.id;
+    let timeOffset = parseInt(req.params.timeOffset);
+    let requestId = req.body.requestId;
+    let newStatus = req.body.newStatus;
+    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
+    let requests = []
+    try {
+        let request = await requestSchema.findById(requestId);
+        let matching_queries = await requestSchema.find({
+            'status': 'Confirmed',
+            'time.id': 'request.id'
+        })
+        if (await (matching_queries === [])) {
+            console.log('Success')
+        }
+        request.status = newStatus
+        await request.save()
+        for (let status of conditions) {
+            const dbData = await requestSchema.find({mentor: alumniId, status: status})
+            for (let request of dbData) {
+                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                if (request.requesterRole === 'STUDENT') {
+                    request.requesterObj = await studentSchema.findOne({_id: request.requester})
+                } else {
+                    request.requesterObj = await alumniSchema.findOne({_id: request.requester})
+                }
+            }
+            requests.push(dbData)
+        }
+        res.json({'requests' : requests});
+    } catch (e) {
+        console.log('/request/updateStatus Error: ' + e)
+        res.status(500).send({
+            message: 'Failed to update status: ' + e
+        })
+    }
+})
+
 router.get('/getRequests/:id/:timeOffset', async (req, res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset)
