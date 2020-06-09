@@ -30,6 +30,12 @@ export const timeSlotOptions = [
     '11pm - 12am'
 ]
 
+/*
+ * DETAILS:
+ * Parent component, contains menu and switches out active RequestCards
+ * PROPS
+ * userDetails - full profile of logged in user
+ */
 export default class RequestsView extends Component {
     constructor(props){
         super(props)
@@ -142,8 +148,6 @@ export default class RequestsView extends Component {
                     <RequestCards 
                         activeSet={this.state.activeItem}
                         requests={this.state.completed}
-                        liftRequests={this.handleStatusUpdate}
-                        timeOffset={this.state.timeOffset}
                     />
                 </div>
             }
@@ -152,6 +156,23 @@ export default class RequestsView extends Component {
     }
 }
 
+
+/*
+ * DETAILS
+ * Child component - takes array of requests, constructs display
+ *                   shows valid actions for a given set
+ * PROPS
+ * Always:
+ * activeSet (string) - Shows what set is currently being used
+ * requests - array of relevant requests
+ * 
+ * Sometimes:
+ * userId - mongo ID for profile (used to update records)
+ * liftRequests (method) - lifts results of an update to parent component
+ * timeOffset
+ * confirmedTimes - array of meeting times that have already been confirmed
+ *                  used to disable approval, preventing double booking
+ */
 class RequestCards extends Component {
     state={
         requests: [],
