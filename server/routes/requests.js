@@ -131,4 +131,30 @@ router.get('/getRequests/:id/:timeOffset', async (req, res, next) => {
     }
 })
 
+router.get('/getSchedulings/:id/:role/:timeOffset', async (req, res, next) => {
+    let requesterId = req.params.id;
+    let requesterRole = req.params.role;
+    let timeOffset = parseInt(req.params.timeOffset)
+    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
+    let schedulings = []
+    try {
+        for (let status of conditions) {
+            const dbData = await requestSchema.find({
+                    requester: requesterId,
+                    requesterRole: requesterRole,
+                    status: status
+                }).populate('mentor')
+            for (let request of dbData) {
+                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+            }
+            schedulings.push(dbData)
+        }
+        res.json({'schedulings' : schedulings});
+    } catch (e) {
+        console.log('getSchedulings error: ' + e)
+        res.status(500).send({message: 'getRequests error: ' + e})
+    }
+})
+
+
 module.exports = router;

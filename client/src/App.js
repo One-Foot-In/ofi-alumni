@@ -13,6 +13,7 @@ import AlumniProfile from './components/AlumniProfile'
 import StudentProfile from './components/StudentProfile'
 import AlumniVerification from './components/AlumniVerification'
 import RequestsView from './components/RequestsView'
+import SchedulingsView from './components/SchedulingsView'
 
 import * as actions from './redux/actions'
 // TODO: for demo only, remove for release
@@ -423,7 +424,10 @@ class App extends Component {
                           navItems={studentNavBarItems()}
                           activeItem={'schedulings'}
                       />
-                      <div> Schedulings! </div>
+                      <SchedulingsView 
+                          userDetails={this.state.userDetails}
+                          role={role}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
