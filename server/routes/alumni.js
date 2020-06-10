@@ -228,4 +228,43 @@ router.patch('/zoomLink/:id', async (req, res, next) => {
     }
 })
 
+router.patch('/interests/remove/:id', async (req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.interests = alumni.interests.filter(interest => interest._id.toString() !== req.body.interestIdToRemove)
+        await alumni.save()
+        res.status(200).send({message: "Successfully removed alumni's interest"})
+    } catch (e) {
+        console.log("Error: alumni#interests/remove", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/interests/add/:id', async (req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        const existingInterests = req.body.existingInterests
+        // find existing interests
+        const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
+        let existingInterestsRecords = await interestsSchema.find().where('_id').in(existingInterestsIds).exec()
+        const newInterests = req.body.newInterests || []
+        // create interests added
+        if (newInterests.length) {
+            for (let i = 0; i < newInterests.length; i++) {
+                var newInterestCreated = new interestsSchema({
+                    name: newInterests[i].value
+                })
+                await newInterestCreated.save()
+                existingInterestsRecords.push(newInterestCreated)
+            }
+        }
+        alumni.interests = [...alumni.interests, ...existingInterestsRecords]
+        await alumni.save()
+        res.status(200).send({message: "Successfully added alumni's interests"})
+    } catch (e) {
+        console.log("Error: alumni#interests/add", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 module.exports = router;

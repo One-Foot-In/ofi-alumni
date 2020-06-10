@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { Button, Card, Image } from 'semantic-ui-react';
+import { Button, Card, Image, Grid, Label, Icon, Segment } from 'semantic-ui-react';
 import LinkedInUpdate from "./LinkedInUpdate";
 import TimePreferencesModal from './TimePreferencesModal';
 import TopicPreferencesModal from './TopicPreferencesModal';
 import ZoomUpdateModal from './ZoomUpdateModal';
 import ImageUpdateModal from './ImageUpdateModal';
+import InterestsUpdateModal from './InterestsUpdateModal';
+import { makeCall } from "../apis";
 
 const ALUMNI = "ALUMNI"
 
@@ -58,7 +60,8 @@ export default class AlumniProfile extends Component {
             timePreferencesModalOpen: false,
             topicPreferencesModalOpen: false,
             zoomUpdateOpen: false,
-            imageModalOpen: false
+            imageModalOpen: false,
+            removingInterest: false
         }
         this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
         this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
@@ -68,6 +71,9 @@ export default class AlumniProfile extends Component {
         this.closeZoomUpdateModal = this.closeZoomUpdateModal.bind(this)
         this.openImageModal = this.openImageModal.bind(this)
         this.closeImageModal = this.closeImageModal.bind(this)
+        this.openInterestsModal = this.openInterestsModal.bind(this)
+        this.closeInterestsModal = this.closeInterestsModal.bind(this)
+        this.getInterests = this.getInterests.bind(this)
     }
     closeTimePreferencesModal() {
         this.setState({
@@ -117,8 +123,53 @@ export default class AlumniProfile extends Component {
             this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
     }
-
-    render(){
+    openInterestsModal() {
+        this.setState({
+            interestsModalOpen: true
+        })
+    }
+    closeInterestsModal() {
+        this.setState({
+            interestsModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    async removeInterest(e, interestIdToRemove) {
+        e.preventDefault()
+        this.setState({removeInterest: true},
+            async () => {
+                await makeCall({interestIdToRemove: interestIdToRemove}, `/alumni/interests/remove/${this.props.details._id}`, 'patch')
+                this.setState({
+                    removeInterest: true
+                }, () =>
+                this.props.refreshProfile(ALUMNI, this.props.details._id)
+                )
+            })
+    }
+    getInterests() {
+        return this.props.details.interests && this.props.details.interests.length && this.props.details.interests.map(interest => {
+            return (
+                <Label
+                    key={interest._id}
+                    style={{
+                        'margin': '3px'
+                    }}
+                    color='blue'
+                >
+                    {interest.name}
+                    {
+                        !this.props.isViewOnly &&
+                        <Icon
+                            onClick={(e) => this.removeInterest(e, interest._id)}
+                            name='delete'
+                        />
+                    }
+                </Label>
+            )
+        })
+    }
+    render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
         let availabilities = details.availabilities;
@@ -135,8 +186,9 @@ export default class AlumniProfile extends Component {
         )
         const imageUpdate = (
             <>
-            <Button 
-                floated="right"
+            <Button
+                style={{'margin': '2px'}}
+                floated="left"
                 basic
                 color="blue"
                 onClick={this.openImageModal}
@@ -154,6 +206,7 @@ export default class AlumniProfile extends Component {
         const timeAvailabilitiesUpdate = (
             <>
             <Button
+                style={{'margin': '2px'}}
                 floated='right'
                 basic
                 color="blue"
@@ -172,6 +225,7 @@ export default class AlumniProfile extends Component {
         const topicAvailabilitiesUpdate = (
             <>
             <Button
+                style={{'margin': '2px'}}
                 floated='right'
                 basic
                 color="blue"
@@ -190,6 +244,7 @@ export default class AlumniProfile extends Component {
         const zoomLinkUpdate = (
             <>
              <Button
+                style={{'margin': '2px'}}
                 floated='right'
                 basic
                 color="blue"
@@ -205,17 +260,46 @@ export default class AlumniProfile extends Component {
             />
             </>
         )
+
+        const interestsUpdate = (
+            <>
+            <Button
+                style={{'margin': '2px'}}
+                floated='right'
+                basic
+                color="blue"
+                onClick={this.openInterestsModal}
+            >
+                Add Interests
+            </Button>
+            <InterestsUpdateModal
+                modalOpen={this.state.interestsModalOpen}
+                closeModal={this.closeInterestsModal}
+                id={details._id}
+            />
+            </>
+        )
         var canUpdate;
 
         if (!isViewOnly) {
             canUpdate = (
+                <>
                 <Card.Content extra>
-                    {linkedInUpdate}
-                    {zoomLinkUpdate}
-                    {timeAvailabilitiesUpdate}
-                    {topicAvailabilitiesUpdate}
-                    {imageUpdate}
+                    <Grid centered columns={2}>
+                        <Grid.Column width={4}>
+                            {linkedInUpdate}
+                            {imageUpdate}
+                        </Grid.Column>
+                        <Grid.Column width={12}>
+                            {zoomLinkUpdate}
+                            {timeAvailabilitiesUpdate}
+                            {topicAvailabilitiesUpdate}
+                            {interestsUpdate}
+                        </Grid.Column>
+                    </Grid>
+                
                 </Card.Content>
+                </>
             )
         } else {
             canUpdate = <div />
@@ -238,6 +322,17 @@ export default class AlumniProfile extends Component {
                     <Card.Description>Location: {(details.city && details.country) ? `${details.city} (${details.country})` : 'Unavailable'}</Card.Description>
                     <Card.Description>Company: {details.companyName || 'Unavailable'}</Card.Description>
                     
+                </Card.Content>
+                <Card.Content>
+                    <Card.Header>Interests</Card.Header>
+                    <Segment
+                        loading={this.state.removingInterest}
+                    >
+                        {details.interests && details.interests.length ?
+                        this.getInterests() :
+                        <span>No interests added.</span>
+                        }
+                    </Segment>
                 </Card.Content>
                 {canUpdate}
             </Card>
