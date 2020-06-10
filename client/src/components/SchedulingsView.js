@@ -49,12 +49,12 @@ export default class SchedulingsView extends Component {
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
     }
     
-    async handleStatusUpdate(requests) {
-        if (requests.requests === []) return;
+    async handleStatusUpdate(schedulings) {
+        if (schedulings.schedulings === []) return;
         this.setState({
-            unconfirmed: requests.requests[0],
-            confirmed: requests.requests[1],
-            completed: requests.requests[2],
+            unconfirmed: schedulings.schedulings[0],
+            confirmed: schedulings.schedulings[1],
+            completed: schedulings.schedulings[2],
         })
     }
 
@@ -71,12 +71,6 @@ export default class SchedulingsView extends Component {
 
     getSchedulings(timeOffset) {
         return makeCall({}, '/request/getSchedulings/'+this.props.userDetails._id +'/'+ this.props.role +'/' + timeOffset, 'get')
-    }
-
-    populateConfirmedTimes(requests) {
-       return requests.map(confirmedRequest => {
-            return (confirmedRequest.time[0].id)
-        })
     }
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
@@ -116,32 +110,33 @@ export default class SchedulingsView extends Component {
             </Menu>
             {this.state.activeItem === 'confirmed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
-                    <RequestCards 
+                    <SchedulingCards 
                         activeSet={this.state.activeItem}
-                        requests={this.state.confirmed}
-                        liftRequests={this.handleStatusUpdate}
+                        schedulings={this.state.confirmed}
+                        liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
+                        userRole={this.props.role}
                     />
                 </div>
             }
             {this.state.activeItem === 'unconfirmed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
-                    <RequestCards 
+                    <SchedulingCards 
                         activeSet={this.state.activeItem}
-                        requests={this.state.unconfirmed}
-                        liftRequests={this.handleStatusUpdate}
+                        schedulings={this.state.unconfirmed}
+                        liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
-                        userRole={this.props.userDetails.role}
+                        userRole={this.props.role}
                     />
                 </div>
             }
             {this.state.activeItem === 'completed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
-                    <RequestCards 
+                    <SchedulingCards 
                         activeSet={this.state.activeItem}
-                        requests={this.state.completed}
+                        schedulings={this.state.completed}
                     />
                 </div>
             }
@@ -158,55 +153,54 @@ export default class SchedulingsView extends Component {
  * PROPS
  * Always:
  * activeSet (string) - Shows what set is currently being used
- * requests - array of relevant requests
+ * schedulings - array of relevant requests
  * 
  * Sometimes:
  * userId - mongo ID for profile (used to update records)
- * liftRequests (method) - lifts results of an update to parent component
+ * userRole - user's role in the mongoDB
+ * liftSchedulings (method) - lifts results of an update to parent component
  * timeOffset
- * confirmedTimes - array of meeting times that have already been confirmed
- *                  used to disable approval, preventing double booking
  */
-class RequestCards extends Component {
+class SchedulingCards extends Component {
     state={
-        requests: [],
+        schedulings: [],
         display: []
     }
     // This allows the component to update its state should a prop value change
-    async componentWillReceiveProps({requests}) {
-        await this.setState({requests: requests})
-        this.constructDisplay(this.state.requests)
+    async componentWillReceiveProps({schedulings}) {
+        await this.setState({schedulings: schedulings})
+        this.constructDisplay(this.state.schedulings)
     }
     // This ensures that the component doesn't use an old prop on menu change
     componentWillMount() {
-        this.constructDisplay(this.props.requests)
+        this.constructDisplay(this.props.schedulings)
     }
 
-    constructRequest(request) {
+    constructRequest(scheduling) {
         return (
-            <Grid key={request._id}>
+            <Grid key={scheduling._id}>
             <Grid.Row columns={2}>
                 <Grid.Column width={4}>
                     <Image
                         size='small'
                         centered
                         rounded
-                        src={request.mentor.imageURL}
+                        src={scheduling.mentor.imageURL}
                     />
                 </Grid.Column>
                 <Grid.Column>
                     <Card fluid>
                         <Card.Content>
                             <Card.Header>
-                                Scheduling With: {request.mentor.name}
+                                Scheduling With: {scheduling.mentor.name}
                             </Card.Header>           
-                            <Card.Meta>{request.status}</Card.Meta>
-                            <Card.Description>Topic: {request.topic}</Card.Description>
-                            <Card.Description>Time: {request.time[0].day} from {timeSlotOptions[request.time[0].time/100]}</Card.Description>
-                            <Card.Description>Your Note: {request.note}</Card.Description>
+                            <Card.Meta>{scheduling.status}</Card.Meta>
+                            <Card.Description>Topic: {scheduling.topic}</Card.Description>
+                            <Card.Description>Time: {scheduling.time[0].day} from {timeSlotOptions[scheduling.time[0].time/100]}</Card.Description>
+                            <Card.Description>Your Note: {scheduling.note}</Card.Description>
                             <br />
                         </Card.Content>
-                            {this.buttonDisplay(request)}
+                            {this.buttonDisplay(scheduling)}
                     </Card>
                 </Grid.Column>
             </Grid.Row>
@@ -214,13 +208,13 @@ class RequestCards extends Component {
         )
     }
 
-    buttonDisplay(request) {
+    buttonDisplay(scheduling) {
         if (this.props.activeSet === 'unconfirmed') {
             return (
                 <Button
                     fluid
                     negative
-                    requestid={request._id}
+                    requestid={scheduling._id}
                     newstatus={'Rejected'}
                     onClick={this.handleClick.bind(this)}
                 >
@@ -233,17 +227,16 @@ class RequestCards extends Component {
                 <Button 
                     color='blue' 
                     as='a'
-                    href={request.zoomLink} 
+                    href={scheduling.zoomLink} 
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     Join Video Call
                 </Button>
                 <Button.Group>
-
                     <Button 
                         positive
-                        requestid={request._id}
+                        requestid={scheduling._id}
                         newstatus={'Completed'}
                         onClick={this.handleClick.bind(this)}
                     >
@@ -251,7 +244,7 @@ class RequestCards extends Component {
                     </Button>
                     <Button
                         negative
-                        requestid={request._id}
+                        requestid={scheduling._id}
                         newstatus={'Rejected'}
                         onClick={this.handleClick.bind(this)}
                     >
@@ -264,11 +257,11 @@ class RequestCards extends Component {
     }
 
     async handleClick(e) {
-        let requests = await makeCall({
+        let schedulings = await makeCall({
                 requestId: e.currentTarget.getAttribute('requestid'),
                 newStatus: e.currentTarget.getAttribute('newstatus')
-            }, '/request/updateStatus/' + this.props.userId + '/' + this.props.timeOffset, 'patch');
-        if (!requests || requests.error) {
+            }, '/request/updateScheduling/' + this.props.userId + '/' + this.props.userRole + '/' + this.props.timeOffset, 'patch');
+        if (!schedulings || schedulings.error) {
             swal({
                 title: "Error!",
                 text: "There was an error updating this request, please try again.",
@@ -280,14 +273,14 @@ class RequestCards extends Component {
                 text: "Successfully updated this request!",
                 icon: "success"
             })
-            this.props.liftRequests(requests)
+            this.props.liftSchedulings(schedulings)
         }
     }
 
-    constructDisplay(requests) {
+    constructDisplay(schedulings) {
         let display = []
-        for (let request of requests) {
-            display.push(this.constructRequest(request))
+        for (let scheduling of schedulings) {
+            display.push(this.constructRequest(scheduling))
         }
         this.setState({display: display})
     }

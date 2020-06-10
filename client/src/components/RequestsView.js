@@ -272,7 +272,7 @@ class RequestCards extends Component {
         let requests = await makeCall({
                 requestId: e.currentTarget.getAttribute('requestid'),
                 newStatus: e.currentTarget.getAttribute('newstatus')
-            }, '/request/updateStatus/' + this.props.userId + '/' + this.props.timeOffset, 'patch');
+            }, '/request/updateRequest/' + this.props.userId + '/' + this.props.timeOffset, 'patch');
         if (!requests || requests.error) {
             swal({
                 title: "Error!",

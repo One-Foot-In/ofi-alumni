@@ -74,7 +74,7 @@ router.post('/addRequest', async (req, res, next) => {
     }
 });
 
-router.patch('/updateStatus/:id/:timeOffset', async (req,res, next) => {
+router.patch('/updateRequest/:id/:timeOffset', async (req,res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset);
     let requestId = req.body.requestId;
@@ -134,7 +134,7 @@ router.get('/getRequests/:id/:timeOffset', async (req, res, next) => {
 router.get('/getSchedulings/:id/:role/:timeOffset', async (req, res, next) => {
     let requesterId = req.params.id;
     let requesterRole = req.params.role;
-    let timeOffset = parseInt(req.params.timeOffset)
+    let timeOffset = parseInt(req.params.timeOffset);
     let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
     let schedulings = []
     try {
@@ -152,9 +152,40 @@ router.get('/getSchedulings/:id/:role/:timeOffset', async (req, res, next) => {
         res.json({'schedulings' : schedulings});
     } catch (e) {
         console.log('getSchedulings error: ' + e)
-        res.status(500).send({message: 'getRequests error: ' + e})
+        res.status(500).send({message: 'getSchedulings error: ' + e})
     }
 })
+
+router.patch('/updateScheduling/:id/:role/:timeOffset', async (req, res, next) => {
+    let requesterId = req.params.id;
+    let requesterRole = req.params.role;
+    let timeOffset = parseInt(req.params.timeOffset);
+    let requestId = req.body.requestId;
+    let newStatus = req.body.newStatus;
+    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
+    let schedulings = []
+    try {
+        let updatedScheduling = await requestSchema.findById(requestId)
+        updatedScheduling.status = newStatus
+        await updatedScheduling.save()
+        for (let status of conditions) {
+            const dbData = await requestSchema.find({
+                    requester: requesterId,
+                    requesterRole: requesterRole,
+                    status: status
+                }).populate('mentor')
+            for (let request of dbData) {
+                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+            }
+            schedulings.push(dbData)
+        }
+        res.json({'schedulings' : schedulings});
+    } catch (e) {
+        console.log('updateScheduling error: ' + e)
+        res.status(500).send({message: 'updateScheduling error: ' + e})
+    }
+})
+
 
 
 module.exports = router;
