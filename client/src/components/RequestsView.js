@@ -79,10 +79,9 @@ export default class RequestsView extends Component {
     }
 
     populateConfirmedTimes(requests) {
-        let confirmedTimes = requests.map(confirmedRequest => {
+       return requests.map(confirmedRequest => {
             return (confirmedRequest.time[0].id)
         })
-        return confirmedTimes
     }
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
@@ -181,11 +180,10 @@ class RequestCards extends Component {
     // This allows the component to update its state should a prop value change
     async componentWillReceiveProps({requests}) {
         await this.setState({requests: requests})
-        this.constructDisplay(this.props.requests)
+        this.constructDisplay(this.state.requests)
     }
     // This ensures that the component doesn't use an old prop on menu change
-    async componentWillMount() {
-        await this.setState({requests: this.props.requests})
+    componentWillMount() {
         this.constructDisplay(this.props.requests)
     }
 
