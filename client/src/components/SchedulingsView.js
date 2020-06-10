@@ -32,7 +32,7 @@ export const timeSlotOptions = [
 
 /*
  * DETAILS:
- * Parent component, contains menu and switches out active RequestCards
+ * Parent component, contains menu and switches out active SchedulingCards
  * PROPS
  * userDetails - full profile of logged in user
  */
@@ -148,7 +148,7 @@ export default class SchedulingsView extends Component {
 
 /*
  * DETAILS
- * Child component - takes array of requests, constructs display
+ * Child component - takes array of schedulings, constructs display
  *                   shows valid actions for a given set
  * PROPS
  * Always:
