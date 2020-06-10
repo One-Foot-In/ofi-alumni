@@ -12,6 +12,7 @@ import Navbar from './components/Navbar'
 import AlumniProfile from './components/AlumniProfile'
 import StudentProfile from './components/StudentProfile'
 import AlumniVerification from './components/AlumniVerification'
+import RequestsView from './components/RequestsView'
 
 import * as actions from './redux/actions'
 // TODO: for demo only, remove for release
@@ -309,7 +310,9 @@ class App extends Component {
                           navItems={(alumniNavBarItems(this.state.approved))}
                           activeItem={'requests'}
                       />
-                      <div> Requests! </div>
+                      <RequestsView 
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
