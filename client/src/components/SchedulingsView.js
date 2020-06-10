@@ -40,7 +40,7 @@ export default class SchedulingsView extends Component {
     constructor(props){
         super(props)
         this.state={
-            activeItem: 'unconfirmed',
+            activeItem: 'confirmed',
             unconfirmed: [],
             confirmed: [],
             completed: [],

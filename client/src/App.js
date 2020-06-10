@@ -101,6 +101,11 @@ var alumniNavBarItems = (approved) => {
         id: 'requests',
         name: 'Requests',
         navLink: '/requests'
+    },
+    {
+        id: 'schedulings',
+        name: 'Schedulings',
+        navLink: '/schedulings'
     }
   ]
   if (approved) {
@@ -318,6 +323,21 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          <Route exact path={`/schedulings`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          navItems={alumniNavBarItems(this.state.approved)}
+                          activeItem={'schedulings'}
+                      />
+                      <SchedulingsView 
+                          userDetails={this.state.userDetails}
+                          role={role}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
           { this.state.userDetails.approved &&
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
@@ -431,7 +451,7 @@ class App extends Component {
                   </> :
                   <Redirect to={"/login"}/>
               }
-          />      
+          />
           </>
         )
       default:

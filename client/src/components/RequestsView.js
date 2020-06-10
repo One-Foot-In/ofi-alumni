@@ -203,7 +203,7 @@ class RequestCards extends Component {
                     <Card fluid>
                         <Card.Content>
                             <Card.Header>
-                                Request From: {request.requesterObj.name}
+                                Request from {request.requesterObj.name} ({request.requesterRole.toLowerCase()})
                             </Card.Header>           
                             <Card.Meta>{request.status}</Card.Meta>
                             <Card.Description>Topic: {request.topic}</Card.Description>
