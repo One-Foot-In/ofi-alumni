@@ -272,8 +272,9 @@ class SchedulingCards extends Component {
                 title: "Done!",
                 text: "Successfully updated this request!",
                 icon: "success"
+            }).then(() => {
+                this.props.liftSchedulings(schedulings)
             })
-            this.props.liftSchedulings(schedulings)
         }
     }
 
