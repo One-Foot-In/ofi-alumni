@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {Button, Modal, Image, Grid, Form} from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
+import TimeZoneDropdown from './TimeZoneDropdown';
 
 
 export const timeSlotOptions = [
@@ -173,13 +174,14 @@ export default class RequestModal extends Component {
                 <Modal.Content>
                     <Grid>
                         <Grid.Row columns={"equal"}>
-                            <Grid.Column width={3}>
+                            <Grid.Column width={4}>
                                 <Image
                                     floated='left'
                                     size='small'
                                     src={this.state.alumni.imageURL}
                                     rounded
                                 />
+                                <TimeZoneDropdown/>
                             </Grid.Column>
                             <Grid.Column>
                                 <Form>

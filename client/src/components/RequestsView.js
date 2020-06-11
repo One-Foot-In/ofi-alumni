@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Menu, Label, Card, Grid, Image, Button, Segment } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
+import TimeZoneDropdown from './TimeZoneDropdown';
 
 export const timeSlotOptions = [
     '12am - 1am',
@@ -89,7 +90,7 @@ export default class RequestsView extends Component {
     render() {
         return(
             <div>
-            <Menu secondary>
+            <Menu secondary stackable>
                 <Menu.Item
                     id='unconfirmed'
                     name='Unconfirmed Meetings'
@@ -118,6 +119,9 @@ export default class RequestsView extends Component {
                     active={this.state.activeItem === 'completed'}
                     onClick={this.handleMenuClick}
                 />
+                <Menu.Item>
+                    <TimeZoneDropdown/>
+                </Menu.Item>
             </Menu>
             {this.state.activeItem === 'unconfirmed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
