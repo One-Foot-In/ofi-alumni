@@ -32,56 +32,45 @@ export const timeSlotOptions = [
 
 /*
  * DETAILS:
- * Parent component, contains menu and switches out active RequestCards
+ * Parent component, contains menu and switches out active SchedulingCards
  * PROPS
  * userDetails - full profile of logged in user
  */
-export default class RequestsView extends Component {
+export default class SchedulingsView extends Component {
     constructor(props){
         super(props)
         this.state={
-            activeItem: 'unconfirmed',
+            activeItem: 'confirmed',
             unconfirmed: [],
             confirmed: [],
             completed: [],
             timeOffset: 0,
-            confirmedTimes: []
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
     }
     
-    async handleStatusUpdate(requests) {
-        if (requests.requests === []) return;
-        let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
+    async handleStatusUpdate(schedulings) {
+        if (schedulings.schedulings === []) return;
         this.setState({
-            unconfirmed: requests.requests[0],
-            confirmed: requests.requests[1],
-            completed: requests.requests[2],
-            confirmedTimes: confirmedTimes,
+            unconfirmed: schedulings.schedulings[0],
+            confirmed: schedulings.schedulings[1],
+            completed: schedulings.schedulings[2],
         })
     }
 
     async componentWillMount() {
         let timeOffset = (-(new Date().getTimezoneOffset())/60)*100
-        let requests = await this.getRequests(timeOffset)
-        let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
+        let schedulings = await this.getSchedulings(timeOffset)
         this.setState({
             timeOffset: timeOffset,
-            unconfirmed: requests.requests[0],
-            confirmed: requests.requests[1],
-            completed: requests.requests[2],
-            confirmedTimes: confirmedTimes
+            unconfirmed: schedulings.schedulings[0],
+            confirmed: schedulings.schedulings[1],
+            completed: schedulings.schedulings[2],
         })
     }
 
-    getRequests(timeOffset) {
-        return makeCall({}, '/request/getRequests/'+this.props.userDetails._id+'/'+timeOffset, 'get')
-    }
-
-    populateConfirmedTimes(requests) {
-       return requests.map(confirmedRequest => {
-            return (confirmedRequest.time[0].id)
-        })
+    getSchedulings(timeOffset) {
+        return makeCall({}, '/request/getSchedulings/'+this.props.userDetails._id +'/'+ this.props.role +'/' + timeOffset, 'get')
     }
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
@@ -90,17 +79,6 @@ export default class RequestsView extends Component {
         return(
             <div>
             <Menu secondary>
-                <Menu.Item
-                    id='unconfirmed'
-                    name='Unconfirmed Meetings'
-                    active={this.state.activeItem === 'unconfirmed'}
-                    onClick={this.handleMenuClick}
-                >
-                    Unconfirmed Meetings
-                    {   (this.state.unconfirmed !== []) &&
-                        <Label color='teal'>{this.state.unconfirmed.length}</Label>
-                    }
-                </Menu.Item>
                 <Menu.Item
                     id='confirmed'
                     name='Confirmed Meetings'
@@ -113,40 +91,52 @@ export default class RequestsView extends Component {
                     }
                 </Menu.Item>
                 <Menu.Item
+                    id='unconfirmed'
+                    name='Unconfirmed Meetings'
+                    active={this.state.activeItem === 'unconfirmed'}
+                    onClick={this.handleMenuClick}
+                >
+                    Unconfirmed Meetings
+                    {   (this.state.unconfirmed !== []) &&
+                        <Label color='teal'>{this.state.unconfirmed.length}</Label>
+                    }
+                </Menu.Item>
+                <Menu.Item
                     id='completed'
                     name='Completed Meetings'
                     active={this.state.activeItem === 'completed'}
                     onClick={this.handleMenuClick}
                 />
             </Menu>
-            {this.state.activeItem === 'unconfirmed' &&
+            {this.state.activeItem === 'confirmed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
-                    <RequestCards 
-                        confirmedTimes={this.state.confirmedTimes}
+                    <SchedulingCards 
                         activeSet={this.state.activeItem}
-                        requests={this.state.unconfirmed}
-                        liftRequests={this.handleStatusUpdate}
+                        schedulings={this.state.confirmed}
+                        liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
+                        userRole={this.props.role}
                     />
                 </div>
             }
-            {this.state.activeItem === 'confirmed' &&
+            {this.state.activeItem === 'unconfirmed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
-                    <RequestCards 
+                    <SchedulingCards 
                         activeSet={this.state.activeItem}
-                        requests={this.state.confirmed}
-                        liftRequests={this.handleStatusUpdate}
+                        schedulings={this.state.unconfirmed}
+                        liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
+                        userRole={this.props.role}
                     />
                 </div>
             }
             {this.state.activeItem === 'completed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
-                    <RequestCards 
+                    <SchedulingCards 
                         activeSet={this.state.activeItem}
-                        requests={this.state.completed}
+                        schedulings={this.state.completed}
                     />
                 </div>
             }
@@ -158,60 +148,59 @@ export default class RequestsView extends Component {
 
 /*
  * DETAILS
- * Child component - takes array of requests, constructs display
+ * Child component - takes array of schedulings, constructs display
  *                   shows valid actions for a given set
  * PROPS
  * Always:
  * activeSet (string) - Shows what set is currently being used
- * requests - array of relevant requests
+ * schedulings - array of relevant requests
  * 
  * Sometimes:
  * userId - mongo ID for profile (used to update records)
- * liftRequests (method) - lifts results of an update to parent component
+ * userRole - user's role in the mongoDB
+ * liftSchedulings (method) - lifts results of an update to parent component
  * timeOffset
- * confirmedTimes - array of meeting times that have already been confirmed
- *                  used to disable approval, preventing double booking
  */
-class RequestCards extends Component {
+class SchedulingCards extends Component {
     state={
-        requests: [],
+        schedulings: [],
         display: []
     }
     // This allows the component to update its state should a prop value change
-    async componentWillReceiveProps({requests}) {
-        await this.setState({requests: requests})
-        this.constructDisplay(this.state.requests)
+    async componentWillReceiveProps({schedulings}) {
+        await this.setState({schedulings: schedulings})
+        this.constructDisplay(this.state.schedulings)
     }
     // This ensures that the component doesn't use an old prop on menu change
     componentWillMount() {
-        this.constructDisplay(this.props.requests)
+        this.constructDisplay(this.props.schedulings)
     }
 
-    constructRequest(request) {
+    constructRequest(scheduling) {
         return (
-            <Grid key={request._id}>
+            <Grid key={scheduling._id}>
             <Grid.Row columns={2}>
                 <Grid.Column width={4}>
                     <Image
                         size='small'
                         centered
                         rounded
-                        src={request.requesterObj.imageURL}
+                        src={scheduling.mentor.imageURL}
                     />
                 </Grid.Column>
                 <Grid.Column>
                     <Card fluid>
                         <Card.Content>
                             <Card.Header>
-                                Request from {request.requesterObj.name} ({request.requesterRole.toLowerCase()})
+                                Scheduling With: {scheduling.mentor.name}
                             </Card.Header>           
-                            <Card.Meta>{request.status}</Card.Meta>
-                            <Card.Description>Topic: {request.topic}</Card.Description>
-                            <Card.Description>Time: {request.time[0].day} from {timeSlotOptions[request.time[0].time/100]}</Card.Description>
-                            <Card.Description>Note from requester: {request.note}</Card.Description>
+                            <Card.Meta>{scheduling.status}</Card.Meta>
+                            <Card.Description>Topic: {scheduling.topic}</Card.Description>
+                            <Card.Description>Time: {scheduling.time[0].day} from {timeSlotOptions[scheduling.time[0].time/100]}</Card.Description>
+                            <Card.Description>Your Note: {scheduling.note}</Card.Description>
                             <br />
                         </Card.Content>
-                        {this.buttonDisplay(request)}
+                            {this.buttonDisplay(scheduling)}
                     </Card>
                 </Grid.Column>
             </Grid.Row>
@@ -219,61 +208,60 @@ class RequestCards extends Component {
         )
     }
 
-    buttonDisplay(request) {
+    buttonDisplay(scheduling) {
         if (this.props.activeSet === 'unconfirmed') {
-            let disableApprove = this.props.confirmedTimes.includes(request.time[0].id)
             return (
-                <Button.Group>
-                    <Button
-                        positive
-                        requestid={request._id}
-                        newstatus={'Confirmed'}
-                        onClick={this.handleClick.bind(this)}
-                        disabled={disableApprove}
-                    >
-                        Approve meeting
-                    </Button>
-                    <Button
-                        negative
-                        requestid={request._id}
-                        newstatus={'Rejected'}
-                        onClick={this.handleClick.bind(this)}
-                    >
-                        Reject meeting
-                    </Button>
-                </Button.Group>
+                <Button
+                    fluid
+                    negative
+                    requestid={scheduling._id}
+                    newstatus={'Rejected'}
+                    onClick={this.handleClick.bind(this)}
+                >
+                    Cancel meeting
+                </Button>
             )
         } else if (this.props.activeSet === 'confirmed') {
             return(
+                <>
+                <Button 
+                    color='blue' 
+                    as='a'
+                    href={scheduling.zoomLink} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Join Video Call
+                </Button>
                 <Button.Group>
                     <Button 
-                        color='blue' 
-                        as='a'
-                        href={request.zoomLink} 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Join Video Call
-                    </Button>
-                    <Button 
                         positive
-                        requestid={request._id}
+                        requestid={scheduling._id}
                         newstatus={'Completed'}
                         onClick={this.handleClick.bind(this)}
                     >
                         Mark as completed!
                     </Button>
+                    <Button
+                        negative
+                        requestid={scheduling._id}
+                        newstatus={'Rejected'}
+                        onClick={this.handleClick.bind(this)}
+                    >
+                        Cancel meeting
+                    </Button>
                 </Button.Group>
+                </>
             )
         }
     }
 
     async handleClick(e) {
-        let requests = await makeCall({
+        let schedulings = await makeCall({
                 requestId: e.currentTarget.getAttribute('requestid'),
                 newStatus: e.currentTarget.getAttribute('newstatus')
-            }, '/request/updateRequest/' + this.props.userId + '/' + this.props.timeOffset, 'patch');
-        if (!requests || requests.error) {
+            }, '/request/updateScheduling/' + this.props.userId + '/' + this.props.userRole + '/' + this.props.timeOffset, 'patch');
+        if (!schedulings || schedulings.error) {
             swal({
                 title: "Error!",
                 text: "There was an error updating this request, please try again.",
@@ -285,15 +273,15 @@ class RequestCards extends Component {
                 text: "Successfully updated this request!",
                 icon: "success"
             }).then(() => {
-                this.props.liftRequests(requests)
+                this.props.liftSchedulings(schedulings)
             })
         }
     }
 
-    constructDisplay(requests) {
+    constructDisplay(schedulings) {
         let display = []
-        for (let request of requests) {
-            display.push(this.constructRequest(request))
+        for (let scheduling of schedulings) {
+            display.push(this.constructRequest(scheduling))
         }
         this.setState({display: display})
     }
