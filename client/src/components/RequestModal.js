@@ -47,7 +47,7 @@ export default class RequestModal extends Component {
         super(props)
         this.state = {
             alumni: null,
-            studentId: '',
+            timeOffset: null,
             availabilityOptions: [],
             availabilityValue: '',
             topicOptions: [],
@@ -57,10 +57,21 @@ export default class RequestModal extends Component {
         }
         this.handleValueChange = this.handleValueChange.bind(this)
         this.submitRequest = this.submitRequest.bind(this)
+        this.handleOffsetChange = this.handleOffsetChange.bind(this)
+    }
+    
+    async handleOffsetChange(offset) {
+        if (this.state.timeOffset !== offset) {
+            await this.setState({timeOffset: offset})
+            this.createAvailabilityOptions(this.state.alumni.availabilities)
+        }
     }
 
     async componentWillMount() {
-        await this.setState({alumni: this.props.alumni})
+        await this.setState({
+            alumni: this.props.alumni, 
+            timeOffset: this.props.userDetails.timeZone
+        })
         this.createAvailabilityOptions(this.state.alumni.availabilities)
         this.createTopicOptions(this.state.alumni.topics)
     }
@@ -73,11 +84,13 @@ export default class RequestModal extends Component {
          * That's why there's a tiny bit of math in the payload, to conform
          * with our date model
          */
-        let timeOffset = new Date().getTimezoneOffset()
+        console.log(this.state.timeOffset)
+        console.log(availabilities)
         let adjustedAvailabilities = await makeCall({availabilities: availabilities,
-                                                    offset: (-(timeOffset/60)*100)}, 
+                                                    offset: parseInt(this.state.timeOffset)}, 
                                                     '/request/applyRequesterTimezone', 
                                                     'patch')
+        console.log(adjustedAvailabilities)
         let availabilityOptions = []
         for (let option of adjustedAvailabilities.availabilities) {
             let readableOption = option.day + ', ' + timeSlotOptions[(option.time/100)]
@@ -181,7 +194,11 @@ export default class RequestModal extends Component {
                                     src={this.state.alumni.imageURL}
                                     rounded
                                 />
-                                <TimeZoneDropdown/>
+                                <TimeZoneDropdown
+                                    userDetails={this.props.userDetails}
+                                    userRole={this.props.role}
+                                    liftTimezone={this.handleOffsetChange}
+                                />
                             </Grid.Column>
                             <Grid.Column>
                                 <Form>

@@ -135,18 +135,28 @@ export default class TimeZoneDropdown extends Component {
         offset: 0
     }
 
-    handleDropdownChange({value}) {
-        this.setState({offset: value})
+    componentWillMount() {
+        this.setState({offset: this.props.userDetails.timeZone.toString()})
+    }
+
+    handleDropdownChange = (e, { name, value }) => {
+        console.log(value)
+        this.setState({ [name]: value })
+        this.props.liftTimezone(value)
     }
 
     render() {
         return(
             <Dropdown
+                compact
                 placeholder={'Select Timezone'}
                 selection
                 search
                 floating
+                name='offset'
+                onChange={this.handleDropdownChange}
                 options={timeZoneOptions}
+                defaultValue={this.state.offset}
             />
         )
     }

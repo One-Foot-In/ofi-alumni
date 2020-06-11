@@ -49,6 +49,21 @@ export default class RequestsView extends Component {
             confirmedTimes: []
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
+        this.handleOffsetChange = this.handleOffsetChange.bind(this)
+    }
+
+    async handleOffsetChange(offset) {
+        if (this.state.timeOffset !== offset) {
+            await this.setState({timeOffset: offset})
+            let requests = await this.getRequests(offset)
+            let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
+            this.setState({
+                unconfirmed: requests.requests[0],
+                confirmed: requests.requests[1],
+                completed: requests.requests[2],
+                confirmedTimes: confirmedTimes,
+            })
+        }
     }
     
     async handleStatusUpdate(requests) {
@@ -63,7 +78,7 @@ export default class RequestsView extends Component {
     }
 
     async componentWillMount() {
-        let timeOffset = (-(new Date().getTimezoneOffset())/60)*100
+        let timeOffset = this.props.userDetails.timeZone
         let requests = await this.getRequests(timeOffset)
         let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
         this.setState({
@@ -120,7 +135,11 @@ export default class RequestsView extends Component {
                     onClick={this.handleMenuClick}
                 />
                 <Menu.Item position={'right'}>
-                    <TimeZoneDropdown/>
+                    <TimeZoneDropdown
+                        userDetails={this.props.userDetails}
+                        userRole={this.props.role}
+                        liftTimezone={this.handleOffsetChange}
+                    />
                 </Menu.Item>
             </Menu>
             {this.state.activeItem === 'unconfirmed' &&

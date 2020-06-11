@@ -48,6 +48,19 @@ export default class SchedulingsView extends Component {
             timeOffset: 0,
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
+        this.handleOffsetChange = this.handleOffsetChange.bind(this)
+    }
+
+    async handleOffsetChange(offset) {
+        if (this.state.timeOffset !== offset) {
+            await this.setState({timeOffset: offset})
+            let schedulings = await this.getSchedulings(offset)
+            this.setState({
+                unconfirmed: schedulings.schedulings[0],
+                confirmed: schedulings.schedulings[1],
+                completed: schedulings.schedulings[2],
+            })
+        }
     }
     
     async handleStatusUpdate(schedulings) {
@@ -60,7 +73,7 @@ export default class SchedulingsView extends Component {
     }
 
     async componentWillMount() {
-        let timeOffset = (-(new Date().getTimezoneOffset())/60)*100
+        let timeOffset = this.props.userDetails.timeZone
         let schedulings = await this.getSchedulings(timeOffset)
         this.setState({
             timeOffset: timeOffset,
@@ -109,7 +122,11 @@ export default class SchedulingsView extends Component {
                     onClick={this.handleMenuClick}
                 />
                 <Menu.Item position={'right'}>
-                    <TimeZoneDropdown/>
+                    <TimeZoneDropdown
+                        userDetails={this.props.userDetails}
+                        userRole={this.props.role}
+                        liftTimezone={this.handleOffsetChange}
+                    />
                 </Menu.Item>
             </Menu>
             {this.state.activeItem === 'confirmed' &&
