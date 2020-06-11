@@ -119,7 +119,7 @@ export default class RequestsView extends Component {
                     active={this.state.activeItem === 'completed'}
                     onClick={this.handleMenuClick}
                 />
-                <Menu.Item>
+                <Menu.Item position={'right'}>
                     <TimeZoneDropdown/>
                 </Menu.Item>
             </Menu>
