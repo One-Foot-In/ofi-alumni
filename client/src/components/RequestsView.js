@@ -288,8 +288,9 @@ class RequestCards extends Component {
                 title: "Done!",
                 text: "Successfully updated this request!",
                 icon: "success"
+            }).then(() => {
+                this.props.liftRequests(requests)
             })
-            this.props.liftRequests(requests)
         }
     }
 
