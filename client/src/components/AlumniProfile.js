@@ -187,7 +187,7 @@ export default class AlumniProfile extends Component {
         const imageUpdate = (
             <>
             <Button
-                style={{'margin': '2px'}}
+                style={{'margin-right': '2px'}}
                 floated="left"
                 basic
                 color="blue"
@@ -206,7 +206,7 @@ export default class AlumniProfile extends Component {
         const timeAvailabilitiesUpdate = (
             <>
             <Button
-                style={{'margin': '2px'}}
+                style={{'margin-right': '5px'}}
                 floated='right'
                 basic
                 color="blue"
@@ -225,9 +225,9 @@ export default class AlumniProfile extends Component {
         const topicAvailabilitiesUpdate = (
             <>
             <Button
-                style={{'margin': '2px'}}
+                primary
+                style={{'margin-left': '2px'}}
                 floated='right'
-                basic
                 color="blue"
                 onClick={this.openTopicPreferencesModal}
             >
@@ -244,9 +244,9 @@ export default class AlumniProfile extends Component {
         const zoomLinkUpdate = (
             <>
              <Button
-                style={{'margin': '2px'}}
+                primary
+                style={{'margin-right': '5px'}}
                 floated='right'
-                basic
                 color="blue"
                 onClick={this.openZoomUpdateModal}
             >
@@ -264,7 +264,7 @@ export default class AlumniProfile extends Component {
         const interestsUpdate = (
             <>
             <Button
-                style={{'margin': '2px'}}
+                style={{'margin-left': '2px'}}
                 floated='right'
                 basic
                 color="blue"
@@ -285,16 +285,24 @@ export default class AlumniProfile extends Component {
             canUpdate = (
                 <>
                 <Card.Content extra>
-                    <Grid centered columns={2}>
-                        <Grid.Column width={4}>
-                            {linkedInUpdate}
-                            {imageUpdate}
+                    <Grid centered columns={3}>
+                        <Grid.Column width={6}>
+                            <Button.Group vertical>
+                                {linkedInUpdate}
+                                {imageUpdate}
+                            </Button.Group>
                         </Grid.Column>
-                        <Grid.Column width={12}>
-                            {zoomLinkUpdate}
-                            {timeAvailabilitiesUpdate}
-                            {topicAvailabilitiesUpdate}
-                            {interestsUpdate}
+                        <Grid.Column width={5}>
+                            <Button.Group vertical>
+                                {zoomLinkUpdate}
+                                {timeAvailabilitiesUpdate}
+                            </Button.Group>
+                        </Grid.Column>
+                        <Grid.Column width={5}>
+                            <Button.Group vertical>
+                                {topicAvailabilitiesUpdate}
+                                {interestsUpdate}
+                            </Button.Group>
                         </Grid.Column>
                     </Grid>
                 

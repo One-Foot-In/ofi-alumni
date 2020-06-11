@@ -24,7 +24,7 @@ export default class LinkedInUpdate extends React.Component {
         <Button
           primary
           onClick={this.fetchFromLinkedIn}
-          style={{'margin': '2px'}}  
+          style={{'margin-right': '2px'}}  
         >
             Fetch Photo from LinkedIn
         </Button>
