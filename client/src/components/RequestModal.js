@@ -77,20 +77,10 @@ export default class RequestModal extends Component {
     }
 
     async createAvailabilityOptions(availabilities) {
-        /* 
-         * Offset is in minutes and in the opposite direction 
-         * that you'd expect. For UTC -4 (EST), it returns 240 
-         * (not -240 to reflect being 4 hours behind)
-         * That's why there's a tiny bit of math in the payload, to conform
-         * with our date model
-         */
-        console.log(this.state.timeOffset)
-        console.log(availabilities)
         let adjustedAvailabilities = await makeCall({availabilities: availabilities,
                                                     offset: parseInt(this.state.timeOffset)}, 
                                                     '/request/applyRequesterTimezone', 
                                                     'patch')
-        console.log(adjustedAvailabilities)
         let availabilityOptions = []
         for (let option of adjustedAvailabilities.availabilities) {
             let readableOption = option.day + ', ' + timeSlotOptions[(option.time/100)]

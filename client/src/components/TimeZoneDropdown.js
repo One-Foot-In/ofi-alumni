@@ -140,7 +140,6 @@ export default class TimeZoneDropdown extends Component {
     }
 
     handleDropdownChange = (e, { name, value }) => {
-        console.log(value)
         this.setState({ [name]: value })
         this.props.liftTimezone(value)
     }
