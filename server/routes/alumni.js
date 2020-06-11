@@ -14,6 +14,38 @@ require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
 
+async function generateNewAndExistingInterests(existingInterests, newInterests) {
+    const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
+    let existingInterestsRecords = await interestsSchema.find().where('_id').in(existingInterestsIds).exec()
+    // create interests added
+    if (newInterests.length) {
+        for (let i = 0; i < newInterests.length; i++) {
+            // check to see if interest name already exists
+            let interestExists = await interestsSchema.find({name: newInterests[i].value})
+            if (!interestExists.length) {
+                var newInterestCreated = new interestsSchema({
+                    name: newInterests[i].value
+                })
+                await newInterestCreated.save()
+                existingInterestsRecords.push(newInterestCreated)
+            }
+        }
+    }
+    return existingInterestsRecords
+}
+
+function getUniqueInterests(allInterests) {
+    let allUniqueNames = new Set()
+    let uniqueInterests = []
+    for (let i = 0; i < allInterests.length; i++) {
+        if (!allUniqueNames.has(allInterests[i].name)) {
+            allUniqueNames.add(allInterests[i].name)
+            uniqueInterests.push(allInterests[i])
+        }
+    }
+    return uniqueInterests
+}
+
 router.post('/', async (req, res, next) => {
     try {
         const email = req.body.email;
@@ -72,20 +104,8 @@ router.post('/', async (req, res, next) => {
         }
 
         const existingInterests = req.body.existingInterests
-        // find existing interests
-        const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
-        let existingInterestsRecords = await interestsSchema.find().where('_id').in(existingInterestsIds).exec()
         const newInterests = req.body.newInterests || []
-        // create interests added
-        if (newInterests.length) {
-            for (let i = 0; i < newInterests.length; i++) {
-                var newInterestCreated = new interestsSchema({
-                    name: newInterests[i].value
-                })
-                await newInterestCreated.save()
-                existingInterestsRecords.push(newInterestCreated)
-            }
-        }
+        let interests = await generateNewAndExistingInterests(existingInterests, newInterests)
 
         // find schoolLogo
         let school = await schoolSchema.findOne({_id: schoolId}, {logoURL: 1})
@@ -107,7 +127,7 @@ router.post('/', async (req, res, next) => {
                 collegeName: college && college.name,
                 jobTitle: jobTitle,
                 jobTitleName: jobTitle && jobTitle.name,
-                interests: existingInterestsRecords,
+                interests: interests,
                 availabilities: availabilities,
                 timeZone: -timeZone,
                 zoomLink: zoomLink,
@@ -224,6 +244,34 @@ router.patch('/zoomLink/:id', async (req, res, next) => {
         res.status(200).send({message: "Successfully updated alumni's zoom link"})
     } catch (e) {
         console.log("Error: alumni#zoomLink", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/interests/remove/:id', async (req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.interests = alumni.interests.filter(interest => interest._id.toString() !== req.body.interestIdToRemove)
+        await alumni.save()
+        res.status(200).send({message: "Successfully removed alumni's interest"})
+    } catch (e) {
+        console.log("Error: alumni#interests/remove", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/interests/add/:id', async (req, res, next) => {
+    try {
+        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        const existingInterests = req.body.existingInterests
+        const newInterests = req.body.newInterests || []
+        let interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
+
+        alumni.interests = getUniqueInterests([...alumni.interests, ...interestsToAdd])
+        await alumni.save()
+        res.status(200).send({message: "Successfully added alumni's interests"})
+    } catch (e) {
+        console.log("Error: alumni#interests/add", e);
         res.status(500).send({'error' : e});
     }
 })
