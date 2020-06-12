@@ -137,7 +137,7 @@ export default class RequestsView extends Component {
                 <Menu.Item position={'right'}>
                     <TimeZoneDropdown
                         userDetails={this.props.userDetails}
-                        userRole={this.props.role}
+                        role={this.props.role}
                         liftTimezone={this.handleOffsetChange}
                     />
                 </Menu.Item>

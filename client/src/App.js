@@ -318,6 +318,7 @@ class App extends Component {
                       />
                       <RequestsView 
                           userDetails={this.state.userDetails}
+                          role={role}
                       />
                   </> :
                   <Redirect to={"/login"}/>

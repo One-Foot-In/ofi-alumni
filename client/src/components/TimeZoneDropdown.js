@@ -141,6 +141,13 @@ export default class TimeZoneDropdown extends Component {
 
     handleDropdownChange = (e, { name, value }) => {
         this.setState({ [name]: value })
+        console.log(this.props.userDetails)
+        console.log(this.props.role)
+        let updateProfile = makeCall({
+            id: this.props.userDetails._id,
+            role: this.props.userRole,
+            timeZone: parseInt(value)
+        }, '/changeTimeZone', 'patch')
         this.props.liftTimezone(value)
     }
 

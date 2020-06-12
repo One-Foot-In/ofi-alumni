@@ -186,7 +186,7 @@ export default class RequestModal extends Component {
                                 />
                                 <TimeZoneDropdown
                                     userDetails={this.props.userDetails}
-                                    userRole={this.props.role}
+                                    role={this.props.role}
                                     liftTimezone={this.handleOffsetChange}
                                     compact={true}
                                 />
