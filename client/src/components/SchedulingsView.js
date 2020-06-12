@@ -199,7 +199,7 @@ class SchedulingCards extends Component {
 
     constructRequest(scheduling) {
         return (
-            <Grid key={scheduling._id}>
+            <Grid key={scheduling._id} columns={'equal'}>
             <Grid.Row columns={2}>
                 <Grid.Column width={4}>
                     <Image
@@ -239,7 +239,7 @@ class SchedulingCards extends Component {
                     newstatus={'Rejected'}
                     onClick={this.handleClick.bind(this)}
                 >
-                    Cancel meeting
+                    Cancel
                 </Button>
             )
         } else if (this.props.activeSet === 'confirmed') {
@@ -252,16 +252,16 @@ class SchedulingCards extends Component {
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    Join Video Call
+                    Join Call
                 </Button>
-                <Button.Group>
+                <Button.Group compact>
                     <Button 
                         positive
                         requestid={scheduling._id}
                         newstatus={'Completed'}
                         onClick={this.handleClick.bind(this)}
                     >
-                        Mark as completed!
+                        Mark Completed!
                     </Button>
                     <Button
                         negative
@@ -269,7 +269,7 @@ class SchedulingCards extends Component {
                         newstatus={'Rejected'}
                         onClick={this.handleClick.bind(this)}
                     >
-                        Cancel meeting
+                        Cancel
                     </Button>
                 </Button.Group>
                 </>
