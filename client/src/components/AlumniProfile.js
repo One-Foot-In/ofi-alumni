@@ -6,6 +6,7 @@ import TopicPreferencesModal from './TopicPreferencesModal';
 import ZoomUpdateModal from './ZoomUpdateModal';
 import ImageUpdateModal from './ImageUpdateModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
+import AlumniCollegeCareerUpdateModal from './AlumniCollegeCareerUpdateModal';
 import { makeCall } from "../apis";
 
 const ALUMNI = "ALUMNI"
@@ -61,6 +62,8 @@ export default class AlumniProfile extends Component {
             topicPreferencesModalOpen: false,
             zoomUpdateOpen: false,
             imageModalOpen: false,
+            interestsModalOpen: false,
+            collegeAndCareerModalOpen: false,
             removingInterest: false
         }
         this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
@@ -73,6 +76,8 @@ export default class AlumniProfile extends Component {
         this.closeImageModal = this.closeImageModal.bind(this)
         this.openInterestsModal = this.openInterestsModal.bind(this)
         this.closeInterestsModal = this.closeInterestsModal.bind(this)
+        this.openCollegeAndCareerModal = this.openCollegeAndCareerModal.bind(this)
+        this.closeCollegeAndCareerModal = this.closeCollegeAndCareerModal.bind(this)
         this.getInterests = this.getInterests.bind(this)
     }
     closeTimePreferencesModal() {
@@ -131,6 +136,18 @@ export default class AlumniProfile extends Component {
     closeInterestsModal() {
         this.setState({
             interestsModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    openCollegeAndCareerModal() {
+        this.setState({
+            collegeAndCareerModalOpen: true
+        })
+    }
+    closeCollegeAndCareerModal() {
+        this.setState({
+            collegeAndCareerModalOpen: false
         }, () => {
             this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
@@ -279,33 +296,57 @@ export default class AlumniProfile extends Component {
             />
             </>
         )
+
+        const collegeAndCareerUpdate = (
+            <>
+                <Button
+                    style={{'margin-left': '2px'}}
+                    floated='right'
+                    basic
+                    color="blue"
+                    onClick={this.openCollegeAndCareerModal}
+                >
+                    Update College/Career
+                </Button>
+                <AlumniCollegeCareerUpdateModal
+                    modalOpen={this.state.collegeAndCareerModalOpen}
+                    closeModal={this.closeCollegeAndCareerModal}
+                    id={details._id}
+                />
+            </>
+        )
         var canUpdate;
 
         if (!isViewOnly) {
             canUpdate = (
                 <>
                 <Card.Content extra>
-                    <Grid centered columns={3}>
-                        <Grid.Column width={6}>
+                    <Grid centered columns={4}>
+                        <Grid.Column width={4}>
                             <Button.Group vertical>
                                 {linkedInUpdate}
                                 {imageUpdate}
                             </Button.Group>
                         </Grid.Column>
-                        <Grid.Column width={5}>
+                        <Grid.Column width={4}>
+                            <Button.Group vertical>
+                                {collegeAndCareerUpdate}
+                                {<></>}
+                            </Button.Group>
+                        </Grid.Column>
+                        <Grid.Column width={4}>
                             <Button.Group vertical>
                                 {zoomLinkUpdate}
                                 {timeAvailabilitiesUpdate}
                             </Button.Group>
                         </Grid.Column>
-                        <Grid.Column width={5}>
+                        <Grid.Column width={4}>
                             <Button.Group vertical>
                                 {topicAvailabilitiesUpdate}
                                 {interestsUpdate}
                             </Button.Group>
                         </Grid.Column>
                     </Grid>
-                
                 </Card.Content>
                 </>
             )

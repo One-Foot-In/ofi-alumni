@@ -262,7 +262,7 @@ router.patch('/interests/remove/:id', async (req, res, next) => {
 
 router.patch('/interests/add/:id', async (req, res, next) => {
     try {
-        const alumni = await alumniSchema.findOne({_id: req.params.id})
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
         const existingInterests = req.body.existingInterests
         const newInterests = req.body.newInterests || []
         let interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
@@ -272,6 +272,70 @@ router.patch('/interests/add/:id', async (req, res, next) => {
         res.status(200).send({message: "Successfully added alumni's interests"})
     } catch (e) {
         console.log("Error: alumni#interests/add", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/collegeAndCareer/update/:id', async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        let existingJobTitleId = req.body.existingJobTitleId
+        let existingJobTitleName = req.body.existingJobTitleName
+        let newJobTitle = req.body.newJobTitle
+        let existingCompanyId = req.body.existingCompanyId
+        let existingCompanyName = req.body.existingCompanyName
+        let newCompany = req.body.newCompany
+        let country = req.body.country
+        let newCollege = req.body.newCollege
+        let existingCollegeId = req.body.existingCollegeId
+        let existingCollegeName = req.body.existingCollegeName
+        // update college
+        if (existingCollegeId || newCollege) {
+            if (existingCollegeId) {
+                alumni.college = existingCollegeId
+                alumni.collegeName = existingCollegeName
+            } else {
+                var newCollegeCreated = new collegeSchema({
+                    name: newCollege,
+                    country: country
+                })
+                await newCollegeCreated.save()
+                alumni.college = newCollegeCreated
+                alumni.collegeName = newCollegeCreated.name
+            }
+        }
+        // update company
+        if (existingCompanyId || newCompany) {
+            if (existingCompanyId) {
+                alumni.company = existingCompanyId
+                alumni.companyName = existingCompanyName
+            } else {
+                var newCompanyCreated = new companySchema({
+                    name: newCompany
+                })
+                await newCompanyCreated.save()
+                alumni.company = newCompanyCreated
+                alumni.companyName = newCompanyCreated.name
+            }
+        }
+        // update job title
+        if (existingJobTitleId || newJobTitle) {
+            if (existingJobTitleId) {
+                alumni.jobTitle = existingJobTitleId
+                alumni.jobTitleName = existingJobTitleName
+            } else {
+                var newJobTitleCreated = new jobTitleSchema({
+                    name: newJobTitle
+                })
+                await newJobTitleCreated.save()
+                alumni.jobTitle = newJobTitleCreated
+                alumni.jobTitleName = newJobTitleCreated.name
+            }
+        }
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's college and career information1"})
+    } catch (e) {
+        console.log("Error: alumni#collegeAndCareer/update", e);
         res.status(500).send({'error' : e});
     }
 })

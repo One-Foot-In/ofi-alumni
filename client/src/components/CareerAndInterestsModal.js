@@ -35,11 +35,6 @@ export default class CareerAndInterestsModal extends Component {
         this.submitReady = this.submitReady.bind(this)
     }
 
-    async componentWillMount() {
-        let result = await makeCall(null, '/drop/countries', 'get')
-        this.setState({countryOptions: result.options})
-    }
-
     getCompanyInput(selection, isNew) {
         if (selection) {
             if (isNew) {
