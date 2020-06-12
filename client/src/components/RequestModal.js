@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Modal, Image, Grid, Form} from 'semantic-ui-react';
+import {Button, Modal, Image, Grid, Form, Segment} from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 import TimeZoneDropdown from './TimeZoneDropdown';
@@ -62,6 +62,7 @@ export default class RequestModal extends Component {
     
     async handleOffsetChange(offset) {
         if (this.state.timeOffset !== offset) {
+            window.location.reload()
             await this.setState({timeOffset: offset})
             this.createAvailabilityOptions(this.state.alumni.availabilities)
         }
@@ -190,6 +191,9 @@ export default class RequestModal extends Component {
                                     liftTimezone={this.handleOffsetChange}
                                     compact={true}
                                 />
+                                <Segment compact inverted color='blue tertiary'>
+                                    Note: Changing your timezone will reload the page
+                                </Segment>
                             </Grid.Column>
                             <Grid.Column>
                                 <Form>

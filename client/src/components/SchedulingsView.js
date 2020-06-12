@@ -53,6 +53,7 @@ export default class SchedulingsView extends Component {
 
     async handleOffsetChange(offset) {
         if (this.state.timeOffset !== offset) {
+            window.location.reload()
             await this.setState({timeOffset: offset})
             let schedulings = await this.getSchedulings(offset)
             this.setState({
