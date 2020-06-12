@@ -147,7 +147,7 @@ export default class TimeZoneDropdown extends Component {
     render() {
         return(
             <Dropdown
-                compact
+                compact={this.props.compact}
                 placeholder={'Select Timezone'}
                 selection
                 search

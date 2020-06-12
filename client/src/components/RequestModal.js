@@ -175,7 +175,7 @@ export default class RequestModal extends Component {
             >
                 <Modal.Header>Schedule a meeting with {this.state.alumni.name}!</Modal.Header>
                 <Modal.Content>
-                    <Grid>
+                    <Grid stackable>
                         <Grid.Row columns={"equal"}>
                             <Grid.Column width={4}>
                                 <Image
@@ -188,6 +188,7 @@ export default class RequestModal extends Component {
                                     userDetails={this.props.userDetails}
                                     userRole={this.props.role}
                                     liftTimezone={this.handleOffsetChange}
+                                    compact={true}
                                 />
                             </Grid.Column>
                             <Grid.Column>

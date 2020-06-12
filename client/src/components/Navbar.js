@@ -41,7 +41,7 @@ export default class Navbar extends Component {
     render() {
         const { navItems, activeItem } = this.props
         return (
-            <Menu>
+            <Menu stackable>
                 {this.renderMenuItems(navItems, activeItem)}
             </Menu>
         )
