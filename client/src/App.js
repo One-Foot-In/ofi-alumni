@@ -424,7 +424,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems}
+                          navItems={studentNavBarItems()}
                           activeItem={'home'}
                           liftTimezone={this.refreshProfile}
                       />
@@ -440,7 +440,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems}
+                          navItems={studentNavBarItems()}
                           activeItem={'profile'}
                           liftTimezone={this.refreshProfile}
                       />
@@ -460,7 +460,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems}
+                          navItems={studentNavBarItems()}
                           activeItem={'alumniDirectory'}
                           liftTimezone={this.refreshProfile}
                       />
@@ -480,7 +480,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems}
+                          navItems={studentNavBarItems()}
                           activeItem={'schedulings'}
                           liftTimezone={this.refreshProfile}
                       />

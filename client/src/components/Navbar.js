@@ -55,7 +55,7 @@ export default class Navbar extends Component {
                     <TimeZoneDropdown
                         compact={true}
                         userDetails={this.props.userDetails}
-                        role={role}
+                        userRole={role}
                         liftTimezone={this.handleOffsetChange}
                     />
                 }
