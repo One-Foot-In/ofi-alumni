@@ -41,7 +41,7 @@ export default class Navbar extends Component {
         })
     }
 
-    handleOffsetChange(offset) {
+    handleOffsetChange() {
         window.location.reload()
     }
 
