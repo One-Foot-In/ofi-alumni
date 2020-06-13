@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Menu } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
+import  TimeZoneDropdown  from './TimeZoneDropdown'
 
 /*
     props:
@@ -22,6 +23,7 @@ export default class Navbar extends Component {
     constructor(props) {
         super(props)
         this.renderMenuItems = this.renderMenuItems.bind(this);
+        this.handleOffsetChange = this.handleOffsetChange.bind(this);
     }
     renderMenuItems(items, activeItem) {
         return items && items.map( item => {
@@ -38,11 +40,25 @@ export default class Navbar extends Component {
             )
         })
     }
+
+    handleOffsetChange(offset) {
+        window.location.reload()
+    }
+
     render() {
-        const { navItems, activeItem } = this.props
+        const { navItems, activeItem, role } = this.props
         return (
             <Menu stackable>
                 {this.renderMenuItems(navItems, activeItem)}
+                
+                {this.props.timezoneActive &&
+                    <TimeZoneDropdown
+                        compact={true}
+                        userDetails={this.props.userDetails}
+                        role={role}
+                        liftTimezone={this.handleOffsetChange}
+                    />
+                }
             </Menu>
         )
     }
