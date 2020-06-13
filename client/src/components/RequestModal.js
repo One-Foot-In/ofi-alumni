@@ -104,7 +104,7 @@ export default class RequestModal extends Component {
         }, async () => {
             try {
                 const requesterId = this.props.userDetails._id
-                let timeOffset = this.state.timeOffset
+                let timeOffset = parseInt(this.state.timeOffset)
                 const payload = {
                     requesterRole: this.props.role,
                     requesterId: requesterId,
