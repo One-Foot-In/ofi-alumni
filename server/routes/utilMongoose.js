@@ -30,12 +30,7 @@ const cities = ["St Johnsberg", "Old York City", "Khola", "San Disco", "Jelhi", 
 const professionFirst = ["Angsty", "Focused", "Bewitched", "Destitute", "Fumbling", "Grandiose", "Dextrous", "Giant", "Manual", "Thirsty", "Zoned out", "Astute"]
 const professionSecond = ["Trader", "Engineer", "Painter", "Student", "Assistant", "Clerk", "Banker", "Architect", "Addict", "Surgeon", "Designer", "Tailor", "Duck"]
 const companies = ["Global Business Machines", "Butt Book", "Capture Inc", "Amazon (The Rainforest)", "Chirper", "TripGuide", "Minisoft", "AT or T", "Pillow Housing", "Goldman Tax", "Tubspot"]
-const loremPicSumIds = [
-    "1", "1003", "1012", "1025", "1069", 
-    "1074", "111", "169", "237", "304",
-    "395", "428", "433", "45", "453",
-    "50", "513", "593", "633", "660"
-]
+
 const colleges = [
     "Hogwarts School of WitchCraft and Wizardry", "Elephants on the Hill", "Larvard", "Pepsodent", "Boston Institute of Technology", "Ben and Jerry's", "Lannister University",
     "Get Rich Quick College", "Gary Vee's School of Wisdom", "Tik Tok Fine Arts Institute", "Where Science Comes to Die",
@@ -168,7 +163,7 @@ router.get('/seed/', async (req, res, next) => {
         for (let i = 0; i < SCHOOL_COUNT; i++) {
             const schoolName = randomPickFromArray(schools)
             const country = randomPickFromArray(countries)
-            const logoUrl = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/400/400.jpg`
+            const logoUrl = `https://placedog.net/400/400?id=${Math.floor(Math.random()*20 + 1)}`
             await createSchool(schoolName, country, logoUrl)
         }
         let schoolsSaved = await schoolSchema.find()
@@ -177,7 +172,7 @@ router.get('/seed/', async (req, res, next) => {
         for (let i = 0; i < COLLEGE_COUNT; i++) {
             const collegeName = colleges[i]
             const country = randomPickFromArray(countries)
-            const logoUrl = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/400/400.jpg`
+            const logoUrl = `https://placedog.net/400/400?id=${Math.floor(Math.random()*20 + 1)}`
             await createCollege(collegeName, country, logoUrl)
         }
         let collegesSaved = await collegeSchema.find()
@@ -218,7 +213,7 @@ router.get('/seed/', async (req, res, next) => {
             let jobTitle = randomPickFromArray(jobTitlesSaved)
             let company = randomPickFromArray(companiesSaved)
             let interests = [randomPickFromArray(interestsSaved), randomPickFromArray(interestsSaved)]
-            let picLinkAlumni = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
+            let picLinkAlumni = `https://placedog.net/400/400?id=${Math.floor(Math.random()*20 + 1)}`
             let college = randomPickFromArray(collegesSaved)
             let hasZoom = randomPickFromArray([true, false])
             let timezoneAlumni = randomPickFromArray(timezones)
@@ -227,7 +222,7 @@ router.get('/seed/', async (req, res, next) => {
             // create mock student
             let studentEmail = `student${i}@ofi.com`
             let studentName = `${randomPickFromArray(firstNames)} ${randomPickFromArray(lastNames)}`
-            let picLinkStudent = `https://i.picsum.photos/id/${randomPickFromArray(loremPicSumIds)}/800/800.jpg`
+            let picLinkStudent = `https://placedog.net/400/400?id=${Math.floor(Math.random()*20 + 1)}`
             let timezoneStudent = randomPickFromArray(timezones)
             await createStudent(studentEmail, studentName, picLinkStudent, timezoneStudent, school, school.logoURL)
         }
