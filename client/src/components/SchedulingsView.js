@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import { Menu, Label, Card, Grid, Image, Button, Segment } from 'semantic-ui-react';
+import { Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
-import TimeZoneDropdown from './TimeZoneDropdown';
 
 export const timeSlotOptions = [
     '12am - 1am',
@@ -46,22 +45,9 @@ export default class SchedulingsView extends Component {
             confirmed: [],
             completed: [],
             timeOffset: 0,
+            userDetails: null
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
-        this.handleOffsetChange = this.handleOffsetChange.bind(this)
-    }
-
-    async handleOffsetChange(offset) {
-        if (this.state.timeOffset !== offset) {
-            window.location.reload()
-            await this.setState({timeOffset: offset})
-            let schedulings = await this.getSchedulings(offset)
-            this.setState({
-                unconfirmed: schedulings.schedulings[0],
-                confirmed: schedulings.schedulings[1],
-                completed: schedulings.schedulings[2],
-            })
-        }
     }
     
     async handleStatusUpdate(schedulings) {
@@ -83,7 +69,6 @@ export default class SchedulingsView extends Component {
             completed: schedulings.schedulings[2],
         })
     }
-
     getSchedulings(timeOffset) {
         return makeCall({}, '/request/getSchedulings/'+this.props.userDetails._id +'/'+ this.props.role +'/' + timeOffset, 'get')
     }
@@ -122,13 +107,6 @@ export default class SchedulingsView extends Component {
                     active={this.state.activeItem === 'completed'}
                     onClick={this.handleMenuClick}
                 />
-                <Menu.Item position={'right'}>
-                    <TimeZoneDropdown
-                        userDetails={this.props.userDetails}
-                        role={this.props.role}
-                        liftTimezone={this.handleOffsetChange}
-                    />
-                </Menu.Item>
             </Menu>
             {this.state.activeItem === 'confirmed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>

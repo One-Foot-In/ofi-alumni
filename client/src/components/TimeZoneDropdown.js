@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dropdown } from 'semantic-ui-react'
+import { Dropdown, Menu } from 'semantic-ui-react'
 import { makeCall } from '../apis'
 
 var timeZoneOptions = [
@@ -130,6 +130,16 @@ var timeZoneOptions = [
     }
 ]
 
+/*
+ * DETAILS:
+ * Custom Dropdown as MenuItem for timezone selection
+ * Side Effects: On value change, will refresh the page
+ * to update the users profile across all props (in Navbar)
+ * PROPS:
+ * userDetails - users profile information
+ * userRole - role of logged in user
+ * liftTimezone - prop enabling parent behavior
+ */ 
 export default class TimeZoneDropdown extends Component {
     state={
         offset: 0
@@ -139,26 +149,31 @@ export default class TimeZoneDropdown extends Component {
         this.setState({offset: this.props.userDetails.timeZone.toString()})
     }
 
+    async updateTimeZone(value) {
+        try {
+            let update = await makeCall({
+                id: this.props.userDetails._id,
+                role: this.props.userRole,
+                timeZone: parseInt(value)
+            }, '/changeTimeZone', 'patch')
+        } catch (e) {
+            console.log('timezone update failed')
+        }
+    }
+
     handleDropdownChange = (e, { name, value }) => {
         this.setState({ [name]: value })
-        console.log(this.props.userDetails)
-        console.log(this.props.role)
-        let updateProfile = makeCall({
-            id: this.props.userDetails._id,
-            role: this.props.userRole,
-            timeZone: parseInt(value)
-        }, '/changeTimeZone', 'patch')
+        this.updateTimeZone(value)
         this.props.liftTimezone(value)
     }
 
     render() {
         return(
-            <Dropdown
-                compact={this.props.compact}
+            <Dropdown as={Menu.Item}
+                position={'right'}
                 placeholder={'Select Timezone'}
                 selection
                 search
-                floating
                 name='offset'
                 onChange={this.handleDropdownChange}
                 options={timeZoneOptions}

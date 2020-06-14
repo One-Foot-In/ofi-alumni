@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import {Button, Modal, Image, Grid, Form, Segment} from 'semantic-ui-react';
+import {Button, Modal, Image, Grid, Form } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
-import TimeZoneDropdown from './TimeZoneDropdown';
 
 
 export const timeSlotOptions = [
@@ -57,15 +56,6 @@ export default class RequestModal extends Component {
         }
         this.handleValueChange = this.handleValueChange.bind(this)
         this.submitRequest = this.submitRequest.bind(this)
-        this.handleOffsetChange = this.handleOffsetChange.bind(this)
-    }
-    
-    async handleOffsetChange(offset) {
-        if (this.state.timeOffset !== offset) {
-            window.location.reload()
-            await this.setState({timeOffset: offset})
-            this.createAvailabilityOptions(this.state.alumni.availabilities)
-        }
     }
 
     async componentWillMount() {
@@ -114,8 +104,7 @@ export default class RequestModal extends Component {
         }, async () => {
             try {
                 const requesterId = this.props.userDetails._id
-                let timeOffset = new Date().getTimezoneOffset()
-                timeOffset = -((timeOffset/60)*100)
+                let timeOffset = parseInt(this.state.timeOffset)
                 const payload = {
                     requesterRole: this.props.role,
                     requesterId: requesterId,
@@ -185,15 +174,6 @@ export default class RequestModal extends Component {
                                     src={this.state.alumni.imageURL}
                                     rounded
                                 />
-                                <TimeZoneDropdown
-                                    userDetails={this.props.userDetails}
-                                    role={this.props.role}
-                                    liftTimezone={this.handleOffsetChange}
-                                    compact={true}
-                                />
-                                <Segment compact inverted color='blue tertiary'>
-                                    Note: Changing your timezone will reload the page
-                                </Segment>
                             </Grid.Column>
                             <Grid.Column>
                                 <Form>
