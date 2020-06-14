@@ -12,7 +12,6 @@ import Navbar from './components/Navbar'
 import AlumniProfile from './components/AlumniProfile'
 import StudentProfile from './components/StudentProfile'
 import AlumniVerification from './components/AlumniVerification'
-import StudentVerification from './components/StudentVerification'
 import RequestsView from './components/RequestsView'
 import SchedulingsView from './components/SchedulingsView'
 
@@ -147,11 +146,6 @@ const studentNavBarItems = () => {
         id: 'schedulings',
         name: 'Schedulings',
         navLink: '/schedulings'
-    },
-    {
-        id: 'verification',
-        name: 'Verify Student',
-        navLink: '/verify' 
     }
   ]
   return navBarItems;
@@ -487,21 +481,6 @@ class App extends Component {
                       />
                   </> :
                   <Redirect to={"/login"}/>
-              }
-          />
-          <Route exact path={`/verify`} render={(props) => 
-                  this.state.loggedIn ?
-                      <>
-                        <Navbar
-                          navItems={studentNavBarItems()}
-                          activeItem={'verification'}
-                        />
-                        <StudentVerification
-                          grade={this.state.userDetails.grade}
-                          schoolId={this.state.userDetails.school}
-                        />
-                      </> 
-                  :<Redirect to={"/login"}/>
               }
           />
           </>

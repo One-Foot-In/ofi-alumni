@@ -403,16 +403,6 @@ router.get('/data/clear/student', async (req, res, next) => {
     }
 });
 
-router.get('makeModerator/:studentId', async (req, res, next) => {
-    try {
-        let student = await studentSchema.findOne({_id: req.params.studentId})
-        student.isModerator = true
-        await student.save()
-    } catch (e) {
-        res.status(500).send({error: e})
-    }
-})
-
 /* User Routes */
 router.get('/allUsers', async (req, res, next) => {
     try {
