@@ -233,7 +233,7 @@ export default class AlumniCollegeCareerUpdateModal extends Component {
             <Modal
                 open={this.props.modalOpen}
             >
-                <Modal.Header>Career and Interests Modal</Modal.Header>
+                <Modal.Header>Update your career/college information</Modal.Header>
                 <Modal.Content>
                     <Segment color='green'>
                         <Step.Group>
