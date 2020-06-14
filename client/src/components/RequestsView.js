@@ -45,7 +45,8 @@ export default class RequestsView extends Component {
             confirmed: [],
             completed: [],
             timeOffset: 0,
-            confirmedTimes: []
+            confirmedTimes: [],
+            userDetails: null
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
     }
@@ -62,7 +63,7 @@ export default class RequestsView extends Component {
     }
 
     async componentWillMount() {
-        let timeOffset = (-(new Date().getTimezoneOffset())/60)*100
+        let timeOffset = this.props.userDetails.timeZone
         let requests = await this.getRequests(timeOffset)
         let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
         this.setState({
@@ -89,7 +90,7 @@ export default class RequestsView extends Component {
     render() {
         return(
             <div>
-            <Menu secondary>
+            <Menu secondary stackable>
                 <Menu.Item
                     id='unconfirmed'
                     name='Unconfirmed Meetings'
@@ -189,7 +190,7 @@ class RequestCards extends Component {
 
     constructRequest(request) {
         return (
-            <Grid key={request._id}>
+            <Grid key={request._id} columns={'equal'}>
             <Grid.Row columns={2}>
                 <Grid.Column width={4}>
                     <Image
@@ -231,7 +232,7 @@ class RequestCards extends Component {
                         onClick={this.handleClick.bind(this)}
                         disabled={disableApprove}
                     >
-                        Approve meeting
+                        Approve
                     </Button>
                     <Button
                         negative
@@ -239,13 +240,13 @@ class RequestCards extends Component {
                         newstatus={'Rejected'}
                         onClick={this.handleClick.bind(this)}
                     >
-                        Reject meeting
+                        Reject
                     </Button>
                 </Button.Group>
             )
         } else if (this.props.activeSet === 'confirmed') {
             return(
-                <Button.Group>
+                <Button.Group compact>
                     <Button 
                         color='blue' 
                         as='a'
@@ -253,7 +254,7 @@ class RequestCards extends Component {
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        Join Video Call
+                        Join Call
                     </Button>
                     <Button 
                         positive
@@ -261,7 +262,7 @@ class RequestCards extends Component {
                         newstatus={'Completed'}
                         onClick={this.handleClick.bind(this)}
                     >
-                        Mark as completed!
+                        Mark Completed!
                     </Button>
                 </Button.Group>
             )

@@ -356,7 +356,7 @@ export default class AlumniProfile extends Component {
             canUpdate = (
                 <>
                 <Card.Content extra>
-                    <Grid centered columns={4}>
+                    <Grid stackable centered columns={4}>
                         <Grid.Column width={4}>
                             <Button.Group vertical>
                                 {linkedInUpdate}
