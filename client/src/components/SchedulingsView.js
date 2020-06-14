@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Menu, Label, Card, Grid, Image, Button, Segment } from 'semantic-ui-react';
+import { Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
 
@@ -45,6 +45,7 @@ export default class SchedulingsView extends Component {
             confirmed: [],
             completed: [],
             timeOffset: 0,
+            userDetails: null
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
     }
@@ -59,7 +60,7 @@ export default class SchedulingsView extends Component {
     }
 
     async componentWillMount() {
-        let timeOffset = (-(new Date().getTimezoneOffset())/60)*100
+        let timeOffset = this.props.userDetails.timeZone
         let schedulings = await this.getSchedulings(timeOffset)
         this.setState({
             timeOffset: timeOffset,
@@ -68,7 +69,6 @@ export default class SchedulingsView extends Component {
             completed: schedulings.schedulings[2],
         })
     }
-
     getSchedulings(timeOffset) {
         return makeCall({}, '/request/getSchedulings/'+this.props.userDetails._id +'/'+ this.props.role +'/' + timeOffset, 'get')
     }
@@ -78,7 +78,7 @@ export default class SchedulingsView extends Component {
     render() {
         return(
             <div>
-            <Menu secondary>
+            <Menu secondary stackable>
                 <Menu.Item
                     id='confirmed'
                     name='Confirmed Meetings'
@@ -178,7 +178,7 @@ class SchedulingCards extends Component {
 
     constructRequest(scheduling) {
         return (
-            <Grid key={scheduling._id}>
+            <Grid key={scheduling._id} columns={'equal'}>
             <Grid.Row columns={2}>
                 <Grid.Column width={4}>
                     <Image
@@ -218,7 +218,7 @@ class SchedulingCards extends Component {
                     newstatus={'Rejected'}
                     onClick={this.handleClick.bind(this)}
                 >
-                    Cancel meeting
+                    Cancel
                 </Button>
             )
         } else if (this.props.activeSet === 'confirmed') {
@@ -231,16 +231,16 @@ class SchedulingCards extends Component {
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    Join Video Call
+                    Join Call
                 </Button>
-                <Button.Group>
+                <Button.Group compact>
                     <Button 
                         positive
                         requestid={scheduling._id}
                         newstatus={'Completed'}
                         onClick={this.handleClick.bind(this)}
                     >
-                        Mark as completed!
+                        Mark Completed!
                     </Button>
                     <Button
                         negative
@@ -248,7 +248,7 @@ class SchedulingCards extends Component {
                         newstatus={'Rejected'}
                         onClick={this.handleClick.bind(this)}
                     >
-                        Cancel meeting
+                        Cancel
                     </Button>
                 </Button.Group>
                 </>

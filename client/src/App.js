@@ -214,8 +214,9 @@ class App extends Component {
   }
 
   async refreshProfile(role, id) {
+    let userDetails = await this.fetchProfile(role, id)
     this.setState({
-      userDetails: await this.fetchProfile(role, id)
+      userDetails: userDetails
     })
   }
 
@@ -268,6 +269,9 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'home'}
                       />
@@ -280,6 +284,9 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'profile'}
                       />
@@ -296,10 +303,12 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'alumniDirectory'}
                       />
-
                       <AlumniDirectory
                         schoolId={this.state.userDetails.school}
                         userDetails={this.state.userDetails}
@@ -313,11 +322,15 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
-                          navItems={(alumniNavBarItems(this.state.approved))}
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'requests'}
                       />
                       <RequestsView 
                           userDetails={this.state.userDetails}
+                          role={role}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -327,6 +340,9 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'schedulings'}
                       />
@@ -343,10 +359,13 @@ class App extends Component {
                   this.state.loggedIn ?
                     (this.state.approved ?
                       <>
-                        <Navbar
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={alumniNavBarItems(this.state.approved)}
-                          activeItem={'verification'}
-                        />
+                          activeItem={'verify'}
+                      />
                         <AlumniVerification
                           gradYear={this.state.userDetails.gradYear}
                           schoolId={this.state.userDetails.school}
@@ -360,6 +379,7 @@ class App extends Component {
           <Route exact path={`/playground`} render={(props) => 
               <>
                 <Navbar
+                    userDetails={this.state.userDetails}
                     navItems={alumniNavBarItems()}
                     activeItem={'playground'}
                 />
@@ -396,6 +416,9 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={studentNavBarItems()}
                           activeItem={'home'}
                       />
@@ -408,6 +431,9 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={studentNavBarItems()}
                           activeItem={'profile'}
                       />
@@ -424,10 +450,12 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={studentNavBarItems()}
                           activeItem={'alumniDirectory'}
                       />
-
                       <AlumniDirectory
                         schoolId={this.state.userDetails.school}
                         userDetails={this.state.userDetails}
@@ -441,6 +469,9 @@ class App extends Component {
                   this.state.loggedIn ?
                   <>
                       <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
                           navItems={studentNavBarItems()}
                           activeItem={'schedulings'}
                       />

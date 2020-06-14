@@ -308,7 +308,7 @@ export default class AlumniDirectory extends Component {
         /* Search Area */
 
         return ( 
-            <Grid divided="vertically">
+            <Grid stackable divided="vertically">
                 
                 {searchRow}
                 {resultsRow}
