@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Modal, Image, Grid, Form} from 'semantic-ui-react';
+import {Button, Modal, Image, Grid, Form } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 
@@ -46,7 +46,7 @@ export default class RequestModal extends Component {
         super(props)
         this.state = {
             alumni: null,
-            studentId: '',
+            timeOffset: null,
             availabilityOptions: [],
             availabilityValue: '',
             topicOptions: [],
@@ -59,22 +59,17 @@ export default class RequestModal extends Component {
     }
 
     async componentWillMount() {
-        await this.setState({alumni: this.props.alumni})
+        await this.setState({
+            alumni: this.props.alumni, 
+            timeOffset: this.props.userDetails.timeZone
+        })
         this.createAvailabilityOptions(this.state.alumni.availabilities)
         this.createTopicOptions(this.state.alumni.topics)
     }
 
     async createAvailabilityOptions(availabilities) {
-        /* 
-         * Offset is in minutes and in the opposite direction 
-         * that you'd expect. For UTC -4 (EST), it returns 240 
-         * (not -240 to reflect being 4 hours behind)
-         * That's why there's a tiny bit of math in the payload, to conform
-         * with our date model
-         */
-        let timeOffset = new Date().getTimezoneOffset()
         let adjustedAvailabilities = await makeCall({availabilities: availabilities,
-                                                    offset: (-(timeOffset/60)*100)}, 
+                                                    offset: parseInt(this.state.timeOffset)}, 
                                                     '/request/applyRequesterTimezone', 
                                                     'patch')
         let availabilityOptions = []
@@ -109,8 +104,7 @@ export default class RequestModal extends Component {
         }, async () => {
             try {
                 const requesterId = this.props.userDetails._id
-                let timeOffset = new Date().getTimezoneOffset()
-                timeOffset = -((timeOffset/60)*100)
+                let timeOffset = parseInt(this.state.timeOffset)
                 const payload = {
                     requesterRole: this.props.role,
                     requesterId: requesterId,
@@ -171,9 +165,9 @@ export default class RequestModal extends Component {
             >
                 <Modal.Header>Schedule a meeting with {this.state.alumni.name}!</Modal.Header>
                 <Modal.Content>
-                    <Grid>
+                    <Grid stackable>
                         <Grid.Row columns={"equal"}>
-                            <Grid.Column width={3}>
+                            <Grid.Column width={4}>
                                 <Image
                                     floated='left'
                                     size='small'
