@@ -340,4 +340,17 @@ router.patch('/collegeAndCareer/update/:id', async (req, res, next) => {
     }
 })
 
+router.patch('/location/update/:id', async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.country = req.body.country
+        alumni.city = req.body.city
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's location"})
+    } catch (e) {
+        console.log("Error: alumni#location/update", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 module.exports = router;

@@ -6,6 +6,7 @@ import TopicPreferencesModal from './TopicPreferencesModal';
 import ZoomUpdateModal from './ZoomUpdateModal';
 import ImageUpdateModal from './ImageUpdateModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
+import LocationUpdateModal from './LocationUpdateModal';
 import AlumniCollegeCareerUpdateModal from './AlumniCollegeCareerUpdateModal';
 import { makeCall } from "../apis";
 
@@ -64,6 +65,7 @@ export default class AlumniProfile extends Component {
             imageModalOpen: false,
             interestsModalOpen: false,
             collegeAndCareerModalOpen: false,
+            locationModalOpen: false,
             removingInterest: false
         }
         this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
@@ -78,6 +80,8 @@ export default class AlumniProfile extends Component {
         this.closeInterestsModal = this.closeInterestsModal.bind(this)
         this.openCollegeAndCareerModal = this.openCollegeAndCareerModal.bind(this)
         this.closeCollegeAndCareerModal = this.closeCollegeAndCareerModal.bind(this)
+        this.openLocationUpdateModal = this.openLocationUpdateModal.bind(this)
+        this.closeLocationUpdateModal = this.closeLocationUpdateModal.bind(this)
         this.getInterests = this.getInterests.bind(this)
     }
     closeTimePreferencesModal() {
@@ -148,6 +152,18 @@ export default class AlumniProfile extends Component {
     closeCollegeAndCareerModal() {
         this.setState({
             collegeAndCareerModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    openLocationUpdateModal() {
+        this.setState({
+            locationModalOpen: true
+        })
+    }
+    closeLocationUpdateModal() {
+        this.setState({
+            locationModalOpen: false
         }, () => {
             this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
@@ -302,7 +318,7 @@ export default class AlumniProfile extends Component {
                 <Button
                     style={{'margin-left': '2px'}}
                     floated='right'
-                    basic
+                    primary
                     color="blue"
                     onClick={this.openCollegeAndCareerModal}
                 >
@@ -311,6 +327,25 @@ export default class AlumniProfile extends Component {
                 <AlumniCollegeCareerUpdateModal
                     modalOpen={this.state.collegeAndCareerModalOpen}
                     closeModal={this.closeCollegeAndCareerModal}
+                    id={details._id}
+                />
+            </>
+        )
+
+        const locationUpdate = (
+            <>
+                <Button
+                    style={{'margin-left': '2px'}}
+                    floated='right'
+                    basic
+                    color="blue"
+                    onClick={this.openLocationUpdateModal}
+                >
+                    Update Location
+                </Button>
+                <LocationUpdateModal
+                    modalOpen={this.state.locationModalOpen}
+                    closeModal={this.closeLocationUpdateModal}
                     id={details._id}
                 />
             </>
@@ -331,7 +366,7 @@ export default class AlumniProfile extends Component {
                         <Grid.Column width={4}>
                             <Button.Group vertical>
                                 {collegeAndCareerUpdate}
-                                {<></>}
+                                {locationUpdate}
                             </Button.Group>
                         </Grid.Column>
                         <Grid.Column width={4}>

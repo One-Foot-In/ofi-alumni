@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Menu, Label, Card, Grid, Image, Button, Segment } from 'semantic-ui-react';
+import { Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
 

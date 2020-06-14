@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {Button, Modal, Divider, Step, Segment } from 'semantic-ui-react';
 import PooledSingleSelectDropdown from "./PooledSingleSelectDropdown"
 import PooledMultiSelectDropdown from './PooledMultiSelectDropdown';
-import { makeCall } from "../apis";
 
 /*
     props:

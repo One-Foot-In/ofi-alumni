@@ -45,11 +45,30 @@ export default class AlumniCollegeCareerUpdateModal extends Component {
         this.deleteCountry = this.deleteCountry.bind(this)
         this.submit = this.submit.bind(this)
         this.submitReady = this.submitReady.bind(this)
+        this.clearState = this.clearState.bind(this)
     }
 
     async componentWillMount() {
         let result = await makeCall(null, '/drop/countries', 'get')
         this.setState({countryOptions: result.options})
+    }
+
+    clearState() {
+        this.setState({
+            existingJobTitleId: '',
+            existingJobTitleName: '',
+            newJobTitle: '',
+            // Company
+            existingCompanyId: '',
+            existingCompanyName: '',
+            newCompany: '',
+            // College
+            country: '',
+            newCollege: '',
+            existingCollegeId: '',
+            existingCollegeName: '',
+            collegeOptions: [],
+        })
     }
 
     getCompanyInput(selection, isNew) {
@@ -192,6 +211,7 @@ export default class AlumniCollegeCareerUpdateModal extends Component {
                             text: "Your college/career information have been successfully updated!",
                             icon: "success",
                         }).then(() => {
+                            this.clearState()
                             this.props.closeModal();
                         })
                     })
@@ -306,7 +326,11 @@ export default class AlumniCollegeCareerUpdateModal extends Component {
                         onClick={this.submit}>
                         Update
                     </Button>
-                    <Button onClick={this.props.closeModal}>
+                    <Button onClick={() => {
+                            this.clearState();
+                            this.props.closeModal()
+                            }
+                        }>
                         Done
                     </Button>
                 </Modal.Actions>
