@@ -130,6 +130,16 @@ var timeZoneOptions = [
     }
 ]
 
+/*
+ * DETAILS:
+ * Custom Dropdown as MenuItem for timezone selection
+ * Side Effects: On value change, will refresh the page
+ * to update the users profile across all props (in Navbar)
+ * PROPS:
+ * userDetails - users profile information
+ * userRole - role of logged in user
+ * liftTimezone - prop enabling parent behavior
+ */ 
 export default class TimeZoneDropdown extends Component {
     state={
         offset: 0
