@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {Button, Modal, Divider, Step, Segment } from 'semantic-ui-react';
 import PooledSingleSelectDropdown from "./PooledSingleSelectDropdown"
 import PooledMultiSelectDropdown from './PooledMultiSelectDropdown';
-import { makeCall } from "../apis";
 
 /*
     props:
@@ -33,11 +32,6 @@ export default class CareerAndInterestsModal extends Component {
         this.getInterestsInput = this.getInterestsInput.bind(this)
         this.submit = this.submit.bind(this)
         this.submitReady = this.submitReady.bind(this)
-    }
-
-    async componentWillMount() {
-        let result = await makeCall(null, '/drop/countries', 'get')
-        this.setState({countryOptions: result.options})
     }
 
     getCompanyInput(selection, isNew) {

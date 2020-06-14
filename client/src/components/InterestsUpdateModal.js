@@ -22,6 +22,14 @@ export default class InterestsUpdateModal extends Component {
         this.handleChange = this.handleChange.bind(this)
         this.getInterestsInput = this.getInterestsInput.bind(this)
         this.submit = this.submit.bind(this)
+        this.clearState = this.clearState.bind(this)
+    }
+
+    clearState() {
+        this.setState({
+            existingInterests: [],
+            newInterests: []
+        })
     }
 
     handleChange(e) {
@@ -61,6 +69,7 @@ export default class InterestsUpdateModal extends Component {
                             text: "Your interests have been successfully added!",
                             icon: "success",
                         }).then(() => {
+                            this.clearState();
                             this.props.closeModal();
                         })
                     })
@@ -115,7 +124,10 @@ export default class InterestsUpdateModal extends Component {
                     >
                         Submit
                     </Button>
-                    <Button onClick={this.props.closeModal}>
+                    <Button onClick={() => {
+                            this.clearState();
+                            this.props.closeModal()
+                        }}>
                         Close
                     </Button>
                 </Modal.Actions>
