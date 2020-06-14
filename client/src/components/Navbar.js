@@ -5,6 +5,9 @@ import  TimeZoneDropdown  from './TimeZoneDropdown'
 
 /*
     props:
+    - userDetails - profile object
+    - role
+    -timezoneActive (enables/disables timezone dropdown)
     - navItems: [
         {
             id: 'item1',
