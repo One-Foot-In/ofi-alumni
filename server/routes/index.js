@@ -135,6 +135,29 @@ router.get('/isLoggedIn', passport.authenticate('jwt', {session: false}), (req, 
   res.json({message: "You have a fresh cookie!"});
 });
 
+router.patch('/changeTimeZone/', async (req, res, next) => {
+  let id = req.body.id
+  let role = req.body.role
+  let newTimeZone = req.body.timeZone
+  let profile;
+
+  try {
+    if (role === "STUDENT") {
+      let profile = await studentSchema.findById(id)
+      profile.timeZone = newTimeZone
+      await profile.save();
+    } else {
+      let profile = await alumniSchema.findById(id)
+      profile.timeZone = newTimeZone
+      await profile.save();
+    }
+    res.status(200).send({userDetails: profile})
+  } catch (e) {
+    console.log("Change time zone error" + e)
+    res.status(500).send({message: "change time zone error" + e})
+  }
+})
+
 /*
   LinkedIn API
 */
