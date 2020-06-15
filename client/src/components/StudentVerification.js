@@ -7,17 +7,21 @@ import StudentProfile from './StudentProfile'
     props:
     - schoolId: String
     - grade
+    - studentId: String
 */
 export default class StudentVerification extends Component {
     constructor(props) {
         super(props);
         this.state = {
             entries: [],
-            dropdownOptions: [],
             display: [],
             showApproved: false,
             recentName: ''
         }
+        this.createDisplay = this.createDisplay.bind(this)
+        this.constructProfile = this.constructProfile.bind(this)
+        this.getEntries = this.getEntries.bind(this)
+        this.handleClick = this.handleClick.bind(this)
     }
 
     async componentWillMount(){
@@ -29,7 +33,7 @@ export default class StudentVerification extends Component {
     }
 
     getEntries() {
-        return makeCall(null, `/student/${this.props.schoolId}/moderator/${this.props.grade}/unapproved/`, 'get').catch(e => console.log(e))
+        return makeCall(null, `/student/${this.props.studentId}/moderator/${this.props.grade}/unapproved/`, 'get').catch(e => console.log(e))
     }
 
     constructProfile(profile) {
@@ -60,7 +64,7 @@ export default class StudentVerification extends Component {
                     <Card.Content extra>
                         <Button 
                         inverted color='green'
-                        onClick={this.handleClick.bind(this)}
+                        onClick={this.handleClick}
                         data-id={profile._id}
                         key={profile.name}
                         fluid
@@ -73,7 +77,7 @@ export default class StudentVerification extends Component {
         )
     }
 
-    createDisplay(value) {
+    createDisplay() {
         let display = []
         if (this.state.showApproved) {
             display.push(<Segment inverted color='green' tertiary>Approved {this.state.recentName}</Segment>)
@@ -87,20 +91,26 @@ export default class StudentVerification extends Component {
     }
 
     async handleClick(e, key) {
-        let entries = await makeCall({id: e.currentTarget.dataset.id}, '/student/approve/', 'post');
+        e.preventDefault();
+        let entries = await makeCall({
+            id: e.currentTarget.dataset.id,
+            grade: this.props.grade
+        }, '/student/approve/', 'post');
         this.setState({
             entries: entries.unapproved,
             showApproved: true,
             recentName: entries.name
-        })
+        }, () => this.createDisplay())
     }
 
     render(){
         return (
+            this.state.entries.length ?
             <>
             <Segment inverted color='blue' tertiary>Showing unapproved individuals from Grade {this.props.grade}. Please only verify individuals that you know personally!</Segment>
             {this.state.display}
-            </>
+            </> :
+            <Segment inverted color='green' tertiary>No students from grade {this.props.grade} are currently awaiting approval.</Segment>
         )
     }
 }

@@ -126,7 +126,7 @@ var alumniNavBarItems = (approved) => {
   return navBarItems;
 }
 
-const studentNavBarItems = () => {
+const studentNavBarItems = (isModerator) => {
   let navBarItems = [
     {
         id: 'home',
@@ -147,13 +147,15 @@ const studentNavBarItems = () => {
         id: 'schedulings',
         name: 'Schedulings',
         navLink: '/schedulings'
-    },
-    {
-        id: 'verification',
-        name: 'Verify Student',
-        navLink: '/verify' 
     }
   ]
+  if (isModerator) {
+    navBarItems.push({
+        id: 'verification',
+        name: 'Verify Students',
+        navLink: '/verify'
+    })
+  }
   return navBarItems;
 }
 
@@ -386,7 +388,7 @@ class App extends Component {
               <>
                 <Navbar
                     userDetails={this.state.userDetails}
-                    navItems={alumniNavBarItems()}
+                    navItems={alumniNavBarItems(this.state.approved)}
                     activeItem={'playground'}
                 />
                 <Button
@@ -425,7 +427,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems()}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
                           activeItem={'home'}
                       />
                       <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
@@ -440,7 +442,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems()}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
                           activeItem={'profile'}
                       />
                       <StudentProfile
@@ -459,7 +461,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems()}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
                           activeItem={'alumniDirectory'}
                       />
                       <AlumniDirectory
@@ -478,7 +480,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems()}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
                           activeItem={'schedulings'}
                       />
                       <SchedulingsView 
@@ -491,16 +493,19 @@ class App extends Component {
           />
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
+                    this.state.userDetails.isModerator ?
                       <>
                         <Navbar
-                          navItems={studentNavBarItems()}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
                           activeItem={'verification'}
                         />
                         <StudentVerification
                           grade={this.state.userDetails.grade}
                           schoolId={this.state.userDetails.school}
+                          studentId={this.state.userDetails._id}
                         />
-                      </> 
+                      </>
+                      : <Redirect to={"/"}/>
                   :<Redirect to={"/login"}/>
               }
           />
@@ -512,7 +517,7 @@ class App extends Component {
             this.state.loggedIn ?
             <>
                 <Navbar
-                    navItems={studentNavBarItems()}
+                    navItems={studentNavBarItems(this.state.userDetails.isModerator)}
                     activeItem={'home'}
                 />
                 <div> Home! Welcome!</div>
