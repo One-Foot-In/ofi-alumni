@@ -92,7 +92,7 @@ export default class RequestModal extends Component {
                 })
             }
         }
-        availabilityOptions = await availabilityOptions.sort((a, b) => {
+        availabilityOptions = availabilityOptions.sort((a, b) => {
             let valueA = (10000 * dayOptions.indexOf(a.day)) + parseInt(a.time)
             let valueB = (10000 * dayOptions.indexOf(b.day)) + parseInt(b.time)
             return valueA - valueB
