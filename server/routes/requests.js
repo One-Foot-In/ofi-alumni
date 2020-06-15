@@ -186,6 +186,19 @@ router.patch('/updateScheduling/:id/:role/:timeOffset', async (req, res, next) =
     }
 })
 
-
+router.get('/getConfirmed/:id/:timeOffset', async (req, res, next) => {
+    let alumniId = req.params.id;
+    let timeOffset = parseInt(req.params.timeOffset)
+    try {
+        const dbData = await requestSchema.find({mentor: alumniId, status: 'Confirmed'})
+        for (let request of dbData) {
+            request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+        }
+        res.json({'confirmed' : dbData});
+    } catch (e) {
+        console.log('getConfirmed error: ' + e)
+        res.status(500).send({message: 'getConfirmed error: ' + e})
+    }
+})
 
 module.exports = router;
