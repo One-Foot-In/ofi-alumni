@@ -30,6 +30,7 @@ export const timeSlotOptions = [
     '10pm - 11pm',
     '11pm - 12am'
 ]
+const dayOptions = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 
 /*
@@ -67,20 +68,35 @@ export default class RequestModal extends Component {
         this.createTopicOptions(this.state.alumni.topics)
     }
 
+    // Gets availability slots, adjusts for timezone, removes existing
+    // confirmed requests, and then sorts them
     async createAvailabilityOptions(availabilities) {
         let adjustedAvailabilities = await makeCall({availabilities: availabilities,
                                                     offset: parseInt(this.state.timeOffset)}, 
                                                     '/request/applyRequesterTimezone', 
                                                     'patch')
+        let confirmedTimes = await makeCall({}, '/request/getConfirmed/'+this.state.alumni._id+'/'+this.state.timeOffset, 'get')
+        confirmedTimes = confirmedTimes.confirmed.map(confirmedRequest => {
+            return confirmedRequest.time[0].id
+        })
         let availabilityOptions = []
         for (let option of adjustedAvailabilities.availabilities) {
-            let readableOption = option.day + ', ' + timeSlotOptions[(option.time/100)]
-            availabilityOptions.push({
-                key: option.id,
-                text: readableOption,
-                value: option.id,
-            })
+            if (!confirmedTimes.includes(option.id)) {
+                let readableOption = option.day + ', ' + timeSlotOptions[(option.time/100)]
+                availabilityOptions.push({
+                    day: option.day,
+                    time: option.time,
+                    key: option.id,
+                    text: readableOption,
+                    value: option.id,
+                })
+            }
         }
+        availabilityOptions = availabilityOptions.sort((a, b) => {
+            let valueA = (10000 * dayOptions.indexOf(a.day)) + parseInt(a.time)
+            let valueB = (10000 * dayOptions.indexOf(b.day)) + parseInt(b.time)
+            return valueA - valueB
+        })
         this.setState({availabilityOptions: availabilityOptions})
     }
 
