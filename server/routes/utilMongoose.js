@@ -245,6 +245,18 @@ router.get('/alumni/', async (req, res, next) => {
     }
 });
 
+router.get('/alumni/approve/:id', async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.approved = true
+        await alumni.save()
+        res.status(200).send({message : `Approved alumni ${alumni.name}!`});
+    } catch (e) {
+        console.log("Error: util#approveAlumni", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
 router.get('/allAlumni', async (req, res, next) => {
     try {
         const dbData = await alumniSchema.find()
@@ -402,6 +414,17 @@ router.get('/data/clear/student', async (req, res, next) => {
         res.status(500).send({error: e})
     }
 });
+
+router.get('/makeModerator/:studentId', async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.studentId})
+        student.isModerator = true
+        await student.save()
+        res.status(200).send({message: `${student.name} has been made a moderator!`})
+    } catch (e) {
+        res.status(500).send({error: e})
+    }
+})
 
 /* User Routes */
 router.get('/allUsers', async (req, res, next) => {

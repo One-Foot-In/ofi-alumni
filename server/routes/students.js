@@ -9,6 +9,11 @@ require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
 
+async function isModerator(studentId) {
+    let student = await studentSchema.findOne({_id: studentId})
+    return student.isModerator
+}
+
 router.post('/', async (req, res, next) => {
     try {
         const email = req.body.email;
@@ -69,6 +74,34 @@ router.get('/one/:id', async (req, res, next) => {
     } catch (e) {
         console.log("Error: util#oneStudent", e);
         res.status(500).send({'error' : e});
+    }
+});
+
+router.get('/:studentId/moderator/:grade/unapproved', async (req, res, next) => {
+    try {
+        if (await isModerator(req.params.studentId)) {
+            let unapproved =  await studentSchema.find({approved: false, grade: parseInt(req.params.grade)})
+            res.status(200).json({unapproved})
+        } else {
+            res.status(400).send({message: 'Student does not have moderator access!'})
+        }
+    } catch (e) {
+        console.log("Error: util#moderator/unapproved", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
+router.post('/approve', async(req, res, next) => {
+    try {
+        const student = await studentSchema.findOne({_id: req.body.id})
+        student.approved = true
+        await student.save();
+        const dbData = await studentSchema.find({approved: false, grade: parseInt(req.body.grade)})
+        res.json({'unapproved': dbData, 'name': student.name})
+
+    } catch (e) {
+        console.log("Error: util#approveStudent");
+        res.status(500).send({'error': e});
     }
 });
 
