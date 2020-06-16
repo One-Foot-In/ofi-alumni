@@ -8,7 +8,9 @@ import CollegeSelectionModal from './CollegeSelectionModal';
 import CareerAndInterestsModal from './CareerAndInterestsModal';
 
 let fieldStyle = {
-    width: '100%',
+    width: '90%',
+    'margin-left': 'auto',
+    'margin-right': 'auto'
 }
 let messageStyle = {
     padding: '20px',
@@ -484,7 +486,7 @@ export default class Signup extends React.Component {
                         </Button>
                     </Grid.Row>
                     <Grid.Row centered>
-                    <Form onSubmit={this.handleSubmit}>
+                    <Form onSubmit={this.handleSubmit} widths={'equal'}>
                         <Form.Field
                             type="email"
                             required={true}
@@ -523,20 +525,19 @@ export default class Signup extends React.Component {
                             <label>Name</label>
                             <input placeholder='Name' name="name" onChange={this.handleChange} />
                         </Form.Field>
-                        <Form.Field
+                        <Form.Dropdown
+                            label={'High School'}
                             required={true}
+                            style={fieldStyle}
+                            basic
+                            placeholder={'Select your high school network'}
+                            search
+                            selection
+                            options={this.state.schoolOptions}
+                            value={this.state.value}
+                            onChange={this.handleSchoolSelection}
                         >
-                            <label>High School</label>
-                            <Dropdown
-                                style={{ 'margin': '5px', 'width': '80%'}}
-                                placeholder={'Select your high school network'}
-                                search
-                                selection
-                                options={this.state.schoolOptions}
-                                value={this.state.value}
-                                onChange={this.handleSchoolSelection}
-                            />
-                        </Form.Field>
+                        </Form.Dropdown>
                         {this.props.isAlumni ? 
                             this.getAlumniFields() :
                             this.getStudentFields()

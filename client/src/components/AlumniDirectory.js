@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
+import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, Responsive } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import RequestModal from './RequestModal'
 
@@ -327,9 +327,16 @@ export default class AlumniDirectory extends Component {
                 <Grid.Row stretched>
                     <Grid.Column>
                         <Segment>
-                            <Pagination
+                            <Responsive as={Pagination} minWidth={726}
                                 activePage={activePage}
                                 totalPages={totalPages}
+                                onPageChange={this.handlePaginationChange}
+                            />
+                            <Responsive as={Pagination} maxWidth={726}
+                                activePage={activePage}
+                                totalPages={totalPages}
+                                siblingRange={0}
+                                boundaryRange={0}
                                 onPageChange={this.handlePaginationChange}
                             />
                         </Segment>
