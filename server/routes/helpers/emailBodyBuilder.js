@@ -2,7 +2,7 @@ const buildBody = (body, title, clickMe, link) => {
     return `
     <html><head>
 <title>One Foot In</title>
-<link rel="shortcut icon" href="https://onefootin-dev.s3.us-east-2.amazonaws.com/favicon.ico">
+<link rel="shortcut icon" href="https://ofi-alumni-test.s3.us-east-2.amazonaws.com/favicon.ico">
 <style type="text/css">
 table[name="blk_permission"], table[name="blk_footer"] {display:none;} 
 </style>

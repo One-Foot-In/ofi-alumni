@@ -10,6 +10,7 @@ var interestsSchema = require('../models/interestsSchema');
 var companySchema = require('../models/companySchema');
 var schoolSchema = require('../models/schoolSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
+var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -108,7 +109,7 @@ router.post('/', async (req, res, next) => {
         let interests = await generateNewAndExistingInterests(existingInterests, newInterests)
 
         // find schoolLogo
-        let school = await schoolSchema.findOne({_id: schoolId}, {logoURL: 1})
+        let school = await schoolSchema.findOne({_id: schoolId})
         const role = "ALUMNI"
         const emailVerified = false
         const approved = false
@@ -148,6 +149,7 @@ router.post('/', async (req, res, next) => {
         );
         await alumni_instance.save();
         await user_instance.save();
+        await sendAlumniVerificationEmail(email, verificationToken, school.name)
         res.status(200).send({
             message: 'Successfully added alumni',
             alumni: alumni_instance
