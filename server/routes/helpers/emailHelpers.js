@@ -42,9 +42,13 @@ const sendAlumniVerificationEmail = async (to, token, schoolName) => {
 const sendStudentVerificationEmail = async (to, token, schoolName) => {
   let emailObject = createPersonalization(
     to,
-    `Welcome to One Foot In's ${schoolName} Student Network!`,
-    'Verify Email',
-    `${BACKEND}/verification/${to}/${token}`
+    'Hello from One Foot In',
+    htmlBuilder(
+      'Please verify your email in order to login!',
+      `Welcome to One Foot In's ${schoolName} Student Network!`,
+      'Verify Email',
+      `${BACKEND}/verification/${to}/${token}`
+    )
   )
   // console.log("Sending email with", emailObject)
   await sg.send(emailObject, true)

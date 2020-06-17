@@ -5,6 +5,7 @@ var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
+var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -29,7 +30,7 @@ router.post('/', async (req, res, next) => {
         const verificationToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
         // find schoolLogo
-        let school = await schoolSchema.findOne({_id: schoolId}, {logoURL: 1})
+        let school = await schoolSchema.findOne({_id: schoolId})
         var student_instance = new studentSchema(
             {
                 name: name,
@@ -55,6 +56,7 @@ router.post('/', async (req, res, next) => {
         
         await student_instance.save();
         await user_instance.save();
+        await sendStudentVerificationEmail(email, verificationToken, school.name)
         res.status(200).send({
             message: 'Successfully added student',
             student: student_instance
