@@ -13,6 +13,7 @@ var jobTitleSchema = require('../models/jobTitleSchema');
 var interestsSchema = require('../models/interestsSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
+var sendTestEmail = require('../routes/helpers/emailHelpers').sendTestEmail
 
 const HASH_COST = 10;
 
@@ -527,6 +528,19 @@ router.get('/allCompanies', async (req, res) => {
         let companies = await companySchema.find()
         res.status(200).send(companies)
     } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
+/* Sendgrid */
+
+router.get('/testEmail/:email', async (req, res) => {
+    try {
+        let email = req.params.email
+        await sendTestEmail(email)
+        res.status(200).send({message: "Sent test email!"})
+    } catch (e) {
+        console.log(e)
         res.status(500).send({'error': e});
     }
 })

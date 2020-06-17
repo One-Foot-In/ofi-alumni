@@ -1,20 +1,25 @@
 const sg = require('@sendgrid/mail');
 require('dotenv').config();
 
+var htmlBuilder = require('./emailBodyBuilder').buildBody
+
 sg.setApiKey(process.env.SENDGRID_KEY);
 
-const sendEmail = (emails, from, subject, body, html) => {
-  // TODO: Include name in SendGrid personalization and move from to .env
-  const msg = {
-    to: emails,
-    from: from,
+const createPersonalization = (to, subject, html) => {
+  return {
+    to: to,
+    from: {
+      email: 'no-reply@onefootin.com',
+      name: 'One Foot In'
+    },
     subject: subject,
-    text: body,
     html: html,
-  };
-  console.log("Email is being sent to", emails);
-  // TODO: uncomment when email is needed
-  // sg.send(msg,true);
+  }
 }
 
-exports.sendEmail = sendEmail
+const sendTestEmail = async (to) => {
+  let emailObject = createPersonalization(to, 'Test Subject', htmlBuilder('Test Body', 'This is a title', 'Click me to go to facebook!', 'facebook.com'))
+  await sg.send(emailObject, true);
+}
+
+exports.sendTestEmail = sendTestEmail
