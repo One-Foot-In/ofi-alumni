@@ -18,19 +18,7 @@ export default class Register extends React.Component {
                 />
             </Grid.Row>
             <Grid.Row>
-                <Button centered onClick={
-                    (e) => {
-                        e.preventDefault(); props.history.goBack()
-                        }
-                    }
-                >
-                    Back
-                </Button>
-            </Grid.Row>
-            <Grid.Row>
-                <Button.Group size='massive' style={{
-                    'padding': '200px 0 100px 0'
-                }}>
+                <Button.Group size='massive'>
                     <Link to={`${match.url}/student`}>
                         <Button 
                             color='yellow'
@@ -47,6 +35,21 @@ export default class Register extends React.Component {
                         </Button>
                     </Link>
                 </Button.Group>
+            </Grid.Row>
+            <Grid.Row>
+                <Button centered style={{
+                    'position': 'relative',
+                    'bottom': '0',
+                    'margin': '200px 0 100px 0'
+                }} 
+                onClick={
+                    (e) => {
+                        e.preventDefault(); props.history.goBack()
+                        }
+                    }
+                >
+                    Back
+                </Button>
             </Grid.Row>
         </Grid>
         return (
