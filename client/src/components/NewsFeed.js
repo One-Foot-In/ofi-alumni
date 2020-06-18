@@ -50,11 +50,11 @@ export default class NewsFeed extends Component {
      * On Click: Opens a profile modal that can not be interacted with
      */
     createNewAlumniPost(feedItem) {
-        let alumniDetails = feedItem.alumni[0]
+        let alumniDetails = feedItem.alumni[0];
         let elapsedTime = new Date();
-        let uploadedTime = new Date(feedItem.time)
-        elapsedTime = Math.floor((elapsedTime.getTime() - uploadedTime.getTime())/3600000)
-        const timestampString = (elapsedTime === 0 ? 'Just Now' : `${elapsedTime} hours ago`)
+        let uploadedTime = new Date(feedItem.time);
+        elapsedTime = Math.floor((elapsedTime.getTime() - uploadedTime.getTime())/3600000);
+        const timestampString = (elapsedTime === 0 ? 'Just Now' : `${elapsedTime} hours ago`);
 
         return(
             <Modal closeIcon key={feedItem._id} onClose={this.close} dimmer='blurring' trigger={
