@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
+var passport = require("passport");
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
 var collegeSchema = require('../models/collegeSchema');

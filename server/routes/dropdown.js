@@ -1,4 +1,5 @@
 var express = require('express');
+var passport = require("passport");
 var router = express.Router();
 var schoolSchema = require('../models/schoolSchema');
 var collegeSchema = require('../models/collegeSchema');
@@ -25,7 +26,7 @@ router.get('/countries/', async (req, res, next) => {
     }
 });
 
-router.get('/schoolsOptions', passport.authenticate('jwt', {session: false}), async (req, res) => {
+router.get('/schoolsOptions', async (req, res) => {
     try {
       let schools = await schoolSchema.find()
       let schoolOptions = schools.map( school => {
@@ -42,7 +43,7 @@ router.get('/schoolsOptions', passport.authenticate('jwt', {session: false}), as
     }
 })
 
-router.get('/jobTitles', passport.authenticate('jwt', {session: false}), async (req, res) => {
+router.get('/jobTitles', async (req, res) => {
   try {
     let jobTitles = await jobTitleSchema.find()
     let jobTitlesOptions = jobTitles.map( job => {
@@ -59,7 +60,7 @@ router.get('/jobTitles', passport.authenticate('jwt', {session: false}), async (
   }
 })
 
-router.get('/companies', passport.authenticate('jwt', {session: false}), async (req, res) => {
+router.get('/companies', async (req, res) => {
   try {
     let companies = await companySchema.find()
     let companiesOptions = companies.map( company => {
@@ -76,7 +77,7 @@ router.get('/companies', passport.authenticate('jwt', {session: false}), async (
   }
 })
 
-router.get('/interests', passport.authenticate('jwt', {session: false}), async (req, res) => {
+router.get('/interests', async (req, res) => {
   try {
     let interests = await interestsSchema.find()
     let interestsOptions = interests.map( interest => {
@@ -93,7 +94,7 @@ router.get('/interests', passport.authenticate('jwt', {session: false}), async (
   }
 })
 
-router.get('/colleges/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+router.get('/colleges/:country', async (req, res) => {
   try {
     let country = req.params.country
     let colleges = await collegeSchema.find({country: country})

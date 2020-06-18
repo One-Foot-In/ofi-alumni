@@ -1,4 +1,5 @@
 var express = require('express');
+var passport = require("passport");
 var router = express.Router();
 var userSchema = require('../models/userSchema');
 require('mongoose').Promise = global.Promise

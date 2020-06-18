@@ -1,4 +1,5 @@
 var express = require('express');
+var passport = require("passport");
 var router = express.Router();
 var AWS = require('aws-sdk');
 var fs = require('fs');
@@ -59,7 +60,7 @@ router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}),
     }
 });
 
-router.post('/student/:studentId', async (req, res, next) => {
+router.post('/student/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const form = new multiparty.Form();
         form.parse(req, async (error, fields, files) => {
