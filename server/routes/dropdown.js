@@ -25,7 +25,7 @@ router.get('/countries/', async (req, res, next) => {
     }
 });
 
-router.get('/schoolsOptions', async (req, res) => {
+router.get('/schoolsOptions', passport.authenticate('jwt', {session: false}), async (req, res) => {
     try {
       let schools = await schoolSchema.find()
       let schoolOptions = schools.map( school => {
@@ -42,7 +42,7 @@ router.get('/schoolsOptions', async (req, res) => {
     }
 })
 
-router.get('/jobTitles', async (req, res) => {
+router.get('/jobTitles', passport.authenticate('jwt', {session: false}), async (req, res) => {
   try {
     let jobTitles = await jobTitleSchema.find()
     let jobTitlesOptions = jobTitles.map( job => {
@@ -59,7 +59,7 @@ router.get('/jobTitles', async (req, res) => {
   }
 })
 
-router.get('/companies', async (req, res) => {
+router.get('/companies', passport.authenticate('jwt', {session: false}), async (req, res) => {
   try {
     let companies = await companySchema.find()
     let companiesOptions = companies.map( company => {
@@ -76,7 +76,7 @@ router.get('/companies', async (req, res) => {
   }
 })
 
-router.get('/interests', async (req, res) => {
+router.get('/interests', passport.authenticate('jwt', {session: false}), async (req, res) => {
   try {
     let interests = await interestsSchema.find()
     let interestsOptions = interests.map( interest => {
@@ -93,7 +93,7 @@ router.get('/interests', async (req, res) => {
   }
 })
 
-router.get('/colleges/:country', async (req, res) => {
+router.get('/colleges/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
   try {
     let country = req.params.country
     let colleges = await collegeSchema.find({country: country})

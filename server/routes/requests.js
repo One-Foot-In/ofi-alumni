@@ -12,7 +12,7 @@ router.get('/', async (req, res, next) => {
     })
 })
 
-router.patch('/applyRequesterTimezone', async (req, res, next) => {
+router.patch('/applyRequesterTimezone', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const agnosticAvailabilities = req.body.availabilities;
         const timezone = req.body.offset
@@ -28,7 +28,7 @@ router.patch('/applyRequesterTimezone', async (req, res, next) => {
     }
 })
 
-router.post('/addRequest', async (req, res, next) => {
+router.post('/addRequest', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const requesterId = req.body.requesterId;
         const requesterRole = req.body.requesterRole
@@ -74,7 +74,7 @@ router.post('/addRequest', async (req, res, next) => {
     }
 });
 
-router.patch('/updateRequest/:id/:timeOffset', async (req,res, next) => {
+router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req,res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset);
     let requestId = req.body.requestId;
@@ -106,7 +106,7 @@ router.patch('/updateRequest/:id/:timeOffset', async (req,res, next) => {
     }
 })
 
-router.get('/getRequests/:id/:timeOffset', async (req, res, next) => {
+router.get('/getRequests/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset)
     let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
@@ -131,7 +131,7 @@ router.get('/getRequests/:id/:timeOffset', async (req, res, next) => {
     }
 })
 
-router.get('/getSchedulings/:id/:role/:timeOffset', async (req, res, next) => {
+router.get('/getSchedulings/:id/:role/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let requesterId = req.params.id;
     let requesterRole = req.params.role;
     let timeOffset = parseInt(req.params.timeOffset);
@@ -156,7 +156,7 @@ router.get('/getSchedulings/:id/:role/:timeOffset', async (req, res, next) => {
     }
 })
 
-router.patch('/updateScheduling/:id/:role/:timeOffset', async (req, res, next) => {
+router.patch('/updateScheduling/:id/:role/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let requesterId = req.params.id;
     let requesterRole = req.params.role;
     let timeOffset = parseInt(req.params.timeOffset);
@@ -186,7 +186,7 @@ router.patch('/updateScheduling/:id/:role/:timeOffset', async (req, res, next) =
     }
 })
 
-router.get('/getConfirmed/:id/:timeOffset', async (req, res, next) => {
+router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset)
     try {

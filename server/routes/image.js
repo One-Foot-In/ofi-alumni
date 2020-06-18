@@ -34,7 +34,7 @@ const params = {
 return await s3.upload(params).promise();
 };
 
-router.post('/alumni/:alumniId', async (req, res, next) => {
+router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const form = new multiparty.Form();
         form.parse(req, async (error, fields, files) => {
