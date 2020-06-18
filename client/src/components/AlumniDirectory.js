@@ -192,7 +192,7 @@ export default class AlumniDirectory extends Component {
         let display = [];
         let i = 0;
         for (let post of this.state.entries) {
-            if (this.state.filter !== 'all') {
+            if (this.state.filter !== 'all' && post[this.state.filter]) {
                 if (post[this.state.filter].toString().match(searchPattern) !== null) {
                     numResults += 1
                     display.push(this.constructProfile(post));
