@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Menu, Responsive, Sidebar, Icon, Button, MenuItem } from 'semantic-ui-react'
+import { Menu, Responsive, Sidebar, Button } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 import  TimeZoneDropdown  from './TimeZoneDropdown'
 
@@ -95,7 +95,7 @@ export default class Navbar extends Component {
                     }
                     <Button icon='close' as={Menu.Item} onClick={this.handleClick}/>
                 </Sidebar>
-                <Button icon='bars' onClick={this.handleClick} fluid style={{'margin-bottom': '18px'}}/>
+                <Button icon='bars' onClick={this.handleClick} fluid style={{'marginBottom': '18px'}}/>
             </Responsive>
             </>
         )
