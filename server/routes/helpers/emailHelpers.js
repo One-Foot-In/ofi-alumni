@@ -30,8 +30,8 @@ const sendAlumniVerificationEmail = async (to, token, schoolName) => {
     to,
     'Hello from One Foot In',
     htmlBuilder(
-      'Please verify your email in order to login!',
       `Welcome to One Foot In's ${schoolName} Alumni Network!`,
+      'Please verify your email in order to login!',
       'Verify Email',
       `${BACKEND}/verification/${to}/${token}`
     )
@@ -45,8 +45,8 @@ const sendStudentVerificationEmail = async (to, token, schoolName) => {
     to,
     'Hello from One Foot In',
     htmlBuilder(
-      'Please verify your email in order to login!',
       `Welcome to One Foot In's ${schoolName} Student Network!`,
+      'Please verify your email in order to login!',
       'Verify Email',
       `${BACKEND}/verification/${to}/${token}`
     )
@@ -60,8 +60,8 @@ const sendNewRequestEmail = async (to) => {
     to,
     'New Request!',
     htmlBuilder(
+      `You have a mentee who needs your help! Please login to app to confirm your the call!`,
       'You have a new request!',
-      `You have a mentee who needs your help! Please login to app to view your new requests!`,
       'Go To App',
       APP
     )
@@ -75,8 +75,8 @@ const sendRequestConfirmedEmail = async (menteeEmail, menteeName, menteeTime, me
     menteeEmail,
     'You\'re request has been confirmed!',
     htmlBuilder(
+      `You're set to take a call with <b>${mentorName}</b> discussing <b>${topic}</b>. The call is set to take place <b>${menteeTime}</b>. We <b> strongly recommend </b> setting up a reminder so you don't forget the call! You can go into the app, and join the video call.`,
       'You\'re all set!',
-      `You're set to take a call with ${mentorName} discussing ${topic}. The call is set to take place ${menteeTime}. We <b> strongly recommend </b> setting up a reminder so you don't forget the call! You can go into the app, and join the video call.`,
       'Go To App',
       APP
     )
@@ -85,8 +85,8 @@ const sendRequestConfirmedEmail = async (menteeEmail, menteeName, menteeTime, me
     mentorEmail,
     'You\'ve confirmed a request!',
     htmlBuilder(
+      `You're set to take a call with <b>${menteeName}</b> discussing <b>${topic}</b>. The call is set to take place <b>${mentorTime}</b>. We <b> strongly recommend </b> setting up a reminder so you don't forget the call! You can go into the app, and join the video call.`,
       'Thank you for confirming your request!',
-      `You're set to take a call with ${menteeName} discussing ${topic}. The call is set to take place ${mentorTime}. We <b> strongly recommend </b> setting up a reminder so you don't forget the call! You can go into the app, and join the video call.`,
       'Go To App',
       APP
     )

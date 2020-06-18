@@ -97,7 +97,21 @@ router.patch('/updateRequest/:id/:timeOffset', async (req,res, next) => {
                 mentee = await alumniSchema.findOne({_id: request.requester})
             }
             let mentor = await alumniSchema.findOne({_id: alumniId})
-            await sendRequestConfirmedEmail(mentee.email, mentee.name, timezoneHelpers.applyTimezone(request.time, mentee.timeZone), mentor.email, mentor.name, timezoneHelpers.applyTimezone(request.time, mentor.timeZone), request.topic)
+            let menteeTime = timezoneHelpers.applyTimezone(request.time, mentee.timeZone)
+            let menteeTimeString = `${menteeTime[0].day} ${timezoneHelpers.getSlot(menteeTime[0].time)}`
+            // javascript directory mutates time object, so we need to strip timezone here before using time again again
+            timezoneHelpers.stripTimezone(request.time, mentee.timeZone)
+            let mentorTime = timezoneHelpers.applyTimezone(request.time, mentor.timeZone)
+            let mentorTimeString = `${mentorTime[0].day} ${timezoneHelpers.getSlot(mentorTime[0].time)}`
+            await sendRequestConfirmedEmail(
+                mentee.email,
+                mentee.name, 
+                menteeTimeString,
+                mentor.email,
+                mentor.name,
+                mentorTimeString,
+                request.topic
+            )
         }
         for (let status of conditions) {
             const dbData = await requestSchema.find({mentor: alumniId, status: status})
