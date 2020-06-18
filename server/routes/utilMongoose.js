@@ -16,6 +16,7 @@ const { try } = require('bluebird');
 const newsSchema = require('../models/newsSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
+var sendTestEmail = require('../routes/helpers/emailHelpers').sendTestEmail
 
 const HASH_COST = 10;
 
@@ -550,6 +551,16 @@ router.get('/data/clear/news', async (req, res) => {
         res.status(200).send({'message': 'deleted all news items!'})
     } catch (e) {
         res.status(500).send({'news deletion error': e})
+/* Sendgrid */
+
+router.get('/testEmail/:email', async (req, res) => {
+    try {
+        let email = req.params.email
+        await sendTestEmail(email)
+        res.status(200).send({message: "Sent test email!"})
+    } catch (e) {
+        console.log(e)
+        res.status(500).send({'error': e});
     }
 })
 

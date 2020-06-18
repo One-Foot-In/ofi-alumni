@@ -7,9 +7,12 @@ var crypto = require('crypto-random-string');
 var sendEmail = require('./helpers/emailHelpers').sendEmail
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
-var schoolSchema = require('../models/schoolSchema');
+var userSchema = require('../models/userSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
+var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
 require('dotenv').config();
+
+const APP_LINK = process.env.APP || 'http://localhost:3000/'
 
 const HASH_COST = 10;
 
@@ -91,16 +94,17 @@ router.get('/verification/:email/:verificationToken', async (req, res, next) => 
   const email = req.params.email
   const verificationToken = req.params.verificationToken
   try{
-    const dbData = await req.db.collection("User").find({email: email}).project({verificationToken:1,_id:0}).toArray();
-    if (verificationToken == dbData[0]['verificationToken']){
-      await req.db.collection("Student").updateOne({email: email},{$set:{approved:approve}});
-      res.json({Success:true})
-    }else{
-      res.json({Success:false})
+    var user = await userSchema.findOne({'email': email});
+    if (verificationToken === user.verificationToken) {
+      user.emailVerified = true;
+      await user.save()
+      res.status(200).send(htmlBuilder('Welcome aboard!', 'Thank you for verifying your email!', 'Go To App', APP_LINK))
+    } else {
+      res.status(500).send({message: 'Your token could not be verified!'})
     }
   }catch(e){
-    console.log("Error index.js#verification")
-    res.status(500).json({Success:false, error:e})
+    console.log("Error index.js#verification", e)
+    res.status(500).json(e)
   }
 
 });
