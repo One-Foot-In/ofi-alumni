@@ -20,23 +20,29 @@ export default class NewsFeed extends Component {
 
     async componentWillMount() {
         let newsItems = await this.getNews(this.props.userRole)
-        await this.setState({
-            newsItems: newsItems.news.reverse()
-        })
+        if (newsItems.news) {
+            await this.setState({
+                newsItems: newsItems.news.reverse()
+            })
+        }
         this.constructDisplay()
     }
 
     getNews(role) {
-        return makeCall({}, '/news/getNews/'+{role}, 'get')
+        return makeCall({}, '/news/getNews/'+role+'/'+this.props.userDetails._id, 'get')
     }
 
     constructDisplay() {
         let display = []
         let i = 0
         for (let feedItem of this.state.newsItems) {
-            if (feedItem.event === 'New Alumni') {
-                display.push(<Divider key={i}/>)
-                display.push(this.createNewAlumniPost(feedItem))
+            switch (feedItem.event) {
+                case 'New Alumni':
+                    display.push(<Divider key={i}/>)
+                    display.push(this.createNewAlumniPost(feedItem))
+                    break;
+                default:
+                    break;
             }
             i++;
         }
@@ -51,10 +57,6 @@ export default class NewsFeed extends Component {
      */
     createNewAlumniPost(feedItem) {
         let alumniDetails = feedItem.alumni[0];
-        let elapsedTime = new Date();
-        let uploadedTime = new Date(feedItem.time);
-        elapsedTime = Math.floor((elapsedTime.getTime() - uploadedTime.getTime())/3600000);
-        const timestampString = (elapsedTime === 0 ? 'Just Now' : `${elapsedTime} hours ago`);
 
         return(
             <Modal closeIcon key={feedItem._id} onClose={this.close} dimmer='blurring' trigger={
@@ -65,7 +67,7 @@ export default class NewsFeed extends Component {
                     <Feed.Content>
                         <Feed.Summary>
                             <Feed.User>{alumniDetails.name}</Feed.User> joined the network!
-                            <Feed.Date>{timestampString}</Feed.Date>
+                            <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
                         </Feed.Summary>
                         <Feed.Extra>
                             {alumniDetails.name} graduated in {alumniDetails.gradYear}, and currently lives in {alumniDetails.city}, {alumniDetails.country}
@@ -90,7 +92,7 @@ export default class NewsFeed extends Component {
     
     render() {
         return(
-            <Segment>
+            <Segment style={{'marginBottom': '1em'}}>
                 <Header>
                     <Icon name={'newspaper outline'}/>
                     <Header.Content>Recent News</Header.Content>

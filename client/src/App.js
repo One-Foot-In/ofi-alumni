@@ -436,6 +436,10 @@ class App extends Component {
                           activeItem={'home'}
                       />
                       <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
+                      <NewsFeed
+                        userDetails={this.state.userDetails}
+                        userRole={role}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }

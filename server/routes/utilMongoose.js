@@ -12,8 +12,6 @@ var companySchema = require('../models/companySchema');
 var jobTitleSchema = require('../models/jobTitleSchema');
 var interestsSchema = require('../models/interestsSchema');
 var newsSchema = require('../models/newsSchema');
-const { try } = require('bluebird');
-const newsSchema = require('../models/newsSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
 var sendTestEmail = require('../routes/helpers/emailHelpers').sendTestEmail
@@ -551,6 +549,8 @@ router.get('/data/clear/news', async (req, res) => {
         res.status(200).send({'message': 'deleted all news items!'})
     } catch (e) {
         res.status(500).send({'news deletion error': e})
+    }
+})
 /* Sendgrid */
 
 router.get('/testEmail/:email', async (req, res) => {

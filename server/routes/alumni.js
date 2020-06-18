@@ -153,6 +153,7 @@ router.post('/', async (req, res, next) => {
         const news_instance = new newsSchema({
             event: 'New Alumni',
             alumni: [alumni_instance._id],
+            school: schoolId
         })
         await news_instance.save();
         await sendAlumniVerificationEmail(email, verificationToken, school.name)
