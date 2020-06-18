@@ -26,7 +26,7 @@ export default class Navbar extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            visible: false
+            sidebarVisible: false
         }
         this.renderMenuItems = this.renderMenuItems.bind(this);
         this.handleOffsetChange = this.handleOffsetChange.bind(this);
@@ -34,7 +34,7 @@ export default class Navbar extends Component {
     }
 
     componentWillMount() {
-        this.setState({visible: false})
+        this.setState({sidebarVisible: false})
     }
 
     renderMenuItems(items, activeItem) {
@@ -57,9 +57,8 @@ export default class Navbar extends Component {
         window.location.reload()
     }
 
-    handleClick() {
-        let menuVisible = this.state.visible
-        this.setState({visible: !menuVisible})
+    async handleClick() {
+        this.setState({sidebarVisible: !this.state.sidebarVisible})
     }
 
     render() {
@@ -83,7 +82,7 @@ export default class Navbar extends Component {
                     icon='labeled'
                     inverted
                     vertical
-                    visible={this.state.visible}
+                    visible={this.state.sidebarVisible}
                     width='thin'
                 >
                     {this.renderMenuItems(navItems, activeItem)}
