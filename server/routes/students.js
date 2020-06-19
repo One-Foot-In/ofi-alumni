@@ -1,4 +1,5 @@
 var express = require('express');
+var passport = require("passport");
 var router = express.Router();
 var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
@@ -7,6 +8,8 @@ var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
+var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
+var getUniqueInterests = require("./alumni").getUniqueInterests
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -80,7 +83,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/one/:id', async (req, res, next) => {
+router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const dbData = await studentSchema.findOne({_id: req.params.id})
         res.json({'result' : dbData});
@@ -90,7 +93,7 @@ router.get('/one/:id', async (req, res, next) => {
     }
 });
 
-router.get('/:studentId/moderator/:grade/unapproved', async (req, res, next) => {
+router.get('/:studentId/moderator/:grade/unapproved', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         if (await isModerator(req.params.studentId)) {
             let unapproved =  await studentSchema.find({approved: false, grade: parseInt(req.params.grade)})
@@ -104,7 +107,7 @@ router.get('/:studentId/moderator/:grade/unapproved', async (req, res, next) => 
     }
 });
 
-router.post('/approve', async(req, res, next) => {
+router.post('/approve', passport.authenticate('jwt', {session: false}), async(req, res, next) => {
     try {
         const student = await studentSchema.findOne({_id: req.body.id})
         student.approved = true
@@ -117,5 +120,33 @@ router.post('/approve', async(req, res, next) => {
         res.status(500).send({'error': e});
     }
 });
+
+router.patch('/interests/remove/:id', async (req, res, next) => {
+    try {
+        const student = await studentSchema.findOne({_id: req.params.id})
+        student.interests = student.interests.filter(interest => interest._id.toString() !== req.body.interestIdToRemove)
+        await student.save()
+        res.status(200).send({message: "Successfully removed student's interest"})
+    } catch (e) {
+        console.log("Error: student#interests/remove", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/interests/add/:id', async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.id})
+        const existingInterests = req.body.existingInterests
+        const newInterests = req.body.newInterests || []
+        let interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
+
+        student.interests = getUniqueInterests([...student.interests, ...interestsToAdd])
+        await student.save()
+        res.status(200).send({message: "Successfully added student's interests"})
+    } catch (e) {
+        console.log("Error: student#interests/add", e);
+        res.status(500).send({'error' : e});
+    }
+})
 
 module.exports = router;

@@ -1,9 +1,12 @@
 var express = require('express');
+var passport = require("passport");
 var router = express.Router();
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
+var sendNewRequestEmail = require('../routes/helpers/emailHelpers').sendNewRequestEmail
+var sendRequestConfirmedEmail = require('../routes/helpers/emailHelpers').sendRequestConfirmedEmail
 require('mongoose').Promise = global.Promise
 
 router.get('/', async (req, res, next) => {
@@ -12,7 +15,7 @@ router.get('/', async (req, res, next) => {
     })
 })
 
-router.patch('/applyRequesterTimezone', async (req, res, next) => {
+router.patch('/applyRequesterTimezone', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const agnosticAvailabilities = req.body.availabilities;
         const timezone = req.body.offset
@@ -28,7 +31,7 @@ router.patch('/applyRequesterTimezone', async (req, res, next) => {
     }
 })
 
-router.post('/addRequest', async (req, res, next) => {
+router.post('/addRequest', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const requesterId = req.body.requesterId;
         const requesterRole = req.body.requesterRole
@@ -62,6 +65,8 @@ router.post('/addRequest', async (req, res, next) => {
             id: time[0].id
         })
         let insert = await request_instance.save();
+        let mentor = await alumniSchema.findOne({_id: mentorId}, {email: 1})
+        await sendNewRequestEmail(mentor.email)
         res.status(200).send({
             message: 'Successfully added request',
             request: request_instance
@@ -74,7 +79,7 @@ router.post('/addRequest', async (req, res, next) => {
     }
 });
 
-router.patch('/updateRequest/:id/:timeOffset', async (req,res, next) => {
+router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req,res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset);
     let requestId = req.body.requestId;
@@ -85,6 +90,30 @@ router.patch('/updateRequest/:id/:timeOffset', async (req,res, next) => {
         let request = await requestSchema.findById(requestId);
         request.status = newStatus
         await request.save()
+        if (newStatus === 'Confirmed') {
+            let mentee
+            if (request.requesterRole === 'STUDENT') {
+                mentee = await studentSchema.findOne({_id: request.requester})
+            } else {
+                mentee = await alumniSchema.findOne({_id: request.requester})
+            }
+            let mentor = await alumniSchema.findOne({_id: alumniId})
+            let menteeTime = timezoneHelpers.applyTimezone(request.time, mentee.timeZone)
+            let menteeTimeString = `${menteeTime[0].day} ${timezoneHelpers.getSlot(menteeTime[0].time)}`
+            // javascript directory mutates time object, so we need to strip timezone here before using time again again
+            timezoneHelpers.stripTimezone(request.time, mentee.timeZone)
+            let mentorTime = timezoneHelpers.applyTimezone(request.time, mentor.timeZone)
+            let mentorTimeString = `${mentorTime[0].day} ${timezoneHelpers.getSlot(mentorTime[0].time)}`
+            await sendRequestConfirmedEmail(
+                mentee.email,
+                mentee.name, 
+                menteeTimeString,
+                mentor.email,
+                mentor.name,
+                mentorTimeString,
+                request.topic
+            )
+        }
         for (let status of conditions) {
             const dbData = await requestSchema.find({mentor: alumniId, status: status})
             for (let request of dbData) {
@@ -106,7 +135,7 @@ router.patch('/updateRequest/:id/:timeOffset', async (req,res, next) => {
     }
 })
 
-router.get('/getRequests/:id/:timeOffset', async (req, res, next) => {
+router.get('/getRequests/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset)
     let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
@@ -131,7 +160,7 @@ router.get('/getRequests/:id/:timeOffset', async (req, res, next) => {
     }
 })
 
-router.get('/getSchedulings/:id/:role/:timeOffset', async (req, res, next) => {
+router.get('/getSchedulings/:id/:role/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let requesterId = req.params.id;
     let requesterRole = req.params.role;
     let timeOffset = parseInt(req.params.timeOffset);
@@ -156,7 +185,7 @@ router.get('/getSchedulings/:id/:role/:timeOffset', async (req, res, next) => {
     }
 })
 
-router.patch('/updateScheduling/:id/:role/:timeOffset', async (req, res, next) => {
+router.patch('/updateScheduling/:id/:role/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let requesterId = req.params.id;
     let requesterRole = req.params.role;
     let timeOffset = parseInt(req.params.timeOffset);
@@ -186,7 +215,7 @@ router.patch('/updateScheduling/:id/:role/:timeOffset', async (req, res, next) =
     }
 })
 
-router.get('/getConfirmed/:id/:timeOffset', async (req, res, next) => {
+router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset)
     try {

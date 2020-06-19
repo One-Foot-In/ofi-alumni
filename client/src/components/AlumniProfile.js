@@ -170,13 +170,13 @@ export default class AlumniProfile extends Component {
     }
     async removeInterest(e, interestIdToRemove) {
         e.preventDefault()
-        this.setState({removeInterest: true},
+        this.setState({removingInterest: true},
             async () => {
                 await makeCall({interestIdToRemove: interestIdToRemove}, `/alumni/interests/remove/${this.props.details._id}`, 'patch')
                 this.setState({
-                    removeInterest: true
+                    removingInterest: false
                 }, () =>
-                this.props.refreshProfile(ALUMNI, this.props.details._id)
+                    this.props.refreshProfile(ALUMNI, this.props.details._id)
                 )
             })
     }
@@ -306,6 +306,7 @@ export default class AlumniProfile extends Component {
                 Add Interests
             </Button>
             <InterestsUpdateModal
+                role={'alumni'}
                 modalOpen={this.state.interestsModalOpen}
                 closeModal={this.closeInterestsModal}
                 id={details._id}

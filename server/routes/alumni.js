@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
+var passport = require("passport");
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
 var collegeSchema = require('../models/collegeSchema');
@@ -16,7 +17,7 @@ require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
 
-async function generateNewAndExistingInterests(existingInterests, newInterests) {
+const generateNewAndExistingInterests = async (existingInterests, newInterests) => {
     const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
     let existingInterestsRecords = await interestsSchema.find().where('_id').in(existingInterestsIds).exec()
     // create interests added
@@ -30,13 +31,16 @@ async function generateNewAndExistingInterests(existingInterests, newInterests) 
                 })
                 await newInterestCreated.save()
                 existingInterestsRecords.push(newInterestCreated)
+            } else {
+                // user accidentally added an interest that already exists as a new interest
+                existingInterestsRecords.push(interestExists[0])
             }
         }
     }
     return existingInterestsRecords
 }
 
-function getUniqueInterests(allInterests) {
+const getUniqueInterests = (allInterests) => {
     let allUniqueNames = new Set()
     let uniqueInterests = []
     for (let i = 0; i < allInterests.length; i++) {
@@ -169,7 +173,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/all/:schoolId', async (req, res, next) => {
+router.get('/all/:schoolId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let alumni = await alumniSchema.find({school: req.params.schoolId})
         res.json({'alumni' : alumni});
@@ -180,7 +184,7 @@ router.get('/all/:schoolId', async (req, res, next) => {
 });
 
 
-router.get('/unapproved/:schoolId', async(req, res, next) => {
+router.get('/unapproved/:schoolId', passport.authenticate('jwt', {session: false}), async(req, res, next) => {
     try {
         const dbData = await alumniSchema.find({approved: false, school: req.params.schoolId})
         res.json({'unapproved': dbData})
@@ -190,7 +194,7 @@ router.get('/unapproved/:schoolId', async(req, res, next) => {
     }
 });
 
-router.post('/approve/', async(req, res, next) => {
+router.post('/approve/', passport.authenticate('jwt', {session: false}), async(req, res, next) => {
     try {
         const alumni = await alumniSchema.findOne({_id: req.body.id})
         alumni.approved = true
@@ -204,7 +208,7 @@ router.post('/approve/', async(req, res, next) => {
     }
 });
 
-router.get('/one/:id', async (req, res, next) => {
+router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let alumnus = await alumniSchema.findOne({_id: req.params.id})
         alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
@@ -220,7 +224,7 @@ router.get('/topicOptions', async (req, res, next) => {
     res.status(200).send({topics: preloadedTopics})
 })
 
-router.patch('/timePreferences/:id', async (req, res, next) => {
+router.patch('/timePreferences/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const alumni = await alumniSchema.findOne({_id: req.params.id})
         const timezoneAgnosticPreferences = timezoneHelpers.stripTimezone(req.body.timePreferences, alumni.timeZone || 0)
@@ -233,7 +237,7 @@ router.patch('/timePreferences/:id', async (req, res, next) => {
     }
 });
 
-router.patch('/topicPreferences/:id', async (req, res, next) => {
+router.patch('/topicPreferences/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const alumni = await alumniSchema.findOne({_id: req.params.id})
         alumni.topics = req.body.topicPreferences
@@ -251,7 +255,7 @@ router.patch('/topicPreferences/:id', async (req, res, next) => {
     }
 })
 
-router.patch('/zoomLink/:id', async (req, res, next) => {
+router.patch('/zoomLink/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const alumni = await alumniSchema.findOne({_id: req.params.id})
         alumni.zoomLink = req.body.zoomLink
@@ -263,7 +267,7 @@ router.patch('/zoomLink/:id', async (req, res, next) => {
     }
 })
 
-router.patch('/interests/remove/:id', async (req, res, next) => {
+router.patch('/interests/remove/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const alumni = await alumniSchema.findOne({_id: req.params.id})
         alumni.interests = alumni.interests.filter(interest => interest._id.toString() !== req.body.interestIdToRemove)
@@ -275,7 +279,7 @@ router.patch('/interests/remove/:id', async (req, res, next) => {
     }
 })
 
-router.patch('/interests/add/:id', async (req, res, next) => {
+router.patch('/interests/add/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let alumni = await alumniSchema.findOne({_id: req.params.id})
         const existingInterests = req.body.existingInterests
@@ -291,7 +295,7 @@ router.patch('/interests/add/:id', async (req, res, next) => {
     }
 })
 
-router.patch('/collegeAndCareer/update/:id', async (req, res, next) => {
+router.patch('/collegeAndCareer/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let alumni = await alumniSchema.findOne({_id: req.params.id})
         let existingJobTitleId = req.body.existingJobTitleId
@@ -355,7 +359,7 @@ router.patch('/collegeAndCareer/update/:id', async (req, res, next) => {
     }
 })
 
-router.patch('/location/update/:id', async (req, res, next) => {
+router.patch('/location/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let alumni = await alumniSchema.findOne({_id: req.params.id})
         alumni.country = req.body.country
@@ -369,3 +373,5 @@ router.patch('/location/update/:id', async (req, res, next) => {
 })
 
 module.exports = router;
+module.exports.generateNewAndExistingInterests = generateNewAndExistingInterests
+module.exports.getUniqueInterests = getUniqueInterests

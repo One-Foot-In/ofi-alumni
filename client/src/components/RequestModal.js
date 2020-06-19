@@ -138,7 +138,7 @@ export default class RequestModal extends Component {
                     }, () => {
                         swal({
                             title: "Error!",
-                            text: "There was an error updating your time preferences, please try again.",
+                            text: "There was an error submitting your request, please try again.",
                             icon: "error",
                         });
                     })
@@ -148,7 +148,7 @@ export default class RequestModal extends Component {
                     }, () => {
                         swal({
                             title: "Done!",
-                            text: "Your time preferences were successfully updated!",
+                            text: "You have successfully submitted your request!",
                             icon: "success",
                         }).then(() => {
                             this.props.closeModal();

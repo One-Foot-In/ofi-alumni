@@ -1,4 +1,5 @@
 var express = require('express');
+var passport = require("passport");
 var router = express.Router();
 var schoolSchema = require('../models/schoolSchema');
 var collegeSchema = require('../models/collegeSchema');
