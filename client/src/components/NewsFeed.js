@@ -22,7 +22,7 @@ export default class NewsFeed extends Component {
     async componentWillMount() {
         let newsItems = await this.getNews(this.props.userRole)
         if (newsItems.news) {
-            await this.setState({
+            this.setState({
                 newsItems: newsItems.news.reverse()
             })
         }
@@ -37,6 +37,7 @@ export default class NewsFeed extends Component {
         let display = []
         let i = 0
         for (let feedItem of this.state.newsItems) {
+            console.log(feedItem)
             switch (feedItem.event) {
                 case 'New Alumni':
                     display.push(<Divider key={i}/>)
@@ -45,6 +46,7 @@ export default class NewsFeed extends Component {
                 case 'New Student':
                     display.push(<Divider key={i}/>)
                     display.push(this.createNewStudentPost(feedItem))
+                    break;
                 default:
                     break;
             }

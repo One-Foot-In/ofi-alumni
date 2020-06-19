@@ -11,7 +11,6 @@ const newsSchema = new Schema(
         school: {type: Schema.Types.ObjectId, ref: 'School'},
         dateCreated: {type: Date, default: moment()}, 
         role: {type: String, default: 'BOTH', enum: ['BOTH', 'ALUMNI', 'STUDENT']},
-        timeElapsed: {type: String, required: false},
         grade: {type: Number, default: null}
     }
 );

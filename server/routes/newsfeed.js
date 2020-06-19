@@ -18,10 +18,12 @@ router.get('/getNews/:role/:id', async (req, res, next) => {
             userInfo = await studentSchema.findById(id)
             dbData = await newsSchema.find({role: {$ne: 'ALUMNI'}, school: userInfo.school, grade: {$in: [null, userInfo.grade]}}).populate('alumni').populate('students')
         }
-        for (let item of dbData) {
-            item.timeElapsed = moment(item.dateCreated).fromNow();
-        }
-        res.json({'news' : dbData});
+        let objData = dbData.map(item => {
+            let itemObj = item.toObject()
+            itemObj.timeElapsed = moment(item.dateCreated).fromNow()
+            return itemObj
+        })
+        res.json({'news' : objData});
     } catch (e) {
         console.log('getNews error: ' + e)
         res.status(500).send({message: 'getNews error: ' + e})
