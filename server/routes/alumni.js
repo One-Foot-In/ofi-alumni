@@ -242,6 +242,12 @@ router.patch('/topicPreferences/:id', passport.authenticate('jwt', {session: fal
         const alumni = await alumniSchema.findOne({_id: req.params.id})
         alumni.topics = req.body.topicPreferences
         await alumni.save()
+        const news_instance = new newsSchema({
+            event: 'New Topics',
+            alumni: [alumni._id],
+            school: alumni.school,
+        })
+        await news_instance.save()
         res.status(200).send({message: "Successfully updated alumni's topic preferences"})
     } catch (e) {
         console.log("Error: alumni#topicPreferences", e);
