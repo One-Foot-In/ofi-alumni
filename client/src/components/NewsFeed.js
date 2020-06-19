@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Segment, Feed, Image, Header, Icon, Divider, Modal, Grid} from 'semantic-ui-react'
 import { makeCall } from '../apis';
-import AlumniProfile from './AlumniProfile'
+import AlumniProfile from './AlumniProfile';
+import StudentProfile from './StudentProfile';
 
 /*
  * DETAILS:
@@ -41,6 +42,9 @@ export default class NewsFeed extends Component {
                     display.push(<Divider key={i}/>)
                     display.push(this.createNewAlumniPost(feedItem))
                     break;
+                case 'New Student':
+                    display.push(<Divider key={i}/>)
+                    display.push(this.createNewStudentPost(feedItem))
                 default:
                     break;
             }
@@ -59,13 +63,12 @@ export default class NewsFeed extends Component {
         let alumniDetails = feedItem.alumni[0];
 
         return(
-            
-               <Feed.Event key={feedItem._id}>
-                    <Feed.Label>
-                        <Image src={alumniDetails.imageURL} />
-                    </Feed.Label>
-                    <Feed.Content>
-                        <Feed.Summary>
+            <Feed.Event key={feedItem._id}>
+                <Feed.Label>
+                    <Image src={alumniDetails.imageURL} />
+                </Feed.Label>
+                <Feed.Content>
+                    <Feed.Summary>
                         <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
                             <Feed.User>{alumniDetails.name}</Feed.User>
                         }>
@@ -82,12 +85,45 @@ export default class NewsFeed extends Component {
                             </Modal.Content>
                         </Modal> joined the network!
                             <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
-                        </Feed.Summary>
-                        <Feed.Extra>
-                            {alumniDetails.name} graduated in {alumniDetails.gradYear}, and currently lives in {alumniDetails.city}, {alumniDetails.country}
-                        </Feed.Extra>
-                    </Feed.Content>
-                </Feed.Event>
+                    </Feed.Summary>
+                    <Feed.Extra>
+                        {alumniDetails.name} graduated in {alumniDetails.gradYear}, and currently lives in {alumniDetails.city}, {alumniDetails.country}
+                    </Feed.Extra>
+                </Feed.Content>
+            </Feed.Event>
+        )
+    }
+
+    /*
+     * EVENT: 'New Student'
+     * Display to: 'STUDENT'
+     * Contains: Student[0] and time ONLY
+     * On Click: Opens a profile modal 
+     */ 
+    createNewStudentPost(feedItem) {
+        let studentDetails = feedItem.students[0];
+
+        return(
+            <Feed.Event key={feedItem._id}>
+                <Feed.Label>
+                    <Image src={studentDetails.imageURL} />
+                </Feed.Label>
+                <Feed.Content>
+                    <Feed.Summary>
+                        <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
+                            <Feed.User>{studentDetails.name}</Feed.User>
+                        }>
+                            <Header>
+                                Details for {studentDetails.name}
+                            </Header>
+                            <Modal.Content>
+                                <StudentProfile details={studentDetails} isViewOnly={true} />
+                            </Modal.Content>
+                        </Modal> joined the network! Welcome!
+                            <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
+                    </Feed.Summary>
+                </Feed.Content>
+            </Feed.Event>
         )
     }
     

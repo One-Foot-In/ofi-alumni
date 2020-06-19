@@ -5,6 +5,7 @@ var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
+var newsSchema = require('../models/newsSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 require('mongoose').Promise = global.Promise
 
@@ -56,6 +57,16 @@ router.post('/', async (req, res, next) => {
         
         await student_instance.save();
         await user_instance.save();
+        const news_instance = new newsSchema(
+            {
+                event: 'New Student',
+                students: [student_instance._id],
+                school: schoolId,
+                role: 'STUDENT',
+                grade: grade
+            }
+        )
+        await news_instance.save();
         await sendStudentVerificationEmail(email, verificationToken, school.name)
         res.status(200).send({
             message: 'Successfully added student',
