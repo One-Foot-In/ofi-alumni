@@ -134,7 +134,7 @@ export default class NewsFeed extends Component {
     }
 
         /*
-     * EVENT: 'New Alumni'
+     * EVENT: 'New Topics'
      * Display to: 'BOTH'
      * Contains: Alumni[0] and time (stored as string) ONLY
      * On Click: Opens a profile modal that can not be interacted with
