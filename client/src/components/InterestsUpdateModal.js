@@ -6,6 +6,7 @@ import { makeCall } from "../apis";
 
 /*
 props:
+    - role: string
     - modalOpen: boolean
     - closeModal: ()
     - interests: []
@@ -49,7 +50,7 @@ export default class InterestsUpdateModal extends Component {
                 existingInterests: this.state.existingInterests
             }
             try {
-                const result = await makeCall(payload, `/alumni/interests/add/${this.props.id}`, 'patch')
+                const result = await makeCall(payload, `/${this.props.role}/interests/add/${this.props.id}`, 'patch')
                 if (!result || result.error) {
                     this.setState({
                         submitting: false
