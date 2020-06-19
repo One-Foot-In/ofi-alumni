@@ -133,7 +133,7 @@ export default class NewsFeed extends Component {
         )
     }
 
-        /*
+    /*
      * EVENT: 'New Topics'
      * Display to: 'BOTH'
      * Contains: Alumni[0] and time (stored as string) ONLY
@@ -141,13 +141,7 @@ export default class NewsFeed extends Component {
      */
     createNewTopicsPost(feedItem) {
         let alumniDetails = feedItem.alumni[0];
-        var topicsString = '';
-        for (let i = 0; i < alumniDetails.topics.length; i++) {
-            if (i !== 0) {
-                topicsString += ', '
-            }
-            topicsString += alumniDetails.topics[i]
-        }
+        var topicsString = alumniDetails.topics.join(", ")
 
         return(
             <Feed.Event key={feedItem._id}>
