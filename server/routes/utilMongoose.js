@@ -11,6 +11,7 @@ var collegeSchema = require('../models/collegeSchema');
 var companySchema = require('../models/companySchema');
 var jobTitleSchema = require('../models/jobTitleSchema');
 var interestsSchema = require('../models/interestsSchema');
+var newsSchema = require('../models/newsSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
 var sendTestEmail = require('../routes/helpers/emailHelpers').sendTestEmail
@@ -532,6 +533,24 @@ router.get('/allCompanies', async (req, res) => {
     }
 })
 
+/* Newsfeed Routes */
+router.get('/allNews', async (req, res) => {
+    try {
+        let news = await newsSchema.find()
+        res.status(200).send(news)
+    } catch (e) {
+        res.status(500).send({'allNews error': e})
+    }
+})
+
+router.get('/data/clear/news', async (req, res) => {
+    try {
+        let news = await newsSchema.deleteMany({})
+        res.status(200).send({'message': 'deleted all news items!'})
+    } catch (e) {
+        res.status(500).send({'news deletion error': e})
+    }
+})
 /* Sendgrid */
 
 router.get('/testEmail/:email', async (req, res) => {
@@ -557,6 +576,7 @@ router.get('/data/clear/all', async (req, res, next) => {
         await jobTitleSchema.deleteMany({});
         await interestsSchema.deleteMany({});
         await companySchema.deleteMany({});
+        await newsSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});

@@ -10,6 +10,7 @@ var jobTitleSchema = require('../models/jobTitleSchema');
 var interestsSchema = require('../models/interestsSchema');
 var companySchema = require('../models/companySchema');
 var schoolSchema = require('../models/schoolSchema');
+var newsSchema = require('../models/newsSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
 require('mongoose').Promise = global.Promise
@@ -150,6 +151,12 @@ router.post('/', async (req, res, next) => {
         );
         await alumni_instance.save();
         await user_instance.save();
+        const news_instance = new newsSchema({
+            event: 'New Alumni',
+            alumni: [alumni_instance._id],
+            school: schoolId
+        })
+        await news_instance.save();
         await sendAlumniVerificationEmail(email, verificationToken, school.name)
         res.status(200).send({
             message: 'Successfully added alumni',

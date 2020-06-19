@@ -15,6 +15,7 @@ import AlumniVerification from './components/AlumniVerification'
 import StudentVerification from './components/StudentVerification'
 import RequestsView from './components/RequestsView'
 import SchedulingsView from './components/SchedulingsView'
+import NewsFeed from './components/NewsFeed'
 
 import * as actions from './redux/actions'
 // TODO: for demo only, remove for release
@@ -284,6 +285,10 @@ class App extends Component {
                           activeItem={'home'}
                       />
                       <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
+                      <NewsFeed
+                        userDetails={this.state.userDetails}
+                        userRole={role}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -431,6 +436,10 @@ class App extends Component {
                           activeItem={'home'}
                       />
                       <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
+                      <NewsFeed
+                        userDetails={this.state.userDetails}
+                        userRole={role}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }

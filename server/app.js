@@ -19,6 +19,7 @@ var dropdownRouter = require('./routes/dropdown');
 var utilRouter = require('./routes/util');
 var mongooseUtilRouter = require('./routes/utilMongoose');
 var requestRouter = require('./routes/requests');
+var newsRouter = require('./routes/newsfeed');
 var imageRouter = require('./routes/image');
 
 require('dotenv').config();
@@ -117,6 +118,8 @@ async function main() {
     app.use('/user/', userRouter);
 
     app.use('/drop/', dropdownRouter);
+
+    app.use('/news/', newsRouter);
 
     app.use('/image/', imageRouter);
 
