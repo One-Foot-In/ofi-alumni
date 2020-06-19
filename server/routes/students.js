@@ -1,4 +1,5 @@
 var express = require('express');
+var passport = require("passport");
 var router = express.Router();
 var crypto = require('crypto-random-string');
 var bcrypt = require('bcrypt');
@@ -69,7 +70,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/one/:id', async (req, res, next) => {
+router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const dbData = await studentSchema.findOne({_id: req.params.id})
         res.json({'result' : dbData});
@@ -79,7 +80,7 @@ router.get('/one/:id', async (req, res, next) => {
     }
 });
 
-router.get('/:studentId/moderator/:grade/unapproved', async (req, res, next) => {
+router.get('/:studentId/moderator/:grade/unapproved', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         if (await isModerator(req.params.studentId)) {
             let unapproved =  await studentSchema.find({approved: false, grade: parseInt(req.params.grade)})
@@ -93,7 +94,7 @@ router.get('/:studentId/moderator/:grade/unapproved', async (req, res, next) => 
     }
 });
 
-router.post('/approve', async(req, res, next) => {
+router.post('/approve', passport.authenticate('jwt', {session: false}), async(req, res, next) => {
     try {
         const student = await studentSchema.findOne({_id: req.body.id})
         student.approved = true

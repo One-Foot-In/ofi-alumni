@@ -109,7 +109,7 @@ router.get('/verification/:email/:verificationToken', async (req, res, next) => 
 
 });
 
-router.post('/password/change', async (req, res, next) => {
+router.post('/password/change', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
   const password = req.body.newPassword
   const email = req.body.email
   const passwordHash = await bcrypt.hash(password, HASH_COST);
@@ -122,7 +122,7 @@ router.post('/password/change', async (req, res, next) => {
   }
 });
 
-router.post('/password/forgot', async (req, res, next) => {
+router.post('/password/forgot', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
   const email = req.body.email
   const newTempPass = crypto({length: 16});
   try{
@@ -139,7 +139,7 @@ router.get('/isLoggedIn', passport.authenticate('jwt', {session: false}), (req, 
   res.json({message: "You have a fresh cookie!"});
 });
 
-router.patch('/changeTimeZone/', async (req, res, next) => {
+router.patch('/changeTimeZone/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
   let id = req.body.id
   let role = req.body.role
   let newTimeZone = req.body.timeZone
@@ -185,7 +185,7 @@ function requestProfile(token) {
 }
 
 // end-point configured as callback for LinkedIn App
-router.get('/linkedin', (req, res, next) => {
+router.get('/linkedin', passport.authenticate('jwt', {session: false}), (req, res, next) => {
   // state is the email address of member
   requestAccessToken(req.query.code, req.query.state)
   .then((response) => {
