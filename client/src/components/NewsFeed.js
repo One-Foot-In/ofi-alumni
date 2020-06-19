@@ -47,6 +47,10 @@ export default class NewsFeed extends Component {
                     display.push(<Divider key={i}/>)
                     display.push(this.createNewStudentPost(feedItem))
                     break;
+                case 'New Topics':
+                    display.push(<Divider key={i}/>)
+                    display.push(this.createNewTopicsPost(feedItem))
+                    break;
                 default:
                     break;
             }
@@ -124,6 +128,54 @@ export default class NewsFeed extends Component {
                         </Modal> joined the network! Welcome!
                             <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
                     </Feed.Summary>
+                </Feed.Content>
+            </Feed.Event>
+        )
+    }
+
+        /*
+     * EVENT: 'New Alumni'
+     * Display to: 'BOTH'
+     * Contains: Alumni[0] and time (stored as string) ONLY
+     * On Click: Opens a profile modal that can not be interacted with
+     */
+    createNewTopicsPost(feedItem) {
+        let alumniDetails = feedItem.alumni[0];
+        var topicsString = '';
+        for (let i = 0; i < alumniDetails.topics.length; i++) {
+            if (i !== 0) {
+                topicsString += ', '
+            }
+            topicsString += alumniDetails.topics[i]
+        }
+
+        return(
+            <Feed.Event key={feedItem._id}>
+                <Feed.Label>
+                    <Image src={alumniDetails.imageURL} />
+                </Feed.Label>
+                <Feed.Content>
+                    <Feed.Summary>
+                        <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
+                            <Feed.User>{alumniDetails.name}</Feed.User>
+                        }>
+                            <Header>
+                                <Grid>
+                                    <Grid.Row columns={2}>
+                                        <Grid.Column width={7}>Details for {alumniDetails.name}</Grid.Column>
+                                        <Grid.Column textAlign='right'>Graduated: {alumniDetails.gradYear}</Grid.Column>
+                                    </Grid.Row>
+                                </Grid>
+                            </Header>
+                            <Modal.Content>
+                                <AlumniProfile details={alumniDetails} isViewOnly={true} />
+                            </Modal.Content>
+                        </Modal> has added new topics!
+                            <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
+                    </Feed.Summary>
+                    <Feed.Extra>
+                        {alumniDetails.name} is now consulting on: {topicsString}
+                    </Feed.Extra>
                 </Feed.Content>
             </Feed.Event>
         )
