@@ -283,7 +283,7 @@ class RequestCards extends Component {
         } else if (this.props.activeSet === 'completed') {
             return(
                 <Button
-                    secondary
+                    color='teal'
                     requestId={request._id}
                     onClick={this.toggleFeedbackModal.bind(this)}
                 >

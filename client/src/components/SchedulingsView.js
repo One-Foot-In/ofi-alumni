@@ -263,7 +263,7 @@ class SchedulingCards extends Component {
         } else if (this.props.activeSet === 'completed') {
             return(
                 <Button
-                    secondary
+                    color='teal'
                     requestId={scheduling._id}
                     onClick={this.toggleFeedbackModal.bind(this)}
                 >

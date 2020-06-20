@@ -178,7 +178,7 @@ router.patch('/leaveFinalNote/:id/:timeOffset', passport.authenticate('jwt', {se
         for (let status of conditions) {
             const dbData = await requestSchema.find({mentor: alumniId, status: status})
             for (let request of dbData) {
-                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
                 if (request.requesterRole === 'STUDENT') {
                     request.requesterObj = await studentSchema.findOne({_id: request.requester})
                 } else {
@@ -265,7 +265,7 @@ router.patch('/updateScheduling/:id/:role/:timeOffset', passport.authenticate('j
                     status: status
                 }).populate('mentor')
             for (let request of dbData) {
-                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
             }
             schedulings.push(dbData)
         }
