@@ -18,14 +18,16 @@ const requestSchema = new Schema(
     zoomLink: {type: String},
     topic: {type: String, required: true},
     status: {type: String, 
-                enum: [ 'Awaiting Confirmation',
+                enum: [ 
+                        'Awaiting Confirmation',
                         'Confirmed',
                         'Completed',
-                        'Rejected',
-                        'Feedback Provided'
+                        'Rejected'
                       ]
             },
-    note: {type: String}
+    note: {type: String},
+    finalNote: {type: String},
+    feedback: {type: String}
   }
 );
 

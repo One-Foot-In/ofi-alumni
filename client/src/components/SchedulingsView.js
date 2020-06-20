@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
+import { Modal, Form, Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
 
@@ -137,6 +137,10 @@ export default class SchedulingsView extends Component {
                     <SchedulingCards 
                         activeSet={this.state.activeItem}
                         schedulings={this.state.completed}
+                        liftSchedulings={this.handleStatusUpdate}
+                        timeOffset={this.state.timeOffset}
+                        userId={this.props.userDetails._id}
+                        userRole={this.props.role}
                     />
                 </div>
             }
@@ -164,7 +168,10 @@ export default class SchedulingsView extends Component {
 class SchedulingCards extends Component {
     state={
         schedulings: [],
-        display: []
+        display: [],
+        schedulingDetails: [],
+        feedback: '',
+        showFeedbackModal: false
     }
     // This allows the component to update its state should a prop value change
     async componentWillReceiveProps({schedulings}) {
@@ -197,7 +204,15 @@ class SchedulingCards extends Component {
                             <Card.Meta>{scheduling.status}</Card.Meta>
                             <Card.Description>Topic: {scheduling.topic}</Card.Description>
                             <Card.Description>Time: {scheduling.time[0].day} from {timeSlotOptions[scheduling.time[0].time/100]}</Card.Description>
-                            <Card.Description>Your Note: {scheduling.note}</Card.Description>
+                            {scheduling.note &&
+                                <Card.Description>Your Note: {scheduling.note}</Card.Description>
+                            }
+                            {scheduling.finalNote &&
+                                <Card.Description>Final note from mentor: {scheduling.finalNote}</Card.Description>
+                            }
+                            {scheduling.feedback &&
+                                <Card.Description>Feedback for mentor: {scheduling.feedback}</Card.Description>
+                            }
                             <br />
                         </Card.Content>
                             {this.buttonDisplay(scheduling)}
@@ -224,23 +239,15 @@ class SchedulingCards extends Component {
         } else if (this.props.activeSet === 'confirmed') {
             return(
                 <>
-                <Button 
-                    color='blue' 
-                    as='a'
-                    href={scheduling.zoomLink} 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Join Call
-                </Button>
                 <Button.Group compact>
                     <Button 
-                        positive
-                        requestid={scheduling._id}
-                        newstatus={'Completed'}
-                        onClick={this.handleClick.bind(this)}
+                        color='blue' 
+                        as='a'
+                        href={scheduling.zoomLink} 
+                        target="_blank"
+                        rel="noopener noreferrer"
                     >
-                        Mark Completed!
+                        Join Call
                     </Button>
                     <Button
                         negative
@@ -252,6 +259,16 @@ class SchedulingCards extends Component {
                     </Button>
                 </Button.Group>
                 </>
+            )
+        } else if (this.props.activeSet === 'completed') {
+            return(
+                <Button
+                    secondary
+                    requestId={scheduling._id}
+                    onClick={this.toggleFeedbackModal.bind(this)}
+                >
+                    Provide feedback!
+                </Button>
             )
         }
     }
@@ -278,6 +295,35 @@ class SchedulingCards extends Component {
         }
     }
 
+    toggleFeedbackModal(e) {
+        let schedulingDetails = this.props.schedulings.find(request => request._id === e.currentTarget.getAttribute('requestid'))
+        let feedback = null
+        if (schedulingDetails) {
+            feedback = schedulingDetails.feedback
+        }
+        this.setState({
+            showFeedbackModal: !this.state.showFeedbackModal,
+            schedulingDetails: schedulingDetails,
+            feedback: feedback
+        })
+    }
+
+    async submitFinalNote(e) {
+        let requests = await makeCall({
+            requestId: this.state.schedulingDetails._id,
+            feedback: this.state.feedback
+        }, `/request/leaveFeedback/${this.props.userId}/${this.props.userRole}/${this.props.timeOffset}`, 'patch')
+        this.setState({showFeedbackModal: !this.state.showFeedbackModal})
+        this.props.liftSchedulings(requests)
+    }
+
+    handleValueChange(e, {name, value}) {
+        e.preventDefault();
+        this.setState({
+            [name]: value
+        })
+    }
+
     constructDisplay(schedulings) {
         let display = []
         for (let scheduling of schedulings) {
@@ -289,6 +335,44 @@ class SchedulingCards extends Component {
     render() {
         return(
             <>
+            {this.state.showFeedbackModal && 
+                <Modal open={this.state.showFeedbackModal}>
+                    <Modal.Header>Provide feedback for {this.state.schedulingDetails.mentor.name}</Modal.Header>
+                    <Modal.Content>
+                    <Grid stackable>
+                        <Grid.Row columns={"equal"}>
+                            <Grid.Column width={4}>
+                                <Image
+                                    floated='left'
+                                    size='small'
+                                    src={this.state.schedulingDetails.mentor.imageURL}
+                                    rounded
+                                />
+                            </Grid.Column>
+                            <Grid.Column>
+                                <Form>
+                                    <Form.TextArea 
+                                        label={'Leave a note for ' + this.state.schedulingDetails.mentor.name + ':'}
+                                        placeholder="How was your mentor able to help you? Is there something the mentor could do to be more helpful?"
+                                        onChange={this.handleValueChange.bind(this)}
+                                        value={this.state.feedback}
+                                        name='feedback'
+                                    />
+                                </Form>
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={this.toggleFeedbackModal.bind(this)}>
+                            Done
+                        </Button>
+                        <Button onClick={this.submitFinalNote.bind(this)} primary>
+                            Submit
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
+            }
             {this.state.display}
             </>
         )

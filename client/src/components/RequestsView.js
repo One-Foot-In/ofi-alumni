@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
+import { Form, Modal, Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
 
@@ -146,6 +146,9 @@ export default class RequestsView extends Component {
             {this.state.activeItem === 'completed' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
                     <RequestCards 
+                        liftRequests={this.handleStatusUpdate}
+                        userId={this.props.userDetails._id}
+                        timeOffset={this.state.timeOffset}
                         activeSet={this.state.activeItem}
                         requests={this.state.completed}
                     />
@@ -176,7 +179,10 @@ export default class RequestsView extends Component {
 class RequestCards extends Component {
     state={
         requests: [],
-        display: []
+        display: [],
+        showFeedbackModal: false,
+        requestDetails: null,
+        finalNote: ''
     }
     // This allows the component to update its state should a prop value change
     async componentWillReceiveProps({requests}) {
@@ -209,7 +215,15 @@ class RequestCards extends Component {
                             <Card.Meta>{request.status}</Card.Meta>
                             <Card.Description>Topic: {request.topic}</Card.Description>
                             <Card.Description>Time: {request.time[0].day} from {timeSlotOptions[request.time[0].time/100]}</Card.Description>
-                            <Card.Description>Note from requester: {request.note}</Card.Description>
+                            { request.note &&
+                                <Card.Description>Note from requester: {request.note}</Card.Description>
+                            }
+                            { request.finalNote &&
+                                <Card.Description>Final note from mentor: {request.finalNote}</Card.Description>
+                            }
+                            { request.feedback &&
+                                <Card.Description>Feedback for mentor: {request.feedback}</Card.Description>
+                            }
                             <br />
                         </Card.Content>
                         {this.buttonDisplay(request)}
@@ -266,6 +280,16 @@ class RequestCards extends Component {
                     </Button>
                 </Button.Group>
             )
+        } else if (this.props.activeSet === 'completed') {
+            return(
+                <Button
+                    secondary
+                    requestId={request._id}
+                    onClick={this.toggleFeedbackModal.bind(this)}
+                >
+                    Leave a note!
+                </Button>
+            )
         }
     }
 
@@ -291,6 +315,35 @@ class RequestCards extends Component {
         }
     }
 
+    toggleFeedbackModal(e) {
+        let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
+        let finalNote = null
+        if (requestDetails) {
+            finalNote = requestDetails.finalNote
+        }
+        this.setState({
+            showFeedbackModal: !this.state.showFeedbackModal,
+            requestDetails: requestDetails,
+            finalNote: finalNote
+        })
+    }
+
+    async submitFinalNote(e) {
+        let requests = await makeCall({
+            requestId: this.state.requestDetails._id,
+            finalNote: this.state.finalNote
+        }, `/request/leaveFinalNote/${this.props.userId}/${this.props.timeOffset}`, 'patch')
+        this.setState({showFeedbackModal: !this.state.showFeedbackModal})
+        this.props.liftRequests(requests)
+    }
+
+    handleValueChange(e, {name, value}) {
+        e.preventDefault();
+        this.setState({
+            [name]: value
+        })
+    }
+
     constructDisplay(requests) {
         let display = []
         for (let request of requests) {
@@ -302,6 +355,44 @@ class RequestCards extends Component {
     render() {
         return(
             <>
+            {this.state.showFeedbackModal && 
+                <Modal open={this.state.showFeedbackModal}>
+                    <Modal.Header>Leave a final note for {this.state.requestDetails.requesterObj.name}</Modal.Header>
+                    <Modal.Content>
+                    <Grid stackable>
+                        <Grid.Row columns={"equal"}>
+                            <Grid.Column width={4}>
+                                <Image
+                                    floated='left'
+                                    size='small'
+                                    src={this.state.requestDetails.requesterObj.imageURL}
+                                    rounded
+                                />
+                            </Grid.Column>
+                            <Grid.Column>
+                                <Form>
+                                    <Form.TextArea 
+                                        label={'Leave a note for ' + this.state.requestDetails.requesterObj.name + ':'}
+                                        placeholder='Provide a recap or leave any other useful notes here!'
+                                        onChange={this.handleValueChange.bind(this)}
+                                        value={this.state.finalNote}
+                                        name='finalNote'
+                                    />
+                                </Form>
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={this.toggleFeedbackModal.bind(this)}>
+                            Done
+                        </Button>
+                        <Button onClick={this.submitFinalNote.bind(this)} primary>
+                            Submit
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
+            }
             {this.state.display}
             </>
         )
