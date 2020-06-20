@@ -17,7 +17,7 @@ require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
 
-async function generateNewAndExistingInterests(existingInterests, newInterests) {
+const generateNewAndExistingInterests = async (existingInterests, newInterests) => {
     const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
     let existingInterestsRecords = await interestsSchema.find().where('_id').in(existingInterestsIds).exec()
     // create interests added
@@ -31,13 +31,16 @@ async function generateNewAndExistingInterests(existingInterests, newInterests) 
                 })
                 await newInterestCreated.save()
                 existingInterestsRecords.push(newInterestCreated)
+            } else {
+                // user accidentally added an interest that already exists as a new interest
+                existingInterestsRecords.push(interestExists[0])
             }
         }
     }
     return existingInterestsRecords
 }
 
-function getUniqueInterests(allInterests) {
+const getUniqueInterests = (allInterests) => {
     let allUniqueNames = new Set()
     let uniqueInterests = []
     for (let i = 0; i < allInterests.length; i++) {
@@ -239,6 +242,12 @@ router.patch('/topicPreferences/:id', passport.authenticate('jwt', {session: fal
         const alumni = await alumniSchema.findOne({_id: req.params.id})
         alumni.topics = req.body.topicPreferences
         await alumni.save()
+        const news_instance = new newsSchema({
+            event: 'New Topics',
+            alumni: [alumni._id],
+            school: alumni.school,
+        })
+        await news_instance.save()
         res.status(200).send({message: "Successfully updated alumni's topic preferences"})
     } catch (e) {
         console.log("Error: alumni#topicPreferences", e);
@@ -364,3 +373,5 @@ router.patch('/location/update/:id', passport.authenticate('jwt', {session: fals
 })
 
 module.exports = router;
+module.exports.generateNewAndExistingInterests = generateNewAndExistingInterests
+module.exports.getUniqueInterests = getUniqueInterests

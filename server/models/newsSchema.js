@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const newsSchema = new Schema(
     { 
-        event: {type: String, enum: [ 'New Alumni', 'New Student', 'Confirmed Meeting' ] }, 
+        event: {type: String, enum: [ 'New Alumni', 'New Student', 'Confirmed Meeting', 'New Topics' ] }, 
         alumni: [{type: Schema.Types.ObjectId, ref: 'Alumni'}], 
         students: [{type: Schema.Types.ObjectId, ref: 'Student'}], 
         school: {type: Schema.Types.ObjectId, ref: 'School'},
