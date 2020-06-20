@@ -37,7 +37,7 @@ const sendAlumniVerificationEmail = async (to, token, schoolName) => {
     )
   )
   // console.log("Sending email with", emailObject)
-  // await sg.send(emailObject, true)
+  await sg.send(emailObject, true)
 }
 
 const sendStudentVerificationEmail = async (to, token, schoolName) => {
@@ -52,7 +52,7 @@ const sendStudentVerificationEmail = async (to, token, schoolName) => {
     )
   )
   // console.log("Sending email with", emailObject)
-  // await sg.send(emailObject, true)
+  await sg.send(emailObject, true)
 }
 
 const sendNewRequestEmail = async (to) => {
@@ -67,7 +67,7 @@ const sendNewRequestEmail = async (to) => {
     )
   )
   // console.log("Sending email with", emailObject)
-  // await sg.send(emailObject, true)
+  await sg.send(emailObject, true)
 }
 
 const sendRequestConfirmedEmail = async (menteeEmail, menteeName, menteeTime, mentorEmail, mentorName, mentorTime, topic) => {
@@ -92,8 +92,8 @@ const sendRequestConfirmedEmail = async (menteeEmail, menteeName, menteeTime, me
     )
   )
   // console.log("Sending email with", emailObject)
-  //await sg.send(emailObjectForMentee, true)
-  //await sg.send(emailObjectForMentor, true)
+  await sg.send(emailObjectForMentee, true)
+  await sg.send(emailObjectForMentor, true)
 }
 
 exports.sendTestEmail = sendTestEmail
