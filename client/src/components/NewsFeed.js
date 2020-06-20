@@ -47,6 +47,10 @@ export default class NewsFeed extends Component {
                     display.push(<Divider key={i}/>)
                     display.push(this.createNewStudentPost(feedItem))
                     break;
+                case 'Confirmed Meeting':
+                    display.push(<Divider key={i}/>)
+                    display.push(this.createCallConfirmedPost(feedItem))
+                    break;
                 case 'New Topics':
                     display.push(<Divider key={i}/>)
                     display.push(this.createNewTopicsPost(feedItem))
@@ -133,6 +137,72 @@ export default class NewsFeed extends Component {
         )
     }
 
+    /*
+     * EVENT: 'Call Confirmed'
+     * Display to: 'BOTH' or 'ALUMNI'
+     * Contains: Either 2 entries in alumni or 1 entry in alumni and 1 entry in students,
+     * supportData.topic,
+     * grade(if there is an entry in students),
+     * time (stored as string) ONLY
+     * On Click: Opens student/alumni profile modal 
+     */ 
+    createCallConfirmedPost(feedItem) {
+        try {
+            let mentorDetails
+            let menteeDetails
+            let alumniRequestingAlumni = !feedItem.students.length
+            if (alumniRequestingAlumni) {
+                // mentor is first entry in list
+                mentorDetails = feedItem.alumni[0]
+                menteeDetails = feedItem.alumni[1]
+            } else {
+                menteeDetails = feedItem.students[0]
+                mentorDetails = feedItem.alumni[0]
+            }
+            return(
+                <Feed.Event key={feedItem._id}>
+                    <Feed.Label>
+                        <Image src={mentorDetails.imageURL} />
+                    </Feed.Label>
+                    <Feed.Label>
+                        <Image src={menteeDetails.imageURL} />
+                    </Feed.Label>
+                    <Feed.Content>
+                        <Feed.Summary>
+                            <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
+                                <Feed.User>{mentorDetails.name} (Alumni)</Feed.User>
+                            }>
+                                <Header>
+                                    Details for {mentorDetails.name}
+                                </Header>
+                                <Modal.Content>
+                                    <AlumniProfile details={mentorDetails} isViewOnly={true} />
+                                </Modal.Content>
+                            </Modal>
+                            {` confirmed a call with `}
+                            <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
+                                <Feed.User>{menteeDetails.name} {alumniRequestingAlumni ? `(Alumni)` : `(Student)`}</Feed.User>
+                            }>
+                                <Header>
+                                    Details for {menteeDetails.name}
+                                </Header>
+                                <Modal.Content>
+                                    {
+                                        alumniRequestingAlumni ? 
+                                        <AlumniProfile details={menteeDetails} isViewOnly={true} /> :
+                                        <StudentProfile details={menteeDetails} isViewOnly={true} />
+                                    }
+                                </Modal.Content>
+                            </Modal> to discuss {feedItem.supportData && feedItem.supportData.topic}
+                                <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
+                        </Feed.Summary>
+                    </Feed.Content>
+                </Feed.Event>
+            )
+        } catch (e) {
+            console.log("Error: NewsFeed#createCallConfirmedPost", e)
+        }
+    }
     /*
      * EVENT: 'New Topics'
      * Display to: 'BOTH'

@@ -58,6 +58,7 @@ const timezoneUtil = {
     stripTimezone: (timeSlots, timezone) => {
         if (timezone === 0) {
             timeSlots.map( timeSlot => {
+                timeSlot.id = `${timeSlot.day}-${(timeSlot.time).toString()}`
                 delete timeSlot.text
                 return timeSlot
             })
@@ -86,6 +87,7 @@ const timezoneUtil = {
     applyTimezone: (timeSlots, timezone) => {
         if (timezone === 0) {
             timeSlots.map( timeSlot => {
+                timeSlot.id = `${timeSlot.day}-${(timeSlot.time).toString()}`
                 delete timeSlot.text
                 return timeSlot
             })

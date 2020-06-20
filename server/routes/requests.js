@@ -4,6 +4,7 @@ var router = express.Router();
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
+var newsSchema = require('../models/newsSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendNewRequestEmail = require('../routes/helpers/emailHelpers').sendNewRequestEmail
 var sendRequestConfirmedEmail = require('../routes/helpers/emailHelpers').sendRequestConfirmedEmail
@@ -104,6 +105,34 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
             timezoneHelpers.stripTimezone(request.time, mentee.timeZone)
             let mentorTime = timezoneHelpers.applyTimezone(request.time, mentor.timeZone)
             let mentorTimeString = `${mentorTime[0].day} ${timezoneHelpers.getSlot(mentorTime[0].time)}`
+            let studentsSubscribed = [], alumniSubscribed = []
+            let grade = null
+            let role = null
+            if (request.requesterRole === 'STUDENT') {
+                alumniSubscribed = [mentor._id]
+                studentsSubscribed = [mentee._id]
+                grade = mentee.grade
+                role = 'BOTH'
+            } else {
+                // mentor is first entry in list
+                alumniSubscribed = [mentor._id, mentee._id]
+                role = 'ALUMNI'
+            }
+            let news_instance = new newsSchema({
+                event: 'Confirmed Meeting',
+                alumni: alumniSubscribed,
+                students: studentsSubscribed,
+                // it will be possible to make requests in OFI CORE across school networks
+                // we will need to make school an array to accommodate that case
+                school: mentor.school,
+                role: role,
+                grade: grade,
+                supportData: {
+                    topic: request.topic
+                }
+            })
+            await news_instance.save();
+
             await sendRequestConfirmedEmail(
                 mentee.email,
                 mentee.name, 
