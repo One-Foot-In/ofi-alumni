@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { connect } from 'react-redux';
-import { Container, Segment, Message , Button} from 'semantic-ui-react';
-import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom'
+import { Container, Segment, Message , Button, Grid} from 'semantic-ui-react';
+import { Route, BrowserRouter as Router, Switch, Redirect, Link } from 'react-router-dom'
 import Header from './components/Header';
 import LoginForm from './components/LoginForm';
 import AlumniDirectory from './components/AlumniDirectory'
-import Register from './screens/Register';
 import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
 import AlumniProfile from './components/AlumniProfile'
@@ -16,24 +15,12 @@ import StudentVerification from './components/StudentVerification'
 import RequestsView from './components/RequestsView'
 import SchedulingsView from './components/SchedulingsView'
 import NewsFeed from './components/NewsFeed'
+import Signup from './components/Signup';
 
 import * as actions from './redux/actions'
-// TODO: for demo only, remove for release
-import SearchablePooledMultiSelectDropdown from './components/SearchablePooledMultiSelectDropdown';
-import SearchablePooledSingleSelectDropdown from './components/SearchablePooledSingleSelectDropdown';
 
-export const SCHOOL_NAME = process.env.REACT_APP_SCHOOL_NAME || 'Template'
-const isDevMode = () => {
-  return !!process.env.REACT_APP_DEV_MODE
-} 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
-
-export const PATHS = {
-  root: "/",
-  login: "/login",
-  register: "/register",
-}
 
 /*
   STORE SETUP
@@ -53,34 +40,52 @@ const mapDispatchToProps = dispatch => ({
   increment: num => dispatch(actions.increment(num))
 })
 
+let registerButtonGroup = (props) =>
+    <Grid centered >
+        <Grid.Row>
+            <Message
+                content="Are you a student or an alumni?"
+            />
+        </Grid.Row>
+        <Grid.Row>
+            <Button.Group size='massive'>
+                <Link to={`register/student`}>
+                    <Button 
+                        color='yellow'
+                    >
+                      Student
+                    </Button>
+                </Link>
+                <Button.Or />
+                <Link to={`register/alumni`}>
+                    <Button
+                        color='orange'
+                    >
+                      Alumni
+                    </Button>
+                </Link>
+            </Button.Group>
+        </Grid.Row>
+        <Grid.Row>
+            <Button centered style={{
+                'position': 'relative',
+                'bottom': '0',
+                'margin': '200px 0 100px 0'
+            }} 
+            onClick={
+                (e) => {
+                    e.preventDefault(); props.history.goBack()
+                    }
+                }
+            >
+                Back
+            </Button>
+        </Grid.Row>
+    </Grid>
+
 /*
   STORE SETUP
 */
-
-// TODO extract Routes into this higher-order component
-// function withLoginCheck(RouterComponent, isLoggedIn, navItems, routePath, activeItem) {
-//   return class extends React.Component {
-//     constructor(props) {
-//       super(props)
-//     }
-//     render() {
-//       return (
-//         <Route exact path={routePath} render={(props) => 
-//             isLoggedIn ? 
-//             <>
-//                 <Navbar
-//                     navItems={navItems}
-//                     activeItem={activeItem}
-//                 />
-//                 <RouterComponent {...this.props} />
-//             </> :
-//             <Redirect to={'/login'} />
-//           }
-//         />
-//       )
-//     }
-//   }
-// }
 
 var alumniNavBarItems = (approved) => {
   let navBarItems = [
@@ -115,13 +120,6 @@ var alumniNavBarItems = (approved) => {
         id: 'verification',
         name: 'Verify Alumni',
         navLink: '/verify'
-    })
-  }
-  if (isDevMode()) {
-    navBarItems.push({
-      id: 'playground',
-      name: 'Playground (DEV MODE only)',
-      navLink: '/playground'
     })
   }
   return navBarItems;
@@ -169,9 +167,7 @@ class App extends Component {
       approved: false,
       role: null,
       schoolId: '',
-      userDetails: {},
-      // TODO: for demo only, remove for release
-      pooledDropdownValueLifted: null
+      userDetails: {}
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
@@ -179,8 +175,6 @@ class App extends Component {
     this.renderScreens = this.renderScreens.bind(this);
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
     this.refreshProfile = this.refreshProfile.bind(this);
-    // TODO: for demo only, remove for release
-    this.getInputs = this.getInputs.bind(this);
   }
 
   async componentWillMount() {
@@ -260,15 +254,6 @@ class App extends Component {
       window.location.reload()
   }
 
-  // TODO: for demo only, remove for release
-  getInputs(inputs) {
-    this.setState({
-      pooledDropdownValueLifted: inputs
-    }, () => {
-      console.log("dropdown value extracted is", this.state.pooledDropdownValueLifted)
-    })
-  }
-
   renderLoggedInRoutes(role) {
     switch (role) {
       case ALUMNI:
@@ -284,7 +269,6 @@ class App extends Component {
                           navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'home'}
                       />
-                      <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
                       <NewsFeed
                         userDetails={this.state.userDetails}
                         userRole={role}
@@ -389,37 +373,6 @@ class App extends Component {
               }
           />
           }
-          <Route exact path={`/playground`} render={(props) => 
-              <>
-                <Navbar
-                    userDetails={this.state.userDetails}
-                    navItems={alumniNavBarItems(this.state.approved)}
-                    activeItem={'playground'}
-                />
-                <Button
-                  primary
-                  onClick={(e) => this.props.increment(1)}
-                >
-                  Click to increase counter
-                </Button>
-                <Segment>
-                  Count in store is {this.props.count ? this.props.count : 0}
-                </Segment>
-                <SearchablePooledMultiSelectDropdown
-                  endpoint={'/drop/jobTitles'}
-                  getInputs={this.getInputs}
-                  dataType={'Colleges'}
-                  allowAdditions={true}
-                />
-                <SearchablePooledSingleSelectDropdown
-                  endpoint={'/drop/jobTitles'}
-                  getInput={this.getInputs}
-                  dataType={'Colleges'}
-                  allowAddition={true}
-                />
-              </>
-            }
-          />
           </>
         )
       case STUDENT:
@@ -435,7 +388,6 @@ class App extends Component {
                           navItems={studentNavBarItems(this.state.userDetails.isModerator)}
                           activeItem={'home'}
                       />
-                      <div> Home! Welcome {this.state.userDetails && this.state.userDetails.name} ({this.state.role})</div>
                       <NewsFeed
                         userDetails={this.state.userDetails}
                         userRole={role}
@@ -529,7 +481,6 @@ class App extends Component {
                     navItems={studentNavBarItems(this.state.userDetails.isModerator)}
                     activeItem={'home'}
                 />
-                <div> Home! Welcome!</div>
             </> :
             <Redirect to={"/login"}/>
             }
@@ -541,11 +492,29 @@ class App extends Component {
   renderScreens(role) {
     return (
         <Switch>
-          <Route exact path={PATHS.register} render={(props) => 
-              <Register match={props.match}/>
-            }
+          <Route exact path={'/register'} render={
+              (props) =>
+              <>
+                  {registerButtonGroup(props)}
+              </>
+          }/>
+          <Route exact path={`/register/alumni`} render={
+              (props) => 
+                  <Signup
+                      isAlumni={true}
+                      match={props}
+                  />
+              }
           />
-          <Route exact path={PATHS.login} render={(props) => 
+          <Route exact path={`/register/student`} render={
+              (props) => 
+                  <Signup
+                      isAlumni={false}
+                      match={props}
+                  />
+              }
+          />
+          <Route exact path={"/login"} render={(props) => 
               <LoginForm
                 isLoggedIn={this.state.loggedIn}
                 liftPayload={this.liftPayload}
