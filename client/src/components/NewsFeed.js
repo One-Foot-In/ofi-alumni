@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Segment, Feed, Image, Header, Icon, Divider, Modal, Grid} from 'semantic-ui-react'
+import { Placeholder, Segment, Feed, Image, Header, Icon, Divider, Modal, Grid} from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import AlumniProfile from './AlumniProfile';
 import StudentProfile from './StudentProfile';
@@ -253,6 +253,20 @@ export default class NewsFeed extends Component {
                     <Header.Content>Recent News</Header.Content>
                 </Header>
                 <Feed>
+                    {
+                        !this.state.display.length &&
+                        <>
+                        <Divider/>
+                        <Placeholder fluid>
+                            <Placeholder.Header image>
+                            <Placeholder.Line />
+                            <Placeholder.Line />
+                            </Placeholder.Header>
+                        </Placeholder>
+                        <Header as='h3'>No recent news</Header>
+                        <p>Check back later!</p>
+                        </>
+                    }
                     {this.state.display}
                 </Feed>
             </Segment>

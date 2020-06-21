@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Modal, Form, Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
+import { Header, Placeholder, Modal, Form, Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
 
@@ -264,7 +264,7 @@ class SchedulingCards extends Component {
             return(
                 <Button
                     color='teal'
-                    requestId={scheduling._id}
+                    requestid={scheduling._id}
                     onClick={this.toggleFeedbackModal.bind(this)}
                 >
                     Provide feedback!
@@ -372,6 +372,32 @@ class SchedulingCards extends Component {
                         </Button>
                     </Modal.Actions>
                 </Modal>
+            }
+            {!this.state.display.length &&
+                <>
+                <Header as='h2'>No {this.props.activeSet} meetings!</Header>
+                {
+                    this.props.activeSet === 'unconfirmed' &&
+                    <p>Make new schedulings in the alumni directory!</p>
+                }
+                {
+                    this.props.activeSet === 'confirmed' &&
+                    <p>Check back later!</p>
+                }
+                <br />
+                <Placeholder fluid>
+                    <Placeholder.Header image>
+                    <Placeholder.Line />
+                    <Placeholder.Line />
+                    </Placeholder.Header>
+                    <Placeholder.Paragraph>
+                    <Placeholder.Line />
+                    <Placeholder.Line />
+                    <Placeholder.Line />
+                    <Placeholder.Line />
+                    </Placeholder.Paragraph>
+                </Placeholder>
+                </>
             }
             {this.state.display}
             </>
