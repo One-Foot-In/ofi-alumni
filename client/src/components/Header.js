@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
-import {Grid, Button, Modal, Form, Image} from 'semantic-ui-react';
+import {Grid, Button, Modal, Form, Image, Label} from 'semantic-ui-react';
 import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
+
+function getErrorLabel(content) {
+    return (
+        <Label pointing='below' style={{'backgroundColor': '#F6C7BD'}}> {content} </Label>
+    )
+}
 
 /*
 props:
@@ -19,13 +25,33 @@ export default class Header extends Component {
             password: '',
             confirmPassword: '',
             sendingPasswordRequest: false,
-            modalOpen: false
+            modalOpen: false,
+            passwordsMatching: true
         }
         this.renderLoginStateInfo = this.renderLoginStateInfo.bind(this);
         this.sendNewPasswordRequest = this.sendNewPasswordRequest.bind(this);
         this.openPasswordModal = this.openPasswordModal.bind(this);
         this.closePasswordModal = this.closePasswordModal.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handlePasswordChange = this.handlePasswordChange.bind(this);
+        this.comparePasswords = this.comparePasswords.bind(this);
+    }
+
+    comparePasswords() {
+        this.setState({
+            passwordsMatching: this.state.password === this.state.confirmPassword
+        })
+    }
+
+    handlePasswordChange(e) {
+        e.preventDefault();
+        let change = {}
+        change[e.target.name] = e.target.value
+        this.setState(
+            change, () => {
+            this.comparePasswords()
+            }
+        )
     }
 
     handleChange(e) {
@@ -52,24 +78,12 @@ export default class Header extends Component {
 
     async sendNewPasswordRequest(e) {
         e.preventDefault();
-        if (this.state.password !== this.state.confirmPassword) {
-            this.setState({
-                sendingPasswordRequest: false
-            }, () => {
-                swal({
-                    title: "Error!",
-                    text: `Your passwords do not match, please try again!`,
-                    icon: "error",
-                });
-            }); 
-            return;
-        }
         const payload = {
-            password: this.state.password,
+            newPassword: this.state.password,
             email: this.props.email
         }
         try {
-            const result = await makeCall(payload, '/changePassword', 'post');
+            const result = await makeCall(payload, '/password/change', 'post');
             if (!result || result.error) {
                 this.setState({
                     sendingPasswordRequest: false
@@ -84,7 +98,8 @@ export default class Header extends Component {
                 this.setState({
                     sendingPasswordRequest: false,
                     password: '',
-                    confirmPassword: ''
+                    confirmPassword: '',
+                    modalOpen: false
                 }, () => {
                     swal({
                         title: "Success!",
@@ -109,12 +124,14 @@ export default class Header extends Component {
                 <Modal.Content>
                     <Form onSubmit={this.sendNewPasswordRequest}>
                         <Form.Field>
+                            {!this.state.passwordsMatching ? getErrorLabel('Your passwords do not match!') : null}
                             <label>New password</label>
-                            <input type="password" placeholder='***' name="password" onChange={this.handleChange} value={this.state.password} />
+                            <input type="password" placeholder='***' name="password" onChange={this.handlePasswordChange} value={this.state.password} />
                         </Form.Field>
                         <Form.Field>
+                            {!this.state.passwordsMatching ? getErrorLabel('Your passwords do not match!') : null}
                             <label>Confirm your new password</label>
-                            <input type="password" placeholder='***' name="confirmPassword" onChange={this.handleChange} value={this.state.confirmPassword} />
+                            <input type="password" placeholder='***' name="confirmPassword" onChange={this.handlePasswordChange} value={this.state.confirmPassword} />
                         </Form.Field>
                         <Button 
                             color="blue" 
