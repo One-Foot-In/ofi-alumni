@@ -164,6 +164,38 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
     }
 })
 
+router.patch('/leaveFinalNote/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req,res, next) => {
+    let alumniId = req.params.id;
+    let timeOffset = req.params.timeOffset;
+    let requestId = req.body.requestId;
+    let finalNote = req.body.finalNote;
+    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
+    let requests = []
+    try {
+        let request = await requestSchema.findById(requestId);
+        request.finalNote = finalNote
+        await request.save()
+        for (let status of conditions) {
+            const dbData = await requestSchema.find({mentor: alumniId, status: status})
+            for (let request of dbData) {
+                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
+                if (request.requesterRole === 'STUDENT') {
+                    request.requesterObj = await studentSchema.findOne({_id: request.requester})
+                } else {
+                    request.requesterObj = await alumniSchema.findOne({_id: request.requester})
+                }
+            }
+            requests.push(dbData)
+        }
+        res.json({'requests' : requests});
+    } catch (e) {
+        console.log('/request/leaveFinalNote Error: ' + e)
+        res.status(500).send({
+            message: 'Failed to add final note: ' + e
+        })
+    }
+})
+
 router.get('/getRequests/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let alumniId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset)
@@ -233,7 +265,7 @@ router.patch('/updateScheduling/:id/:role/:timeOffset', passport.authenticate('j
                     status: status
                 }).populate('mentor')
             for (let request of dbData) {
-                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
             }
             schedulings.push(dbData)
         }
@@ -243,6 +275,37 @@ router.patch('/updateScheduling/:id/:role/:timeOffset', passport.authenticate('j
         res.status(500).send({message: 'updateScheduling error: ' + e})
     }
 })
+
+router.patch('/leaveFeedback/:id/:role/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    let requesterId = req.params.id;
+    let requesterRole = req.params.role;
+    let timeOffset = parseInt(req.params.timeOffset);
+    let requestId = req.body.requestId;
+    let feedback = req.body.feedback;
+    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
+    let schedulings = []
+    try {
+        let updatedScheduling = await requestSchema.findById(requestId)
+        updatedScheduling.feedback = feedback
+        await updatedScheduling.save()
+        for (let status of conditions) {
+            const dbData = await requestSchema.find({
+                    requester: requesterId,
+                    requesterRole: requesterRole,
+                    status: status
+                }).populate('mentor')
+            for (let request of dbData) {
+                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+            }
+            schedulings.push(dbData)
+        }
+        res.json({'schedulings' : schedulings});
+    } catch (e) {
+        console.log('leaveFeedback error: ' + e)
+        res.status(500).send({message: 'leaveFeedback error: ' + e})
+    }
+})
+
 
 router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let alumniId = req.params.id;
