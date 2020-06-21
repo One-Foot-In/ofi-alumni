@@ -254,7 +254,7 @@ export default class NewsFeed extends Component {
                 </Header>
                 <Feed>
                     {
-                        this.state.display.length &&
+                        !this.state.display.length &&
                         <>
                         <Divider/>
                         <Message info>
