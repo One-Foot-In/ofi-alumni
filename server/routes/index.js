@@ -4,13 +4,14 @@ var passport = require("passport");
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var crypto = require('crypto-random-string');
-var sendEmail = require('./helpers/emailHelpers').sendEmail
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var userSchema = require('../models/userSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
 require('dotenv').config();
+var sendPasswordChangeEmail = require('./helpers/emailHelpers').sendPasswordChangeEmail
+var sendTemporaryPasswordEmail = require('./helpers/emailHelpers').sendTemporaryPasswordEmail
 
 const APP_LINK = process.env.APP || 'http://localhost:3000/'
 
@@ -102,7 +103,7 @@ router.get('/verification/:email/:verificationToken', async (req, res, next) => 
     } else {
       res.status(500).send({message: 'Your token could not be verified!'})
     }
-  }catch(e){
+  } catch(e) {
     console.log("Error index.js#verification", e)
     res.status(500).json(e)
   }
@@ -110,28 +111,56 @@ router.get('/verification/:email/:verificationToken', async (req, res, next) => 
 });
 
 router.post('/password/change', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
-  const password = req.body.newPassword
-  const email = req.body.email
-  const passwordHash = await bcrypt.hash(password, HASH_COST);
-  try{
-    const dbData = await req.db.collection("User").updateOne({email: email},{$set:{passwordHash:passwordHash}});
-    res.json({Success:true})
-  }catch(e){
-    console.log("Error index.js#password/change")
-    res.status(500).json({Success:false, error: e})
+  try {
+    const password = req.body.newPassword
+    const email = req.body.email
+    const passwordHash = await bcrypt.hash(password, HASH_COST);
+    let user = await userSchema.findOne({email: email})
+    user.passwordHash = passwordHash
+    await user.save()
+    res.status(200).send({message: 'Successfully changed password!'})
+  } catch(e) {
+    console.log("Error index.js#password/change", e)
+    res.status(500).send({success:false, error: e})
   }
 });
 
-router.post('/password/forgot', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
-  const email = req.body.email
-  const newTempPass = crypto({length: 16});
-  try{
-    const dbData = await req.db.collection("User").updateOne({email: email},{$set:{passwordHash:newTempPass}});
-    await sendEmail(email,'noreply@school.edu','Your Password Was Reset','Email Body',newTempPass)
-    res.json({Success:true})
-  }catch(e){
-    console.log("Error index.js#password/forgot")
-    res.status(500).json({Success:false, error: e})
+router.post('/password/forgot', async (req, res, next) => {
+  try {
+    let email = req.body.email
+    let user = await userSchema.findOne({email: email})
+    let passwordChangeToken = crypto({length: 16})
+    user.passwordChangeToken = passwordChangeToken;
+    await user.save()
+    await sendPasswordChangeEmail(email, passwordChangeToken)
+    res.status(200).send({message: 'We have sent you an email with further instructions!'})
+  } catch (e) {
+    console.log("Error index.js#password/change", e)
+    res.status(500).json(e)
+  }
+});
+
+router.get('/tempPassword/:to/:token', async (req, res, next) => {
+  try {
+    let email = req.params.to
+    let passwordChangeToken = req.params.token
+    var user = await userSchema.findOne({'email': email});
+    if (!user) {
+      res.status(404).send({message: 'Could not find a user with given email!'})
+    }
+    if (passwordChangeToken === user.passwordChangeToken) {
+      let newTempPass = crypto({length: 10})
+    let passwordHash = await bcrypt.hash(newTempPass, HASH_COST)
+      user.passwordHash = passwordHash
+      await user.save()
+      await sendTemporaryPasswordEmail(email, newTempPass)
+      res.status(200).send(htmlBuilder('Thanks!', 'Thank you for verifying your request for a password change! We will send you an email with a temporary password shortly.', 'Go To App', APP_LINK))
+    } else {
+      res.status(500).send(htmlBuilder('Whoops!', 'Your password change token could not be verified. Please contact support at onefootincollege@gmail.com', 'Go To App', APP_LINK))
+    }
+  } catch(e) {
+    console.log("Error index.js#tempPassword", e)
+    res.status(500).json(e)
   }
 });
 
