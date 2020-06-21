@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Header, Placeholder, Modal, Form, Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
+import { Modal, Form, Menu, Label, Card, Grid, Image, Button, Message } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
 
@@ -374,30 +374,17 @@ class SchedulingCards extends Component {
                 </Modal>
             }
             {!this.state.display.length &&
-                <>
-                <Header as='h2'>No {this.props.activeSet} meetings!</Header>
+                <Message info>
+                <Message.Header>No {this.props.activeSet} meetings!</Message.Header>
                 {
                     this.props.activeSet === 'unconfirmed' &&
-                    <p>Make new schedulings in the alumni directory!</p>
+                    <Message.Content>Make new schedulings in the alumni directory!</Message.Content>
                 }
                 {
                     this.props.activeSet === 'confirmed' &&
-                    <p>Check back later!</p>
+                    <Message.Content>Check back later!</Message.Content>
                 }
-                <br />
-                <Placeholder fluid>
-                    <Placeholder.Header image>
-                    <Placeholder.Line />
-                    <Placeholder.Line />
-                    </Placeholder.Header>
-                    <Placeholder.Paragraph>
-                    <Placeholder.Line />
-                    <Placeholder.Line />
-                    <Placeholder.Line />
-                    <Placeholder.Line />
-                    </Placeholder.Paragraph>
-                </Placeholder>
-                </>
+                </Message>
             }
             {this.state.display}
             </>
