@@ -1,6 +1,6 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Icon, Message, Grid, Modal } from 'semantic-ui-react';
+import { Form, Button, Icon, Message, Grid, Modal, Label } from 'semantic-ui-react';
 import { Redirect } from 'react-router-dom'
 import { makeCall } from "../apis";
 import swal from "sweetalert";
@@ -32,6 +32,12 @@ const mapDispatchToProps = dispatch => ({
 STORE SETUP
 */
 
+function getErrorLabel(content) {
+    return (
+        <Label pointing='below' style={{'backgroundColor': '#F6C7BD'}}> {content} </Label>
+    )
+}
+
 /*
 props:
 -isloggedIn
@@ -48,7 +54,8 @@ class LoginForm extends React.Component {
             error: null,
             loginLoading: false,
             modalOpen: false,
-            sendingPasswordRequest: false
+            sendingPasswordRequest: false,
+            passwordResetEmailValid: true
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -56,6 +63,8 @@ class LoginForm extends React.Component {
         this.openPasswordModal = this.openPasswordModal.bind(this);
         this.closePasswordModal = this.closePasswordModal.bind(this);
         this.sendPasswordRequest = this.sendPasswordRequest.bind(this);
+        this.validateEmail = this.validateEmail.bind(this);
+        this.handlePasswordResetEmailChange = this.handlePasswordResetEmailChange.bind(this)
     }
 
     async handleSubmit(e) {
@@ -113,13 +122,21 @@ class LoginForm extends React.Component {
         this.setState(change)
     }
 
+    handlePasswordResetEmailChange(e) {
+        e.preventDefault();
+        this.setState({
+            passwordResetEmail: e.target.value,
+            passwordResetEmailValid: this.validateEmail()
+        })
+    }
+
     async sendPasswordRequest(e) {
         e.preventDefault();
         const payload = {
             email: this.state.passwordResetEmail
         }
         try {
-            const result = await makeCall(payload, '/forgotPassword', 'post');
+            const result = await makeCall(payload, '/password/forgot', 'post');
             if (!result || result.error) {
                 this.setState({
                     sendingPasswordRequest: false
@@ -132,7 +149,9 @@ class LoginForm extends React.Component {
                 }); 
             } else {
                 this.setState({
-                    sendingPasswordRequest: false
+                    sendingPasswordRequest: false,
+                    modalOpen: false,
+                    passwordResetEmail: ''
                 }, () => {
                     swal({
                         title: "Success!",
@@ -144,6 +163,11 @@ class LoginForm extends React.Component {
         } catch (e) {
             console.log("Error: LoginForm#sendPasswordRequest", e);
         }
+    }
+
+    // Email regex borrowed from: https://www.w3resource.com/javascript/form/email-validation.php
+    validateEmail() {
+        return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.state.passwordResetEmail)) 
     }
 
     renderIncorrectCredentialsMessage() {
@@ -216,14 +240,15 @@ class LoginForm extends React.Component {
                                 <Form onSubmit={this.sendPasswordRequest}>
                                 <Form.Field
                                     type="text">
+                                        {!this.state.passwordResetEmailValid ? getErrorLabel('Please enter a valid email!') : null}
                                         <label>Email</label>
-                                        <input placeholder='Your email address...' name="passwordResetEmail" onChange={this.handleChange} value={this.state.passwordResetEmail} />
+                                        <input placeholder='Your email address...' name="passwordResetEmail" onChange={this.handlePasswordResetEmailChange} value={this.state.passwordResetEmail} />
                                     </Form.Field>
                                     <Button 
                                         color="blue" 
                                         type='submit'
                                         loading={this.state.sendingPasswordRequest}
-                                        disabled={!this.state.passwordResetEmail || this.state.sendingPasswordRequest}
+                                        disabled={!this.state.passwordResetEmail || this.state.sendingPasswordRequest || !this.validateEmail()}
                                     >
                                         Send
                                     </Button>
