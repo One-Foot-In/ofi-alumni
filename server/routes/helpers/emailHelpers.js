@@ -96,8 +96,40 @@ const sendRequestConfirmedEmail = async (menteeEmail, menteeName, menteeTime, me
   await sg.send(emailObjectForMentor, true)
 }
 
+const sendPasswordChangeEmail = async (to, token) => {
+  let emailObject = createPersonalization(
+    to,
+    `You've requested to change your password.`,
+    htmlBuilder(
+      `We will send you a temporary password to help you login.`,
+      'Forgot your password? It happens!',
+      'Get temporary password',
+      `${BACKEND}/tempPassword/${to}/${token}`
+    )
+  )
+  // console.log("Sending email with", emailObject)
+  await sg.send(emailObject, true)
+}
+
+const sendTemporaryPasswordEmail = async (to, tempPass) => {
+  let emailObject = createPersonalization(
+    to,
+    `Your temporary password is here!`,
+    htmlBuilder(
+      `Here's your new temporary password! If you didn't request a password change, please email us at onefootincollege@gmail.com! Please change your password once you login.`,
+      `Your temporary password is ${tempPass}`,
+      'Go To App',
+      APP
+    )
+  )
+  // console.log("Sending email with", emailObject)
+  await sg.send(emailObject, true)
+}
+
 exports.sendTestEmail = sendTestEmail
 exports.sendAlumniVerificationEmail = sendAlumniVerificationEmail
 exports.sendStudentVerificationEmail = sendStudentVerificationEmail
 exports.sendNewRequestEmail = sendNewRequestEmail
 exports.sendRequestConfirmedEmail = sendRequestConfirmedEmail
+exports.sendPasswordChangeEmail = sendPasswordChangeEmail
+exports.sendTemporaryPasswordEmail = sendTemporaryPasswordEmail
