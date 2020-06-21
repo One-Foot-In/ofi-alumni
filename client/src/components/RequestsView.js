@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Modal, Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
+import { Message, Form, Modal, Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
 
@@ -392,6 +392,19 @@ class RequestCards extends Component {
                         </Button>
                     </Modal.Actions>
                 </Modal>
+            }
+            {!this.state.display.length &&
+                <Message info>
+                <Message.Header>No {this.props.activeSet} meetings!</Message.Header>
+                {
+                    this.props.activeSet === 'unconfirmed' &&
+                    <Message.Content>Check back later!</Message.Content>
+                }
+                {
+                    this.props.activeSet === 'confirmed' &&
+                    <Message.Content>Confirm requests in the unconfirmed meetings tab!</Message.Content>
+                }
+                </Message>
             }
             {this.state.display}
             </>
