@@ -11,6 +11,7 @@ var interestsSchema = require('../models/interestsSchema');
 var companySchema = require('../models/companySchema');
 var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
+var majorSchema = require('../models/majorSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
 require('mongoose').Promise = global.Promise
@@ -71,12 +72,18 @@ router.post('/', async (req, res, next) => {
         let existingCollegeId = req.body.existingCollegeId
         var college
         if (newCollege) {
-            var newCollegeCreated = new collegeSchema({
-                name: newCollege,
-                country: collegeCountry
-            })
-            await newCollegeCreated.save()
-            college = newCollegeCreated
+            // to prevent users from accidentally adding an existing college as custom entry
+            let collegeFound = await collegeSchema.find({name: newCollege, country: collegeCountry})
+            if (!collegeFound.length) {
+                var newCollegeCreated = new collegeSchema({
+                    name: newCollege,
+                    country: collegeCountry
+                })
+                await newCollegeCreated.save()
+                college = newCollegeCreated
+            } else {
+                college = collegeFound[0]
+            }
         } else if (existingCollegeId) {
             college = await collegeSchema.findOne({_id: existingCollegeId})
         }
@@ -86,11 +93,16 @@ router.post('/', async (req, res, next) => {
         const newJobTitle = req.body.newJobTitle
         var jobTitle
         if (newJobTitle) {
-            var newJobTitleCreated = new jobTitleSchema({
-                name: newJobTitle
-            })
-            await newJobTitleCreated.save()
-            jobTitle = newJobTitleCreated
+            let jobTitleFound = await jobTitleSchema.find({name: newJobTitle})
+            if (!jobTitleFound.length) {
+                let jobTitleCreated = await new jobTitleSchema({
+                    name: newJobTitle
+                })
+                await jobTitleCreated.save()
+                jobTitle = jobTitleCreated
+            } else {
+                jobTitle = jobTitleFound[0]
+            }
         } else if (existingJobTitleId) {
             jobTitle = await jobTitleSchema.findOne({_id: existingJobTitleId})
         }
@@ -100,13 +112,37 @@ router.post('/', async (req, res, next) => {
         const newCompany = req.body.newCompany
         var company
         if (newCompany) {
-            var newCompanyCreated = new companySchema({
-                name: newCompany
-            })
-            await newCompanyCreated.save()
-            var company = newCompanyCreated
+            let companyFound = await companySchema.find({name: newCompany})
+            if (!companyFound.length) {
+                let companyCreated = await new companySchema({
+                    name: newCompany
+                })
+                await companyCreated.save()
+                company = companyCreated
+            } else {
+                company = companyFound[0]
+            }
         } else if (existingCompanyId) {
             company = await companySchema.findOne({_id: existingCompanyId})
+        }
+
+        // find or create Major
+        const existingMajorId = req.body.existingMajorId
+        const newMajor = req.body.newMajor
+        var major
+        if (newMajor) {
+            let majorFound = await majorSchema.find({name: newMajor})
+            if (!majorFound.length) {
+                let majorCreated = await new majorSchema({
+                    name: newMajor
+                })
+                await majorCreated.save()
+                major = majorCreated
+            } else {
+                major = majorFound[0]
+            }
+        } else if (existingMajorId) {
+            major = await majorSchema.findOne({_id: existingMajorId})
         }
 
         const existingInterests = req.body.existingInterests
@@ -139,7 +175,9 @@ router.post('/', async (req, res, next) => {
                 zoomLink: zoomLink,
                 approved: approved,
                 school: schoolId,
-                schoolLogo: school.logoURL
+                schoolLogo: school.logoURL,
+                major: major,
+                majorName: major && major.name
             }
         )
         const user_instance = new userSchema(

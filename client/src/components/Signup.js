@@ -6,6 +6,7 @@ import { makeCall } from "../apis";
 import LocationSelectionModal from './LocationSelectionModal';
 import CollegeSelectionModal from './CollegeSelectionModal';
 import CareerAndInterestsModal from './CareerAndInterestsModal';
+import MajorSelectionModal from './MajorSelectionModal';
 
 let fieldStyle = {
     width: '90%',
@@ -68,13 +69,18 @@ export default class Signup extends React.Component {
             existingCollegeId: '', // when alumni selects from existing colleges
             collegeDisplayName: '', // used for display when selecting colleges
             collegeCountry: '', // when alumni selects old college
+            // major
+            newMajor: '', // when new college is being entered
+            existingMajorId: '', // when alumni selects from existing colleges
+            majorDisplayName: '', // used for display when selecting colleges
             // FORM-CONTROL
             submitting: false,
             passwordsMatching: true,
             emailValid: true,
             locationModalOpen: false,
             collegeModalOpen: false,
-            careerModalOpen: false
+            careerModalOpen: false,
+            majorModalOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
@@ -90,7 +96,10 @@ export default class Signup extends React.Component {
         this.getCollegeInput = this.getCollegeInput.bind(this);
         this.handleCollegeSelectionModal = this.handleCollegeSelectionModal.bind(this);
         this.handleCareerModal = this.handleCareerModal.bind(this);
+        this.handleMajorSelectionModal = this.handleMajorSelectionModal.bind(this);
         this.getCareerInput = this.getCareerInput.bind(this);
+        this.getMajorInput = this.getMajorInput.bind(this);
+        this.getMajorDisplay = this.getMajorDisplay.bind(this);
         this.getCareerAndInterestsDisplay = this.getCareerAndInterestsDisplay.bind(this);
         this.hansEntriesForCareerAndInterests = this.hansEntriesForCareerAndInterests.bind(this);
     }
@@ -188,6 +197,25 @@ export default class Signup extends React.Component {
         }
     }
 
+    /**
+     * lifts major selection from major modal to main Sign Up form's context
+     * @param {String} majorName, can be existing or new major 
+     * @param {*} majorId, has value when major is picked from an existing option 
+     */
+    getMajorInput(majorName, majorId) {
+        if (!majorId) {
+            this.setState({
+                newMajor: majorName,
+                majorDisplayName: majorName
+            })
+        } else {
+            this.setState({
+                existingMajorId: majorId,
+                majorDisplayName: majorName
+            })
+        }
+    }
+
     handleLocationModal() {
         this.setState({locationModalOpen: !this.state.locationModalOpen})
     }
@@ -198,6 +226,10 @@ export default class Signup extends React.Component {
 
     handleCareerModal() {
         this.setState({careerModalOpen: !this.state.careerModalOpen})
+    }
+
+    handleMajorSelectionModal() {
+        this.setState({majorModalOpen: !this.state.majorModalOpen})
     }
 
     getLocationDisplay() {
@@ -228,6 +260,27 @@ export default class Signup extends React.Component {
                         collegeDisplayName: '',
                         newCollege: '',
                         existingCollegeId: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
+    }
+
+    /**
+     * Generates dismissible display label for major selected
+     */
+    getMajorDisplay() {
+        return (
+            <Label
+                style={{'margin': '2px'}}
+            >
+                {this.state.majorDisplayName}
+                <Icon
+                    onClick={() => this.setState({
+                        majorDisplayName: '',
+                        newMajor: '',
+                        existingMajorId: ''
                     })}
                     name='delete'
                 />
@@ -278,7 +331,7 @@ export default class Signup extends React.Component {
     validateSubmitReadiness() {
         const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password);
         if (this.props.isAlumni) {
-            return baseCondition && this.state.graduationYear;
+            return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId);
         }
         return baseCondition && this.state.grade;
     }
@@ -305,49 +358,77 @@ export default class Signup extends React.Component {
                     <label>Graduation Year</label>
                     <input placeholder='YYYY' name="graduationYear" onChange={this.handleChange} />
                 </Form.Field>
-                <Form.Group>
-                    <Form.Field>
-                        {(this.state.country && this.state.city) ?
-                        this.getLocationDisplay() :
+                <Form.Field
+                    required={true}
+                >
+                    <label>College</label>
+                    {
+                        (this.state.collegeDisplayName) ?
+                        this.getCollegeDisplay() :
                         <>
                             <Button
                                 primary
                                 color="blue"
                                 type="button"
-                                onClick={() => {this.setState({locationModalOpen: true})}}
+                                onClick={() => {this.setState({collegeModalOpen: true})}}
                             >
-                                Add Location (required)
+                                Add College
                             </Button>
-                            <LocationSelectionModal
-                                getInput={this.getLocationInput}
-                                modalOpen={this.state.locationModalOpen}
-                                closeModal={this.handleLocationModal}
+                            <CollegeSelectionModal
+                                getInput={this.getCollegeInput}
+                                modalOpen={this.state.collegeModalOpen}
+                                closeModal={this.handleCollegeSelectionModal}
                             />
                         </>
-                        }
-                    </Form.Field>
-                    <Form.Field>
-                        {
-                            (this.state.collegeDisplayName) ?
-                            this.getCollegeDisplay() :
-                            <>
-                                <Button
-                                    primary
-                                    color="blue"
-                                    type="button"
-                                    onClick={() => {this.setState({collegeModalOpen: true})}}
-                                >
-                                    Add College
-                                </Button>
-                                <CollegeSelectionModal
-                                    getInput={this.getCollegeInput}
-                                    modalOpen={this.state.collegeModalOpen}
-                                    closeModal={this.handleCollegeSelectionModal}
-                                />
-                            </>
-                        }
-                    </Form.Field>
-                </Form.Group>
+                    }
+                </Form.Field>
+                <Form.Field
+                    required={true}
+                >
+                    <label>Major</label>
+                    {
+                        (this.state.majorDisplayName) ?
+                        this.getMajorDisplay() :
+                        <>
+                            <Button
+                                primary
+                                color="blue"
+                                type="button"
+                                onClick={() => {this.setState({majorModalOpen: true})}}
+                            >
+                                Add Major
+                            </Button>
+                            <MajorSelectionModal
+                                getInput={this.getMajorInput}
+                                modalOpen={this.state.majorModalOpen}
+                                closeModal={this.handleMajorSelectionModal}
+                            />
+                        </>
+                    }
+                </Form.Field>
+                <Form.Field
+                    required={true}
+                >
+                    <label>Location</label>
+                    {(this.state.country && this.state.city) ?
+                    this.getLocationDisplay() :
+                    <>
+                        <Button
+                            primary
+                            color="blue"
+                            type="button"
+                            onClick={() => {this.setState({locationModalOpen: true})}}
+                        >
+                            Add Location
+                        </Button>
+                        <LocationSelectionModal
+                            getInput={this.getLocationInput}
+                            modalOpen={this.state.locationModalOpen}
+                            closeModal={this.handleLocationModal}
+                        />
+                    </>
+                    }
+                </Form.Field>
                 {
                     this.hansEntriesForCareerAndInterests() ?
                     this.getCareerAndInterestsDisplay() :
@@ -416,7 +497,10 @@ export default class Signup extends React.Component {
                     collegeCountry: this.state.collegeCountry,
                     //interests
                     existingInterests: this.state.existingInterests, // interests are stored whole on alumni models
-                    newInterests: this.state.newInterests
+                    newInterests: this.state.newInterests,
+                    // major
+                    existingMajorId: this.state.existingMajorId,
+                    newMajor: this.state.newMajor,
                 });
             }
             e.preventDefault();
