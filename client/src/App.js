@@ -327,7 +327,6 @@ class App extends Component {
                       />
                       <AlumniMentorship 
                           userDetails={this.state.userDetails}
-                          role={role}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -443,7 +442,6 @@ class App extends Component {
                       />
                       <StudentMentorship 
                           userDetails={this.state.userDetails}
-                          role={role}
                       />
                   </> :
                   <Redirect to={"/login"}/>
