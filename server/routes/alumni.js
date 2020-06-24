@@ -18,6 +18,23 @@ require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
 
+/**
+ * Prevents users from accidentally creating an existing item as a custom new entry
+ * @param {String} newItem 
+ * @param {MongooseSchema} schema 
+ */
+const generateNewIfAbsent = async (newItem, schema) => {
+    let itemFound = await schema.find({name: newItem})
+    if (!itemFound.length) {
+        var newItemCreated = new schema({
+            name: newItem
+        })
+        await newItemCreated.save()
+        return newItemCreated
+    }
+    return itemFound[0]
+}
+
 const generateNewAndExistingInterests = async (existingInterests, newInterests) => {
     const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
     let existingInterestsRecords = await interestsSchema.find().where('_id').in(existingInterestsIds).exec()
@@ -93,16 +110,7 @@ router.post('/', async (req, res, next) => {
         const newJobTitle = req.body.newJobTitle
         var jobTitle
         if (newJobTitle) {
-            let jobTitleFound = await jobTitleSchema.find({name: newJobTitle})
-            if (!jobTitleFound.length) {
-                let jobTitleCreated = await new jobTitleSchema({
-                    name: newJobTitle
-                })
-                await jobTitleCreated.save()
-                jobTitle = jobTitleCreated
-            } else {
-                jobTitle = jobTitleFound[0]
-            }
+            jobTitle = await generateNewIfAbsent(newJobTitle, jobTitleSchema)
         } else if (existingJobTitleId) {
             jobTitle = await jobTitleSchema.findOne({_id: existingJobTitleId})
         }
@@ -112,16 +120,7 @@ router.post('/', async (req, res, next) => {
         const newCompany = req.body.newCompany
         var company
         if (newCompany) {
-            let companyFound = await companySchema.find({name: newCompany})
-            if (!companyFound.length) {
-                let companyCreated = await new companySchema({
-                    name: newCompany
-                })
-                await companyCreated.save()
-                company = companyCreated
-            } else {
-                company = companyFound[0]
-            }
+            company = await generateNewIfAbsent(newCompany, companySchema)
         } else if (existingCompanyId) {
             company = await companySchema.findOne({_id: existingCompanyId})
         }
@@ -131,16 +130,7 @@ router.post('/', async (req, res, next) => {
         const newMajor = req.body.newMajor
         var major
         if (newMajor) {
-            let majorFound = await majorSchema.find({name: newMajor})
-            if (!majorFound.length) {
-                let majorCreated = await new majorSchema({
-                    name: newMajor
-                })
-                await majorCreated.save()
-                major = majorCreated
-            } else {
-                major = majorFound[0]
-            }
+            major = await generateNewIfAbsent(newMajor, majorSchema)
         } else if (existingMajorId) {
             major = await majorSchema.findOne({_id: existingMajorId})
         }
