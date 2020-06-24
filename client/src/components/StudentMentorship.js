@@ -70,7 +70,7 @@ export default class StudentMentorship extends Component {
         })
     }
     getSchedulings(timeOffset) {
-        return makeCall({}, '/request/getSchedulings/'+this.props.userDetails._id +'/'+ this.props.role +'/' + timeOffset, 'get')
+        return makeCall({}, '/request/getSchedulings/'+ this.props.userDetails._id +'/' + timeOffset, 'get')
     }
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
@@ -116,7 +116,6 @@ export default class StudentMentorship extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
-                        userRole={this.props.role}
                     />
                 </div>
             }
@@ -128,7 +127,6 @@ export default class StudentMentorship extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
-                        userRole={this.props.role}
                     />
                 </div>
             }
@@ -140,7 +138,6 @@ export default class StudentMentorship extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
-                        userRole={this.props.role}
                     />
                 </div>
             }
@@ -278,7 +275,7 @@ class SchedulingCards extends Component {
         let schedulings = await makeCall({
                 requestId: e.currentTarget.getAttribute('requestid'),
                 newStatus: e.currentTarget.getAttribute('newstatus')
-            }, '/request/updateScheduling/' + this.props.userId + '/' + this.props.userRole + '/' + this.props.timeOffset, 'patch');
+            }, '/request/updateScheduling/' + this.props.userId + '/' + this.props.timeOffset, 'patch');
         if (!schedulings || schedulings.error) {
             swal({
                 title: "Error!",
@@ -313,7 +310,7 @@ class SchedulingCards extends Component {
         let requests = await makeCall({
             requestId: this.state.schedulingDetails._id,
             feedback: this.state.feedback
-        }, `/request/leaveFeedback/${this.props.userId}/${this.props.userRole}/${this.props.timeOffset}`, 'patch')
+        }, `/request/leaveFeedback/${this.props.userId}/${this.props.timeOffset}`, 'patch')
         this.setState({showFeedbackModal: !this.state.showFeedbackModal})
         this.props.liftSchedulings(requests)
     }

@@ -204,14 +204,14 @@ class RequestCards extends Component {
                         size='small'
                         centered
                         rounded
-                        src={request.requesterObj.imageURL}
+                        src={request.requester.imageURL}
                     />
                 </Grid.Column>
                 <Grid.Column>
                     <Card fluid>
                         <Card.Content>
                             <Card.Header>
-                                {cardHeader} {request.requesterObj.name}
+                                {cardHeader} {request.requester.name}
                             </Card.Header>           
                             <Card.Meta>{request.status}</Card.Meta>
                             <Card.Description>Topic: {request.topic}</Card.Description>
@@ -358,7 +358,7 @@ class RequestCards extends Component {
             <>
             {this.state.showFeedbackModal && 
                 <Modal open={this.state.showFeedbackModal}>
-                    <Modal.Header>Leave a final note for {this.state.requestDetails.requesterObj.name}</Modal.Header>
+                    <Modal.Header>Leave a final note for {this.state.requestDetails.requester.name}</Modal.Header>
                     <Modal.Content>
                     <Grid stackable>
                         <Grid.Row columns={"equal"}>
@@ -366,14 +366,14 @@ class RequestCards extends Component {
                                 <Image
                                     floated='left'
                                     size='small'
-                                    src={this.state.requestDetails.requesterObj.imageURL}
+                                    src={this.state.requestDetails.requester.imageURL}
                                     rounded
                                 />
                             </Grid.Column>
                             <Grid.Column>
                                 <Form>
                                     <Form.TextArea 
-                                        label={'Leave a note for ' + this.state.requestDetails.requesterObj.name + ':'}
+                                        label={'Leave a note for ' + this.state.requestDetails.requester.name + ':'}
                                         placeholder='Provide a recap or leave any other useful notes here!'
                                         onChange={this.handleValueChange.bind(this)}
                                         value={this.state.finalNote}
