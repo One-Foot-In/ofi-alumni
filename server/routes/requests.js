@@ -129,14 +129,9 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
             )
         }
         for (let status of conditions) {
-            const dbData = await requestSchema.find({mentor: alumniId, status: status})
+            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('requester')
             for (let request of dbData) {
                 request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
-                if (request.requesterRole === 'STUDENT') {
-                    request.requesterObj = await studentSchema.findOne({_id: request.requester})
-                } else {
-                    request.requesterObj = await alumniSchema.findOne({_id: request.requester})
-                }
             }
             requests.push(dbData)
         }
