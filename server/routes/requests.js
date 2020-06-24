@@ -34,7 +34,7 @@ router.patch('/applyRequesterTimezone', passport.authenticate('jwt', {session: f
 
 router.post('/addRequest', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        const requesterId = req.body.requesterId;
+        const studentId = req.body.requesterId;
         const mentorId = req.body.mentorId;
         const timeId = req.body.timeId;
         const topic = req.body.topic;
@@ -50,7 +50,7 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
         time = timezoneHelpers.stripTimezone(time, parseInt(req.body.timezone))
         var request_instance = new requestSchema(
             {
-                requester: requesterId,
+                student: studentId,
                 mentor: mentorId,
                 zoomLink: req.body.zoomLink,
                 topic: topic,
@@ -90,7 +90,7 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
         request.status = newStatus
         await request.save()
         if (newStatus === 'Confirmed') {
-            let mentee = await studentSchema.findOne({_id: request.requester})
+            let mentee = await studentSchema.findOne({_id: request.student})
             let mentor = await alumniSchema.findOne({_id: alumniId})
             let menteeTime = timezoneHelpers.applyTimezone(request.time, mentee.timeZone)
             let menteeTimeString = `${menteeTime[0].day} ${timezoneHelpers.getSlot(menteeTime[0].time)}`
@@ -129,7 +129,7 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
             )
         }
         for (let status of conditions) {
-            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('requester')
+            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
                 request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
             }
@@ -156,7 +156,7 @@ router.patch('/leaveFinalNote/:id/:timeOffset', passport.authenticate('jwt', {se
         request.finalNote = finalNote
         await request.save()
         for (let status of conditions) {
-            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('requester')
+            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
                 request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
             }
@@ -178,7 +178,7 @@ router.get('/getRequests/:id/:timeOffset', passport.authenticate('jwt', {session
     let requests = []
     try {
         for (let status of conditions) {
-            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('requester')
+            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
                 request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
             }
@@ -192,14 +192,14 @@ router.get('/getRequests/:id/:timeOffset', passport.authenticate('jwt', {session
 })
 
 router.get('/getSchedulings/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
-    let requesterId = req.params.id;
+    let studentId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset);
     let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
     let schedulings = []
     try {
         for (let status of conditions) {
             const dbData = await requestSchema.find({
-                    requester: requesterId,
+                    student: studentId,
                     status: status
                 }).populate('mentor')
             for (let request of dbData) {
@@ -215,7 +215,7 @@ router.get('/getSchedulings/:id/:timeOffset', passport.authenticate('jwt', {sess
 })
 
 router.patch('/updateScheduling/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
-    let requesterId = req.params.id;
+    let studentId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset);
     let requestId = req.body.requestId;
     let newStatus = req.body.newStatus;
@@ -227,7 +227,7 @@ router.patch('/updateScheduling/:id/:timeOffset', passport.authenticate('jwt', {
         await updatedScheduling.save()
         for (let status of conditions) {
             const dbData = await requestSchema.find({
-                    requester: requesterId,
+                    student: studentId,
                     status: status
                 }).populate('mentor')
             for (let request of dbData) {
@@ -243,7 +243,7 @@ router.patch('/updateScheduling/:id/:timeOffset', passport.authenticate('jwt', {
 })
 
 router.patch('/leaveFeedback/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
-    let requesterId = req.params.id;
+    let studentId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset);
     let requestId = req.body.requestId;
     let feedback = req.body.feedback;
@@ -255,7 +255,7 @@ router.patch('/leaveFeedback/:id/:timeOffset', passport.authenticate('jwt', {ses
         await updatedScheduling.save()
         for (let status of conditions) {
             const dbData = await requestSchema.find({
-                    requester: requesterId,
+                    student: studentId,
                     status: status
                 }).populate('mentor')
             for (let request of dbData) {

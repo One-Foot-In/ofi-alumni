@@ -10,7 +10,7 @@ const timeAvailabilitySchema = new Schema({
 
 const requestSchema = new Schema(
   {
-    requester: {type: Schema.Types.ObjectId, ref: 'Student'},
+    student: {type: Schema.Types.ObjectId, ref: 'Student'},
     mentor: {type: Schema.Types.ObjectId, ref: 'Alumni'},
     time: [timeAvailabilitySchema],
     zoomLink: {type: String},
