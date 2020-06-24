@@ -40,7 +40,7 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
         const timeId = req.body.timeId;
         const topic = req.body.topic;
         const status = 'Awaiting Confirmation';
-        const note = req.body.note;
+        const studentNote = req.body.note;
 
         // timeSegments = [day, hour]
         timeSegments = timeId.split('-')
@@ -57,7 +57,7 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
                 zoomLink: req.body.zoomLink,
                 topic: topic,
                 status: status,
-                note: note
+                studentNote: studentNote
             }
         )
         request_instance.time.push({

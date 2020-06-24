@@ -25,7 +25,7 @@ const requestSchema = new Schema(
                         'Rejected'
                       ]
             },
-    note: {type: String},
+    studentNote: {type: String},
     finalNote: {type: String},
     feedback: {type: String}
   }
