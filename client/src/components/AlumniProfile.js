@@ -68,12 +68,6 @@ export default class AlumniProfile extends Component {
             locationModalOpen: false,
             removingInterest: false
         }
-        this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
-        this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
-        this.openTopicPreferencesModal = this.openTopicPreferencesModal.bind(this)
-        this.closeTopicPreferencesModal = this.closeTopicPreferencesModal.bind(this)
-        this.openZoomUpdateModal = this.openZoomUpdateModal.bind(this)
-        this.closeZoomUpdateModal = this.closeZoomUpdateModal.bind(this)
         this.openImageModal = this.openImageModal.bind(this)
         this.closeImageModal = this.closeImageModal.bind(this)
         this.openInterestsModal = this.openInterestsModal.bind(this)
@@ -84,42 +78,7 @@ export default class AlumniProfile extends Component {
         this.closeLocationUpdateModal = this.closeLocationUpdateModal.bind(this)
         this.getInterests = this.getInterests.bind(this)
     }
-    closeTimePreferencesModal() {
-        this.setState({
-            timePreferencesModalOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openTimePreferencesModal() {
-        this.setState({
-            timePreferencesModalOpen: true
-        })
-    }
-    closeTopicPreferencesModal() {
-        this.setState({
-            topicPreferencesModalOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openTopicPreferencesModal() {
-        this.setState({
-            topicPreferencesModalOpen: true
-        })
-    }
-    closeZoomUpdateModal() {
-        this.setState({
-            zoomUpdateOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openZoomUpdateModal() {
-        this.setState({
-            zoomUpdateOpen: true
-        })
-    }
+
     openImageModal() {
         this.setState({
             imageModalOpen: true
