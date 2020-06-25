@@ -8,45 +8,45 @@ import PooledSingleSelectDropdown from "./PooledSingleSelectDropdown"
     - closeModal
     - getInput
 */
-export default class MajorSelectionModal extends Component {
+export default class CompanySelectionModal extends Component {
     constructor(props){
         super(props)
         this.state = {
-            newMajor: '', // name when new major entered
-            existingMajorId: '', // mongoId when existing major selected
-            existingMajorName: ''
+            newCompany: '', // name when new major entered
+            existingCompanyId: '', // mongoId when existing major selected
+            existingCompanyName: ''
         }
-        this.getMajorInput = this.getMajorInput.bind(this)
+        this.getCompanyInput = this.getCompanyInput.bind(this)
         this.submit = this.submit.bind(this)
     }
 
-    getMajorInput(selection, isNew) {
+    getCompanyInput(selection, isNew) {
         if (selection) {
             if (isNew) {
                 this.setState({
-                    newMajor: selection.value,
-                    existingMajorId: '',
-                    existingMajorName: ''
+                    newCompany: selection.value,
+                    existingCompanyId: '',
+                    existingCompanyName: ''
                 })
             } else {
                 this.setState({
-                    newMajor: '',
-                    existingMajorId: selection.value,
-                    existingMajorName: selection.text
+                    newCompany: '',
+                    existingCompanyId: selection.value,
+                    existingCompanyName: selection.text
                 })
             }
         } else {
             this.setState({
-                newMajor: '',
-                existingMajorId: '',
-                existingMajorName: ''
+                newCompany: '',
+                existingCompanyId: '',
+                existingCompanyName: ''
             })
         }
     }
 
     submit(e) {
         e.preventDefault()
-        this.props.getInput(this.state.newMajor || this.state.existingMajorName, this.state.existingMajorId)
+        this.props.getInput(this.state.newCompany || this.state.existingCompanyName, this.state.existingCompanyId)
         this.props.closeModal()
     }
 
@@ -55,13 +55,13 @@ export default class MajorSelectionModal extends Component {
             <Modal
                 open={this.props.modalOpen}
             >
-                <Modal.Header>Select your major</Modal.Header>
+                <Modal.Header>Select your company</Modal.Header>
                 <Modal.Content>
                     <PooledSingleSelectDropdown
-                        endpoint={`/drop/majors`}
+                        endpoint={`/drop/companies`}
                         allowAddition={true}
-                        dataType={"Major"}
-                        getInput={this.getMajorInput}
+                        dataType={"Company"}
+                        getInput={this.getCompanyInput}
                     />
                 </Modal.Content>
                 <Modal.Actions>

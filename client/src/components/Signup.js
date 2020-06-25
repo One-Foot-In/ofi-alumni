@@ -1,12 +1,14 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Icon, Message, Grid, Dropdown, Label, Segment, List } from 'semantic-ui-react';
+import { Form, Button, Icon, Message, Grid, Dropdown, Label } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 import LocationSelectionModal from './LocationSelectionModal';
 import CollegeSelectionModal from './CollegeSelectionModal';
 import AddInterestsModal from './AddInterestsModal';
 import MajorSelectionModal from './MajorSelectionModal';
+import CompanySelectionModal from './CompanySelectionModal';
+import JobTitleSelectionModal from './JobTitleSelectionModal';
 
 let fieldStyle = {
     width: '90%',
@@ -81,7 +83,9 @@ export default class Signup extends React.Component {
             collegeModalOpen: false,
             careerModalOpen: false,
             majorModalOpen: false,
-            interestsModalOpen: false
+            interestsModalOpen: false,
+            companyModalOpen: false,
+            jobTitleModalOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
@@ -103,6 +107,12 @@ export default class Signup extends React.Component {
         this.handleInterestsModal = this.handleInterestsModal.bind(this);
         this.getInterestsForDisplay = this.getInterestsForDisplay.bind(this);
         this.removeInterest = this.removeInterest.bind(this);
+        this.handleCompanySelectionModal = this.handleCompanySelectionModal.bind(this);
+        this.handleJobTitleSelectionModal = this.handleJobTitleSelectionModal.bind(this);
+        this.getCompanyDisplay = this.getCompanyDisplay.bind(this);
+        this.getJobTitleDisplay = this.getJobTitleDisplay.bind(this);
+        this.getCompanyInput = this.getCompanyInput.bind(this);
+        this.getJobTitleInput = this.getJobTitleInput.bind(this);
     }
 
     
@@ -145,6 +155,42 @@ export default class Signup extends React.Component {
         }
     }
 
+    /**
+     * lifts company selection from company modal to main Sign Up form's context
+     * @param {String} companyName, can be existing or new company 
+     * @param {*} companyId, has value when company is picked from an existing option 
+     */
+    getCompanyInput(companyName, companyId) {
+        if (!companyId) {
+            this.setState({
+                newCompany: companyName
+            })
+        } else {
+            this.setState({
+                existingCompanyId: companyId,
+                existingCompanyName: companyName
+            })
+        }
+    }
+
+    /**
+     * lifts job title selection from job title modal to main Sign Up form's context
+     * @param {String} jobTitleName, can be existing or new jobTitle 
+     * @param {*} jobTitleId, has value when jobTitle is picked from an existing option 
+     */
+    getJobTitleInput(jobTitleName, jobTitleId) {
+        if (!jobTitleId) {
+            this.setState({
+                newJobTitle: jobTitleName
+            })
+        } else {
+            this.setState({
+                existingJobTitleId: jobTitleId,
+                existingJobTitleName: jobTitleName
+            })
+        }
+    }
+
     getInterestsInput(existingInterests, newInterests) {
         this.setState({
             existingInterests,
@@ -170,6 +216,14 @@ export default class Signup extends React.Component {
 
     handleInterestsModal() {
         this.setState({interestsModalOpen: !this.state.interestsModalOpen})
+    }
+
+    handleCompanySelectionModal() {
+        this.setState({companyModalOpen: !this.state.companyModalOpen})
+    }
+
+    handleJobTitleSelectionModal() {
+        this.setState({jobTitleModalOpen: !this.state.jobTitleModalOpen})
     }
 
     removeInterest(e, interestMarker) {
@@ -272,6 +326,48 @@ export default class Signup extends React.Component {
                         majorDisplayName: '',
                         newMajor: '',
                         existingMajorId: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
+    }
+
+    /**
+     * Generates dismissible display label for company selected
+     */
+    getCompanyDisplay() {
+        return (
+            <Label
+                style={{'margin': '2px'}}
+            >
+                {this.state.existingCompanyName || this.state.newCompany}
+                <Icon
+                    onClick={() => this.setState({
+                        existingCompanyName: '',
+                        newCompany: '',
+                        existingCompanyId: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
+    }
+
+    /**
+     * Generates dismissible display label for job title selected
+     */
+    getJobTitleDisplay() {
+        return (
+            <Label
+                style={{'margin': '2px'}}
+            >
+                {this.state.existingJobTitleName || this.state.newJobTitle}
+                <Icon
+                    onClick={() => this.setState({
+                        existingJobTitleName: '',
+                        newJobTitle: '',
+                        existingJobTitleId: ''
                     })}
                     name='delete'
                 />
@@ -407,6 +503,52 @@ export default class Signup extends React.Component {
                             closeModal={this.handleLocationModal}
                         />
                     </>
+                    }
+                </Form.Field>
+                <Form.Field
+                >
+                    <label>Company/Organization</label>
+                    {
+                        (this.state.existingCompanyName || this.state.newCompany) ?
+                        this.getCompanyDisplay() :
+                        <>
+                            <Button
+                                primary
+                                color="blue"
+                                type="button"
+                                onClick={() => {this.setState({companyModalOpen: true})}}
+                            >
+                                Add Company/Organization
+                            </Button>
+                            <CompanySelectionModal
+                                getInput={this.getCompanyInput}
+                                modalOpen={this.state.companyModalOpen}
+                                closeModal={this.handleCompanySelectionModal}
+                            />
+                        </>
+                    }
+                </Form.Field>
+                <Form.Field
+                >
+                    <label>Job Title</label>
+                    {
+                        (this.state.existingJobTitleName || this.state.newJobTitle) ?
+                        this.getJobTitleDisplay() :
+                        <>
+                            <Button
+                                primary
+                                color="blue"
+                                type="button"
+                                onClick={() => {this.setState({jobTitleModalOpen: true})}}
+                            >
+                                Add Job Title
+                            </Button>
+                            <JobTitleSelectionModal
+                                getInput={this.getJobTitleInput}
+                                modalOpen={this.state.jobTitleModalOpen}
+                                closeModal={this.handleJobTitleSelectionModal}
+                            />
+                        </>
                     }
                 </Form.Field>
                 <Form.Field
