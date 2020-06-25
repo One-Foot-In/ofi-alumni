@@ -205,13 +205,6 @@ export default class AlumniProfile extends Component {
     render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-        let availabilities = details.availabilities;
-        let topics = details.topics;
-        let zoomLink = details.zoomLink;
-        availabilities = availabilities.map(timeSlot => {
-                timeSlot.text = `${timeSlot.day} ${timeToSlot[timeSlot.time]}`
-                return timeSlot
-            })
         const linkedInUpdate = (
             <LinkedInUpdate
                 email={details.email}
@@ -236,64 +229,6 @@ export default class AlumniProfile extends Component {
             />
             </>
         )
-        const timeAvailabilitiesUpdate = (
-            <>
-            <Button
-                style={{'margin-right': '5px'}}
-                floated='right'
-                basic
-                color="blue"
-                onClick={this.openTimePreferencesModal}
-            >
-                Update Time Availabilities
-            </Button>
-            <TimePreferencesModal
-                modalOpen={this.state.timePreferencesModalOpen}
-                timePreferences={availabilities || []}
-                closeModal={this.closeTimePreferencesModal}
-                id={details._id}
-            />
-            </>
-        )
-        const topicAvailabilitiesUpdate = (
-            <>
-            <Button
-                primary
-                style={{'margin-left': '2px'}}
-                floated='right'
-                color="blue"
-                onClick={this.openTopicPreferencesModal}
-            >
-                Update Topic Preferences
-            </Button>
-            <TopicPreferencesModal
-                modalOpen={this.state.topicPreferencesModalOpen}
-                topicPreferences={topics || []}
-                closeModal={this.closeTopicPreferencesModal}
-                id={details._id}
-            />
-            </>
-        )
-        const zoomLinkUpdate = (
-            <>
-             <Button
-                primary
-                style={{'margin-right': '5px'}}
-                floated='right'
-                color="blue"
-                onClick={this.openZoomUpdateModal}
-            >
-                Update Zoom Meeting ID
-            </Button>
-            <ZoomUpdateModal
-                modalOpen={this.state.zoomUpdateOpen}
-                zoomLink={zoomLink || ''}
-                closeModal={this.closeZoomUpdateModal}
-                id={details._id}
-            />
-            </>
-        )
-
         const interestsUpdate = (
             <>
             <Button
@@ -357,7 +292,7 @@ export default class AlumniProfile extends Component {
             canUpdate = (
                 <>
                 <Card.Content extra>
-                    <Grid stackable centered columns={4}>
+                    <Grid stackable centered columns={3}>
                         <Grid.Column width={4}>
                             <Button.Group vertical>
                                 {linkedInUpdate}
@@ -372,13 +307,6 @@ export default class AlumniProfile extends Component {
                         </Grid.Column>
                         <Grid.Column width={4}>
                             <Button.Group vertical>
-                                {zoomLinkUpdate}
-                                {timeAvailabilitiesUpdate}
-                            </Button.Group>
-                        </Grid.Column>
-                        <Grid.Column width={4}>
-                            <Button.Group vertical>
-                                {topicAvailabilitiesUpdate}
                                 {interestsUpdate}
                             </Button.Group>
                         </Grid.Column>
