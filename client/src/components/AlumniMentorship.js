@@ -224,7 +224,7 @@ export default class AlumniMentorship extends Component {
                 color="blue"
                 onClick={this.openZoomUpdateModal}
             >
-                Update Zoom Meeting ID
+                Update Video Meeting Link
             </Button>
             <ZoomUpdateModal
                 modalOpen={this.state.zoomUpdateOpen}
