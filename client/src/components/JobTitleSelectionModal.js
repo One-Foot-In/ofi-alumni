@@ -8,45 +8,45 @@ import PooledSingleSelectDropdown from "./PooledSingleSelectDropdown"
     - closeModal
     - getInput
 */
-export default class MajorSelectionModal extends Component {
+export default class JobTitleSelectionModal extends Component {
     constructor(props){
         super(props)
         this.state = {
-            newMajor: '', // name when new major entered
-            existingMajorId: '', // mongoId when existing major selected
-            existingMajorName: ''
+            newJobTitle: '', // name when new major entered
+            existingJobTitleId: '', // mongoId when existing major selected
+            existingJobTitleName: ''
         }
-        this.getMajorInput = this.getMajorInput.bind(this)
+        this.getJobTitleInput = this.getJobTitleInput.bind(this)
         this.submit = this.submit.bind(this)
     }
 
-    getMajorInput(selection, isNew) {
+    getJobTitleInput(selection, isNew) {
         if (selection) {
             if (isNew) {
                 this.setState({
-                    newMajor: selection.value,
-                    existingMajorId: '',
-                    existingMajorName: ''
+                    newJobTitle: selection.value,
+                    existingJobTitleId: '',
+                    existingJobTitleName: ''
                 })
             } else {
                 this.setState({
-                    newMajor: '',
-                    existingMajorId: selection.value,
-                    existingMajorName: selection.text
+                    newJobTitle: '',
+                    existingJobTitleId: selection.value,
+                    existingJobTitleName: selection.text
                 })
             }
         } else {
             this.setState({
-                newMajor: '',
-                existingMajorId: '',
-                existingMajorName: ''
+                newJobTitle: '',
+                existingJobTitleId: '',
+                existingJobTitleName: ''
             })
         }
     }
 
     submit(e) {
         e.preventDefault()
-        this.props.getInput(this.state.newMajor || this.state.existingMajorName, this.state.existingMajorId)
+        this.props.getInput(this.state.newJobTitle || this.state.existingJobTitleName, this.state.existingJobTitleId)
         this.props.closeModal()
     }
 
@@ -55,13 +55,13 @@ export default class MajorSelectionModal extends Component {
             <Modal
                 open={this.props.modalOpen}
             >
-                <Modal.Header>Select your major</Modal.Header>
+                <Modal.Header>Select your Job Title</Modal.Header>
                 <Modal.Content>
                     <PooledSingleSelectDropdown
-                        endpoint={`/drop/majors`}
+                        endpoint={`/drop/jobTitles`}
                         allowAddition={true}
-                        dataType={"Major"}
-                        getInput={this.getMajorInput}
+                        dataType={"Job Title"}
+                        getInput={this.getJobTitleInput}
                     />
                 </Modal.Content>
                 <Modal.Actions>

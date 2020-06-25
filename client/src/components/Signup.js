@@ -1,12 +1,14 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Icon, Message, Grid, Dropdown, Label, Segment, List } from 'semantic-ui-react';
+import { Form, Button, Icon, Message, Grid, Dropdown, Label } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 import LocationSelectionModal from './LocationSelectionModal';
 import CollegeSelectionModal from './CollegeSelectionModal';
-import CareerAndInterestsModal from './CareerAndInterestsModal';
+import AddInterestsModal from './AddInterestsModal';
 import MajorSelectionModal from './MajorSelectionModal';
+import CompanySelectionModal from './CompanySelectionModal';
+import JobTitleSelectionModal from './JobTitleSelectionModal';
 
 let fieldStyle = {
     width: '90%',
@@ -80,7 +82,10 @@ export default class Signup extends React.Component {
             locationModalOpen: false,
             collegeModalOpen: false,
             careerModalOpen: false,
-            majorModalOpen: false
+            majorModalOpen: false,
+            interestsModalOpen: false,
+            companyModalOpen: false,
+            jobTitleModalOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
@@ -95,88 +100,22 @@ export default class Signup extends React.Component {
         this.handleLocationModal = this.handleLocationModal.bind(this);
         this.getCollegeInput = this.getCollegeInput.bind(this);
         this.handleCollegeSelectionModal = this.handleCollegeSelectionModal.bind(this);
-        this.handleCareerModal = this.handleCareerModal.bind(this);
         this.handleMajorSelectionModal = this.handleMajorSelectionModal.bind(this);
-        this.getCareerInput = this.getCareerInput.bind(this);
         this.getMajorInput = this.getMajorInput.bind(this);
         this.getMajorDisplay = this.getMajorDisplay.bind(this);
-        this.getCareerAndInterestsDisplay = this.getCareerAndInterestsDisplay.bind(this);
-        this.hansEntriesForCareerAndInterests = this.hansEntriesForCareerAndInterests.bind(this);
+        this.getInterestsInput = this.getInterestsInput.bind(this);
+        this.handleInterestsModal = this.handleInterestsModal.bind(this);
+        this.getInterestsForDisplay = this.getInterestsForDisplay.bind(this);
+        this.removeInterest = this.removeInterest.bind(this);
+        this.handleCompanySelectionModal = this.handleCompanySelectionModal.bind(this);
+        this.handleJobTitleSelectionModal = this.handleJobTitleSelectionModal.bind(this);
+        this.getCompanyDisplay = this.getCompanyDisplay.bind(this);
+        this.getJobTitleDisplay = this.getJobTitleDisplay.bind(this);
+        this.getCompanyInput = this.getCompanyInput.bind(this);
+        this.getJobTitleInput = this.getJobTitleInput.bind(this);
     }
 
-    getCareerInput(jobTitleObject, companyObject, interestsObj) {
-        this.setState({
-            existingJobTitleId: jobTitleObject.existingJobTitleId,
-            existingJobTitleName: jobTitleObject.existingJobTitleName,
-            newJobTitle: jobTitleObject.newJobTitle,
-            existingCompanyId: companyObject.existingCompanyId,
-            existingCompanyName: companyObject.existingCompanyName,
-            newCompany: companyObject.newCompany,
-            existingInterests: interestsObj.existingInterests, // interests are stored whole on alumni models
-            newInterests: interestsObj.newInterests,
-        })
-    }
-
-    getCareerAndInterestsDisplay() {
-        return (
-            <Segment>
-                <Label>
-                    Clear Entries for career and interests
-                    <Icon
-                        onClick={() => this.setState({
-                            existingJobTitleId: '',
-                            existingJobTitleName: '',
-                            newJobTitle: '',
-                            existingCompanyId: '',
-                            existingCompanyName: '',
-                            newCompany: '',
-                            existingInterests: [], // interests are stored whole on alumni models
-                            newInterests: [],
-                        })}
-                        name='delete'
-                    />
-                </Label>
-                <List divided relaxed>
-                    
-                    {
-                    (this.state.existingJobTitleId || this.state.newJobTitle) ?
-                        <List.Item>
-                            <List.Content>
-                                <List.Header>Job Title</List.Header>
-                                <List.Description>{this.state.existingJobTitleName || this.state.newJobTitle}</List.Description>
-                            </List.Content>
-                        </List.Item> : null 
-                    }
-                    {
-                        this.state.existingCompanyId || this.state.newCompany ?
-                        <List.Item>
-                            <List.Content>
-                                <List.Header>Company</List.Header>
-                                <List.Description>{this.state.existingCompanyName || this.state.newCompany}</List.Description>
-                            </List.Content>
-                        </List.Item> : null
-                    }
-                    {
-                        this.state.existingInterests.length || this.state.newInterests.length ?
-                        <List.Item>
-                            <List.Content>
-                                <List.Header>Interests</List.Header>
-                                <List.Description>
-                                    {
-                                        [
-                                            ...this.state.existingInterests.map(interest => interest.text).flat(),
-                                            ...this.state.newInterests.map(interest => interest.text).flat()
-                                        ].join(', ')
-                                    }
-                                </List.Description>
-                            </List.Content>
-                        </List.Item> : null
-                    }   
-                </List>
-            </Segment>
-        )
-    }
-
+    
     getLocationInput(country, city) {
         this.setState({country, city})
     }
@@ -216,6 +155,49 @@ export default class Signup extends React.Component {
         }
     }
 
+    /**
+     * lifts company selection from company modal to main Sign Up form's context
+     * @param {String} companyName, can be existing or new company 
+     * @param {*} companyId, has value when company is picked from an existing option 
+     */
+    getCompanyInput(companyName, companyId) {
+        if (!companyId) {
+            this.setState({
+                newCompany: companyName
+            })
+        } else {
+            this.setState({
+                existingCompanyId: companyId,
+                existingCompanyName: companyName
+            })
+        }
+    }
+
+    /**
+     * lifts job title selection from job title modal to main Sign Up form's context
+     * @param {String} jobTitleName, can be existing or new jobTitle 
+     * @param {*} jobTitleId, has value when jobTitle is picked from an existing option 
+     */
+    getJobTitleInput(jobTitleName, jobTitleId) {
+        if (!jobTitleId) {
+            this.setState({
+                newJobTitle: jobTitleName
+            })
+        } else {
+            this.setState({
+                existingJobTitleId: jobTitleId,
+                existingJobTitleName: jobTitleName
+            })
+        }
+    }
+
+    getInterestsInput(existingInterests, newInterests) {
+        this.setState({
+            existingInterests,
+            newInterests
+        })
+    }
+
     handleLocationModal() {
         this.setState({locationModalOpen: !this.state.locationModalOpen})
     }
@@ -230,6 +212,70 @@ export default class Signup extends React.Component {
 
     handleMajorSelectionModal() {
         this.setState({majorModalOpen: !this.state.majorModalOpen})
+    }
+
+    handleInterestsModal() {
+        this.setState({interestsModalOpen: !this.state.interestsModalOpen})
+    }
+
+    handleCompanySelectionModal() {
+        this.setState({companyModalOpen: !this.state.companyModalOpen})
+    }
+
+    handleJobTitleSelectionModal() {
+        this.setState({jobTitleModalOpen: !this.state.jobTitleModalOpen})
+    }
+
+    removeInterest(e, interestMarker) {
+        e.preventDefault()
+        this.setState({
+            existingInterests: this.state.existingInterests.filter(interest => interest.value !== interestMarker),
+            newInterests: this.state.newInterests.filter(interest => interest.value !== interestMarker)
+        })
+    }
+
+    getInterestsForDisplay() {
+        let allInterests = [...this.state.existingInterests, ...this.state.newInterests]
+        return (
+            <>
+            {
+                allInterests.map(interest => {
+                    return (
+                        <Label
+                            key={interest.value}
+                            style={{
+                                'margin': '3px'
+                            }}
+                            color='teal'
+                        >
+                            {interest.text}
+                            {
+                                <Icon
+                                    onClick={(e) => this.removeInterest(e, interest.value)}
+                                    name='delete'
+                                />
+                            }
+                        </Label>
+                    )
+                })
+            }
+            <Button
+                primary
+                color="blue"
+                type="button"
+                size="mini"
+                onClick={() => {this.setState({interestsModalOpen: true})}}
+            >
+                {allInterests.length ? `Add more Interests` : `Add Interests`}
+                <Icon
+                    name="add"
+                    style={{
+                        'margin': '3px'
+                    }}
+                />
+            </Button>
+            </>
+        )
     }
 
     getLocationDisplay() {
@@ -288,6 +334,48 @@ export default class Signup extends React.Component {
         )
     }
 
+    /**
+     * Generates dismissible display label for company selected
+     */
+    getCompanyDisplay() {
+        return (
+            <Label
+                style={{'margin': '2px'}}
+            >
+                {this.state.existingCompanyName || this.state.newCompany}
+                <Icon
+                    onClick={() => this.setState({
+                        existingCompanyName: '',
+                        newCompany: '',
+                        existingCompanyId: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
+    }
+
+    /**
+     * Generates dismissible display label for job title selected
+     */
+    getJobTitleDisplay() {
+        return (
+            <Label
+                style={{'margin': '2px'}}
+            >
+                {this.state.existingJobTitleName || this.state.newJobTitle}
+                <Icon
+                    onClick={() => this.setState({
+                        existingJobTitleName: '',
+                        newJobTitle: '',
+                        existingJobTitleId: ''
+                    })}
+                    name='delete'
+                />
+            </Label>
+        )
+    }
+
     async componentWillMount() {
         let result = await makeCall(null, '/drop/schoolsOptions', 'get')
         this.setState({
@@ -334,17 +422,6 @@ export default class Signup extends React.Component {
             return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId);
         }
         return baseCondition && this.state.grade;
-    }
-
-    hansEntriesForCareerAndInterests() {
-        return (
-            this.state.existingJobTitleId || 
-            this.state.newJobTitle || 
-            this.state.existingCompanyId || 
-            this.state.newCompany || 
-            this.state.existingInterests.length ||
-            this.state.newInterests.length
-        )
     }
 
     getAlumniFields() {
@@ -429,25 +506,64 @@ export default class Signup extends React.Component {
                     </>
                     }
                 </Form.Field>
-                {
-                    this.hansEntriesForCareerAndInterests() ?
-                    this.getCareerAndInterestsDisplay() :
-                    <Form.Field>
-                        <Button
-                            primary
-                            color="blue"
-                            type="button"
-                            onClick={() => {this.setState({careerModalOpen: true})}}
-                        >
-                            Add Career and Interests
-                        </Button>
-                        <CareerAndInterestsModal
-                            getInput={this.getCareerInput}
-                            modalOpen={this.state.careerModalOpen}
-                            closeModal={this.handleCareerModal}
+                <Form.Field
+                >
+                    <label>Company/Organization</label>
+                    {
+                        (this.state.existingCompanyName || this.state.newCompany) ?
+                        this.getCompanyDisplay() :
+                        <>
+                            <Button
+                                primary
+                                color="blue"
+                                type="button"
+                                onClick={() => {this.setState({companyModalOpen: true})}}
+                            >
+                                Add Company/Organization
+                            </Button>
+                            <CompanySelectionModal
+                                getInput={this.getCompanyInput}
+                                modalOpen={this.state.companyModalOpen}
+                                closeModal={this.handleCompanySelectionModal}
+                            />
+                        </>
+                    }
+                </Form.Field>
+                <Form.Field
+                >
+                    <label>Job Title</label>
+                    {
+                        (this.state.existingJobTitleName || this.state.newJobTitle) ?
+                        this.getJobTitleDisplay() :
+                        <>
+                            <Button
+                                primary
+                                color="blue"
+                                type="button"
+                                onClick={() => {this.setState({jobTitleModalOpen: true})}}
+                            >
+                                Add Job Title
+                            </Button>
+                            <JobTitleSelectionModal
+                                getInput={this.getJobTitleInput}
+                                modalOpen={this.state.jobTitleModalOpen}
+                                closeModal={this.handleJobTitleSelectionModal}
+                            />
+                        </>
+                    }
+                </Form.Field>
+                <Form.Field
+                >
+                    <label>Interests</label>
+                    <>
+                        {this.getInterestsForDisplay()}
+                        <AddInterestsModal
+                            getInput={this.getInterestsInput}
+                            modalOpen={this.state.interestsModalOpen}
+                            closeModal={this.handleInterestsModal}
                         />
-                    </Form.Field>
-                }
+                    </>
+                </Form.Field>
             </>
         )
     }
