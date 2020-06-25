@@ -36,7 +36,7 @@ export const timeSlotOptions = [
  * PROPS
  * userDetails - full profile of logged in user
  */
-export default class RequestsView extends Component {
+export default class AlumniMentorship extends Component {
     constructor(props){
         super(props)
         this.state={
@@ -195,6 +195,7 @@ class RequestCards extends Component {
     }
 
     constructRequest(request) {
+        const cardHeader = (this.props.activeSet !== 'completed'? 'Meeting requested by: ' : 'Completed call with: ')
         return (
             <Grid key={request._id} columns={'equal'}>
             <Grid.Row columns={2}>
@@ -203,20 +204,20 @@ class RequestCards extends Component {
                         size='small'
                         centered
                         rounded
-                        src={request.requesterObj.imageURL}
+                        src={request.student.imageURL}
                     />
                 </Grid.Column>
                 <Grid.Column>
                     <Card fluid>
                         <Card.Content>
                             <Card.Header>
-                                Request from {request.requesterObj.name} ({request.requesterRole.toLowerCase()})
+                                {cardHeader} {request.student.name}
                             </Card.Header>           
                             <Card.Meta>{request.status}</Card.Meta>
                             <Card.Description>Topic: {request.topic}</Card.Description>
                             <Card.Description>Time: {request.time[0].day} from {timeSlotOptions[request.time[0].time/100]}</Card.Description>
-                            { request.note &&
-                                <Card.Description>Note from requester: {request.note}</Card.Description>
+                            { request.studentNote &&
+                                <Card.Description>Note from student: {request.studentNote}</Card.Description>
                             }
                             { request.finalNote &&
                                 <Card.Description>Final note from mentor: {request.finalNote}</Card.Description>
@@ -357,7 +358,7 @@ class RequestCards extends Component {
             <>
             {this.state.showFeedbackModal && 
                 <Modal open={this.state.showFeedbackModal}>
-                    <Modal.Header>Leave a final note for {this.state.requestDetails.requesterObj.name}</Modal.Header>
+                    <Modal.Header>Leave a final note for {this.state.requestDetails.student.name}</Modal.Header>
                     <Modal.Content>
                     <Grid stackable>
                         <Grid.Row columns={"equal"}>
@@ -365,14 +366,14 @@ class RequestCards extends Component {
                                 <Image
                                     floated='left'
                                     size='small'
-                                    src={this.state.requestDetails.requesterObj.imageURL}
+                                    src={this.state.requestDetails.student.imageURL}
                                     rounded
                                 />
                             </Grid.Column>
                             <Grid.Column>
                                 <Form>
                                     <Form.TextArea 
-                                        label={'Leave a note for ' + this.state.requestDetails.requesterObj.name + ':'}
+                                        label={'Leave a note for ' + this.state.requestDetails.student.name + ':'}
                                         placeholder='Provide a recap or leave any other useful notes here!'
                                         onChange={this.handleValueChange.bind(this)}
                                         value={this.state.finalNote}

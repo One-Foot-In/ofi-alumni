@@ -36,7 +36,7 @@ export const timeSlotOptions = [
  * PROPS
  * userDetails - full profile of logged in user
  */
-export default class SchedulingsView extends Component {
+export default class StudentMentorship extends Component {
     constructor(props){
         super(props)
         this.state={
@@ -70,7 +70,7 @@ export default class SchedulingsView extends Component {
         })
     }
     getSchedulings(timeOffset) {
-        return makeCall({}, '/request/getSchedulings/'+this.props.userDetails._id +'/'+ this.props.role +'/' + timeOffset, 'get')
+        return makeCall({}, '/request/getSchedulings/'+ this.props.userDetails._id +'/' + timeOffset, 'get')
     }
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
@@ -116,7 +116,6 @@ export default class SchedulingsView extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
-                        userRole={this.props.role}
                     />
                 </div>
             }
@@ -128,7 +127,6 @@ export default class SchedulingsView extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
-                        userRole={this.props.role}
                     />
                 </div>
             }
@@ -140,7 +138,6 @@ export default class SchedulingsView extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
-                        userRole={this.props.role}
                     />
                 </div>
             }
@@ -184,6 +181,7 @@ class SchedulingCards extends Component {
     }
 
     constructRequest(scheduling) {
+        const cardHeader = (this.props.activeSet !== 'completed'? 'Meeting with: ' : 'Completed call with: ')
         return (
             <Grid key={scheduling._id} columns={'equal'}>
             <Grid.Row columns={2}>
@@ -199,13 +197,13 @@ class SchedulingCards extends Component {
                     <Card fluid>
                         <Card.Content>
                             <Card.Header>
-                                Scheduling With: {scheduling.mentor.name}
+                                {cardHeader} {scheduling.mentor.name}
                             </Card.Header>           
                             <Card.Meta>{scheduling.status}</Card.Meta>
                             <Card.Description>Topic: {scheduling.topic}</Card.Description>
                             <Card.Description>Time: {scheduling.time[0].day} from {timeSlotOptions[scheduling.time[0].time/100]}</Card.Description>
-                            {scheduling.note &&
-                                <Card.Description>Your Note: {scheduling.note}</Card.Description>
+                            {scheduling.studentNote &&
+                                <Card.Description>Your Note: {scheduling.studentNote}</Card.Description>
                             }
                             {scheduling.finalNote &&
                                 <Card.Description>Final note from mentor: {scheduling.finalNote}</Card.Description>
@@ -277,7 +275,7 @@ class SchedulingCards extends Component {
         let schedulings = await makeCall({
                 requestId: e.currentTarget.getAttribute('requestid'),
                 newStatus: e.currentTarget.getAttribute('newstatus')
-            }, '/request/updateScheduling/' + this.props.userId + '/' + this.props.userRole + '/' + this.props.timeOffset, 'patch');
+            }, '/request/updateScheduling/' + this.props.userId + '/' + this.props.timeOffset, 'patch');
         if (!schedulings || schedulings.error) {
             swal({
                 title: "Error!",
@@ -312,7 +310,7 @@ class SchedulingCards extends Component {
         let requests = await makeCall({
             requestId: this.state.schedulingDetails._id,
             feedback: this.state.feedback
-        }, `/request/leaveFeedback/${this.props.userId}/${this.props.userRole}/${this.props.timeOffset}`, 'patch')
+        }, `/request/leaveFeedback/${this.props.userId}/${this.props.timeOffset}`, 'patch')
         this.setState({showFeedbackModal: !this.state.showFeedbackModal})
         this.props.liftSchedulings(requests)
     }

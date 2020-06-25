@@ -148,17 +148,9 @@ export default class NewsFeed extends Component {
      */ 
     createCallConfirmedPost(feedItem) {
         try {
-            let mentorDetails
-            let menteeDetails
-            let alumniRequestingAlumni = !feedItem.students.length
-            if (alumniRequestingAlumni) {
-                // mentor is first entry in list
-                mentorDetails = feedItem.alumni[0]
-                menteeDetails = feedItem.alumni[1]
-            } else {
-                menteeDetails = feedItem.students[0]
-                mentorDetails = feedItem.alumni[0]
-            }
+            const mentorDetails = feedItem.alumni[0]
+            const menteeDetails = feedItem.students[0]
+
             return(
                 <Feed.Event key={feedItem._id}>
                     <Feed.Label>
@@ -181,17 +173,13 @@ export default class NewsFeed extends Component {
                             </Modal>
                             {` confirmed a call with `}
                             <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
-                                <Feed.User>{menteeDetails.name} {alumniRequestingAlumni ? `(Alumni)` : `(Student)`}</Feed.User>
+                                <Feed.User>{menteeDetails.name}</Feed.User>
                             }>
                                 <Header>
                                     Details for {menteeDetails.name}
                                 </Header>
                                 <Modal.Content>
-                                    {
-                                        alumniRequestingAlumni ? 
-                                        <AlumniProfile details={menteeDetails} isViewOnly={true} /> :
-                                        <StudentProfile details={menteeDetails} isViewOnly={true} />
-                                    }
+                                    <StudentProfile details={menteeDetails} isViewOnly={true} />
                                 </Modal.Content>
                             </Modal> to discuss {feedItem.supportData && feedItem.supportData.topic}
                                 <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
@@ -250,7 +238,7 @@ export default class NewsFeed extends Component {
             <Segment style={{'marginBottom': '1em'}}>
                 <Header>
                     <Icon name={'newspaper outline'}/>
-                    <Header.Content>Recent News</Header.Content>
+                    <Header.Content>News</Header.Content>
                 </Header>
                 <Feed>
                     {
