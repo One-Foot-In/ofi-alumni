@@ -11,11 +11,29 @@ var interestsSchema = require('../models/interestsSchema');
 var companySchema = require('../models/companySchema');
 var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
+var majorSchema = require('../models/majorSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
+
+/**
+ * Prevents users from accidentally creating an existing item as a custom new entry
+ * @param {String} newItem 
+ * @param {MongooseSchema} schema 
+ */
+const generateNewIfAbsent = async (newItem, schema) => {
+    let itemFound = await schema.find({name: newItem})
+    if (!itemFound.length) {
+        var newItemCreated = new schema({
+            name: newItem
+        })
+        await newItemCreated.save()
+        return newItemCreated
+    }
+    return itemFound[0]
+}
 
 const generateNewAndExistingInterests = async (existingInterests, newInterests) => {
     const existingInterestsIds = existingInterests.map(interest => interest.value).flat()
@@ -71,12 +89,18 @@ router.post('/', async (req, res, next) => {
         let existingCollegeId = req.body.existingCollegeId
         var college
         if (newCollege) {
-            var newCollegeCreated = new collegeSchema({
-                name: newCollege,
-                country: collegeCountry
-            })
-            await newCollegeCreated.save()
-            college = newCollegeCreated
+            // to prevent users from accidentally adding an existing college as custom entry
+            let collegeFound = await collegeSchema.find({name: newCollege, country: collegeCountry})
+            if (!collegeFound.length) {
+                var newCollegeCreated = new collegeSchema({
+                    name: newCollege,
+                    country: collegeCountry
+                })
+                await newCollegeCreated.save()
+                college = newCollegeCreated
+            } else {
+                college = collegeFound[0]
+            }
         } else if (existingCollegeId) {
             college = await collegeSchema.findOne({_id: existingCollegeId})
         }
@@ -86,11 +110,7 @@ router.post('/', async (req, res, next) => {
         const newJobTitle = req.body.newJobTitle
         var jobTitle
         if (newJobTitle) {
-            var newJobTitleCreated = new jobTitleSchema({
-                name: newJobTitle
-            })
-            await newJobTitleCreated.save()
-            jobTitle = newJobTitleCreated
+            jobTitle = await generateNewIfAbsent(newJobTitle, jobTitleSchema)
         } else if (existingJobTitleId) {
             jobTitle = await jobTitleSchema.findOne({_id: existingJobTitleId})
         }
@@ -100,13 +120,19 @@ router.post('/', async (req, res, next) => {
         const newCompany = req.body.newCompany
         var company
         if (newCompany) {
-            var newCompanyCreated = new companySchema({
-                name: newCompany
-            })
-            await newCompanyCreated.save()
-            var company = newCompanyCreated
+            company = await generateNewIfAbsent(newCompany, companySchema)
         } else if (existingCompanyId) {
             company = await companySchema.findOne({_id: existingCompanyId})
+        }
+
+        // find or create Major
+        const existingMajorId = req.body.existingMajorId
+        const newMajor = req.body.newMajor
+        var major
+        if (newMajor) {
+            major = await generateNewIfAbsent(newMajor, majorSchema)
+        } else if (existingMajorId) {
+            major = await majorSchema.findOne({_id: existingMajorId})
         }
 
         const existingInterests = req.body.existingInterests
@@ -139,7 +165,9 @@ router.post('/', async (req, res, next) => {
                 zoomLink: zoomLink,
                 approved: approved,
                 school: schoolId,
-                schoolLogo: school.logoURL
+                schoolLogo: school.logoURL,
+                major: major,
+                majorName: major && major.name
             }
         )
         const user_instance = new userSchema(

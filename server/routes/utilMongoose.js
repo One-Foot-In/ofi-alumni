@@ -10,6 +10,7 @@ var schoolSchema = require('../models/schoolSchema');
 var collegeSchema = require('../models/collegeSchema');
 var companySchema = require('../models/companySchema');
 var jobTitleSchema = require('../models/jobTitleSchema');
+var majorSchema = require('../models/majorSchema');
 var interestsSchema = require('../models/interestsSchema');
 var newsSchema = require('../models/newsSchema');
 require('mongoose').Promise = global.Promise
@@ -32,6 +33,7 @@ const cities = ["St Johnsberg", "Old York City", "Khola", "San Disco", "Jelhi", 
 const professionFirst = ["Angsty", "Focused", "Bewitched", "Destitute", "Fumbling", "Grandiose", "Dextrous", "Giant", "Manual", "Thirsty", "Zoned out", "Astute"]
 const professionSecond = ["Trader", "Engineer", "Painter", "Student", "Assistant", "Clerk", "Banker", "Architect", "Addict", "Surgeon", "Designer", "Tailor", "Duck"]
 const companies = ["Global Business Machines", "Butt Book", "Capture Inc", "Amazon (The Rainforest)", "Chirper", "TripGuide", "Minisoft", "AT or T", "Pillow Housing", "Goldman Tax", "Tubspot"]
+const majors = ["Aerospace Engineering", "Peace and Justice Studies", "Ultimate Fight Science", "Production Engineering", "Biomedical Engineering", "Music Theory", "Science of Batman", "Econometrics", "Psychology", "Finance", "Pre-med"]
 
 const colleges = [
     "Hogwarts School of WitchCraft and Wizardry", "Elephants on the Hill", "Larvard", "Pepsodent", "Boston Institute of Technology", "Ben and Jerry's", "Lannister University",
@@ -56,7 +58,7 @@ const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _schoolLogo, _interests) => {
+const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _schoolLogo, _interests, _major) => {
     const email = _email;
     const gradYear = Math.floor((Math.random() * 1000) + 2000);
     const zoomLink = _hasZoom ? 'yourZoomLink' : null;
@@ -88,7 +90,9 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             approved: approved,
             timeZone: timezone,
             school: _school,
-            schoolLogo: _schoolLogo
+            schoolLogo: _schoolLogo,
+            major: _major,
+            majorName: _major.name
         }
     )
     const user_instance = new userSchema(
@@ -195,6 +199,14 @@ router.get('/seed/', async (req, res, next) => {
             await jobTitle_instance.save()
         }
         let jobTitlesSaved = await jobTitleSchema.find()
+        // create majors
+        for (let i = 0; i < majors.length; i++) {
+            let major_instance = new majorSchema({
+                name: majors[i]
+            })
+            await major_instance.save()
+        }
+        let majorsSaved = await majorSchema.find()
 
         // create interests
         for (let i = 0; i < interests.length; i++) {
@@ -219,7 +231,8 @@ router.get('/seed/', async (req, res, next) => {
             let college = randomPickFromArray(collegesSaved)
             let hasZoom = randomPickFromArray([true, false])
             let timezoneAlumni = randomPickFromArray(timezones)
-            await createAlumni(alumniEmail, alumniName, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school, school.logoURL, interests)
+            let major = randomPickFromArray(majorsSaved)
+            await createAlumni(alumniEmail, alumniName, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezoneAlumni, school, school.logoURL, interests, major)
 
             // create mock student
             let studentEmail = `student${i}@ofi.com`
@@ -533,6 +546,16 @@ router.get('/allCompanies', async (req, res) => {
     }
 })
 
+/* Major Routes */
+router.get('/allMajors', async (req, res) => {
+    try {
+        let majors = await majorSchema.find()
+        res.status(200).send(majors)
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
 /* Newsfeed Routes */
 router.get('/allNews', async (req, res) => {
     try {
@@ -577,6 +600,7 @@ router.get('/data/clear/all', async (req, res, next) => {
         await interestsSchema.deleteMany({});
         await companySchema.deleteMany({});
         await newsSchema.deleteMany({});
+        await majorSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});

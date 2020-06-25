@@ -406,6 +406,7 @@ export default class AlumniProfile extends Component {
                     <Card.Description>College: {details.collegeName || 'Unavailable'}</Card.Description>
                     <Card.Description>Location: {(details.city && details.country) ? `${details.city} (${details.country})` : 'Unavailable'}</Card.Description>
                     <Card.Description>Company: {details.companyName || 'Unavailable'}</Card.Description>
+                    <Card.Description>Major: {details.majorName || 'Unavailable'}</Card.Description>
                     
                 </Card.Content>
                 <Card.Content>

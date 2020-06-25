@@ -5,6 +5,7 @@ var schoolSchema = require('../models/schoolSchema');
 var collegeSchema = require('../models/collegeSchema');
 var jobTitleSchema = require('../models/jobTitleSchema');
 var companySchema = require('../models/companySchema');
+var majorSchema = require('../models/majorSchema');
 var interestsSchema = require('../models/interestsSchema');
 var COUNTRIES = require("../countries").COUNTRIES
 require('mongoose').Promise = global.Promise
@@ -39,7 +40,7 @@ router.get('/schoolsOptions', async (req, res) => {
       res.status(200).send({options: schoolOptions})
     } catch (e) {
       console.log("Error index.js#schoolsOptions")
-      res.status(500).json({Success:false, error: e})
+      res.status(500).json({success:false, error: e})
     }
 })
 
@@ -56,7 +57,7 @@ router.get('/jobTitles', async (req, res) => {
     res.status(200).send({options: jobTitlesOptions})
   } catch (e) {
     console.log("Error index.js#jobTitlesOptions", e)
-    res.status(500).json({Success:false, error: e})
+    res.status(500).json({success:false, error: e})
   }
 })
 
@@ -73,7 +74,24 @@ router.get('/companies', async (req, res) => {
     res.status(200).send({options: companiesOptions})
   } catch (e) {
     console.log("Error index.js#companiesOptions", e)
-    res.status(500).json({Success:false, error: e})
+    res.status(500).json({success:false, error: e})
+  }
+})
+
+router.get('/majors', async (req, res) => {
+  try {
+    let majors = await majorSchema.find()
+    let majorsOptions = majors.map( major => {
+      return {
+        key: major.name,
+        value: major._id,
+        text: major.name,
+      }
+    })
+    res.status(200).send({options: majorsOptions})
+  } catch (e) {
+    console.log("Error index.js#majorsOptions", e)
+    res.status(500).json({success:false, error: e})
   }
 })
 
@@ -90,7 +108,7 @@ router.get('/interests', async (req, res) => {
     res.status(200).send({options: interestsOptions})
   } catch (e) {
     console.log("Error index.js#interestsOptions", e)
-    res.status(500).json({Success:false, error: e})
+    res.status(500).json({success:false, error: e})
   }
 })
 
@@ -108,7 +126,7 @@ router.get('/colleges/:country', async (req, res) => {
     res.status(200).send({options: collegeOptions})
   } catch (e) {
     console.error("Error dropdown.js#collegeOptions", e)
-    res.status(500).json({Success:false, error: e})
+    res.status(500).json({success:false, error: e})
   }
 })
 

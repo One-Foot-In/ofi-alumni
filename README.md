@@ -22,4 +22,4 @@ We rely heavily on the [Semantic UI React library](https://react.semantic-ui.com
 
 ## Starting mongo locally
 
-* Use `mongod --dbpath==data/db`
+* Use `mongod --dbpath=data/db`

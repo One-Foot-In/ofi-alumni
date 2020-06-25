@@ -30,8 +30,8 @@ const alumniSchema = new Schema(
     companyName: {type: String, required: false}, // to avoid lookup for display purposes
     jobTitle: {type: Schema.Types.ObjectId, ref: 'JobTitle', required: false},
     jobTitleName: {type: String, required: false}, // to avoid lookup for display purposes
-    college: {type: Schema.Types.ObjectId, ref: 'College', required: false},
-    collegeName: {type: String, required: false}, // to avoid lookup for display purposes
+    college: {type: Schema.Types.ObjectId, ref: 'College', required: true},
+    collegeName: {type: String, required: true}, // to avoid lookup for display purposes
     interests: {type: Array, required: false},
     //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
     //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
@@ -41,7 +41,9 @@ const alumniSchema = new Schema(
     zoomLink: {type: String, required: false},
     approved: {type: Boolean, default: false},
     school: {type: Schema.Types.ObjectId, ref: 'School', required: true},
-    schoolLogo: {type: String, default:'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
+    schoolLogo: {type: String, default:'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'},
+    major: {type: Schema.Types.ObjectId, ref: 'Major', required: true},
+    majorName: {type: String, required: true}, // to avoid lookup for display purposes
   }
 );
 
