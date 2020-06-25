@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Message, Form, Modal, Menu, Label, Card, Grid, Image, Button, Header, Segment } from 'semantic-ui-react';
+import { Message, Form, Modal, Menu, Label, Card, Grid, Image, List, Button, Header, Segment } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
 import TopicPreferencesModal from './TopicPreferencesModal'
@@ -238,7 +238,7 @@ export default class AlumniMentorship extends Component {
         let topicListItems = []
         for (let topic of details.topics) {
             topicListItems.push(
-                <li>{topic}</li>
+                <List.Item>{topic}</List.Item>
             )
         }
 
@@ -328,7 +328,7 @@ export default class AlumniMentorship extends Component {
             {this.state.activeItem ==='settings' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
                     <Segment>
-                        <Grid verticalAlign='middle' celled>
+                        <Grid verticalAlign='middle' divided={'vertically'}>
                             <Grid.Row columns={'equal'}>
                                 <Grid.Column>
                                     <Header as='h3'> Current Meeting Link:</Header>
@@ -339,10 +339,11 @@ export default class AlumniMentorship extends Component {
                                 </Grid.Column>
                             </Grid.Row>
                             <Grid.Row columns={'equal'}>
-                                <Grid.Column>
+                                <Grid.Column width={6}>
                                     <Header as='h3'> Current Topic Availabilities:</Header>
-                                    <ul>{topicListItems}</ul>
+                                    <List divided bulleted>{topicListItems}</List>
                                 </Grid.Column>
+                                <Grid.Column></Grid.Column>
                                 <Grid.Column width={4}>
                                     {topicAvailabilitiesUpdate}
                                 </Grid.Column>
