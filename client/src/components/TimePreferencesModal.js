@@ -75,7 +75,7 @@ export const timeSlotOptions = [
     {
         key: 'slot13',
         value: 1200,
-        text: '12p - 1pm'
+        text: '12pm - 1pm'
     },
     {
         key: 'slot14',

@@ -68,12 +68,6 @@ export default class AlumniProfile extends Component {
             locationModalOpen: false,
             removingInterest: false
         }
-        this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
-        this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
-        this.openTopicPreferencesModal = this.openTopicPreferencesModal.bind(this)
-        this.closeTopicPreferencesModal = this.closeTopicPreferencesModal.bind(this)
-        this.openZoomUpdateModal = this.openZoomUpdateModal.bind(this)
-        this.closeZoomUpdateModal = this.closeZoomUpdateModal.bind(this)
         this.openImageModal = this.openImageModal.bind(this)
         this.closeImageModal = this.closeImageModal.bind(this)
         this.openInterestsModal = this.openInterestsModal.bind(this)
@@ -84,42 +78,7 @@ export default class AlumniProfile extends Component {
         this.closeLocationUpdateModal = this.closeLocationUpdateModal.bind(this)
         this.getInterests = this.getInterests.bind(this)
     }
-    closeTimePreferencesModal() {
-        this.setState({
-            timePreferencesModalOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openTimePreferencesModal() {
-        this.setState({
-            timePreferencesModalOpen: true
-        })
-    }
-    closeTopicPreferencesModal() {
-        this.setState({
-            topicPreferencesModalOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openTopicPreferencesModal() {
-        this.setState({
-            topicPreferencesModalOpen: true
-        })
-    }
-    closeZoomUpdateModal() {
-        this.setState({
-            zoomUpdateOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openZoomUpdateModal() {
-        this.setState({
-            zoomUpdateOpen: true
-        })
-    }
+
     openImageModal() {
         this.setState({
             imageModalOpen: true
@@ -205,13 +164,6 @@ export default class AlumniProfile extends Component {
     render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-        let availabilities = details.availabilities;
-        let topics = details.topics;
-        let zoomLink = details.zoomLink;
-        availabilities = availabilities.map(timeSlot => {
-                timeSlot.text = `${timeSlot.day} ${timeToSlot[timeSlot.time]}`
-                return timeSlot
-            })
         const linkedInUpdate = (
             <LinkedInUpdate
                 email={details.email}
@@ -236,64 +188,6 @@ export default class AlumniProfile extends Component {
             />
             </>
         )
-        const timeAvailabilitiesUpdate = (
-            <>
-            <Button
-                style={{'margin-right': '5px'}}
-                floated='right'
-                basic
-                color="blue"
-                onClick={this.openTimePreferencesModal}
-            >
-                Update Time Availabilities
-            </Button>
-            <TimePreferencesModal
-                modalOpen={this.state.timePreferencesModalOpen}
-                timePreferences={availabilities || []}
-                closeModal={this.closeTimePreferencesModal}
-                id={details._id}
-            />
-            </>
-        )
-        const topicAvailabilitiesUpdate = (
-            <>
-            <Button
-                primary
-                style={{'margin-left': '2px'}}
-                floated='right'
-                color="blue"
-                onClick={this.openTopicPreferencesModal}
-            >
-                Update Topic Preferences
-            </Button>
-            <TopicPreferencesModal
-                modalOpen={this.state.topicPreferencesModalOpen}
-                topicPreferences={topics || []}
-                closeModal={this.closeTopicPreferencesModal}
-                id={details._id}
-            />
-            </>
-        )
-        const zoomLinkUpdate = (
-            <>
-             <Button
-                primary
-                style={{'margin-right': '5px'}}
-                floated='right'
-                color="blue"
-                onClick={this.openZoomUpdateModal}
-            >
-                Update Zoom Meeting ID
-            </Button>
-            <ZoomUpdateModal
-                modalOpen={this.state.zoomUpdateOpen}
-                zoomLink={zoomLink || ''}
-                closeModal={this.closeZoomUpdateModal}
-                id={details._id}
-            />
-            </>
-        )
-
         const interestsUpdate = (
             <>
             <Button
@@ -357,7 +251,7 @@ export default class AlumniProfile extends Component {
             canUpdate = (
                 <>
                 <Card.Content extra>
-                    <Grid stackable centered columns={4}>
+                    <Grid stackable centered columns={3}>
                         <Grid.Column width={4}>
                             <Button.Group vertical>
                                 {linkedInUpdate}
@@ -372,13 +266,6 @@ export default class AlumniProfile extends Component {
                         </Grid.Column>
                         <Grid.Column width={4}>
                             <Button.Group vertical>
-                                {zoomLinkUpdate}
-                                {timeAvailabilitiesUpdate}
-                            </Button.Group>
-                        </Grid.Column>
-                        <Grid.Column width={4}>
-                            <Button.Group vertical>
-                                {topicAvailabilitiesUpdate}
                                 {interestsUpdate}
                             </Button.Group>
                         </Grid.Column>

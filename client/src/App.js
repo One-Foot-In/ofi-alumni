@@ -327,6 +327,7 @@ class App extends Component {
                       />
                       <AlumniMentorship 
                           userDetails={this.state.userDetails}
+                          refreshProfile={this.refreshProfile}
                       />
                   </> :
                   <Redirect to={"/login"}/>
