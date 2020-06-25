@@ -246,7 +246,7 @@ export default class Signup extends React.Component {
                             style={{
                                 'margin': '3px'
                             }}
-                            color='blue'
+                            color='teal'
                         >
                             {interest.text}
                             {
@@ -263,6 +263,7 @@ export default class Signup extends React.Component {
                 primary
                 color="blue"
                 type="button"
+                size="mini"
                 onClick={() => {this.setState({interestsModalOpen: true})}}
             >
                 {allInterests.length ? `Add more Interests` : `Add Interests`}
