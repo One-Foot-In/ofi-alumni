@@ -169,10 +169,10 @@ export default class AlumniDirectory extends Component {
                                     primary 
                                     data-id={i}
                                     onClick={this.handleRequestButton.bind(this)}>
-                                        Make Request
+                                        Connect with {post.name}!
                                     </Button>
                 } else {
-                    requestButton = <Button disabled>Make Request</Button>
+                    requestButton = <Button disabled>Connect with {post.name}!</Button>
                 }
             } else {
                 requestButton = null;

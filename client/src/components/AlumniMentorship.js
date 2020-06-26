@@ -388,8 +388,10 @@ class RequestCards extends Component {
         requests: [],
         display: [],
         showFeedbackModal: false,
+        showAlumniNoteModal: false,
         requestDetails: null,
-        finalNote: ''
+        finalNote: '',
+        alumniNote: ''
     }
     // This allows the component to update its state should a prop value change
     async componentWillReceiveProps({requests}) {
@@ -421,16 +423,19 @@ class RequestCards extends Component {
                                 {cardHeader} {request.student.name}
                             </Card.Header>           
                             <Card.Meta>{request.status}</Card.Meta>
-                            <Card.Description>Topic: {request.topic}</Card.Description>
-                            <Card.Description>Time: {request.time[0].day} from {timeSlotOptions[request.time[0].time/100]}</Card.Description>
+                            <Card.Description><b>Topic:</b> {request.topic}</Card.Description>
+                            <Card.Description><b>Time:</b> {request.time[0].day} from {timeSlotOptions[request.time[0].time/100]}</Card.Description>
                             { request.studentNote &&
-                                <Card.Description>Note from student: {request.studentNote}</Card.Description>
+                                <Card.Description><b>Note from student:</b> {request.studentNote}</Card.Description>
+                            }
+                            { request.alumniNote &&
+                                <Card.Description><b>Your pre-meeting note:</b> {request.alumniNote}</Card.Description>
                             }
                             { request.finalNote &&
-                                <Card.Description>Final note from mentor: {request.finalNote}</Card.Description>
+                                <Card.Description><b>Your final note:</b> {request.finalNote}</Card.Description>
                             }
-                            { request.feedback &&
-                                <Card.Description>Feedback for mentor: {request.feedback}</Card.Description>
+                            { request.publicFeedback &&
+                                <Card.Description><b>Feedback for you:</b> {request.publicFeedback}</Card.Description>
                             }
                             <br />
                         </Card.Content>
@@ -468,6 +473,17 @@ class RequestCards extends Component {
             )
         } else if (this.props.activeSet === 'confirmed') {
             return(
+                <>
+                {!request.alumniNote && 
+                    <Button
+                        color='standard'
+                        onClick={this.toggleAlumniNoteModal.bind(this)}
+                        requestid={request._id}
+                    >
+                        Leave a pre-meeting note
+                    </Button>
+                }
+                    
                 <Button.Group compact>
                     <Button 
                         color='blue' 
@@ -487,8 +503,9 @@ class RequestCards extends Component {
                         Mark Completed!
                     </Button>
                 </Button.Group>
+                </>
             )
-        } else if (this.props.activeSet === 'completed') {
+        } else if (this.props.activeSet === 'completed' && !request.finalNote) {
             return(
                 <Button
                     color='teal'
@@ -535,6 +552,30 @@ class RequestCards extends Component {
             finalNote: finalNote
         })
     }
+
+    toggleAlumniNoteModal(e) {
+        let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
+        console.log(requestDetails)
+        let alumniNote = null
+        if (requestDetails) {
+            alumniNote = requestDetails.alumniNote
+        }
+        this.setState({
+            showAlumniNoteModal: !this.state.showAlumniNoteModal,
+            requestDetails: requestDetails,
+            alumniNote: alumniNote
+        })
+    }
+
+    async submitAlumniNote(e) {
+        let requests = await makeCall({
+            requestId: this.state.requestDetails._id,
+            alumniNote: this.state.alumniNote
+        }, `/request/leaveAlumniNote/${this.props.userId}/${this.props.timeOffset}`, 'patch')
+        this.setState({showAlumniNoteModal: !this.state.showAlumniNoteModal})
+        this.props.liftRequests(requests)
+    }
+
 
     async submitFinalNote(e) {
         let requests = await makeCall({
@@ -595,7 +636,45 @@ class RequestCards extends Component {
                         <Button onClick={this.toggleFeedbackModal.bind(this)}>
                             Done
                         </Button>
-                        <Button onClick={this.submitFinalNote.bind(this)} primary>
+                        <Button onClick={this.submitFinalNote.bind(this)} disabled={!this.state.finalNote} primary>
+                            Submit
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
+            }
+            {this.state.showAlumniNoteModal &&
+                <Modal open={this.state.showAlumniNoteModal}>
+                    <Modal.Header>Leave a pre-meeting note for {this.state.requestDetails.student.name}</Modal.Header>
+                    <Modal.Content>
+                    <Grid stackable>
+                        <Grid.Row columns={"equal"}>
+                            <Grid.Column width={4}>
+                                <Image
+                                    floated='left'
+                                    size='small'
+                                    src={this.state.requestDetails.student.imageURL}
+                                    rounded
+                                />
+                            </Grid.Column>
+                            <Grid.Column>
+                                <Form>
+                                    <Form.TextArea 
+                                        label={'Leave a note for ' + this.state.requestDetails.student.name + ':'}
+                                        placeholder='Include useful readings and other useful preparations here!'
+                                        onChange={this.handleValueChange.bind(this)}
+                                        value={this.state.alumniNote}
+                                        name='alumniNote'
+                                    />
+                                </Form>
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={this.toggleFeedbackModal.bind(this)}>
+                            Done
+                        </Button>
+                        <Button onClick={this.submitAlumniNote.bind(this)} disabled={!this.state.alumniNote} primary>
                             Submit
                         </Button>
                     </Modal.Actions>
