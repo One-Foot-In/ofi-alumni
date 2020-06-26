@@ -1,20 +1,25 @@
 import React, { Component } from 'react';
 import {Button, Modal } from 'semantic-ui-react';
-import PooledSingleSelectDropdown from "./PooledSingleSelectDropdown"
+import PooledSingleSelectDropdown from "../PooledSingleSelectDropdown"
+import { makeCall } from "../../apis";
+import swal from "sweetalert";
 
 /*
+    Modal makes a PATCH call to update alumni information
     props:
     - modalOpen
     - closeModal: ()
     - getInput: ()
+    - id
 */
-export default class JobTitleSelectionModal extends Component {
+export default class JobTitleUpdateModal extends Component {
     constructor(props){
         super(props)
         this.state = {
             newJobTitle: '', // name when new major entered
             existingJobTitleId: '', // mongoId when existing major selected
-            existingJobTitleName: ''
+            existingJobTitleName: '',
+            submitting: false
         }
         this.getJobTitleInput = this.getJobTitleInput.bind(this)
         this.submit = this.submit.bind(this)
@@ -46,8 +51,48 @@ export default class JobTitleSelectionModal extends Component {
 
     submit(e) {
         e.preventDefault()
-        this.props.getInput(this.state.newJobTitle || this.state.existingJobTitleName, this.state.existingJobTitleId)
-        this.props.closeModal()
+        this.setState({
+            submitting: true
+        }, async () => {
+            let payload = {
+                existingJobTitleId: this.state.existingJobTitleId,
+                existingJobTitleName: this.state.existingJobTitleName,
+                newJobTitle: this.state.newJobTitle,
+            }
+            try {
+                const result = await makeCall(payload, `/alumni/jobTitle/update/${this.props.id}`, 'patch')
+                if (!result || result.error) {
+                    this.setState({
+                        submitting: false
+                    }, () => {
+                        swal({
+                            title: "Error!",
+                            text: "There was an error updating your job title information, please try again.",
+                            icon: "error",
+                        });
+                    })
+                } else {
+                    this.setState({
+                        submitting: false
+                    }, () => {
+                        swal({
+                            title: "Done!",
+                            text: "Your job title has been successfully updated!",
+                            icon: "success",
+                        }).then(() => {
+                            this.props.closeModal();
+                        })
+                    })
+                    
+                }
+            } catch (e) {
+                this.setState({
+                    submitting: false
+                }, () => {
+                    console.log("Error: JobTitleUpdateModal#submit", e);
+                })
+            }
+        })
     }
 
     render() {
@@ -66,6 +111,7 @@ export default class JobTitleSelectionModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
+                        disabled={!this.state.newJobTitle && !this.state.existingJobTitleId}
                         onClick={this.submit}>
                         Submit
                     </Button>

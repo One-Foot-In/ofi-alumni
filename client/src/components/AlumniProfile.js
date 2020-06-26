@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
-import { Button, Card, Image, Grid, Label, Icon, Segment } from 'semantic-ui-react';
-import LinkedInUpdate from "./LinkedInUpdate";
-import TimePreferencesModal from './TimePreferencesModal';
-import TopicPreferencesModal from './TopicPreferencesModal';
-import ZoomUpdateModal from './ZoomUpdateModal';
+import { Button, Card, Image, Label, Icon, Segment } from 'semantic-ui-react';
 import ImageUpdateModal from './ImageUpdateModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
 import LocationUpdateModal from './LocationUpdateModal';
-import AlumniCollegeCareerUpdateModal from './AlumniCollegeCareerUpdateModal';
+import JobTitleUpdateModal from './alumni_profile_update_modals/JobTitleUpdateModal';
+import CollegeUpdateModal from './alumni_profile_update_modals/CollegeUpdateModal';
+import CompanyUpdateModal from './alumni_profile_update_modals/CompanyUpdateModal';
+import MajorUpdateModal from './alumni_profile_update_modals/MajorUpdateModal';
 import { makeCall } from "../apis";
 
 const ALUMNI = "ALUMNI"
@@ -59,66 +58,29 @@ export default class AlumniProfile extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            timePreferencesModalOpen: false,
-            topicPreferencesModalOpen: false,
-            zoomUpdateOpen: false,
-            imageModalOpen: false,
             interestsModalOpen: false,
-            collegeAndCareerModalOpen: false,
             locationModalOpen: false,
+            jobTitleModalOpen: false,
+            collegeModalOpen: false,
+            companyModalOpen: false,
+            majorModalOpen: false,
             removingInterest: false
         }
-        this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
-        this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
-        this.openTopicPreferencesModal = this.openTopicPreferencesModal.bind(this)
-        this.closeTopicPreferencesModal = this.closeTopicPreferencesModal.bind(this)
-        this.openZoomUpdateModal = this.openZoomUpdateModal.bind(this)
-        this.closeZoomUpdateModal = this.closeZoomUpdateModal.bind(this)
         this.openImageModal = this.openImageModal.bind(this)
         this.closeImageModal = this.closeImageModal.bind(this)
         this.openInterestsModal = this.openInterestsModal.bind(this)
         this.closeInterestsModal = this.closeInterestsModal.bind(this)
-        this.openCollegeAndCareerModal = this.openCollegeAndCareerModal.bind(this)
-        this.closeCollegeAndCareerModal = this.closeCollegeAndCareerModal.bind(this)
         this.openLocationUpdateModal = this.openLocationUpdateModal.bind(this)
         this.closeLocationUpdateModal = this.closeLocationUpdateModal.bind(this)
+        this.openJobTitleModal = this.openJobTitleModal.bind(this);
+        this.closeJobTitleModal = this.closeJobTitleModal.bind(this);
+        this.openCollegeModal = this.openCollegeModal.bind(this);
+        this.closeCollegeModal = this.closeCollegeModal.bind(this);
+        this.openCompanyModal = this.openCompanyModal.bind(this);
+        this.closeCompanyModal = this.closeCompanyModal.bind(this);
+        this.openMajorModal = this.openMajorModal.bind(this);
+        this.closeMajorModal = this.closeMajorModal.bind(this);
         this.getInterests = this.getInterests.bind(this)
-    }
-    closeTimePreferencesModal() {
-        this.setState({
-            timePreferencesModalOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openTimePreferencesModal() {
-        this.setState({
-            timePreferencesModalOpen: true
-        })
-    }
-    closeTopicPreferencesModal() {
-        this.setState({
-            topicPreferencesModalOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openTopicPreferencesModal() {
-        this.setState({
-            topicPreferencesModalOpen: true
-        })
-    }
-    closeZoomUpdateModal() {
-        this.setState({
-            zoomUpdateOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
-    openZoomUpdateModal() {
-        this.setState({
-            zoomUpdateOpen: true
-        })
     }
     openImageModal() {
         this.setState({
@@ -144,18 +106,6 @@ export default class AlumniProfile extends Component {
             this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
     }
-    openCollegeAndCareerModal() {
-        this.setState({
-            collegeAndCareerModalOpen: true
-        })
-    }
-    closeCollegeAndCareerModal() {
-        this.setState({
-            collegeAndCareerModalOpen: false
-        }, () => {
-            this.props.refreshProfile(ALUMNI, this.props.details._id)
-        })
-    }
     openLocationUpdateModal() {
         this.setState({
             locationModalOpen: true
@@ -164,6 +114,54 @@ export default class AlumniProfile extends Component {
     closeLocationUpdateModal() {
         this.setState({
             locationModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    openJobTitleModal() {
+        this.setState({
+            jobTitleModalOpen: true
+        })
+    }
+    closeJobTitleModal() {
+        this.setState({
+            jobTitleModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    openCollegeModal() {
+        this.setState({
+            collegeModalOpen: true
+        })
+    }
+    closeCollegeModal() {
+        this.setState({
+            collegeModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    openCompanyModal() {
+        this.setState({
+            companyModalOpen: true
+        })
+    }
+    closeCompanyModal() {
+        this.setState({
+            companyModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.details._id)
+        })
+    }
+    openMajorModal() {
+        this.setState({
+            majorModalOpen: true
+        })
+    }
+    closeMajorModal() {
+        this.setState({
+            majorModalOpen: false
         }, () => {
             this.props.refreshProfile(ALUMNI, this.props.details._id)
         })
@@ -181,214 +179,63 @@ export default class AlumniProfile extends Component {
             })
     }
     getInterests() {
-        return this.props.details.interests && this.props.details.interests.length && this.props.details.interests.map(interest => {
-            return (
-                <Label
-                    key={interest._id}
-                    style={{
-                        'margin': '3px'
-                    }}
-                    color='blue'
-                >
-                    {interest.name}
-                    {
-                        !this.props.isViewOnly &&
-                        <Icon
-                            onClick={(e) => this.removeInterest(e, interest._id)}
-                            name='delete'
+        let allInterests = this.props.details.interests
+        return (
+            <>
+                {
+                    allInterests.map(interest => {
+                        return (
+                            <Label
+                                key={interest._id}
+                                style={{
+                                    'margin': '3px'
+                                }}
+                                color='blue'
+                            >
+                                {interest.name}
+                                {
+                                    !this.props.isViewOnly &&
+                                    <Icon
+                                        onClick={(e) => this.removeInterest(e, interest._id)}
+                                        name='delete'
+                                    />
+                                }
+                            </Label>
+                        )
+                    })
+                }
+                {
+                    !this.props.isViewOnly &&
+                    <>
+                        <Button
+                            primary
+                            color="blue"
+                            type="button"
+                            size="mini"
+                            onClick={() => {this.setState({interestsModalOpen: true})}}
+                        >
+                            {allInterests.length ? `Add more Interests` : `Add Interests`}
+                            <Icon
+                                name="add"
+                                style={{
+                                    'margin': '3px'
+                                }}
+                            />
+                        </Button>
+                        <InterestsUpdateModal
+                            role={'alumni'}
+                            modalOpen={this.state.interestsModalOpen}
+                            closeModal={this.closeInterestsModal}
+                            id={this.props.details._id}
                         />
-                    }
-                </Label>
-            )
-        })
+                    </>
+                }
+            </>
+        )
     }
     render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-        let availabilities = details.availabilities;
-        let topics = details.topics;
-        let zoomLink = details.zoomLink;
-        availabilities = availabilities.map(timeSlot => {
-                timeSlot.text = `${timeSlot.day} ${timeToSlot[timeSlot.time]}`
-                return timeSlot
-            })
-        const linkedInUpdate = (
-            <LinkedInUpdate
-                email={details.email}
-            />
-        )
-        const imageUpdate = (
-            <>
-            <Button
-                style={{'margin-right': '2px'}}
-                floated="left"
-                basic
-                color="blue"
-                onClick={this.openImageModal}
-            >
-                Update Image
-            </Button>
-            <ImageUpdateModal
-                modalOpen={this.state.imageModalOpen}
-                id={details._id}
-                isAlumni={true}
-                closeModal={this.closeImageModal}
-            />
-            </>
-        )
-        const timeAvailabilitiesUpdate = (
-            <>
-            <Button
-                style={{'margin-right': '5px'}}
-                floated='right'
-                basic
-                color="blue"
-                onClick={this.openTimePreferencesModal}
-            >
-                Update Time Availabilities
-            </Button>
-            <TimePreferencesModal
-                modalOpen={this.state.timePreferencesModalOpen}
-                timePreferences={availabilities || []}
-                closeModal={this.closeTimePreferencesModal}
-                id={details._id}
-            />
-            </>
-        )
-        const topicAvailabilitiesUpdate = (
-            <>
-            <Button
-                primary
-                style={{'margin-left': '2px'}}
-                floated='right'
-                color="blue"
-                onClick={this.openTopicPreferencesModal}
-            >
-                Update Topic Preferences
-            </Button>
-            <TopicPreferencesModal
-                modalOpen={this.state.topicPreferencesModalOpen}
-                topicPreferences={topics || []}
-                closeModal={this.closeTopicPreferencesModal}
-                id={details._id}
-            />
-            </>
-        )
-        const zoomLinkUpdate = (
-            <>
-             <Button
-                primary
-                style={{'margin-right': '5px'}}
-                floated='right'
-                color="blue"
-                onClick={this.openZoomUpdateModal}
-            >
-                Update Zoom Meeting ID
-            </Button>
-            <ZoomUpdateModal
-                modalOpen={this.state.zoomUpdateOpen}
-                zoomLink={zoomLink || ''}
-                closeModal={this.closeZoomUpdateModal}
-                id={details._id}
-            />
-            </>
-        )
-
-        const interestsUpdate = (
-            <>
-            <Button
-                style={{'margin-left': '2px'}}
-                floated='right'
-                basic
-                color="blue"
-                onClick={this.openInterestsModal}
-            >
-                Add Interests
-            </Button>
-            <InterestsUpdateModal
-                role={'alumni'}
-                modalOpen={this.state.interestsModalOpen}
-                closeModal={this.closeInterestsModal}
-                id={details._id}
-            />
-            </>
-        )
-
-        const collegeAndCareerUpdate = (
-            <>
-                <Button
-                    style={{'margin-left': '2px'}}
-                    floated='right'
-                    primary
-                    color="blue"
-                    onClick={this.openCollegeAndCareerModal}
-                >
-                    Update College/Career
-                </Button>
-                <AlumniCollegeCareerUpdateModal
-                    modalOpen={this.state.collegeAndCareerModalOpen}
-                    closeModal={this.closeCollegeAndCareerModal}
-                    id={details._id}
-                />
-            </>
-        )
-
-        const locationUpdate = (
-            <>
-                <Button
-                    style={{'margin-left': '2px'}}
-                    floated='right'
-                    basic
-                    color="blue"
-                    onClick={this.openLocationUpdateModal}
-                >
-                    Update Location
-                </Button>
-                <LocationUpdateModal
-                    modalOpen={this.state.locationModalOpen}
-                    closeModal={this.closeLocationUpdateModal}
-                    id={details._id}
-                />
-            </>
-        )
-        var canUpdate;
-
-        if (!isViewOnly) {
-            canUpdate = (
-                <>
-                <Card.Content extra>
-                    <Grid stackable centered columns={4}>
-                        <Grid.Column width={4}>
-                            <Button.Group vertical>
-                                {linkedInUpdate}
-                                {imageUpdate}
-                            </Button.Group>
-                        </Grid.Column>
-                        <Grid.Column width={4}>
-                            <Button.Group vertical>
-                                {collegeAndCareerUpdate}
-                                {locationUpdate}
-                            </Button.Group>
-                        </Grid.Column>
-                        <Grid.Column width={4}>
-                            <Button.Group vertical>
-                                {zoomLinkUpdate}
-                                {timeAvailabilitiesUpdate}
-                            </Button.Group>
-                        </Grid.Column>
-                        <Grid.Column width={4}>
-                            <Button.Group vertical>
-                                {topicAvailabilitiesUpdate}
-                                {interestsUpdate}
-                            </Button.Group>
-                        </Grid.Column>
-                    </Grid>
-                </Card.Content>
-                </>
-            )
-        } else {
-            canUpdate = <div />
-        }
 
         return (
             <div>
@@ -399,14 +246,139 @@ export default class AlumniProfile extends Component {
                     size="medium"
                     src={details.imageURL}
                 />
+                {
+                !isViewOnly ?
+                    <>
+                        <Button
+                        style={{'width': '30%', 'align-self': 'center', 'margin': '5px 0 5px 0'}}
+                        basic
+                        color="blue"
+                        onClick={this.openImageModal}
+                        >
+                            Update Image
+                        </Button>
+                        <ImageUpdateModal
+                            modalOpen={this.state.imageModalOpen}
+                            id={details._id}
+                            isAlumni={true}
+                            closeModal={this.closeImageModal}
+                        />
+                    </>
+                    : null
+                }
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
-                    <Card.Meta>{details.jobTitleName || 'Unavailable'}</Card.Meta>
-
-                    <Card.Description>College: {details.collegeName || 'Unavailable'}</Card.Description>
-                    <Card.Description>Location: {(details.city && details.country) ? `${details.city} (${details.country})` : 'Unavailable'}</Card.Description>
-                    <Card.Description>Company: {details.companyName || 'Unavailable'}</Card.Description>
-                    <Card.Description>Major: {details.majorName || 'Unavailable'}</Card.Description>
+                    <Card.Meta>{details.jobTitleName || 'Unavailable'}
+                        {
+                            !isViewOnly ?
+                                <>
+                                    <Button
+                                        style={{'margin': '0 0 2px 2px'}}
+                                        icon
+                                        basic
+                                        color="blue"
+                                        size="mini"
+                                        onClick={this.openJobTitleModal}
+                                    >
+                                        <Icon name='pencil'/>
+                                    </Button>
+                                    <JobTitleUpdateModal
+                                        modalOpen={this.state.jobTitleModalOpen}
+                                        closeModal={this.closeJobTitleModal}
+                                        id={details._id}
+                                    />
+                                </>
+                            : null
+                        }
+                    </Card.Meta>
+                    <Card.Description>College: {details.collegeName || 'Unavailable'}
+                        {
+                            !isViewOnly ? 
+                            <>
+                                <Button
+                                    style={{'margin': '0 0 2px 2px'}}
+                                    icon
+                                    basic
+                                    size="mini"
+                                    color="blue"
+                                    onClick={this.openCollegeModal}
+                                >
+                                    <Icon name='pencil'/>
+                                </Button>
+                                <CollegeUpdateModal
+                                    modalOpen={this.state.collegeModalOpen}
+                                    closeModal={this.closeCollegeModal}
+                                    id={details._id}
+                                />
+                            </> : null
+                        }
+                    </Card.Description>
+                    <Card.Description>Location: {(details.city && details.country) ? `${details.city} (${details.country})` : 'Unavailable'}
+                        {
+                            !isViewOnly ? 
+                            <>
+                                <Button
+                                    style={{'margin': '0 0 2px 2px'}}
+                                    icon
+                                    basic
+                                    color="blue"
+                                    size="mini"
+                                    onClick={this.openLocationUpdateModal}
+                                >
+                                    <Icon name='pencil'/>
+                                </Button>
+                                <LocationUpdateModal
+                                    modalOpen={this.state.locationModalOpen}
+                                    closeModal={this.closeLocationUpdateModal}
+                                    id={details._id}
+                                />
+                            </> : null
+                        }
+                    </Card.Description>
+                    <Card.Description>Company: {details.companyName || 'Unavailable'}
+                        {
+                            !isViewOnly ? 
+                            <>
+                                <Button
+                                    style={{'margin': '0 0 2px 2px'}}
+                                    icon
+                                    basic
+                                    color="blue"
+                                    size="mini"
+                                    onClick={this.openCompanyModal}
+                                >
+                                    <Icon name='pencil'/>
+                                </Button>
+                                <CompanyUpdateModal
+                                    modalOpen={this.state.companyModalOpen}
+                                    closeModal={this.closeCompanyModal}
+                                    id={details._id}
+                                />
+                            </> : null
+                        }
+                    </Card.Description>
+                    <Card.Description>Major: {details.majorName || 'Unavailable'}
+                        {
+                            !isViewOnly ? 
+                            <>
+                                <Button
+                                    style={{'margin': '0 0 2px 2px'}}
+                                    icon
+                                    basic
+                                    color="blue"
+                                    size="mini"
+                                    onClick={this.openMajorModal}
+                                >
+                                    <Icon name='pencil'/>
+                                </Button>
+                                <MajorUpdateModal
+                                    modalOpen={this.state.majorModalOpen}
+                                    closeModal={this.closeMajorModal}
+                                    id={details._id}
+                                />
+                            </> : null
+                        }
+                    </Card.Description>
                     
                 </Card.Content>
                 <Card.Content>
@@ -414,13 +386,9 @@ export default class AlumniProfile extends Component {
                     <Segment
                         loading={this.state.removingInterest}
                     >
-                        {details.interests && details.interests.length ?
-                        this.getInterests() :
-                        <span>No interests added.</span>
-                        }
+                        {this.getInterests()}
                     </Segment>
                 </Card.Content>
-                {canUpdate}
             </Card>
             <div padding-top="10px" />
             </div>
