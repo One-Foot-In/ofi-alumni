@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
-import { Message, Form, Modal, Menu, Label, Card, Grid, Image, Button } from 'semantic-ui-react';
+import { Message, Form, Modal, Menu, Label, Card, Grid, Image, List, Button, Header, Segment } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
+import TopicPreferencesModal from './TopicPreferencesModal'
+import TimePreferencesModal from './TimePreferencesModal'
+import ZoomUpdateModal from './ZoomUpdateModal'
 
 export const timeSlotOptions = [
     '12am - 1am',
@@ -30,13 +33,42 @@ export const timeSlotOptions = [
     '11pm - 12am'
 ]
 
+export const timeToSlot = {
+    0: '(12am - 1am)',
+    100: '(1am - 2am)',
+    200: '(2am - 3am)',
+    300: '(3am - 4am)',
+    400: '(4am - 5am)',
+    500: '(5am - 6am)',
+    600: '(6am - 7am)',
+    700: '(7am - 8am)',
+    800: '(8am - 9am)',
+    900: '(9am - 10am)',
+    1000: '(10am - 11am)',
+    1100: '(11am - 12pm)',
+    1200: '(12pm - 1pm)',
+    1300: '(1pm - 2pm)',
+    1400: '(2pm - 3pm)',
+    1500: '(3pm - 4pm)',
+    1600: '(4pm - 5pm)',
+    1700: '(5pm - 6pm)',
+    1800: '(6pm - 7pm)',
+    1900: '(7pm - 8pm)',
+    2000: '(8pm - 9pm)',
+    2100: '(9pm - 10pm)',
+    2200: '(10pm - 11pm)',
+    2300: '(11pm - 12am)',
+}
+
+const ALUMNI = 'ALUMNI'
+
 /*
  * DETAILS:
  * Parent component, contains menu and switches out active RequestCards
  * PROPS
  * userDetails - full profile of logged in user
  */
-export default class RequestsView extends Component {
+export default class AlumniMentorship extends Component {
     constructor(props){
         super(props)
         this.state={
@@ -46,9 +78,55 @@ export default class RequestsView extends Component {
             completed: [],
             timeOffset: 0,
             confirmedTimes: [],
-            userDetails: null
+            userDetails: null,
+            timePreferencesModalOpen: false,
+            topicPreferencesModalOpen: false,
+            zoomUpdateOpen: false
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
+        this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
+        this.closeTimePreferencesModal = this.closeTimePreferencesModal.bind(this)
+        this.openTopicPreferencesModal = this.openTopicPreferencesModal.bind(this)
+        this.closeTopicPreferencesModal = this.closeTopicPreferencesModal.bind(this)
+        this.openZoomUpdateModal = this.openZoomUpdateModal.bind(this)
+        this.closeZoomUpdateModal = this.closeZoomUpdateModal.bind(this)
+    }
+
+    closeTimePreferencesModal() {
+        this.setState({
+            timePreferencesModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.userDetails._id)
+        })
+    }
+    openTimePreferencesModal() {
+        this.setState({
+            timePreferencesModalOpen: true
+        })
+    }
+    closeTopicPreferencesModal() {
+        this.setState({
+            topicPreferencesModalOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.userDetails._id)
+        })
+    }
+    openTopicPreferencesModal() {
+        this.setState({
+            topicPreferencesModalOpen: true
+        })
+    }
+    closeZoomUpdateModal() {
+        this.setState({
+            zoomUpdateOpen: false
+        }, () => {
+            this.props.refreshProfile(ALUMNI, this.props.userDetails._id)
+        })
+    }
+    openZoomUpdateModal() {
+        this.setState({
+            zoomUpdateOpen: true
+        })
     }
     
     async handleStatusUpdate(requests) {
@@ -88,6 +166,93 @@ export default class RequestsView extends Component {
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
 
     render() {
+        let details = this.props.userDetails
+        let availabilities = details.availabilities;
+        let topics = details.topics;
+        let zoomLink = details.zoomLink;
+        availabilities = availabilities.map(timeSlot => {
+            timeSlot.text = `${timeSlot.day} ${timeToSlot[timeSlot.time]}`
+            return timeSlot
+        })
+
+        const timeAvailabilitiesUpdate = (
+            <>
+            <Button
+                primary
+                style={{'margin-right': '5px'}}
+                floated='right'
+                color="blue"
+                onClick={this.openTimePreferencesModal}
+            >
+                Update Time Availabilities
+            </Button>
+            <TimePreferencesModal
+                modalOpen={this.state.timePreferencesModalOpen}
+                timePreferences={availabilities || []}
+                closeModal={this.closeTimePreferencesModal}
+                id={details._id}
+            />
+            </>
+        )
+
+        const topicAvailabilitiesUpdate = (
+            <>
+            <Button
+                primary
+                style={{'margin-left': '2px'}}
+                floated='right'
+                color="blue"
+                onClick={this.openTopicPreferencesModal}
+            >
+                Update Topic Preferences
+            </Button>
+            <TopicPreferencesModal
+                modalOpen={this.state.topicPreferencesModalOpen}
+                topicPreferences={topics || []}
+                closeModal={this.closeTopicPreferencesModal}
+                id={details._id}
+            />
+            </>
+        )
+
+        const zoomLinkUpdate = (
+            <>
+             <Button
+                primary
+                style={{'margin-right': '5px'}}
+                floated='right'
+                color="blue"
+                onClick={this.openZoomUpdateModal}
+            >
+                Update Video Meeting Link
+            </Button>
+            <ZoomUpdateModal
+                modalOpen={this.state.zoomUpdateOpen}
+                zoomLink={zoomLink || ''}
+                closeModal={this.closeZoomUpdateModal}
+                id={details._id}
+            />
+            </>
+        )
+
+        let topicListItems = []
+        for (let topic of details.topics) {
+            topicListItems.push(
+                <List.Item>{topic}</List.Item>
+            )
+        }
+
+        const timeDisplay = availabilities.map(time => {
+            return (
+            <Label
+                key={time.text}
+                style={{'margin': '2px'}}
+            >
+                {time.text}
+            </Label>
+            )
+        })
+
         return(
             <div>
             <Menu secondary stackable>
@@ -117,6 +282,12 @@ export default class RequestsView extends Component {
                     id='completed'
                     name='Completed Meetings'
                     active={this.state.activeItem === 'completed'}
+                    onClick={this.handleMenuClick}
+                />
+                <Menu.Item 
+                    id='settings'
+                    name='Meeting Settings'
+                    active={this.state.activeItem === 'settings'}
                     onClick={this.handleMenuClick}
                 />
             </Menu>
@@ -152,6 +323,42 @@ export default class RequestsView extends Component {
                         activeSet={this.state.activeItem}
                         requests={this.state.completed}
                     />
+                </div>
+            }
+            {this.state.activeItem ==='settings' &&
+                <div style={{paddingLeft: 13, paddingRight: 13}}>
+                    <Segment>
+                        <Grid verticalAlign='middle' divided={'vertically'}>
+                            <Grid.Row columns={'equal'}>
+                                <Grid.Column>
+                                    <Header as='h3'> Current Meeting Link:</Header>
+                                    {details.zoomLink}
+                                </Grid.Column>
+                                <Grid.Column width={4}>
+                                    {zoomLinkUpdate}
+                                </Grid.Column>
+                            </Grid.Row>
+                            <Grid.Row columns={'equal'}>
+                                <Grid.Column width={6}>
+                                    <Header as='h3'> Current Topic Availabilities:</Header>
+                                    <List divided bulleted>{topicListItems}</List>
+                                </Grid.Column>
+                                <Grid.Column></Grid.Column>
+                                <Grid.Column width={4}>
+                                    {topicAvailabilitiesUpdate}
+                                </Grid.Column>
+                            </Grid.Row>
+                            <Grid.Row columns={'equal'}>
+                                <Grid.Column>
+                                <Header as='h3'> Current Time Availabilities:</Header>
+                                    {timeDisplay}
+                                </Grid.Column>
+                                <Grid.Column width={4}>
+                                    {timeAvailabilitiesUpdate}
+                                </Grid.Column>
+                            </Grid.Row>
+                        </Grid>
+                    </Segment>
                 </div>
             }
             </div>
@@ -195,6 +402,7 @@ class RequestCards extends Component {
     }
 
     constructRequest(request) {
+        const cardHeader = (this.props.activeSet !== 'completed'? 'Meeting requested by: ' : 'Completed call with: ')
         return (
             <Grid key={request._id} columns={'equal'}>
             <Grid.Row columns={2}>
@@ -203,20 +411,20 @@ class RequestCards extends Component {
                         size='small'
                         centered
                         rounded
-                        src={request.requesterObj.imageURL}
+                        src={request.student.imageURL}
                     />
                 </Grid.Column>
                 <Grid.Column>
                     <Card fluid>
                         <Card.Content>
                             <Card.Header>
-                                Request from {request.requesterObj.name} ({request.requesterRole.toLowerCase()})
+                                {cardHeader} {request.student.name}
                             </Card.Header>           
                             <Card.Meta>{request.status}</Card.Meta>
                             <Card.Description>Topic: {request.topic}</Card.Description>
                             <Card.Description>Time: {request.time[0].day} from {timeSlotOptions[request.time[0].time/100]}</Card.Description>
-                            { request.note &&
-                                <Card.Description>Note from requester: {request.note}</Card.Description>
+                            { request.studentNote &&
+                                <Card.Description>Note from student: {request.studentNote}</Card.Description>
                             }
                             { request.finalNote &&
                                 <Card.Description>Final note from mentor: {request.finalNote}</Card.Description>
@@ -357,7 +565,7 @@ class RequestCards extends Component {
             <>
             {this.state.showFeedbackModal && 
                 <Modal open={this.state.showFeedbackModal}>
-                    <Modal.Header>Leave a final note for {this.state.requestDetails.requesterObj.name}</Modal.Header>
+                    <Modal.Header>Leave a final note for {this.state.requestDetails.student.name}</Modal.Header>
                     <Modal.Content>
                     <Grid stackable>
                         <Grid.Row columns={"equal"}>
@@ -365,14 +573,14 @@ class RequestCards extends Component {
                                 <Image
                                     floated='left'
                                     size='small'
-                                    src={this.state.requestDetails.requesterObj.imageURL}
+                                    src={this.state.requestDetails.student.imageURL}
                                     rounded
                                 />
                             </Grid.Column>
                             <Grid.Column>
                                 <Form>
                                     <Form.TextArea 
-                                        label={'Leave a note for ' + this.state.requestDetails.requesterObj.name + ':'}
+                                        label={'Leave a note for ' + this.state.requestDetails.student.name + ':'}
                                         placeholder='Provide a recap or leave any other useful notes here!'
                                         onChange={this.handleValueChange.bind(this)}
                                         value={this.state.finalNote}

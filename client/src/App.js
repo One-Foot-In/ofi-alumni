@@ -12,8 +12,8 @@ import AlumniProfile from './components/AlumniProfile'
 import StudentProfile from './components/StudentProfile'
 import AlumniVerification from './components/AlumniVerification'
 import StudentVerification from './components/StudentVerification'
-import RequestsView from './components/RequestsView'
-import SchedulingsView from './components/SchedulingsView'
+import AlumniMentorship from './components/AlumniMentorship';
+import StudentMentorship from './components/StudentMentorship'
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
 
@@ -105,9 +105,9 @@ var alumniNavBarItems = (approved) => {
         navLink: '/alumniDirectory'
     },
     {
-        id: 'requests',
-        name: 'Requests',
-        navLink: '/requests'
+        id: 'mentorship',
+        name: 'Mentorship',
+        navLink: '/mentorship'
     },
     {
         id: 'schedulings',
@@ -143,9 +143,9 @@ const studentNavBarItems = (isModerator) => {
         navLink: '/alumniDirectory'
     },
     {
-        id: 'schedulings',
-        name: 'Schedulings',
-        navLink: '/schedulings'
+        id: 'mentorship',
+        name: 'Mentorship',
+        navLink: '/mentorship'
     }
   ]
   if (isModerator) {
@@ -315,7 +315,7 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
-          <Route exact path={`/requests`} render={(props) => 
+          <Route exact path={`/mentorship`} render={(props) => 
                   this.state.loggedIn ?
                   <>
                       <Navbar
@@ -323,11 +323,11 @@ class App extends Component {
                           role={role}
                           timezoneActive={true}
                           navItems={alumniNavBarItems(this.state.approved)}
-                          activeItem={'requests'}
+                          activeItem={'mentorship'}
                       />
-                      <RequestsView 
+                      <AlumniMentorship 
                           userDetails={this.state.userDetails}
-                          role={role}
+                          refreshProfile={this.refreshProfile}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -343,10 +343,7 @@ class App extends Component {
                           navItems={alumniNavBarItems(this.state.approved)}
                           activeItem={'schedulings'}
                       />
-                      <SchedulingsView 
-                          userDetails={this.state.userDetails}
-                          role={role}
-                      />
+                      //TODO
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -434,7 +431,7 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
-          <Route exact path={`/schedulings`} render={(props) => 
+          <Route exact path={`/mentorship`} render={(props) => 
                   this.state.loggedIn ?
                   <>
                       <Navbar
@@ -442,11 +439,10 @@ class App extends Component {
                           role={role}
                           timezoneActive={true}
                           navItems={studentNavBarItems(this.state.userDetails.isModerator)}
-                          activeItem={'schedulings'}
+                          activeItem={'mentorship'}
                       />
-                      <SchedulingsView 
+                      <StudentMentorship 
                           userDetails={this.state.userDetails}
-                          role={role}
                       />
                   </> :
                   <Redirect to={"/login"}/>
