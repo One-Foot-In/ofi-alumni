@@ -132,6 +132,7 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
             const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
                 request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.privateFeedback = undefined;
             }
             requests.push(dbData)
         }
@@ -159,6 +160,7 @@ router.patch('/leaveFinalNote/:id/:timeOffset', passport.authenticate('jwt', {se
             const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
                 request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.privateFeedback = undefined;
             }
             requests.push(dbData)
         }
@@ -167,6 +169,34 @@ router.patch('/leaveFinalNote/:id/:timeOffset', passport.authenticate('jwt', {se
         console.log('/request/leaveFinalNote Error: ' + e)
         res.status(500).send({
             message: 'Failed to add final note: ' + e
+        })
+    }
+})
+
+router.patch('/leaveAlumniNote/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req,res, next) => {
+    let alumniId = req.params.id;
+    let timeOffset = req.params.timeOffset;
+    let requestId = req.body.requestId;
+    let alumniNote = req.body.alumniNote;
+    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
+    let requests = []
+    try {
+        let request = await requestSchema.findById(requestId);
+        request.alumniNote = alumniNote
+        await request.save()
+        for (let status of conditions) {
+            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
+            for (let request of dbData) {
+                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.privateFeedback = undefined;
+            }
+            requests.push(dbData)
+        }
+        res.json({'requests' : requests});
+    } catch (e) {
+        console.log('/request/leaveAlumniNote Error: ' + e)
+        res.status(500).send({
+            message: 'Failed to add alumni note: ' + e
         })
     }
 })
@@ -181,6 +211,7 @@ router.get('/getRequests/:id/:timeOffset', passport.authenticate('jwt', {session
             const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
                 request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.privateFeedback = undefined;
             }
             requests.push(dbData)
         }
@@ -246,12 +277,16 @@ router.patch('/leaveFeedback/:id/:timeOffset', passport.authenticate('jwt', {ses
     let studentId = req.params.id;
     let timeOffset = parseInt(req.params.timeOffset);
     let requestId = req.body.requestId;
-    let feedback = req.body.feedback;
+    let publicFeedback = req.body.publicFeedback;
+    let privateFeedback = req.body.privateFeedback;
+    let testimonial = req.body.testimonial
     let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
     let schedulings = []
     try {
         let updatedScheduling = await requestSchema.findById(requestId)
-        updatedScheduling.feedback = feedback
+        updatedScheduling.publicFeedback = publicFeedback;
+        updatedScheduling.privateFeedback = privateFeedback;
+        updatedScheduling.testimonial = testimonial;
         await updatedScheduling.save()
         for (let status of conditions) {
             const dbData = await requestSchema.find({
@@ -278,6 +313,7 @@ router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {sessio
         const dbData = await requestSchema.find({mentor: alumniId, status: 'Confirmed'})
         for (let request of dbData) {
             request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+            request.privateFeedback = undefined;
         }
         res.json({'confirmed' : dbData});
     } catch (e) {

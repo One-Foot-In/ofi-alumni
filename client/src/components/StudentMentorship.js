@@ -167,7 +167,9 @@ class SchedulingCards extends Component {
         schedulings: [],
         display: [],
         schedulingDetails: [],
-        feedback: '',
+        publicFeedback: '',
+        privateFeedback: '',
+        testimonial: '',
         showFeedbackModal: false
     }
     // This allows the component to update its state should a prop value change
@@ -200,16 +202,25 @@ class SchedulingCards extends Component {
                                 {cardHeader} {scheduling.mentor.name}
                             </Card.Header>           
                             <Card.Meta>{scheduling.status}</Card.Meta>
-                            <Card.Description>Topic: {scheduling.topic}</Card.Description>
-                            <Card.Description>Time: {scheduling.time[0].day} from {timeSlotOptions[scheduling.time[0].time/100]}</Card.Description>
+                            <Card.Description><b>Topic:</b> {scheduling.topic}</Card.Description>
+                            <Card.Description><b>Time:</b> {scheduling.time[0].day} from {timeSlotOptions[scheduling.time[0].time/100]}</Card.Description>
                             {scheduling.studentNote &&
-                                <Card.Description>Your Note: {scheduling.studentNote}</Card.Description>
+                                <Card.Description><b>Your Note:</b> {scheduling.studentNote}</Card.Description>
+                            }
+                            {scheduling.alumniNote &&
+                                <Card.Description><b>Pre-meeting note from your mentor:</b> {scheduling.alumniNote}</Card.Description>
                             }
                             {scheduling.finalNote &&
-                                <Card.Description>Final note from mentor: {scheduling.finalNote}</Card.Description>
+                                <Card.Description><b>Final note from your mentor:</b> {scheduling.finalNote}</Card.Description>
                             }
-                            {scheduling.feedback &&
-                                <Card.Description>Feedback for mentor: {scheduling.feedback}</Card.Description>
+                            {scheduling.publicFeedback &&
+                                <Card.Description><b>Feedback for mentor:</b> {scheduling.publicFeedback}</Card.Description>
+                            }
+                            {scheduling.privateFeedback &&
+                                <Card.Description><b>Your private feedback:</b> {scheduling.privateFeedback}</Card.Description>
+                            }
+                            {scheduling.testimonial &&
+                                <Card.Description><b>Your testimonial:</b> {scheduling.testimonial}</Card.Description>
                             }
                             <br />
                         </Card.Content>
@@ -258,7 +269,7 @@ class SchedulingCards extends Component {
                 </Button.Group>
                 </>
             )
-        } else if (this.props.activeSet === 'completed') {
+        } else if (this.props.activeSet === 'completed' && (!scheduling.publicFeedback || !scheduling.privateFeedback || !scheduling.testimonial)) {
             return(
                 <Button
                     color='teal'
@@ -295,21 +306,29 @@ class SchedulingCards extends Component {
 
     toggleFeedbackModal(e) {
         let schedulingDetails = this.props.schedulings.find(request => request._id === e.currentTarget.getAttribute('requestid'))
-        let feedback = null
+        let publicFeedback = null
+        let privateFeedback = null
+        let testimonial = null
         if (schedulingDetails) {
-            feedback = schedulingDetails.feedback
+            publicFeedback = schedulingDetails.publicFeedback
+            privateFeedback = schedulingDetails.privateFeedback
+            testimonial = schedulingDetails.testimonial
         }
         this.setState({
             showFeedbackModal: !this.state.showFeedbackModal,
             schedulingDetails: schedulingDetails,
-            feedback: feedback
+            publicFeedback: publicFeedback,
+            privateFeedback: privateFeedback,
+            testimonial: testimonial
         })
     }
 
     async submitFinalNote(e) {
         let requests = await makeCall({
             requestId: this.state.schedulingDetails._id,
-            feedback: this.state.feedback
+            publicFeedback: this.state.publicFeedback,
+            privateFeedback: this.state.privateFeedback,
+            testimonial: this.state.testimonial
         }, `/request/leaveFeedback/${this.props.userId}/${this.props.timeOffset}`, 'patch')
         this.setState({showFeedbackModal: !this.state.showFeedbackModal})
         this.props.liftSchedulings(requests)
@@ -333,7 +352,7 @@ class SchedulingCards extends Component {
     render() {
         return(
             <>
-            {this.state.showFeedbackModal && 
+            {this.state.showFeedbackModal &&
                 <Modal open={this.state.showFeedbackModal}>
                     <Modal.Header>Provide feedback for {this.state.schedulingDetails.mentor.name}</Modal.Header>
                     <Modal.Content>
@@ -351,10 +370,24 @@ class SchedulingCards extends Component {
                                 <Form>
                                     <Form.TextArea 
                                         label={'Leave a note for ' + this.state.schedulingDetails.mentor.name + ':'}
-                                        placeholder="How was your mentor able to help you? Is there something the mentor could do to be more helpful?"
+                                        placeholder={`How was your mentor able to help you? Is there something the mentor could do to be more helpful? (${this.state.schedulingDetails.mentor.name} will be able to see this)`}
                                         onChange={this.handleValueChange.bind(this)}
-                                        value={this.state.feedback}
-                                        name='feedback'
+                                        value={this.state.publicFeedback}
+                                        name='publicFeedback'
+                                    />
+                                    <Form.TextArea 
+                                        label={'Leave an anonymous review for ' + this.state.schedulingDetails.mentor.name + ':'}
+                                        placeholder={`(Only you and OFI admins will be able to see this)`}
+                                        onChange={this.handleValueChange.bind(this)}
+                                        value={this.state.privateFeedback}
+                                        name='privateFeedback'
+                                    />
+                                    <Form.TextArea 
+                                        label={'Leave a testimonial for ' + this.state.schedulingDetails.mentor.name + ':'}
+                                        placeholder={`If you think that your mentor did an outstanding job, leave a note here to share with the community!`}
+                                        onChange={this.handleValueChange.bind(this)}
+                                        value={this.state.testimonial}
+                                        name='testimonial'
                                     />
                                 </Form>
                             </Grid.Column>
@@ -365,7 +398,7 @@ class SchedulingCards extends Component {
                         <Button onClick={this.toggleFeedbackModal.bind(this)}>
                             Done
                         </Button>
-                        <Button onClick={this.submitFinalNote.bind(this)} primary>
+                        <Button onClick={this.submitFinalNote.bind(this)} primary disabled={!this.state.publicFeedback || !this.state.privateFeedback}>
                             Submit
                         </Button>
                     </Modal.Actions>
