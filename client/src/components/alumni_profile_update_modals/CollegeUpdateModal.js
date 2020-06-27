@@ -27,6 +27,7 @@ export default class CollegeUpdateModal extends Component {
         this.getCollegeInput = this.getCollegeInput.bind(this)
         this.deleteCountry = this.deleteCountry.bind(this)
         this.submit = this.submit.bind(this)
+        this.clearState = this.clearState.bind(this)
     }
 
     async componentWillMount() {
@@ -75,6 +76,15 @@ export default class CollegeUpdateModal extends Component {
         })
     }
 
+    clearState() {
+        this.setState({
+            country: '',
+            newCollege: '',
+            existingCollegeId: '',
+            existingCollegeName: ''
+        })
+    }
+
     submit(e) {
         e.preventDefault()
         this.setState({
@@ -107,6 +117,7 @@ export default class CollegeUpdateModal extends Component {
                             text: "Your college has been successfully updated!",
                             icon: "success",
                         }).then(() => {
+                            this.clearState();
                             this.props.closeModal();
                         })
                     })
@@ -171,8 +182,11 @@ export default class CollegeUpdateModal extends Component {
                         onClick={this.submit}>
                         Submit
                     </Button>
-                    <Button onClick={this.props.closeModal}>
-                        Done
+                    <Button onClick={() => {
+                        this.clearState();
+                        this.props.closeModal()
+                    }}>
+                        Close
                     </Button>
                 </Modal.Actions>
             </Modal>

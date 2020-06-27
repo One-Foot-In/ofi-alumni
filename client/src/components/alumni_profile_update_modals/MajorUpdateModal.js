@@ -23,6 +23,7 @@ export default class MajorUpdateModal extends Component {
         }
         this.getMajorInput = this.getMajorInput.bind(this)
         this.submit = this.submit.bind(this)
+        this.clearState = this.clearState.bind(this)
     }
 
     getMajorInput(selection, isNew) {
@@ -47,6 +48,14 @@ export default class MajorUpdateModal extends Component {
                 existingMajorName: ''
             })
         }
+    }
+
+    clearState() {
+        this.setState({
+            newMajor: '',
+            existingMajorId: '',
+            existingMajorName: '',
+        })
     }
 
     submit(e) {
@@ -80,6 +89,7 @@ export default class MajorUpdateModal extends Component {
                             text: "Your major has been successfully updated!",
                             icon: "success",
                         }).then(() => {
+                            this.clearState();
                             this.props.closeModal();
                         })
                     })
@@ -115,8 +125,11 @@ export default class MajorUpdateModal extends Component {
                         onClick={this.submit}>
                         Submit
                     </Button>
-                    <Button onClick={this.props.closeModal}>
-                        Done
+                    <Button onClick={() => {
+                        this.clearState();
+                        this.props.closeModal()
+                    }}>
+                        Close
                     </Button>
                 </Modal.Actions>
             </Modal>

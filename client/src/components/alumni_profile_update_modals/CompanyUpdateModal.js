@@ -23,6 +23,7 @@ export default class CompanyUpdateModal extends Component {
         }
         this.getCompanyInput = this.getCompanyInput.bind(this)
         this.submit = this.submit.bind(this)
+        this.clearState = this.clearState.bind(this)
     }
 
     getCompanyInput(selection, isNew) {
@@ -47,6 +48,14 @@ export default class CompanyUpdateModal extends Component {
                 existingCompanyName: ''
             })
         }
+    }
+
+    clearState() {
+        this.setState({
+            existingCompanyId: '',
+            existingCompanyName: '',
+            newCompany: '',
+        })
     }
 
     submit(e) {
@@ -80,6 +89,7 @@ export default class CompanyUpdateModal extends Component {
                             text: "Your company has been successfully updated!",
                             icon: "success",
                         }).then(() => {
+                            this.clearState();
                             this.props.closeModal();
                         })
                     })
@@ -115,8 +125,11 @@ export default class CompanyUpdateModal extends Component {
                         onClick={this.submit}>
                         Submit
                     </Button>
-                    <Button onClick={this.props.closeModal}>
-                        Done
+                    <Button onClick={() => {
+                        this.clearState();
+                        this.props.closeModal()
+                    }}>
+                        Close
                     </Button>
                 </Modal.Actions>
             </Modal>
