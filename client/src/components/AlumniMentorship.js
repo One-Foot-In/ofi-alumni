@@ -555,7 +555,6 @@ class RequestCards extends Component {
 
     toggleAlumniNoteModal(e) {
         let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
-        console.log(requestDetails)
         let alumniNote = null
         if (requestDetails) {
             alumniNote = requestDetails.alumniNote

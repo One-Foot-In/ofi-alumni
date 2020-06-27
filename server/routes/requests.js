@@ -194,9 +194,9 @@ router.patch('/leaveAlumniNote/:id/:timeOffset', passport.authenticate('jwt', {s
         }
         res.json({'requests' : requests});
     } catch (e) {
-        console.log('/request/leaveFinalNote Error: ' + e)
+        console.log('/request/leaveAlumniNote Error: ' + e)
         res.status(500).send({
-            message: 'Failed to add final note: ' + e
+            message: 'Failed to add alumni note: ' + e
         })
     }
 })
