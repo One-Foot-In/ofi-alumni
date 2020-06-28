@@ -156,13 +156,15 @@ export default class NewsFeed extends Component {
                     <Feed.Label>
                         <Image src={mentorDetails.imageURL} />
                     </Feed.Label>
-                    <Feed.Label>
-                        <Image src={menteeDetails.imageURL} />
-                    </Feed.Label>
+                    {menteeDetails.imageURL &&
+                        <Feed.Label>
+                            <Image src={menteeDetails.imageURL} />
+                        </Feed.Label>
+                    }
                     <Feed.Content>
                         <Feed.Summary>
                             <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
-                                <Feed.User>{mentorDetails.name} (Alumni)</Feed.User>
+                                <Feed.User>{mentorDetails.name}</Feed.User>
                             }>
                                 <Header>
                                     Details for {mentorDetails.name}
@@ -172,16 +174,23 @@ export default class NewsFeed extends Component {
                                 </Modal.Content>
                             </Modal>
                             {` confirmed a call with `}
-                            <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
-                                <Feed.User>{menteeDetails.name}</Feed.User>
-                            }>
-                                <Header>
-                                    Details for {menteeDetails.name}
-                                </Header>
-                                <Modal.Content>
-                                    <StudentProfile details={menteeDetails} isViewOnly={true} />
-                                </Modal.Content>
-                            </Modal> to discuss {feedItem.supportData && feedItem.supportData.topic}
+                            {menteeDetails.name ? (
+                                <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
+                                    <Feed.User>{menteeDetails.name}</Feed.User>
+                                }>
+                                    <Header>
+                                        Details for {menteeDetails.name}
+                                    </Header>
+                                    <Modal.Content>
+                                        <StudentProfile details={menteeDetails} isViewOnly={true} />
+                                    </Modal.Content>
+                                </Modal>
+                                ):
+                                    <>
+                                    {'a student in your grade '}
+                                    </>
+                            }
+                            {' to discuss' } {feedItem.supportData && feedItem.supportData.topic}!
                                 <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
                         </Feed.Summary>
                     </Feed.Content>

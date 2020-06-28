@@ -13,12 +13,17 @@ router.get('/getNews/:role/:id', async (req, res, next) => {
         let dbData;
         if (role == 'ALUMNI') {
             userInfo = await alumniSchema.findById(id)
-            dbData = await newsSchema.find({role: {$ne: 'STUDENT'}, school: userInfo.school}).populate('alumni').populate('students')
+            dbData = await newsSchema.find({role: {$ne: 'STUDENT'}, school: userInfo.school})
+                .populate('alumni').populate('students')
         } else {
             userInfo = await studentSchema.findById(id)
-            dbData = await newsSchema.find({role: {$ne: 'ALUMNI'}, school: userInfo.school, grade: {$in: [null, userInfo.grade]}}).populate('alumni').populate('students')
+            dbData = await newsSchema.find({role: {$ne: 'ALUMNI'}, school: userInfo.school, grade: {$in: [null, userInfo.grade]}})
+                .populate('alumni').populate('students')
         }
         let objData = dbData.map(item => {
+            if (role === 'STUDENT' && item.event === 'Confirmed Meeting') {
+                item.depopulate('students') 
+            }
             let itemObj = item.toObject()
             itemObj.timeElapsed = moment(item.dateCreated).fromNow()
             return itemObj
