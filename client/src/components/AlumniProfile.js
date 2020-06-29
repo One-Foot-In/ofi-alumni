@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Card, Image, Label, Icon, Segment } from 'semantic-ui-react';
+import { Button, Card, Image, Label, Icon, Segment, Dimmer } from 'semantic-ui-react';
 import ImageUpdateModal from './ImageUpdateModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
 import LocationUpdateModal from './LocationUpdateModal';
@@ -64,7 +64,8 @@ export default class AlumniProfile extends Component {
             collegeModalOpen: false,
             companyModalOpen: false,
             majorModalOpen: false,
-            removingInterest: false
+            removingInterest: false,
+            imageActive: false
         }
         this.openImageModal = this.openImageModal.bind(this)
         this.closeImageModal = this.closeImageModal.bind(this)
@@ -80,8 +81,22 @@ export default class AlumniProfile extends Component {
         this.closeCompanyModal = this.closeCompanyModal.bind(this);
         this.openMajorModal = this.openMajorModal.bind(this);
         this.closeMajorModal = this.closeMajorModal.bind(this);
-        this.getInterests = this.getInterests.bind(this)
+        this.getInterests = this.getInterests.bind(this);
+        this.handleShow = this.handleShow.bind(this);
+        this.handleHide = this.handleHide.bind(this);
     }
+
+
+    handleShow(e) {
+        e.preventDefault();
+        this.setState({ imageActive: true })
+    }
+
+    handleHide(e) {
+        e.preventDefault();
+        this.setState({ imageActive: false })
+    }
+
     openImageModal() {
         this.setState({
             imageModalOpen: true
@@ -236,35 +251,59 @@ export default class AlumniProfile extends Component {
     render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-
-        return (
-            <div>
-            <Card fluid>
+        const imageUploadButton = 
+            <>
+                <Button
+                    style={{'width': '100%', 'align-self': 'center', 'margin': '5px 0 5px 0'}}
+                    basic
+                    verticalAlign='bottom'
+                    color="blue"
+                    onClick={this.openImageModal}
+                >
+                    Update Image
+                </Button>
+                <ImageUpdateModal
+                    modalOpen={this.state.imageModalOpen}
+                    id={details._id}
+                    isAlumni={true}
+                    closeModal={this.closeImageModal}
+                />
+            </>
+        const dimmableImage = 
+            <Dimmer.Dimmable as={Image}
+                    dimmed={this.state.imageActive}
+                    onMouseEnter={this.handleShow}
+                    onMouseLeave={this.handleHide}
+                    centered
+                    size="medium"
+                    src={details.imageURL}
+                >
+                    <Dimmer
+                        active={this.state.imageActive}
+                        inverted
+                        verticalAlign='bottom'
+                    >
+                        {imageUploadButton}
+                    </Dimmer>
                 <Image 
                     centered
                     rounded
                     size="medium"
                     src={details.imageURL}
                 />
+            </Dimmer.Dimmable>
+        return (
+            <div>
+            <Card fluid>
                 {
-                !isViewOnly ?
-                    <>
-                        <Button
-                        style={{'width': '30%', 'align-self': 'center', 'margin': '5px 0 5px 0'}}
-                        basic
-                        color="blue"
-                        onClick={this.openImageModal}
-                        >
-                            Update Image
-                        </Button>
-                        <ImageUpdateModal
-                            modalOpen={this.state.imageModalOpen}
-                            id={details._id}
-                            isAlumni={true}
-                            closeModal={this.closeImageModal}
-                        />
-                    </>
-                    : null
+                    isViewOnly ?
+                    <Image 
+                        centered
+                        rounded
+                        size="medium"
+                        src={details.imageURL}
+                    /> :
+                    dimmableImage
                 }
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
@@ -275,12 +314,11 @@ export default class AlumniProfile extends Component {
                                     <Button
                                         style={{'margin': '0 0 2px 2px'}}
                                         icon
-                                        basic
-                                        color="blue"
+                                        inverted
                                         size="mini"
                                         onClick={this.openJobTitleModal}
                                     >
-                                        <Icon name='pencil'/>
+                                        <Icon name='pencil' color="blue"/>
                                     </Button>
                                     <JobTitleUpdateModal
                                         modalOpen={this.state.jobTitleModalOpen}
@@ -298,12 +336,11 @@ export default class AlumniProfile extends Component {
                                 <Button
                                     style={{'margin': '0 0 2px 2px'}}
                                     icon
-                                    basic
+                                    inverted
                                     size="mini"
-                                    color="blue"
                                     onClick={this.openCollegeModal}
                                 >
-                                    <Icon name='pencil'/>
+                                    <Icon name='pencil' color="blue"/>
                                 </Button>
                                 <CollegeUpdateModal
                                     modalOpen={this.state.collegeModalOpen}
@@ -320,12 +357,11 @@ export default class AlumniProfile extends Component {
                                 <Button
                                     style={{'margin': '0 0 2px 2px'}}
                                     icon
-                                    basic
-                                    color="blue"
+                                    inverted
                                     size="mini"
                                     onClick={this.openLocationUpdateModal}
                                 >
-                                    <Icon name='pencil'/>
+                                    <Icon name='pencil' color="blue"/>
                                 </Button>
                                 <LocationUpdateModal
                                     modalOpen={this.state.locationModalOpen}
@@ -342,12 +378,11 @@ export default class AlumniProfile extends Component {
                                 <Button
                                     style={{'margin': '0 0 2px 2px'}}
                                     icon
-                                    basic
-                                    color="blue"
+                                    inverted
                                     size="mini"
                                     onClick={this.openCompanyModal}
                                 >
-                                    <Icon name='pencil'/>
+                                    <Icon name='pencil' color="blue"/>
                                 </Button>
                                 <CompanyUpdateModal
                                     modalOpen={this.state.companyModalOpen}
@@ -364,12 +399,11 @@ export default class AlumniProfile extends Component {
                                 <Button
                                     style={{'margin': '0 0 2px 2px'}}
                                     icon
-                                    basic
-                                    color="blue"
+                                    inverted
                                     size="mini"
                                     onClick={this.openMajorModal}
                                 >
-                                    <Icon name='pencil'/>
+                                    <Icon name='pencil' color="blue"/>
                                 </Button>
                                 <MajorUpdateModal
                                     modalOpen={this.state.majorModalOpen}
