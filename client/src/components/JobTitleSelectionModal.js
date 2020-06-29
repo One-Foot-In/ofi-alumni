@@ -5,8 +5,8 @@ import PooledSingleSelectDropdown from "./PooledSingleSelectDropdown"
 /*
     props:
     - modalOpen
-    - closeModal
-    - getInput
+    - closeModal: ()
+    - getInput: ()
 */
 export default class JobTitleSelectionModal extends Component {
     constructor(props){

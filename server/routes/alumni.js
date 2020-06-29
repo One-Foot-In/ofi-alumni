@@ -387,6 +387,104 @@ router.patch('/collegeAndCareer/update/:id', passport.authenticate('jwt', {sessi
     }
 })
 
+router.patch('/jobTitle/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        // find or create Job Title
+        const existingJobTitleId = req.body.existingJobTitleId
+        const newJobTitle = req.body.newJobTitle
+        var jobTitle
+        if (newJobTitle) {
+            jobTitle = await generateNewIfAbsent(newJobTitle, jobTitleSchema)
+        } else if (existingJobTitleId) {
+            jobTitle = await jobTitleSchema.findOne({_id: existingJobTitleId})
+        }
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.jobTitle = jobTitle
+        alumni.jobTitleName = jobTitle.name
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's jobTitle information!"})
+    } catch (e) {
+        console.log("Error: alumni#jobTitle/update", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/company/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        const existingCompanyId = req.body.existingCompanyId
+        const newCompany = req.body.newCompany
+        var company
+        if (newCompany) {
+            company = await generateNewIfAbsent(newCompany, companySchema)
+        } else if (existingCompanyId) {
+            company = await companySchema.findOne({_id: existingCompanyId})
+        }
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.company = company
+        alumni.companyName = company.name
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's company information!"})
+    } catch (e) {
+        console.log("Error: alumni#company/update", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/major/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        const existingMajorId = req.body.existingMajorId
+        const newMajor = req.body.newMajor
+        var major
+        if (newMajor) {
+            major = await generateNewIfAbsent(newMajor, majorSchema)
+        } else if (existingMajorId) {
+            major = await majorSchema.findOne({_id: existingMajorId})
+        }
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.major = major
+        alumni.majorName = major.name
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's major information!"})
+    } catch (e) {
+        console.log("Error: alumni#major/update", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/college/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        // find or create College
+        const newCollege = req.body.newCollege
+        const collegeCountry = req.body.collegeCountry
+        let existingCollegeId = req.body.existingCollegeId
+        var college
+        if (newCollege) {
+            // to prevent users from accidentally adding an existing college as custom entry
+            let collegeFound = await collegeSchema.find({name: newCollege, country: collegeCountry})
+            if (!collegeFound.length) {
+                var newCollegeCreated = new collegeSchema({
+                    name: newCollege,
+                    country: collegeCountry
+                })
+                await newCollegeCreated.save()
+                college = newCollegeCreated
+            } else {
+                college = collegeFound[0]
+            }
+        } else if (existingCollegeId) {
+            college = await collegeSchema.findOne({_id: existingCollegeId})
+        }
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        alumni.college = college
+        alumni.collegeName = college.name
+        await alumni.save()
+        res.status(200).send({message: "Successfully updated alumni's college information!"})
+    } catch (e) {
+        console.log("Error: alumni#college/update", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 router.patch('/location/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let alumni = await alumniSchema.findOne({_id: req.params.id})

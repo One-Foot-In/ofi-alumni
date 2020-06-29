@@ -132,7 +132,7 @@ export default class PooledSingleSelectDropdown extends Component {
                             selection
                             options={this.state.options}
                             value={this.state.value}
-                            disabled={this.state.customSelection}
+                            disabled={this.state.customSelection || this.state.addEntry}
                             onChange={this.handleSelection}
                             clearable
                         />
@@ -153,14 +153,26 @@ export default class PooledSingleSelectDropdown extends Component {
                                     />
                                 </Grid.Column>
                                 <Grid.Column centered width={4}>
-                                    <Button
-                                        disabled={this.state.value || !this.state.customValue}
-                                        primary
-                                        color="blue"
-                                        onClick={this.commitCustomValue}
-                                    >
-                                        Commit {this.props.dataType}
-                                    </Button>
+                                    {
+                                    this.state.customValue ?
+                                        <Button
+                                            disabled={this.state.value || !this.state.customValue}
+                                            primary
+                                            color="blue"
+                                            onClick={this.commitCustomValue}
+                                        >
+                                            Commit {this.props.dataType}
+                                        </Button>
+                                        : 
+                                        <Button
+                                            primary
+                                            color="blue"
+                                            disabled={this.state.value}
+                                            onClick={() =>{this.setState({addEntry: false})}}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    }
                                 </Grid.Column>
                             </Grid.Row> :
                             <Grid.Row centered>

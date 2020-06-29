@@ -156,6 +156,7 @@ export default class PooledMultiSelectDropdown extends Component {
                 >
                     <Dropdown
                         style={{'margin':'5px'}}
+                        disabled={this.state.addEntry}
                         placeholder={`Search for ${this.props.dataType}`}
                         fluid
                         multiple
@@ -181,14 +182,26 @@ export default class PooledMultiSelectDropdown extends Component {
                                 />
                             </Grid.Column>
                             <Grid.Column centered width={4}>
-                                <Button
-                                    primary
-                                    color="blue"
-                                    onClick={this.commitCustomValue}
-                                    disabled={this.customValueAlreadyAdded() || !this.state.customValue}
-                                >
-                                    Commit {this.props.dataType}
-                                </Button>
+                                {
+                                    this.state.customValue ?
+                                    <Button
+                                        primary
+                                        color="blue"
+                                        onClick={this.commitCustomValue}
+                                        disabled={this.customValueAlreadyAdded() || !this.state.customValue}
+                                    >
+                                        Commit {this.props.dataType}
+                                    </Button>
+                                    : 
+                                    <Button
+                                        primary
+                                        color="blue"
+                                        onClick={() =>{this.setState({addEntry: false})}}
+                                    >
+                                        Cancel
+                                    </Button>
+                                }
+
                             </Grid.Column>
                         </Grid.Row>
                         :
