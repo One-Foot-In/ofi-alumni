@@ -602,9 +602,9 @@ router.get('/allConversations/', async (req, res) => {
 router.get('/data/clear/conversations', async (req, res) => {
     try {
         let conversations = await conversationSchema.deleteMany({})
-        res.status(200).send({'message': 'deleted all news items!'})
+        res.status(200).send({'message': 'deleted all conversation items!'})
     } catch (e) {
-        res.status(500).send({'news deletion error': e})
+        res.status(500).send({'conversation deletion error': e})
     }
 })
 
