@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Card, Image, Grid, Label, Segment, Icon } from 'semantic-ui-react';
-import LinkedInUpdate from "./LinkedInUpdate";
+import { Button, Card, Image, Dimmer, Label, Segment, Icon } from 'semantic-ui-react';
 import ImageUpdateModal from './ImageUpdateModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
 import { makeCall } from "../apis";
@@ -22,13 +21,27 @@ export default class StudentProfile extends Component {
         this.state = {
             imageModalOpen: false,
             interestsModalOpen: false,
-            removingInterest: false
+            removingInterest: false,
+            imageActive: false
         }
         this.openImageModal = this.openImageModal.bind(this)
         this.closeImageModal = this.closeImageModal.bind(this)
         this.openInterestsModal = this.openInterestsModal.bind(this)
         this.closeInterestsModal = this.closeInterestsModal.bind(this)
+        this.handleShow = this.handleShow.bind(this);
+        this.handleHide = this.handleHide.bind(this);
     }
+
+    handleShow(e) {
+        e.preventDefault();
+        this.setState({ imageActive: true })
+    }
+
+    handleHide(e) {
+        e.preventDefault();
+        this.setState({ imageActive: false })
+    }
+
     openImageModal() {
         this.setState({
             imageModalOpen: true
@@ -66,107 +79,117 @@ export default class StudentProfile extends Component {
             })
     }
     getInterests() {
-        return this.props.details.interests && this.props.details.interests.length && this.props.details.interests.map(interest => {
-            return (
-                <Label
-                    key={interest._id}
-                    style={{
-                        'margin': '3px'
-                    }}
-                    color='blue'
-                >
-                    {interest.name}
-                    {
-                        !this.props.isViewOnly &&
-                        <Icon
-                            onClick={(e) => this.removeInterest(e, interest._id)}
-                            name='delete'
+        let allInterests = this.props.details.interests
+        return (
+            <>
+                {
+                    allInterests.map(interest => {
+                        return (
+                            <Label
+                                key={interest._id}
+                                style={{
+                                    'margin': '3px'
+                                }}
+                                color='blue'
+                            >
+                                {interest.name}
+                                {
+                                    !this.props.isViewOnly &&
+                                    <Icon
+                                        onClick={(e) => this.removeInterest(e, interest._id)}
+                                        name='delete'
+                                    />
+                                }
+                            </Label>
+                        )
+                    })
+                }
+                {
+                    !this.props.isViewOnly &&
+                    <>
+                        <Button
+                            primary
+                            color="blue"
+                            type="button"
+                            size="mini"
+                            onClick={() => {this.setState({interestsModalOpen: true})}}
+                        >
+                            {allInterests.length ? `Add more Interests` : `Add Interests`}
+                            <Icon
+                                name="add"
+                                style={{
+                                    'margin': '3px'
+                                }}
+                            />
+                        </Button>
+                        <InterestsUpdateModal
+                            role={'student'}
+                            modalOpen={this.state.interestsModalOpen}
+                            closeModal={this.closeInterestsModal}
+                            id={this.props.details._id}
                         />
-                    }
-                </Label>
-            )
-        })
+                    </>
+                }
+            </>
+        )
     }
     render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-
-        const linkedInUpdate = (
-            <LinkedInUpdate
-                email={details.email}
-            />
-        )
-        const imageUpdate = (
+        const imageUploadButton = 
             <>
-            <Button 
-                floated="right"
-                basic
-                color="blue"
-                onClick={this.openImageModal}
-            >
-                Update Image
-            </Button>
-            <ImageUpdateModal
-                modalOpen={this.state.imageModalOpen}
-                id={details._id}
-                isAlumni={false}
-                closeModal={this.closeImageModal}
-            />
+                <Button
+                    style={{'width': '100%', 'align-self': 'center', 'margin': '5px 0 5px 0'}}
+                    basic
+                    verticalAlign='bottom'
+                    color="blue"
+                    onClick={this.openImageModal}
+                >
+                    Update Image
+                </Button>
+                <ImageUpdateModal
+                    modalOpen={this.state.imageModalOpen}
+                    id={details._id}
+                    isAlumni={false}
+                    closeModal={this.closeImageModal}
+                />
             </>
-        )
-
-        const interestsUpdate = (
-            <>
-            <Button
-                style={{'margin-left': '2px'}}
-                floated='right'
-                basic
-                color="blue"
-                onClick={this.openInterestsModal}
-            >
-                Add Extra-curricular Interests
-            </Button>
-            <InterestsUpdateModal
-                role={'student'}
-                modalOpen={this.state.interestsModalOpen}
-                closeModal={this.closeInterestsModal}
-                id={details._id}
-            />
-            </>
-        )
-        var canUpdate;
-
-        if (!isViewOnly) {
-            canUpdate = (
-                <Card.Content extra>
-                    <Grid stackable centered columns={2}>
-                        <Grid.Column width={8}>
-                            <Button.Group vertical>
-                                {linkedInUpdate}
-                                {imageUpdate}
-                            </Button.Group>
-                        </Grid.Column>
-                        <Grid.Column width={8}>
-                            <Button.Group vertical>
-                                {interestsUpdate}
-                            </Button.Group>
-                        </Grid.Column>
-                    </Grid>
-                </Card.Content>
-            )
-        } else {
-            canUpdate = <div />
-        }
-
-        return (
-            <div>
-            <Card fluid>
+        const dimmableImage = 
+            <Dimmer.Dimmable as={Image}
+                    dimmed={this.state.imageActive}
+                    onMouseEnter={this.handleShow}
+                    onMouseLeave={this.handleHide}
+                    centered
+                    size="medium"
+                    src={details.imageURL}
+                >
+                    <Dimmer
+                        active={this.state.imageActive}
+                        inverted
+                        verticalAlign='bottom'
+                    >
+                        {imageUploadButton}
+                    </Dimmer>
                 <Image 
                     centered
                     rounded
                     size="medium"
                     src={details.imageURL}
                 />
+            </Dimmer.Dimmable>
+        return (
+            <div>
+            <Card fluid>
+                {
+                    isViewOnly ?
+                    <Image 
+                        centered
+                        rounded
+                        size="medium"
+                        src={details.imageURL}
+                    /> :
+                    dimmableImage
+                }
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
 
@@ -177,13 +200,9 @@ export default class StudentProfile extends Component {
                     <Segment
                         loading={this.state.removingInterest}
                     >
-                        {details.interests && details.interests.length ?
-                        this.getInterests() :
-                        <span>No interests added.</span>
-                        }
+                        {this.getInterests()}
                     </Segment>
                 </Card.Content>
-                {canUpdate}
             </Card>
             <div padding-top="10px" />
             </div>
