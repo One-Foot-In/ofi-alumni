@@ -231,8 +231,10 @@ export default class RequestModal extends Component {
                         primary
                         onClick={this.submitRequest}
                         disabled={
-                                (this.state.topicValue === '') || 
-                                (this.state.availabilityValue === '')
+                                ((this.state.topicValue === '' || 
+                                this.state.availabilityValue === '') &&
+                                (this.state.topicValue === '' ||
+                                this.state.note === ''))
                             }
                     >
                         Submit Request

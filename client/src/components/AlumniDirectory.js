@@ -162,18 +162,26 @@ export default class AlumniDirectory extends Component {
 
     requestVisible(post, i) {
         var requestButton;
-            if (post._id !== this.props.userDetails._id) {
+            if (post._id !== this.props.userDetails._id && this.props.role === 'STUDENT') {
                 if (('zoomLink' in post && 
-                    (post.zoomLink !== null && post.zoomLink !== ''))) {
+                    (post.zoomLink !== null && post.zoomLink !== '')) && post.topics.length > 0) {
                     requestButton = <Button 
-                                    primary 
-                                    data-id={i}
-                                    onClick={this.handleRequestButton.bind(this)}>
+                                        primary 
+                                        data-id={i}
+                                        onClick={this.handleRequestButton.bind(this)}
+                                    >
                                         Connect with {post.name}!
                                     </Button>
                 } else {
                     requestButton = <Button disabled>Connect with {post.name}!</Button>
                 }
+            } else if (post._id !== this.props.userDetails._id && this.props.role === 'ALUMNI') {
+                requestButton = <Button
+                                    primary
+                                    data-id={i}
+                                >
+                                    Connect with {post.name}!
+                                </Button>
             } else {
                 requestButton = null;
             }
