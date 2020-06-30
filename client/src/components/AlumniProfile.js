@@ -86,7 +86,6 @@ export default class AlumniProfile extends Component {
         this.handleHide = this.handleHide.bind(this);
     }
 
-
     handleShow(e) {
         e.preventDefault();
         this.setState({ imageActive: true })
