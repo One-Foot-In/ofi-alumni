@@ -18,15 +18,15 @@ export default class AlumniContactModal extends Component {
         super(props)
         this.state = {
             alumni: null,
-            note: '',
+            message: '',
             submitting: false
         }
         this.handleValueChange = this.handleValueChange.bind(this)
         this.submitRequest = this.submitRequest.bind(this)
     }
 
-    async componentWillMount() {
-        await this.setState({
+    componentWillMount() {
+        this.setState({
             alumni: this.props.alumni, 
         })
     }
@@ -42,9 +42,9 @@ export default class AlumniContactModal extends Component {
                 const payload = {
                     senderId: senderId,
                     recipientId: this.state.alumni._id,
-                    note: this.state.note,
+                    message: this.state.message,
                 }
-                const result = await makeCall(payload, '/conversations/addConversation', 'post');
+                const result = await makeCall(payload, '/conversations/add', 'post');
                 if (!result || result.error) {
                     this.setState({
                         submitting: false
@@ -110,8 +110,8 @@ export default class AlumniContactModal extends Component {
                                         label={'Send a message to ' + this.state.alumni.name + ':'}
                                         placeholder='Write a message that will be visible in the networking tab'
                                         onChange={this.handleValueChange}
-                                        value={this.state.note}
-                                        name='note'
+                                        value={this.state.message}
+                                        name='message'
                                     />
                                 </Form>
                             </Grid.Column>
@@ -122,7 +122,7 @@ export default class AlumniContactModal extends Component {
                     <Button
                         primary
                         onClick={this.submitRequest}
-                        disabled={this.state.note === ''}
+                        disabled={this.state.message === ''}
                     >
                         Submit Request
                     </Button>

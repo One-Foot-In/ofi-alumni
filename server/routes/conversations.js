@@ -10,11 +10,11 @@ router.get('/', async (req, res, next) => {
     })
 })
 
-router.post('/addConversation/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+router.post('/add/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const senderId = req.body.senderId;
         const recipientId = req.body.recipientId;
-        const message = req.body.note;
+        const message = req.body.message;
 
         var conversation_instance = await conversationSchema.findOne({alumni: {$all: [senderId, recipientId]}});
         if (!conversation_instance) {
