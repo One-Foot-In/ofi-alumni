@@ -10,6 +10,10 @@ require('dotenv').config();
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 require('mongoose').Promise = global.Promise
+var bcrypt = require('bcrypt');
+var moment = require('moment');
+
+const HASH_COST = 4;
 
 // configure the keys for accessing AWS
 AWS.config.update({
@@ -35,8 +39,7 @@ const params = {
 return await s3.upload(params).promise();
 };
 
-// TODO: Add request header on frontend to allow passport.authenticate guard
-router.post('/alumni/:alumniId', async (req, res, next) => {
+router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const form = new multiparty.Form();
         form.parse(req, async (error, fields, files) => {
@@ -61,8 +64,7 @@ router.post('/alumni/:alumniId', async (req, res, next) => {
     }
 });
 
-// TODO: Add request header on frontend to allow passport.authenticate guard
-router.post('/student/:studentId', async (req, res, next) => {
+router.post('/student/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const form = new multiparty.Form();
         form.parse(req, async (error, fields, files) => {
@@ -83,6 +85,32 @@ router.post('/student/:studentId', async (req, res, next) => {
         })
     } catch (e) {
         console.log("Error: image#student", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
+// TODO: this potentially leaves S3 bucket being polluted with images, but these images will never be associated to any user
+router.post('/add', async (req, res, next) => {
+    try {
+        const form = new multiparty.Form();
+        form.parse(req, async (error, fields, files) => {
+            if (!error) {
+                const email = fields.email[0]
+                const emailHash = await bcrypt.hash(email, HASH_COST);
+                const path = files.imageFile[0].path;
+                const buffer = fs.readFileSync(path);
+                const type = await fileType.fromBuffer(buffer);
+                const fileName = `${emailHash}-${moment().format('MM-DD-YYYY')}`;
+                const data = await uploadFile(buffer, fileName, type);
+                let imageLocation = data.Location;
+                res.status(200).send({
+                    success: true,
+                    imageUrl: imageLocation
+                })
+            }
+        })
+    } catch (e) {
+        console.log("Error: image#addImage", e);
         res.status(500).send({'error' : e});
     }
 });

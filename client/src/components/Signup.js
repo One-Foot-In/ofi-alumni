@@ -1,6 +1,6 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Icon, Message, Grid, Dropdown, Label } from 'semantic-ui-react';
+import { Form, Button, Icon, Message, Grid, Dropdown, Label, Image } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 import LocationSelectionModal from './LocationSelectionModal';
@@ -9,6 +9,7 @@ import AddInterestsModal from './AddInterestsModal';
 import MajorSelectionModal from './MajorSelectionModal';
 import CompanySelectionModal from './CompanySelectionModal';
 import JobTitleSelectionModal from './JobTitleSelectionModal';
+import ImageSelectModal from './ImageSelectModal';
 
 let fieldStyle = {
     width: '90%',
@@ -50,6 +51,7 @@ export default class Signup extends React.Component {
             confirmPassword: '', // required
             schoolSelection: '', // required (id of school selected)
             schoolOptions: [],
+            imageUrl: '',
             // STUDENT ONLY
             grade: null, // required
             // ALUMNI ONLY
@@ -85,7 +87,8 @@ export default class Signup extends React.Component {
             majorModalOpen: false,
             interestsModalOpen: false,
             companyModalOpen: false,
-            jobTitleModalOpen: false
+            jobTitleModalOpen: false,
+            imageModalOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
@@ -113,9 +116,42 @@ export default class Signup extends React.Component {
         this.getJobTitleDisplay = this.getJobTitleDisplay.bind(this);
         this.getCompanyInput = this.getCompanyInput.bind(this);
         this.getJobTitleInput = this.getJobTitleInput.bind(this);
+        this.getImageInput = this.getImageInput.bind(this);
+        this.getImageDisplay = this.getImageDisplay.bind(this);
+        this.handleImageModal = this.handleImageModal.bind(this);
+        this.canAddimage = this.canAddimage.bind(this);
     }
 
-    
+    canAddimage() {
+        return this.state.email && this.state.emailValid;
+    }
+
+    getImageDisplay() {
+        return (
+            <>
+            <Image 
+                centered
+                size='small'
+                src={this.state.imageUrl}
+                circular
+            />
+            <Button
+                style={{'margin-top': '2px'}}
+                basic
+                color="red"
+                onClick={() => this.setState({imageUrl: null})}
+                icon='delete'
+            >
+                Remove Image
+            </Button>
+            </>
+        )    
+    }
+
+    getImageInput(imageUrl) {
+        this.setState({imageUrl})
+    }
+
     getLocationInput(country, city) {
         this.setState({country, city})
     }
@@ -224,6 +260,10 @@ export default class Signup extends React.Component {
 
     handleJobTitleSelectionModal() {
         this.setState({jobTitleModalOpen: !this.state.jobTitleModalOpen})
+    }
+
+    handleImageModal() {
+        this.setState({imageModalOpen: !this.state.imageModalOpen})
     }
 
     removeInterest(e, interestMarker) {
@@ -417,7 +457,7 @@ export default class Signup extends React.Component {
     }
 
     validateSubmitReadiness() {
-        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password);
+        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password) && this.state.imageUrl;
         if (this.props.isAlumni) {
             return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId);
         }
@@ -591,7 +631,8 @@ export default class Signup extends React.Component {
                 email: this.state.email,
                 password: this.state.password,
                 timeZone: ((new Date().getTimezoneOffset())*100)/60, // getTimezoneOffset fetches offset in minutes
-                schoolId: this.state.schoolSelection
+                schoolId: this.state.schoolSelection,
+                imageURL: this.state.imageUrl
             }
             if (!this.props.isAlumni) {
                 payload = Object.assign({}, payload, {
@@ -738,6 +779,32 @@ export default class Signup extends React.Component {
                             onChange={this.handleSchoolSelection}
                         >
                         </Form.Dropdown>
+                        <Form.Field
+                            required={true}
+                        >
+                            <label>Image</label>
+                            {
+                                (this.state.imageUrl) ?
+                                this.getImageDisplay() :
+                                <>
+                                    <Button
+                                        primary
+                                        color="blue"
+                                        type="button"
+                                        disabled={!this.canAddimage()}
+                                        onClick={() => {this.setState({imageModalOpen: true})}}
+                                    >
+                                        {this.canAddimage() ? `Select Image` : `Add email before selecting an Image!`}
+                                    </Button>
+                                    <ImageSelectModal
+                                        getInput={this.getImageInput}
+                                        modalOpen={this.state.imageModalOpen}
+                                        close={this.handleImageModal}
+                                        email={this.state.email}
+                                    />
+                                </>
+                            }
+                        </Form.Field>
                         {this.props.isAlumni ? 
                             this.getAlumniFields() :
                             this.getStudentFields()
