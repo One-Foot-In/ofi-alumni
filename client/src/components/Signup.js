@@ -1,6 +1,6 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Icon, Message, Grid, Dropdown, Label, Image } from 'semantic-ui-react';
+import { Form, Button, Icon, Message, Grid, Dropdown, Label, Image, Divider, Input } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 import LocationSelectionModal from './LocationSelectionModal';
@@ -51,6 +51,7 @@ export default class Signup extends React.Component {
             confirmPassword: '', // required
             schoolSelection: '', // required (id of school selected)
             schoolOptions: [],
+            topicOptions: [],
             imageUrl: '',
             // STUDENT ONLY
             grade: null, // required
@@ -59,6 +60,8 @@ export default class Signup extends React.Component {
             // location
             country: '',
             city: '',
+            topics: [],
+            zoomLink: '',
             // career and interests
             existingJobTitleId: '',
             existingJobTitleName: '',
@@ -120,6 +123,7 @@ export default class Signup extends React.Component {
         this.getImageDisplay = this.getImageDisplay.bind(this);
         this.handleImageModal = this.handleImageModal.bind(this);
         this.canAddimage = this.canAddimage.bind(this);
+        this.handleTopicSelection = this.handleTopicSelection.bind(this);
     }
 
     canAddimage() {
@@ -418,8 +422,24 @@ export default class Signup extends React.Component {
 
     async componentWillMount() {
         let result = await makeCall(null, '/drop/schoolsOptions', 'get')
+        let topicOptions = await makeCall(null, `/alumni/topicOptions`, 'get')
         this.setState({
+            topicOptions: topicOptions.topics.map(option => {
+                return {
+                    key: option,
+                    value: option,
+                    text: option
+                }
+            }),
             schoolOptions: result.options
+
+        })
+    }
+
+    handleTopicSelection(e, {value}) {
+        e.preventDefault()
+        this.setState({
+            topics: value
         })
     }
 
@@ -459,7 +479,7 @@ export default class Signup extends React.Component {
     validateSubmitReadiness() {
         const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password) && this.state.imageUrl;
         if (this.props.isAlumni) {
-            return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId);
+            return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId) && this.state.topics.length && this.state.zoomLink && this.state.city && this.state.country;
         }
         return baseCondition && this.state.grade;
     }
@@ -477,6 +497,7 @@ export default class Signup extends React.Component {
                 </Form.Field>
                 <Form.Field
                     required={true}
+                    style={fieldStyle}
                 >
                     <label>College</label>
                     {
@@ -488,6 +509,7 @@ export default class Signup extends React.Component {
                                 color="blue"
                                 type="button"
                                 onClick={() => {this.setState({collegeModalOpen: true})}}
+                                style={{'width': '100%'}}
                             >
                                 Add College
                             </Button>
@@ -501,6 +523,7 @@ export default class Signup extends React.Component {
                 </Form.Field>
                 <Form.Field
                     required={true}
+                    style={fieldStyle}
                 >
                     <label>Major</label>
                     {
@@ -512,6 +535,7 @@ export default class Signup extends React.Component {
                                 color="blue"
                                 type="button"
                                 onClick={() => {this.setState({majorModalOpen: true})}}
+                                style={{'width': '100%'}}
                             >
                                 Add Major
                             </Button>
@@ -525,6 +549,7 @@ export default class Signup extends React.Component {
                 </Form.Field>
                 <Form.Field
                     required={true}
+                    style={fieldStyle}
                 >
                     <label>Location</label>
                     {(this.state.country && this.state.city) ?
@@ -535,6 +560,7 @@ export default class Signup extends React.Component {
                             color="blue"
                             type="button"
                             onClick={() => {this.setState({locationModalOpen: true})}}
+                            style={{'width': '100%'}}
                         >
                             Add Location
                         </Button>
@@ -547,6 +573,36 @@ export default class Signup extends React.Component {
                     }
                 </Form.Field>
                 <Form.Field
+                    required={true}
+                    style={fieldStyle}
+                >
+                    <label>Zoom meeting link</label>
+                    <Input
+                        style={{width: '100%'}}
+                        placeholder='https://zoom.us/j/1234567890'
+                        value={this.state.zoomLink}
+                        name='zoomLink'
+                        onChange={this.handleChange}
+                    />
+                </Form.Field>
+                <Form.Field
+                    required={true}
+                    style={fieldStyle}
+                >
+                    <label>Topics (select at least one)</label>
+                    <Dropdown
+                        style={{ 'margin': '5px', 'width': '100%'}}
+                        placeholder='Select topics you would like to consult on.'
+                        multiple
+                        selection
+                        options={this.state.topicOptions}
+                        value={this.state.topics}
+                        onChange={this.handleTopicSelection}
+                        name='topics'
+                    />
+                </Form.Field>
+                <Form.Field
+                    style={fieldStyle}
                 >
                     <label>Company/Organization</label>
                     {
@@ -558,6 +614,7 @@ export default class Signup extends React.Component {
                                 color="blue"
                                 type="button"
                                 onClick={() => {this.setState({companyModalOpen: true})}}
+                                style={{'width': '100%'}}
                             >
                                 Add Company/Organization
                             </Button>
@@ -570,6 +627,7 @@ export default class Signup extends React.Component {
                     }
                 </Form.Field>
                 <Form.Field
+                    style={fieldStyle}
                 >
                     <label>Job Title</label>
                     {
@@ -581,6 +639,7 @@ export default class Signup extends React.Component {
                                 color="blue"
                                 type="button"
                                 onClick={() => {this.setState({jobTitleModalOpen: true})}}
+                                style={{'width': '100%'}}
                             >
                                 Add Job Title
                             </Button>
@@ -593,6 +652,7 @@ export default class Signup extends React.Component {
                     }
                 </Form.Field>
                 <Form.Field
+                    style={fieldStyle}
                 >
                     <label>Interests</label>
                     <>
@@ -611,7 +671,9 @@ export default class Signup extends React.Component {
     getStudentFields() {
         return (
             <>
-                <Form.Field>
+                <Form.Field
+                    required={true}
+                >
                     <label>Grade</label>
                     <Dropdown placeholder='Select the grade you attend...' selection options={gradeOptions} onChange={this.handleChangeGrade} name="grade" value={this.state.grade}/>
                 </Form.Field>
@@ -658,6 +720,8 @@ export default class Signup extends React.Component {
                     // major
                     existingMajorId: this.state.existingMajorId,
                     newMajor: this.state.newMajor,
+                    topics: this.state.topics,
+                    zoomLink: this.state.zoomLink
                 });
             }
             e.preventDefault();
@@ -809,10 +873,13 @@ export default class Signup extends React.Component {
                             this.getAlumniFields() :
                             this.getStudentFields()
                         }
+                        <Divider/>
                         <Button 
                             color="blue" 
                             type='submit'
-                            loading={this.state.submitting}>
+                            loading={this.state.submitting}
+                            disabled={!this.validateSubmitReadiness()}
+                        >
                             <Icon name="unlock"/>
                             Submit
                         </Button>

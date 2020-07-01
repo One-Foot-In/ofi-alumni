@@ -66,7 +66,9 @@ export default class CompanySelectionModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
-                        onClick={this.submit}>
+                        onClick={this.submit}
+                        disabled={!this.state.newCompany && !this.state.existingCompanyId}
+                    >
                         Submit
                     </Button>
                     <Button onClick={this.props.closeModal}>

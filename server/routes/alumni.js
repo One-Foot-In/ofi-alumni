@@ -83,6 +83,7 @@ router.post('/', async (req, res, next) => {
         const zoomLink = req.body.zoomLink;
         const schoolId = req.body.schoolId;
         const imageURL = req.body.imageURL;
+        const topics = req.body.topics;
 
         // find or create College
         const newCollege = req.body.newCollege
@@ -169,7 +170,8 @@ router.post('/', async (req, res, next) => {
                 schoolLogo: school.logoURL,
                 major: major,
                 majorName: major && major.name,
-                imageURL: imageURL
+                imageURL: imageURL,
+                topics: topics,
             }
         )
         const user_instance = new userSchema(
