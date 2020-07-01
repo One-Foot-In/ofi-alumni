@@ -14,6 +14,7 @@ import AlumniVerification from './components/AlumniVerification'
 import StudentVerification from './components/StudentVerification'
 import AlumniMentorship from './components/AlumniMentorship';
 import StudentMentorship from './components/StudentMentorship'
+import AlumniNetworking from './components/AlumniNetworking'
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
 
@@ -110,9 +111,9 @@ var alumniNavBarItems = (approved) => {
         navLink: '/mentorship'
     },
     {
-        id: 'schedulings',
-        name: 'Schedulings',
-        navLink: '/schedulings'
+        id: 'networking',
+        name: 'Networking',
+        navLink: '/networking'
     }
   ]
   if (approved) {
@@ -333,7 +334,7 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
-          <Route exact path={`/schedulings`} render={(props) => 
+          <Route exact path={`/networking`} render={(props) => 
                   this.state.loggedIn ?
                   <>
                       <Navbar
@@ -341,9 +342,11 @@ class App extends Component {
                           role={role}
                           timezoneActive={true}
                           navItems={alumniNavBarItems(this.state.approved)}
-                          activeItem={'schedulings'}
+                          activeItem={'networking'}
                       />
-                      //TODO
+                      <AlumniNetworking 
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }

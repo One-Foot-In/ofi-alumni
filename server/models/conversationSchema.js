@@ -16,7 +16,9 @@ const conversationSchema = new Schema(
         alumni: [{type: Schema.Types.ObjectId, ref: 'Alumni'}],
         messages: [messageSchema],
         seen: [{type: Boolean}],
-        dateCreated: {type: Date, default: moment()}, 
+        dateCreated: {type: Date, default: moment()},
+        //RETURN FIELD NOT KEPT IN DB
+        timeFromMessage: {type: String}
     }
 );
 
