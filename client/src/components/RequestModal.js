@@ -122,7 +122,6 @@ export default class RequestModal extends Component {
                 const requesterId = this.props.userDetails._id
                 let timeOffset = parseInt(this.state.timeOffset)
                 const payload = {
-                    requesterRole: this.props.role,
                     requesterId: requesterId,
                     mentorId: this.state.alumni._id,
                     zoomLink: this.state.alumni.zoomLink,
@@ -231,8 +230,10 @@ export default class RequestModal extends Component {
                         primary
                         onClick={this.submitRequest}
                         disabled={
-                                (this.state.topicValue === '') || 
-                                (this.state.availabilityValue === '')
+                                ((this.state.topicValue === '' || 
+                                this.state.availabilityValue === '') &&
+                                (this.state.topicValue === '' ||
+                                this.state.note === ''))
                             }
                     >
                         Submit Request

@@ -21,6 +21,7 @@ var mongooseUtilRouter = require('./routes/utilMongoose');
 var requestRouter = require('./routes/requests');
 var newsRouter = require('./routes/newsfeed');
 var imageRouter = require('./routes/image');
+var conversationsRouter = require('./routes/conversations')
 
 require('dotenv').config();
 
@@ -122,6 +123,8 @@ async function main() {
     app.use('/news/', newsRouter);
 
     app.use('/image/', imageRouter);
+
+    app.use('/conversations/', conversationsRouter);
 
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {

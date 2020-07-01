@@ -13,6 +13,7 @@ var jobTitleSchema = require('../models/jobTitleSchema');
 var majorSchema = require('../models/majorSchema');
 var interestsSchema = require('../models/interestsSchema');
 var newsSchema = require('../models/newsSchema');
+const conversationSchema = require('../models/conversationSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
 var sendTestEmail = require('../routes/helpers/emailHelpers').sendTestEmail
@@ -587,6 +588,26 @@ router.get('/testEmail/:email', async (req, res) => {
     }
 })
 
+/* Conversations */
+router.get('/allConversations/', async (req, res) => {
+    try {
+        let conversations = await conversationSchema.find({}).populate('alumni')
+        res.status(200).send({'conversations': conversations})
+    } catch (e) {
+        console.log(e)
+        res.status(500).send({'error': e});
+    }
+})
+
+router.get('/data/clear/conversations', async (req, res) => {
+    try {
+        let conversations = await conversationSchema.deleteMany({})
+        res.status(200).send({'message': 'deleted all conversation items!'})
+    } catch (e) {
+        res.status(500).send({'conversation deletion error': e})
+    }
+})
+
 /* Clear All */
 router.get('/data/clear/all', async (req, res, next) => {
     try {
@@ -601,6 +622,7 @@ router.get('/data/clear/all', async (req, res, next) => {
         await companySchema.deleteMany({});
         await newsSchema.deleteMany({});
         await majorSchema.deleteMany({});
+        await conversationSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});

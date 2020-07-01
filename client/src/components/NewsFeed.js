@@ -37,7 +37,6 @@ export default class NewsFeed extends Component {
         let display = []
         let i = 0
         for (let feedItem of this.state.newsItems) {
-            console.log(feedItem)
             switch (feedItem.event) {
                 case 'New Alumni':
                     display.push(<Divider key={i}/>)

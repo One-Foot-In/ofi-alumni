@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, Responsive } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import RequestModal from './RequestModal'
+import AlumniContactModal from './AlumniContactModal'
 
 // Filter dropdown options
 const searchOptions = [
@@ -66,14 +67,21 @@ export default class AlumniDirectory extends Component {
             numResults: 0,
             filter: 'all',
             requestModalOpen: false,
+            alumniContactModalOpen: false,
             alumniDetails: null,
         }
         this.toggleRequestModal = this.toggleRequestModal.bind(this)
+        this.toggleAlumniContactModal = this.toggleAlumniContactModal.bind(this)
     }
 
     toggleRequestModal() {
         this.setState({
             requestModalOpen: !this.state.requestModalOpen
+        })
+    }
+    toggleAlumniContactModal() {
+        this.setState({
+            alumniContactModalOpen: !this.state.alumniContactModalOpen
         })
     }
 
@@ -162,18 +170,27 @@ export default class AlumniDirectory extends Component {
 
     requestVisible(post, i) {
         var requestButton;
-            if (post._id !== this.props.userDetails._id) {
+            if (post._id !== this.props.userDetails._id && this.props.role === 'STUDENT') {
                 if (('zoomLink' in post && 
-                    (post.zoomLink !== null && post.zoomLink !== ''))) {
+                    (post.zoomLink !== null && post.zoomLink !== '')) && post.topics.length > 0) {
                     requestButton = <Button 
-                                    primary 
-                                    data-id={i}
-                                    onClick={this.handleRequestButton.bind(this)}>
+                                        primary 
+                                        data-id={i}
+                                        onClick={this.handleRequestButton.bind(this)}
+                                    >
                                         Connect with {post.name}!
                                     </Button>
                 } else {
                     requestButton = <Button disabled>Connect with {post.name}!</Button>
                 }
+            } else if (post._id !== this.props.userDetails._id && this.props.role === 'ALUMNI') {
+                requestButton = <Button
+                                    primary
+                                    data-id={i}
+                                    onClick={this.handleConnectButton.bind(this)}
+                                >
+                                    Connect with {post.name}!
+                                </Button>
             } else {
                 requestButton = null;
             }
@@ -227,6 +244,10 @@ export default class AlumniDirectory extends Component {
     handleRequestButton(e) {
         this.setState({alumniDetails: this.state.entries[e.currentTarget.dataset.id]})
         this.toggleRequestModal()
+    }
+    handleConnectButton(e) {
+        this.setState({alumniDetails: this.state.entries[e.currentTarget.dataset.id]})
+        this.toggleAlumniContactModal()
     }
 
     render(){
@@ -316,6 +337,15 @@ export default class AlumniDirectory extends Component {
                     <RequestModal
                     modalOpen={this.state.requestModalOpen}
                     closeModal={this.toggleRequestModal}
+                    alumni={this.state.alumniDetails}
+                    userDetails={this.props.userDetails}
+                    role={this.props.role}
+                    />
+                }
+                {this.state.alumniContactModalOpen && 
+                    <AlumniContactModal
+                    modalOpen={this.state.alumniContactModalOpen}
+                    closeModal={this.toggleAlumniContactModal}
                     alumni={this.state.alumniDetails}
                     userDetails={this.props.userDetails}
                     role={this.props.role}
