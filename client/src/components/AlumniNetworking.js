@@ -37,7 +37,6 @@ export default class AlumniNetworking extends Component {
     constructConversation(conversation) {
         let userIndex = conversation.alumni.findIndex(item => item._id === this.props.userDetails._id);
         let recipientIndex = (userIndex + 1) % 2;
-        let labelActive = conversation.messages[0].senderId[0] !== this.props.userDetails._id ? true : false;
         return(
             <Grid key={conversation._id} columns={'equal'}>
                 <Grid.Row columns={2}>
@@ -52,7 +51,7 @@ export default class AlumniNetworking extends Component {
                     <Grid.Column>
                         <Card fluid>
                             <Card.Content>
-                            {labelActive && 
+                            {!conversation.seen[userIndex] && 
                                 <Label color='teal' corner='right' icon='envelope' />
                             }
                                 <Card.Header>
