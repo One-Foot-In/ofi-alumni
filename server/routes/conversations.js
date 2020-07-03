@@ -2,6 +2,7 @@ var express = require('express');
 var passport = require("passport");
 var router = express.Router();
 var conversationSchema = require('../models/conversationSchema');
+var moment = require('moment');
 require('mongoose').Promise = global.Promise
 
 router.get('/', async (req, res, next) => {
@@ -41,11 +42,29 @@ router.post('/add/', passport.authenticate('jwt', {session: false}), async (req,
             request: conversation_instance
         });
     } catch (e) {
-        console.log('request/addConversation Error: ' + e)
+        console.log('conversations/add Error: ' + e)
         res.status(500).send({
             message: 'Failed creating conversation: ' + e
         });
     }
 });
+
+router.get('/get/:id', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    try {
+        const alumniId = req.params.id;
+        var conversations = await conversationSchema.find({alumni: alumniId}).populate('alumni', 'name imageURL');
+        for (let conversation of conversations) {
+            conversation.timeFromMessage = moment(conversation.messages[0].dateSent).fromNow();
+        }
+        res.status(200).send({
+            'conversations': conversations
+        });
+    } catch (e) {
+        console.log('conversations/get/:id Error: ' + e)
+        res.status(500).send({
+            message: 'Failed to fetch conversations: ' + e
+        });
+    }
+})
 
 module.exports = router;
