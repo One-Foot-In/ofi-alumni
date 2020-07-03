@@ -82,6 +82,8 @@ router.post('/', async (req, res, next) => {
         const timeZone = req.body.timeZone;
         const zoomLink = req.body.zoomLink;
         const schoolId = req.body.schoolId;
+        const imageURL = req.body.imageURL;
+        const topics = req.body.topics;
 
         // find or create College
         const newCollege = req.body.newCollege
@@ -135,7 +137,7 @@ router.post('/', async (req, res, next) => {
             major = await majorSchema.findOne({_id: existingMajorId})
         }
 
-        const existingInterests = req.body.existingInterests
+        const existingInterests = req.body.existingInterests || []
         const newInterests = req.body.newInterests || []
         let interests = await generateNewAndExistingInterests(existingInterests, newInterests)
 
@@ -167,7 +169,9 @@ router.post('/', async (req, res, next) => {
                 school: schoolId,
                 schoolLogo: school.logoURL,
                 major: major,
-                majorName: major && major.name
+                majorName: major && major.name,
+                imageURL: imageURL,
+                topics: topics,
             }
         )
         const user_instance = new userSchema(

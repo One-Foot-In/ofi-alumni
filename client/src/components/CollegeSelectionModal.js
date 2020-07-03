@@ -122,7 +122,9 @@ export default class CollegeSelectionModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
-                        onClick={this.submit}>
+                        onClick={this.submit}
+                        disabled={!this.state.newCollege && !this.state.existingCollegeId}
+                    >
                         Submit
                     </Button>
                     <Button onClick={this.props.closeModal}>

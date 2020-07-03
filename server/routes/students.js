@@ -26,6 +26,7 @@ router.post('/', async (req, res, next) => {
         const grade = parseInt(req.body.grade);
         const password = req.body.password;
         const schoolId = req.body.schoolId;
+        const imageURL = req.body.imageURL;
         // TODO: need to add timeZone in frontend request
         const timeZone = req.body.timeZone;
         const role = "STUDENT"
@@ -44,7 +45,8 @@ router.post('/', async (req, res, next) => {
                 // issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
                 school: schoolId,
                 timeZone: -timeZone,
-                schoolLogo: school.logoURL
+                schoolLogo: school.logoURL,
+                imageURL: imageURL
             }
         )
         const user_instance = new userSchema(

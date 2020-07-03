@@ -3,19 +3,22 @@ import {Button, Modal, Form} from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCallWithImage } from "../apis";
 
+const BACKEND = process.env.REACT_APP_BACKEND = "http://localhost:5000"
+
 /*
 props:
     - modalOpen: boolean
-    - closeModal: ()
-    - isAlumni: boolean
+    - close: ()
+    - getInput: ()
+    - email
     - id
 */
-export default class ImageUpdateModal extends Component {
+export default class ImageSelectModal extends Component {
     constructor(props){
         super(props)
         this.state = {
-            submitting: false,
-            imageFile: null
+            imageFile: null,
+            loading: false
         }
         this.selectFile = this.selectFile.bind(this)
         this.submit = this.submit.bind(this)
@@ -42,44 +45,28 @@ export default class ImageUpdateModal extends Component {
         }
     }
 
-    submit(e) {
+    async submit(e) {
         e.preventDefault()
-        this.setState({
-            submitting: true
-        }, async () => {
-            try {
-                const result = await makeCallWithImage({imageFile: this.state.imageFile}, `/image/${this.props.isAlumni?`alumni` : `student`}/${this.props.id}`, 'post');
-                if (!result || result.error) {
-                    this.setState({
-                        submitting: false
-                    }, () => {
-                        swal({
-                            title: "Error!",
-                            text: `Something went wrong, please try uploading again!`,
-                            icon: "error",
-                        });
-                    });
-                } else {
-                    this.setState({
-                        submitting: false
-                    }, () => {
-                        swal({
-                            title: "Success!",
-                            text: "Successfully updated photo!",
-                            icon: "success",
-                        }).then(() => {
-                            this.props.closeModal()
-                        });
-                    });
-                }
-            } catch (e) {
-                this.setState({
-                    submitting: false
-                }, () => {
-                    console.log("Error: ImageUpdateModal#submit", e);
-                })
-            }
-        })
+        this.setState({loading: true})
+        const result = await makeCallWithImage({email: this.props.email, imageFile: this.state.imageFile}, '/image/add', 'post');
+        if (!result || result.error) {
+            this.setState({
+                loading: false
+             }, () => {
+                 swal({
+                     title: "Error!",
+                     text: `Something went wrong, please try uploading again!`,
+                     icon: "error",
+                 });
+             });
+        } else {
+            this.setState({
+                loading: false
+            }, () => {
+                this.props.getInput(result.imageUrl)
+                this.props.close()
+            }); 
+        }
     }
 
     render() {
@@ -87,7 +74,7 @@ export default class ImageUpdateModal extends Component {
             <Modal
                 open={this.props.modalOpen}
             >
-                <Modal.Header>Upload your new profile image</Modal.Header>
+                <Modal.Header>Upload a profile image</Modal.Header>
                 <Modal.Content>
                     <Form>
                         <Form.Field>
@@ -100,12 +87,12 @@ export default class ImageUpdateModal extends Component {
                     <Button
                         primary
                         onClick={this.submit}
-                        loading={this.state.submitting}
-                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile)}
+                        loading={this.state.loading}
+                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile) || this.state.loading}
                     >
                         Upload
                     </Button>
-                    <Button onClick={this.props.closeModal}>
+                    <Button onClick={this.props.close}>
                         Close
                     </Button>
                 </Modal.Actions>
