@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Image, Grid, Modal, Button, Feed, Divider, Form, Icon} from 'semantic-ui-react'
+import { Comment, Grid, Modal, Button, Divider, Form, Icon} from 'semantic-ui-react'
 import { makeCall } from '../apis';
 
 /*
@@ -67,16 +67,18 @@ export default class Conversation extends Component {
                 )
         })
         return (
-            <>
-            <Divider/>
-            <Feed.Event>
-                <Feed.Label><Image src={alumni[senderIndex].imageURL}/></Feed.Label>
-                <Feed.Content>
-                    <Feed.Summary>{alumni[senderIndex].name} <Feed.Date>{message.dateString}</Feed.Date></Feed.Summary>
-                    {formattedMessage}
-                </Feed.Content>
-            </Feed.Event>
-            </>
+            <Comment key={message._id}>
+                <Comment.Avatar src={alumni[senderIndex].imageURL}></Comment.Avatar>
+                <Comment.Content>
+                    <Comment.Author>{alumni[senderIndex].name}
+                        <Comment.Metadata><span>{message.dateString}</span></Comment.Metadata>
+                    </Comment.Author> 
+                    
+                    <Comment.Text>
+                        {formattedMessage}
+                    </Comment.Text>
+                </Comment.Content>
+            </Comment>
         )
     }
 
@@ -91,9 +93,9 @@ export default class Conversation extends Component {
             >
                 <Modal.Header>Conversation with {this.state.conversation.alumni[recipientIndex].name}</Modal.Header>
                 <Modal.Content scrolling style={{'display': 'flex', 'flexDirection': 'column-reverse', 'maxHeight': '50vh'}}>
-                    <Feed>
+                    <Comment.Group>
                         {this.state.display}
-                    </Feed>
+                    </Comment.Group>
                 </Modal.Content>
                 <Modal.Content>
                     <Grid>
