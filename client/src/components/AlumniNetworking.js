@@ -190,8 +190,7 @@ class Conversation extends Component {
     }
 
     displayMessage(message, alumni) {
-        let userIndex = alumni.findIndex(item => item._id === this.props.userDetails._id);
-        let recipientIndex = (userIndex + 1) % 2;
+        let senderIndex = alumni.findIndex(item => item._id === message.senderId[0]);
         let formattedMessage = message.message.split('\n').map((message, i) => {
             return(
                 <p style={{'wordWrap': 'break-word', 'hyphens': 'auto', 'width': '50vw'}} key={i}>
@@ -199,33 +198,18 @@ class Conversation extends Component {
                 </p>
                 )
         })
-        if (message.senderId[0] === this.props.userDetails._id) {
-            return (
-                <>
-                <Divider/>
-                <Feed.Event>
-                    <Feed.Label><Image src={alumni[userIndex].imageURL}/></Feed.Label>
-                    <Feed.Content>
-                        <Feed.Summary>{alumni[userIndex].name} <Feed.Date>{message.dateString}</Feed.Date></Feed.Summary>
-                        {formattedMessage}
-                    </Feed.Content>
-                </Feed.Event>
-                </>
-           )
-       } else {
-            return (
-                <>
-                <Divider/>
-                <Feed.Event style={{'overflowWrap': 'break-word', 'hyphens': 'auto'}}>
-                    <Feed.Label><Image src={alumni[recipientIndex].imageURL}/></Feed.Label>
-                    <Feed.Content>
-                        <Feed.Summary>{alumni[recipientIndex].name} <Feed.Date>{message.dateString}</Feed.Date></Feed.Summary>
-                        {formattedMessage}
-                    </Feed.Content>
-                </Feed.Event>
-                </>
-            )
-       }
+        return (
+            <>
+            <Divider/>
+            <Feed.Event>
+                <Feed.Label><Image src={alumni[senderIndex].imageURL}/></Feed.Label>
+                <Feed.Content>
+                    <Feed.Summary>{alumni[senderIndex].name} <Feed.Date>{message.dateString}</Feed.Date></Feed.Summary>
+                    {formattedMessage}
+                </Feed.Content>
+            </Feed.Event>
+            </>
+        )
     }
 
     render() {
@@ -258,7 +242,12 @@ class Conversation extends Component {
                                 </Form>
                             </Grid.Column>
                             <Grid.Column>
-                                <Button inverted floated='left' onClick={this.sendMessage}>
+                                <Button 
+                                    inverted 
+                                    floated='left' 
+                                    onClick={this.sendMessage}
+                                    disabled={!this.state.message}
+                                >
                                     <Icon size='large' color='blue' name='paper plane'/>
                                 </Button>
                             </Grid.Column>
