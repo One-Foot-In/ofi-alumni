@@ -70,17 +70,12 @@ export default class AlumniNetworking extends Component {
     constructConversation(conversation) {
         let userIndex = conversation.alumni.findIndex(item => item._id === this.props.userDetails._id);
         let recipientIndex = (userIndex + 1) % 2;
-        let formattedMessage = conversation.messages[0].message.split('\n').map((message, i) => {
-            if (i === 0) {
-                return(
-                    <p style={{'wordWrap': 'break-word', 'hyphens': 'auto', 'width': '50vw'}} key={i}>
-                        {message}
-                    </p>
-                )
-            } else {
-                return
-            }
-        })
+        let formattedMessage = conversation.messages[0].message.split('\n')
+        formattedMessage =  (
+            <p style={{'wordWrap': 'break-word', 'hyphens': 'auto', 'width': '50vw'}}>
+                {formattedMessage[0]}
+            </p>
+        )
         return(
             <Grid key={conversation._id} columns={'equal'}>
                 <Grid.Row columns={2}>
