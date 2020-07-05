@@ -129,6 +129,21 @@ export default class AlumniNetworking extends Component {
     }
 }
 
+
+/*
+ * DETAILS: Child component, conversation modal
+ * Shows full conversation history and allows for sending of messages
+ * 
+ * PROPS: userDetails,
+ *        conversation {messages [{message, sender, datesent, dateString}], 
+ *                      alumni[{name, imageURL}], seen[bool], dateCreated }
+ *        modalOpen
+ *        closeModal()
+ * 
+ * NOTE: This is specific to alumni conversations - In the future, this should
+ *       be generalized to groupchats (this will take some tweaking) and given
+ *       its own file
+ */ 
 class Conversation extends Component {
     constructor(props){
         super(props)
@@ -138,10 +153,25 @@ class Conversation extends Component {
             message: ''
         }
         this.handleValueChange = this.handleValueChange.bind(this)
+        this.sendMessage = this.sendMessage.bind(this)
     }
     componentWillMount() {
         this.createDisplay(this.props.conversation)
         this.setState({conversation: this.props.conversation})
+    }
+
+    async sendMessage() {
+        let conversation = await makeCall(
+            {
+                id: this.state.conversation._id,
+                timezone: parseInt(this.props.userDetails.timeZone/100),
+                message: this.state.message
+            }, '/conversations/sendMessage/' + this.props.userDetails._id, 'patch')
+        this.createDisplay(conversation.conversation)
+        this.setState({
+            conversation: conversation.conversation,
+            message: ''
+        })
     }
 
     createDisplay(conversation) {
@@ -228,7 +258,9 @@ class Conversation extends Component {
                                 </Form>
                             </Grid.Column>
                             <Grid.Column>
-                                <Button inverted floated='left'><Icon size='large' color='blue' name='paper plane'/></Button>
+                                <Button inverted floated='left' onClick={this.sendMessage}>
+                                    <Icon size='large' color='blue' name='paper plane'/>
+                                </Button>
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
