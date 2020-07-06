@@ -49,7 +49,7 @@ router.post('/add/', passport.authenticate('jwt', {session: false}), async (req,
     }
 });
 
-router.get('/get/:id', passport.authenticate('jwt', {session: false}), async (req, res) => {
+router.get('/all/:id', passport.authenticate('jwt', {session: false}), async (req, res) => {
     try {
         const alumniId = req.params.id;
         var conversations = await conversationSchema.find({alumni: alumniId}).populate('alumni', 'name imageURL');
@@ -60,9 +60,71 @@ router.get('/get/:id', passport.authenticate('jwt', {session: false}), async (re
             'conversations': conversations
         });
     } catch (e) {
-        console.log('conversations/get/:id Error: ' + e)
+        console.log('conversations/all/:id Error: ' + e)
         res.status(500).send({
             message: 'Failed to fetch conversations: ' + e
+        });
+    }
+})
+
+router.patch('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    try {
+        const alumniId = req.params.id;
+        const conversationId = req.body.id;
+        const timezone = parseInt(req.body.timezone);
+        var conversation = await conversationSchema.findById(conversationId)
+        
+        conversation.seen.set(conversation.alumni.indexOf(alumniId), true);
+        await conversation.save()
+        
+        await conversation.populate('alumni', 'name imageURL').execPopulate();
+        for (let message of conversation.messages) {
+            let dateSent = moment.utc(message.dateSent).add(timezone, 'h');
+            message.dateString = dateSent.format('MMM D YYYY, h:mm a')
+        }
+        res.status(200).send({
+            'conversation': conversation
+        });
+    } catch (e) {
+        console.log('conversations/one/:id Error: ' + e)
+        res.status(500).send({
+            message: 'Failed to fetch conversation: ' + e
+        });
+    }
+})
+
+router.patch('/sendMessage/:id', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    try {
+        const senderId = req.params.id;
+        const conversationId = req.body.id;
+        const message = req.body.message
+        const timezone = parseInt(req.body.timezone);
+        
+        let conversation = await conversationSchema.findById(conversationId)
+        
+        conversation.messages.unshift({
+            senderId: senderId,
+            message: message
+        });
+
+        let seen = new Array(conversation.alumni.length).fill(false);
+        seen[conversation.alumni.indexOf(senderId)] = true;
+        conversation.seen = seen
+        
+        await conversation.save()
+        
+        await conversation.populate('alumni', 'name imageURL').execPopulate();
+        for (let message of conversation.messages) {
+            let dateSent = moment.utc(message.dateSent).add(timezone, 'h');
+            message.dateString = dateSent.format('MMM D YYYY, h:mm a')
+        }
+        res.status(200).send({
+            'conversation': conversation
+        });
+    } catch (e) {
+        console.log('conversations/sendMessage/:id Error: ' + e)
+        res.status(500).send({
+            message: 'Failed to send message: ' + e
         });
     }
 })

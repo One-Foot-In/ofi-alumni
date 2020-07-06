@@ -1,15 +1,24 @@
 import React, { Component } from 'react';
-import { Card, Image, Grid, Label, icon } from 'semantic-ui-react'
+import { Card, Image, Grid, Label} from 'semantic-ui-react'
 import { makeCall } from '../apis';
-
+import Conversation from './ConversationModal'
+/*
+ * DETAILS: Parent component, displays available conversations and 
+ *          if the most recent message has been seen
+ * PROPS: userDetails
+ */ 
 export default class AlumniNetworking extends Component {
     constructor(props){
         super(props)
         this.state={
             conversations: [],
             timeOffsetHours: null,
-            display: []
+            display: [],
+            activeConversation: null,
+            conversationModalOpen: false
         }
+        this.closeConversationModal = this.closeConversationModal.bind(this)
+        this.openConversation = this.openConversation.bind(this)
     }
 
     async componentWillMount() {
@@ -23,7 +32,7 @@ export default class AlumniNetworking extends Component {
     }
 
     getConversations() {
-        return makeCall({}, '/conversations/get/' + this.props.userDetails._id, 'get')
+        return makeCall({}, '/conversations/all/' + this.props.userDetails._id, 'get')
     }
 
     createDisplay(conversations) {
@@ -34,9 +43,40 @@ export default class AlumniNetworking extends Component {
         this.setState({display: display})
     }
 
+    async openConversation(e) {
+        let conversationTarget = e.currentTarget.getAttribute('conversationid')
+        let conversation = await this.fetchConversation(conversationTarget)
+        this.setState({
+                activeConversation: conversation.conversation,
+                conversationModalOpen: true
+            })
+    }
+
+    fetchConversation(conversationTarget) {
+        return (makeCall({id: conversationTarget, timezone: this.state.timeOffsetHours},
+            '/conversations/one/' + this.props.userDetails._id, 'patch'))
+    }
+
+    async closeConversationModal() {
+        let conversations = await this.getConversations()
+        this.setState({
+            conversations: conversations.conversations,
+            conversationModalOpen: false, 
+            activeConversation: null
+        })
+        this.createDisplay(conversations.conversations)
+    }
+
     constructConversation(conversation) {
         let userIndex = conversation.alumni.findIndex(item => item._id === this.props.userDetails._id);
         let recipientIndex = (userIndex + 1) % 2;
+        //Formatting to prevent text overflow
+        let formattedMessage = conversation.messages[0].message.split('\n')
+        formattedMessage =  (
+            <p style={{'wordWrap': 'break-word', 'hyphens': 'auto', 'width': '50vw'}}>
+                {formattedMessage[0]} {formattedMessage.length > 1 && '. . .'}
+            </p>
+        )
         return(
             <Grid key={conversation._id} columns={'equal'}>
                 <Grid.Row columns={2}>
@@ -49,7 +89,7 @@ export default class AlumniNetworking extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column>
-                        <Card fluid>
+                        <Card fluid onClick={this.openConversation.bind(this)} conversationid={conversation._id}>
                             <Card.Content>
                             {!conversation.seen[userIndex] && 
                                 <Label color='teal' corner='right' icon='envelope' />
@@ -58,8 +98,7 @@ export default class AlumniNetworking extends Component {
                                     Conversation with {conversation.alumni[recipientIndex].name}
                                 </Card.Header>
                                 <Card.Meta>{conversation.timeFromMessage}</Card.Meta>
-                                
-                                <Card.Description>Most recent message: {conversation.messages[0].message}</Card.Description>
+                                <Card.Description>Most recent message: <br/>{formattedMessage}</Card.Description>
                                 
                             </Card.Content>
                         </Card>
@@ -72,6 +111,14 @@ export default class AlumniNetworking extends Component {
     render() {
         return (
             <>
+            {this.state.activeConversation &&
+                <Conversation 
+                    conversation={this.state.activeConversation}
+                    modalOpen={this.state.conversationModalOpen}
+                    closeModal={this.closeConversationModal}
+                    userDetails={this.props.userDetails}
+                />
+            }
             {this.state.display}
             </>
         )

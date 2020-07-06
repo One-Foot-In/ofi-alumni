@@ -230,11 +230,7 @@ export default class Header extends Component {
     renderLogo() {
         let imageLink = this.props.loggedIn ? this.props.schoolLogo : require('./logo.png')
         return (
-            <Grid
-                centered
-            >
-                <Image src={imageLink} size='small'/>                
-            </Grid>
+                <Image centered src={imageLink} size='small'/>                
         )
     }
     render () {

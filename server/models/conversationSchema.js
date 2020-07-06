@@ -7,7 +7,9 @@ const messageSchema = new Schema(
     {
         senderId: [{type: Schema.Types.ObjectId, ref: 'Alumni'}],
         message: {type: String, required: true},
-        dateSent: {type: Date, default: moment()}
+        dateSent: {type: Date, default: moment()},
+        //RETURN FIELD NOT KEPT IN DB
+        dateString: {type: String}
     }
 )
 
