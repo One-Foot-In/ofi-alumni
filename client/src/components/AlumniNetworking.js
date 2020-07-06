@@ -70,10 +70,11 @@ export default class AlumniNetworking extends Component {
     constructConversation(conversation) {
         let userIndex = conversation.alumni.findIndex(item => item._id === this.props.userDetails._id);
         let recipientIndex = (userIndex + 1) % 2;
+        //Formatting to prevent text overflow
         let formattedMessage = conversation.messages[0].message.split('\n')
         formattedMessage =  (
             <p style={{'wordWrap': 'break-word', 'hyphens': 'auto', 'width': '50vw'}}>
-                {formattedMessage[0]}
+                {formattedMessage[0]} {formattedMessage.length > 1 && '. . .'}
             </p>
         )
         return(

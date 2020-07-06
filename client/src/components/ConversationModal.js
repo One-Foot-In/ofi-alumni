@@ -29,15 +29,15 @@ export default class Conversation extends Component {
     }
 
     async sendMessage() {
-        let conversation = await makeCall(
+        let result = await makeCall(
             {
                 id: this.state.conversation._id,
                 timezone: parseInt(this.props.userDetails.timeZone/100),
                 message: this.state.message
             }, '/conversations/sendMessage/' + this.props.userDetails._id, 'patch')
-        this.createDisplay(conversation.conversation)
+        this.createDisplay(result.conversation)
         this.setState({
-            conversation: conversation.conversation,
+            conversation: result.conversation,
             message: ''
         })
     }
@@ -59,6 +59,7 @@ export default class Conversation extends Component {
 
     displayMessage(message, alumni) {
         let senderIndex = alumni.findIndex(item => item._id === message.senderId[0]);
+        //Formatting to prevent text overflow
         let formattedMessage = message.message.split('\n').map((message, i) => {
             return(
                 <p style={{'wordWrap': 'break-word', 'hyphens': 'auto', 'width': '50vw'}} key={i}>
