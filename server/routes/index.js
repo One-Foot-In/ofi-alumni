@@ -55,7 +55,7 @@ router.post('/login', (req, res, next) => {
           try {
             let userRole = user.role && user.role.toUpperCase()
             if (userRole === "ALUMNI") {
-              const alumni = await alumniSchema.findOne({email: user.email});
+              const alumni = await alumniSchema.findOne({user: user._id})
               payload.id = alumni._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response
@@ -68,7 +68,7 @@ router.post('/login', (req, res, next) => {
                 }
               );
             } else if (userRole === "STUDENT") {
-              const student = await studentSchema.findOne({email: user.email});
+              const student = await studentSchema.findOne({user: user._id});
               payload.id = student._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response

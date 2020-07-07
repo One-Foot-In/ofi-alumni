@@ -36,19 +36,6 @@ router.post('/', async (req, res, next) => {
         var passwordHash = await bcrypt.hash(password, HASH_COST)
         // find schoolLogo
         let school = await schoolSchema.findOne({_id: schoolId})
-        var student_instance = new studentSchema(
-            {
-                name: name,
-                email: email,
-                grade: grade,
-                // requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-                // issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
-                school: schoolId,
-                timeZone: -timeZone,
-                schoolLogo: school.logoURL,
-                imageURL: imageURL
-            }
-        )
         const user_instance = new userSchema(
             {
               email: email,
@@ -59,9 +46,22 @@ router.post('/', async (req, res, next) => {
               approved: approved
             }
         );
-        
-        await student_instance.save();
         await user_instance.save();
+        
+        var student_instance = new studentSchema(
+            {
+                name: name,
+                user: user_instance._id,
+                grade: grade,
+                // requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
+                // issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
+                school: schoolId,
+                timeZone: -timeZone,
+                schoolLogo: school.logoURL,
+                imageURL: imageURL
+            }
+        )      
+        await student_instance.save();
         const news_instance = new newsSchema(
             {
                 event: 'New Student',

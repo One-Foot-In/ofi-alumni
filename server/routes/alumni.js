@@ -148,10 +148,22 @@ router.post('/', async (req, res, next) => {
         const approved = false
         const verificationToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
+
+        const user_instance = new userSchema(
+            {
+              email: email,
+              passwordHash: passwordHash,
+              verificationToken: verificationToken,
+              role: role,
+              emailVerified: emailVerified,
+              approved: approved
+            }
+        );
+        await user_instance.save();
         var alumni_instance = new alumniSchema(
             {
                 name: name,
-                email: email,
+                user: user_instance._id,
                 gradYear: gradYear,
                 country: country,
                 city: city,
@@ -174,18 +186,7 @@ router.post('/', async (req, res, next) => {
                 topics: topics,
             }
         )
-        const user_instance = new userSchema(
-            {
-              email: email,
-              passwordHash: passwordHash,
-              verificationToken: verificationToken,
-              role: role,
-              emailVerified: emailVerified,
-              approved: approved
-            }
-        );
         await alumni_instance.save();
-        await user_instance.save();
         const news_instance = new newsSchema({
             event: 'New Alumni',
             alumni: [alumni_instance._id],
