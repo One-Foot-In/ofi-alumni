@@ -64,8 +64,8 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
             id: time[0].id
         })
         let insert = await request_instance.save();
-        let mentor = await alumniSchema.findOne({_id: mentorId}, {email: 1})
-        await sendNewRequestEmail(mentor.email)
+        let mentor = await alumniSchema.findOne({_id: mentorId}).populate('user')
+        await sendNewRequestEmail(mentor.user.email)
         res.status(200).send({
             message: 'Successfully added request',
             request: request_instance
@@ -90,8 +90,8 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
         request.status = newStatus
         await request.save()
         if (newStatus === 'Confirmed') {
-            let mentee = await studentSchema.findOne({_id: request.student})
-            let mentor = await alumniSchema.findOne({_id: alumniId})
+            let mentee = await studentSchema.findOne({_id: request.student}).populate('user')
+            let mentor = await alumniSchema.findOne({_id: alumniId}).populate('user')
             let menteeTime = timezoneHelpers.applyTimezone(request.time, mentee.timeZone)
             let menteeTimeString = `${menteeTime[0].day} ${timezoneHelpers.getSlot(menteeTime[0].time)}`
             // javascript directory mutates time object, so we need to strip timezone here before using time again again
@@ -119,10 +119,10 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
             await news_instance.save();
 
             await sendRequestConfirmedEmail(
-                mentee.email,
+                mentee.user.email,
                 mentee.name, 
                 menteeTimeString,
-                mentor.email,
+                mentor.user.email,
                 mentor.name,
                 mentorTimeString,
                 request.topic

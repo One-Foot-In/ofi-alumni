@@ -71,10 +71,22 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
     const approved = false
     const verificationToken = crypto({length: 16});
     var passwordHash = await bcrypt.hash(password, HASH_COST)
+    
+    const user_instance = new userSchema(
+        {
+            email: email,
+            passwordHash: passwordHash,
+            verificationToken: verificationToken,
+            role: role,
+            emailVerified: emailVerified
+        }
+    );
+    
+    await user_instance.save();
     var alumni_instance = new alumniSchema(
         {
             name: _name,
-            email: _email,
+            user: user_instance._id,
             gradYear: gradYear,
             country: _country,
             city: _city,
@@ -96,18 +108,7 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             majorName: _major.name
         }
     )
-    const user_instance = new userSchema(
-        {
-            email: email,
-            passwordHash: passwordHash,
-            verificationToken: verificationToken,
-            role: role,
-            emailVerified: emailVerified
-        }
-    );
-    
     let insert = await alumni_instance.save();
-    await user_instance.save();
 }
 
 const createStudent = async (_email, _name, _picLink, timezone, _school, _schoolLogo) => {
@@ -120,18 +121,7 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
     const approved = false
     const verificationToken = crypto({length: 16});
     var passwordHash = await bcrypt.hash(password, HASH_COST)
-    var student_instance = new studentSchema(
-        {
-            name: _name,
-            email: _email,
-            grade: grade,
-            timeZone: timezone,
-            imageURL: _picLink,
-            approved: approved,
-            school: _school,
-            schoolLogo: _schoolLogo
-        }
-    )
+
     const user_instance = new userSchema(
         {
           email: email,
@@ -141,9 +131,21 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
           emailVerified: emailVerified
         }
     );
-    
-    let insert = await student_instance.save();
     await user_instance.save();
+
+    var student_instance = new studentSchema(
+        {
+            name: _name,
+            user: user_instance._id,
+            grade: grade,
+            timeZone: timezone,
+            imageURL: _picLink,
+            approved: approved,
+            school: _school,
+            schoolLogo: _schoolLogo
+        }
+    )
+    let insert = await student_instance.save();
 }
 
 const createSchool = async (_name, _country, _logoURL) => {
@@ -253,7 +255,7 @@ router.get('/seed/', async (req, res, next) => {
 
 router.get('/alumni/', async (req, res, next) => {
     try {
-        var dbData = await alumniSchema.findOne({email: req.body.email})
+        var dbData = await alumniSchema.findOne({_id: req.body.id})
         res.status(200).send({'alumni' : dbData});
     } catch (e) {
         console.log("Error: util#getAlumni", e);
@@ -303,10 +305,22 @@ router.post('/addAlumni/', async (req, res, next) => {
         const approved = false
         const verificationToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
+        const user_instance = new userSchema(
+            {
+              email: email,
+              passwordHash: passwordHash,
+              verificationToken: verificationToken,
+              role: role,
+              emailVerified: emailVerified,
+              approved: approved
+            }
+        );
+        await user_instance.save();
+
         var alumni_instance = new alumniSchema(
             {
                 name: name,
-                email: email,
+                user: user_instance._id,
                 gradYear: gradYear,
                 location: location,
                 profession: profession,
@@ -318,20 +332,9 @@ router.post('/addAlumni/', async (req, res, next) => {
                 timeZone: timeZone,
                 zoomLink: zoomLink
             }
-        )
-        const user_instance = new userSchema(
-            {
-              email: email,
-              passwordHash: passwordHash,
-              verificationToken: verificationToken,
-              role: role,
-              emailVerified: emailVerified,
-              approved: approved
-            }
-        );
-        
+        )        
         let insert = await alumni_instance.save();
-        await user_instance.save();
+
         res.status(200).send({
             message: 'Successfully added alumni',
             alumni: alumni_instance
@@ -356,7 +359,7 @@ router.get('/data/clear/alumni', async (req, res, next) => {
 
 router.get('/student/', async (req, res, next) => {
     try {
-        var dbData = await studentSchema.findOne({email: req.body.email})
+        var dbData = await studentSchema.findOne({_id: req.body.id})
         res.status(200).send({'student' : dbData});
     } catch (e) {
         console.log("Error: util#getStudent", e);
@@ -388,16 +391,6 @@ router.post('/addStudent/', async (req, res, next) => {
         const approved = false
         const verificationToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
-        var student_instance = new studentSchema(
-            {
-                name: name,
-                email: email,
-                grade: grade,
-                //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-                //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
-                timeZone: timeZone
-            }
-        )
         const user_instance = new userSchema(
             {
               email: email,
@@ -408,9 +401,20 @@ router.post('/addStudent/', async (req, res, next) => {
               approved: approved
             }
         );
-        
-        let insert = await student_instance.save();
         await user_instance.save();
+
+        var student_instance = new studentSchema(
+            {
+                name: name,
+                user: user_instance._id,
+                grade: grade,
+                //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
+                //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
+                timeZone: timeZone
+            }
+        )
+        let insert = await student_instance.save();
+
         res.status(200).send({
             message: 'Successfully added student',
             student: student_instance
