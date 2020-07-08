@@ -57,6 +57,7 @@ export default class Signup extends React.Component {
             grade: null, // required
             // ALUMNI ONLY
             graduationYear: null, // required
+            graduationYearValid: true,
             // location
             country: '',
             city: '',
@@ -454,6 +455,9 @@ export default class Signup extends React.Component {
         change[e.target.name] = e.target.value
         this.setState(change, () => {
             this.comparePasswords();
+            if (this.props.isAlumni && this.state.graduationYear !== null) {
+                this.validateGraduationYear();
+            }
         })
     }
 
@@ -461,6 +465,14 @@ export default class Signup extends React.Component {
         e.preventDefault();
         this.setState({
             grade: value
+        });
+    }
+
+    validateGraduationYear() {
+        let currYear = new Date()
+        currYear = currYear.getFullYear()
+        this.setState({
+            graduationYearValid: (parseInt(this.state.graduationYear) <= currYear)      
         });
     }
 
@@ -491,7 +503,9 @@ export default class Signup extends React.Component {
                     type="number"
                     required={true}
                     style={fieldStyle}
+                    error={!this.state.graduationYearValid}
                 >
+                    {!this.state.graduationYearValid ? getErrorLabel('Please input a valid graduation year') : null}
                     <label>Graduation Year</label>
                     <input placeholder='YYYY' name="graduationYear" onChange={this.handleChange} />
                 </Form.Field>
@@ -796,9 +810,9 @@ export default class Signup extends React.Component {
                             type="email"
                             required={true}
                             style={fieldStyle}
-                            error={!this.state.emailValid}
+                            error={!this.state.emailValid && this.state.email !== ''}
                         >
-                            {!this.state.emailValid ? getErrorLabel('Please enter a valid email!') : null}
+                            {!this.state.emailValid && this.state.email !== '' ? getErrorLabel('Please enter a valid email!') : null}
                             <label>Email</label>
                             <input placeholder='Email' name="email" onChange={this.handleChange} />
                         </Form.Field>
