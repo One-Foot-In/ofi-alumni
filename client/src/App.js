@@ -22,6 +22,7 @@ import * as actions from './redux/actions'
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
+export const ADMIN = "ADMIN"
 
 /*
   STORE SETUP
@@ -126,6 +127,37 @@ var alumniNavBarItems = (approved) => {
   return navBarItems;
 }
 
+var adminNavBarItems = () => {
+  let navBarItems = [
+    {
+        id: 'data',
+        name: 'Data Management',
+        navLink: '/'
+    },
+    {
+        id: 'students',
+        name: 'Students',
+        navLink: '/students'
+    },
+    {
+        id: 'alumni',
+        name: 'Alumni',
+        navLink: '/alumni'
+    },
+    {
+        id: 'colleges',
+        name: 'Colleges',
+        navLink: '/colleges'
+    },
+    {
+        id: 'schools',
+        name: 'Schools',
+        navLink: '/schools'
+    }
+  ]
+  return navBarItems;
+}
+
 const studentNavBarItems = (isModerator) => {
   let navBarItems = [
     {
@@ -176,6 +208,7 @@ class App extends Component {
     this.renderScreens = this.renderScreens.bind(this);
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
     this.refreshProfile = this.refreshProfile.bind(this);
+    this.liftRole = this.liftRole.bind(this);
   }
 
   async componentWillMount() {
@@ -195,9 +228,9 @@ class App extends Component {
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
         role = parsedJWT.role;
         id = parsedJWT.id;
-        profile = await this.fetchProfile(role, id);
+        profile = await this.fetchProfile(role[0], id);
         this.setState({
-          role: role,
+          role: role[0],
           userDetails: profile,
           approved: profile.approved,
           loggedIn: true
@@ -253,6 +286,12 @@ class App extends Component {
         userDetails: details.userToSend
       });
       window.location.reload()
+  }
+
+  liftRole(role) {
+    this.setState({
+      role: role
+    })
   }
 
   renderLoggedInRoutes(role) {
@@ -471,6 +510,86 @@ class App extends Component {
           />
           </>
         )
+      case ADMIN:
+        return (
+          <>
+          <Route exact path={`/`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={adminNavBarItems()}
+                          activeItem={'data'}
+                      />
+                      <p>Data Management</p>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/students`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={adminNavBarItems()}
+                          activeItem={'students'}
+                      />
+                      <p>Students</p>
+                  </> :
+                    <Redirect to={"/login"}/>
+                }
+          />
+          <Route exact path={`/alumni`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={adminNavBarItems()}
+                          activeItem={'alumni'}
+                      />
+                      <p>Alumni</p>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/colleges`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={adminNavBarItems()}
+                          activeItem={'colleges'}
+                      />
+                      <p>Colleges</p>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/schools`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={adminNavBarItems()}
+                          activeItem={'schools'}
+                      />
+                      <p>Schools</p>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+        </>
+        )
       default:
         return (
           <Route exact path={`/`} render={(props) => 
@@ -559,6 +678,9 @@ class App extends Component {
               logout={this.logout}
               email={this.state.userDetails && this.state.userDetails.email}
               schoolLogo={this.state.userDetails && this.state.userDetails.schoolLogo}
+              userId={this.state.userDetails && this.state.userDetails.user}
+              role={this.state.role}
+              liftRole={this.liftRole}
             />
             <Container>
               {this.renderScreens(this.state.role)}
