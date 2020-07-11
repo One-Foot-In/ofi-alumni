@@ -143,7 +143,7 @@ router.post('/', async (req, res, next) => {
 
         // find schoolLogo
         let school = await schoolSchema.findOne({_id: schoolId})
-        const role = "ALUMNI"
+        const role = ["ALUMNI"]
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});

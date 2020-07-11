@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Grid, Button, Modal, Form, Image, Label} from 'semantic-ui-react';
+import {Grid, Button, Modal, Form, Image, Label, Dropdown} from 'semantic-ui-react';
 import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
 import swal from "sweetalert";
@@ -26,7 +26,10 @@ export default class Header extends Component {
             confirmPassword: '',
             sendingPasswordRequest: false,
             modalOpen: false,
-            passwordsMatching: true
+            passwordsMatching: true,
+            currRole: this.props.role,
+            userId: this.props.userId,
+            availableRoles: []
         }
         this.renderLoginStateInfo = this.renderLoginStateInfo.bind(this);
         this.sendNewPasswordRequest = this.sendNewPasswordRequest.bind(this);
@@ -35,6 +38,17 @@ export default class Header extends Component {
         this.handleChange = this.handleChange.bind(this);
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
         this.comparePasswords = this.comparePasswords.bind(this);
+        this.renderRoleDropdown = this.renderRoleDropdown.bind(this);
+    }
+
+    async componentDidUpdate(prevProps) {
+        if (prevProps.role !== this.props.role && prevProps.userId !== this.props.userId) {
+            await this.setState({
+                currRole: this.props.role,
+                userId: this.props.userId
+            })
+            await this.fetchRoles()
+        }
     }
 
     comparePasswords() {
@@ -217,8 +231,7 @@ export default class Header extends Component {
             </Link>
         </>
         return (
-        <Grid.Column 
-            style ={{margin: '30px 0 0 0'}}
+        <Grid.Column
             width = {6}
         >
             {this.props.loggedIn ?
@@ -228,11 +241,62 @@ export default class Header extends Component {
     }
 
     renderLogo() {
-        let imageLink = this.props.loggedIn ? this.props.schoolLogo : require('./logo.png')
+        let imageLink = this.props.loggedIn && this.state.currRole !== 'ADMIN' ? 
+            this.props.schoolLogo : require('./logo.png');
         return (
                 <Image centered src={imageLink} size='small'/>                
         )
     }
+
+    renderRoleDropdown() {
+        return(
+            <div>
+            {this.state.availableRoles.length > 1 && 
+            <>
+                <Label basic >Current Role:
+                    <Dropdown
+                        compact
+                        style={{'marginLeft': '5px'}}
+                        selection
+                        options={this.state.availableRoles}
+                        value={this.state.currRole}
+                        onChange={this.changeRole.bind(this)}
+                    />
+                </Label>
+                
+            </>
+            }
+            </div>
+        )
+    }
+
+    changeRole = (e, { value }) => {
+        this.setState({ currRole: value }, () => {
+            this.props.liftRole(value)
+        })
+    }
+
+    async fetchUser() {
+        return makeCall({}, '/user/one/' + this.state.userId, 'get');
+    }
+
+    async fetchRoles() {
+        if (this.state.userId) {
+            let availableRoles = []
+            let userInfo = null
+            userInfo = await this.fetchUser()
+            availableRoles = userInfo.result.role.map(role => {
+                role = role.toLowerCase()
+                return {
+                    key: role,
+                    text: role.charAt(0).toUpperCase() + role.slice(1),
+                    value: role.toUpperCase()
+                }
+            })
+            this.setState({availableRoles: availableRoles})
+        }
+    }
+
     render () {
         return (
             <Grid 
@@ -242,15 +306,19 @@ export default class Header extends Component {
                 columns={3}
                 centered
             >
-                <Grid.Column width={5}>
-                    <div></div>
-                </Grid.Column>
-                <Grid.Column width={6}>
-                    {this.renderLogo()}
-                </Grid.Column>
-                <Grid.Column width={5}>
-                    {this.renderLoginStateInfo()}
-                </Grid.Column>
+                <Grid.Row columns={"equal"}>
+                    <Grid.Column width={5} textAlign='right' verticalAlign='middle'>
+                        {this.props.loggedIn &&
+                            this.renderRoleDropdown()
+                        }
+                    </Grid.Column>
+                    <Grid.Column width={6}>
+                        {this.renderLogo()}
+                    </Grid.Column>
+                    <Grid.Column width={5} verticalAlign='middle'>
+                        {this.renderLoginStateInfo()}
+                    </Grid.Column>
+                </Grid.Row>
             </Grid>
         )
     }

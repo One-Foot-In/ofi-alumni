@@ -66,7 +66,8 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
     const password = MOCK_PASSWORD;
     const availabilities = []
 
-    const role = "ALUMNI"
+    let role = ["ALUMNI"];
+    if ((Math.random() * 10 + 1) >= 5) role.push("ADMIN");
     const emailVerified = false
     const approved = false
     const verificationToken = crypto({length: 16});
@@ -116,7 +117,7 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
     const grade = Math.floor((Math.random() * 10) + 2);
     const password = MOCK_PASSWORD;
 
-    const role = "STUDENT"
+    const role = ["STUDENT"]
     const emailVerified = false
     const approved = false
     const verificationToken = crypto({length: 16});

@@ -29,7 +29,7 @@ router.post('/', async (req, res, next) => {
         const imageURL = req.body.imageURL;
         // TODO: need to add timeZone in frontend request
         const timeZone = req.body.timeZone;
-        const role = "STUDENT"
+        const role = ["STUDENT"]
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
