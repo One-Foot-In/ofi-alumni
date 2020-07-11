@@ -255,6 +255,7 @@ export default class Header extends Component {
             <>
                 <Label basic >Current Role:
                     <Dropdown
+                        compact
                         style={{'marginLeft': '5px'}}
                         selection
                         options={this.state.availableRoles}
@@ -270,11 +271,12 @@ export default class Header extends Component {
     }
 
     changeRole = (e, { value }) => {
-        this.setState({ currRole: value })
-        this.props.liftRole(value)
+        this.setState({ currRole: value }, () => {
+            this.props.liftRole(value)
+        })
     }
 
-    fetchUser() {
+    async fetchUser() {
         return makeCall({}, '/user/one/' + this.state.userId, 'get');
     }
 

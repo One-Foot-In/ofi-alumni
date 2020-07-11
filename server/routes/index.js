@@ -56,7 +56,7 @@ router.post('/login', (req, res, next) => {
             let userRole = user.role && user.role.map(role => {
               return role.toUpperCase()
             })
-            if (userRole[0] === "ALUMNI") {
+            if (userRole.includes("ALUMNI")) {
               const alumni = await alumniSchema.findOne({user: user._id})
               payload.id = alumni._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
@@ -69,7 +69,7 @@ router.post('/login', (req, res, next) => {
                   details: alumni
                 }
               );
-            } else if (userRole[0] === "STUDENT") {
+            } else if (userRole.includes("STUDENT")) {
               const student = await studentSchema.findOne({user: user._id});
               payload.id = student._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
