@@ -5,6 +5,7 @@ var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
+var adminSchema = require('../models/adminSchema');
 var requestSchema = require('../models/requestSchema');
 var schoolSchema = require('../models/schoolSchema');
 var collegeSchema = require('../models/collegeSchema');
@@ -613,11 +614,61 @@ router.get('/data/clear/conversations', async (req, res) => {
     }
 })
 
+/* Admin */
+router.post('/newAdmin/', async (req, res) => {
+    try {
+        const email = req.body.email;
+        const name = req.body.name;
+        const timeZone = req.body.timeZone;
+        const password = req.body.password;
+        console.log(password)
+
+        const role = "ADMIN"
+        const emailVerified = true
+        const approved = true
+        const verificationToken = crypto({length: 16});
+        var passwordHash = await bcrypt.hash(password, HASH_COST)
+        const user_instance = new userSchema(
+            {
+              email: email,
+              passwordHash: passwordHash,
+              verificationToken: verificationToken,
+              role: role,
+              emailVerified: emailVerified,
+            }
+        );
+        await user_instance.save();
+        const admin_instance = new adminSchema(
+            {
+                name: name,
+                timeZone: timeZone,
+                user: user_instance._id,
+                approved: approved
+            }
+        );
+        await admin_instance.save();
+        res.status(200).send({'New Admin': admin_instance})
+    } catch (e) {
+        console.log('/newAdmin error: '+ e);
+        res.status(500).send({'newAdmin error': e});
+    }
+})
+
+router.get('/data/clear/admin', async (req, res) => {
+    try {
+        let admin = await adminSchema.deleteMany({})
+        res.status(200).send({'message': 'deleted all admin items!'})
+    } catch (e) {
+        res.status(500).send({'admin deletion error': e})
+    }
+})
+
 /* Clear All */
 router.get('/data/clear/all', async (req, res, next) => {
     try {
         await alumniSchema.deleteMany({});
         await studentSchema.deleteMany({});
+        await adminSchema.deleteMany({});
         await userSchema.deleteMany({});
         await requestSchema.deleteMany({});
         await schoolSchema.deleteMany({});

@@ -261,8 +261,10 @@ class App extends Component {
     let result;
     if (role === 'STUDENT') {
       result = await makeCall({}, ('/student/one/'+id), 'get')
-    } else {
+    } else if (role === 'ALUMNI') {
       result = await makeCall({}, ('/alumni/one/'+id), 'get')
+    } else if (role === 'ADMIN') {
+      result = await makeCall({}, ('/admin/one/'+id), 'get')
     }
     return result.result
   }

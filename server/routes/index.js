@@ -6,6 +6,7 @@ var bcrypt = require('bcrypt');
 var crypto = require('crypto-random-string');
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
+var adminSchema = require('../models/adminSchema');
 var userSchema = require('../models/userSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
@@ -81,6 +82,17 @@ router.post('/login', (req, res, next) => {
                   details: student
                 }
               );
+            } else if (userRole.includes("ADMIN")) {
+              const admin = await adminSchema.findOne({user: user._id});
+              payload.id = admin._id
+              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              res.cookie('jwt', cookie);
+              res.status(200).send(
+                {
+                  role: userRole,
+                  details: admin
+                }
+              )
             } else {
               res.status(500).send({error: true, message: 'Could not determine role.'});
             }
