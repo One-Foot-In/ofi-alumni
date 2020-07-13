@@ -15,6 +15,7 @@ import StudentVerification from './components/StudentVerification'
 import AlumniMentorship from './components/AlumniMentorship';
 import StudentMentorship from './components/StudentMentorship'
 import AlumniNetworking from './components/AlumniNetworking'
+import ProfileList from './components/admin_dashboard/ProfileList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
 
@@ -540,7 +541,10 @@ class App extends Component {
                           navItems={adminNavBarItems()}
                           activeItem={'students'}
                       />
-                      <p>Students</p>
+                      <ProfileList
+                          viewing={'STUDENT'}
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                     <Redirect to={"/login"}/>
                 }
@@ -555,7 +559,10 @@ class App extends Component {
                           navItems={adminNavBarItems()}
                           activeItem={'alumni'}
                       />
-                      <p>Alumni</p>
+                      <ProfileList
+                          viewing={'ALUMNI'}
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }

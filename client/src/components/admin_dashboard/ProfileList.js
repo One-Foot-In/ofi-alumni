@@ -1,0 +1,334 @@
+import React, { useState, useEffect } from 'react';
+import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, Responsive } from 'semantic-ui-react'
+import { makeCall } from '../../apis';
+
+export default function ProfileList(props){
+    const [allProfiles, setAllProfiles] = useState([]);
+    const [filteredProfiles, setFilteredProfiles] = useState([])
+    const [display, setDisplay] = useState([])
+    const [pages, setPages] = useState(0)
+    const [currPage, setCurrPage] = useState(1)
+    const [search, setSearch] = useState('')
+    const [filter, setFilter] = useState('all')
+    const [secondaryFilter, setSecondaryFilter] = useState('')
+    const [secondaryFilterOptions, setSecondaryFilterOptions] = useState([])
+    
+    const pageSize = 4;
+
+    const gradeOptions = () => {
+        let options = [];
+        for (let profile of allProfiles) {
+            if(!options.find(year => year['value'] === profile.grade)) {
+                options.push({
+                    key: profile.grade,
+                    text: profile.grade,
+                    value: profile.grade
+                });
+            }
+        }
+        options.sort(function(a,b){return a.value-b.value})
+        return options;
+    }
+    const schoolOptions = () => {
+        let options = [];
+        for (let profile of allProfiles) {
+            if(!options.find(year => year['value'] === profile.school.name)) {
+                options.push({
+                    key: profile.school.name,
+                    text: profile.school.name,
+                    value: profile.school.name
+                });
+            }
+        }
+        return options;
+    };
+    const gradYearOptions = () => {
+        let options = [];
+        for (let profile of allProfiles) {
+            if(!options.find(year => year['value'] === profile.gradYear)) {
+                options.push({
+                    key: profile.gradYear,
+                    text: profile.gradYear,
+                    value: profile.gradYear
+                });
+            }
+        }
+        options.sort(function(a,b){return a.value-b.value})
+        return options;
+    };
+
+    const filterOptions = () => {
+        let filters = [
+            {
+                key: 'All Fields',
+                text: 'All Fields',
+                value: 'all'
+            },
+            {
+                key: 'School',
+                text: 'School',
+                value: 'School:'
+            }
+        ]
+        if (props.viewing === 'ALUMNI') {
+            filters.push({
+                key: 'Graduation Year',
+                text: 'Graduation Year',
+                value: 'Grad Year:'
+            })
+        } else {
+            filters.push({
+                key: 'Grade',
+                text: 'Grade',
+                value: 'Grade:'
+            }) 
+        }
+        return filters;
+    }
+
+    //Mounting
+    useEffect(() => {
+        if (props.viewing === 'ALUMNI') {
+            makeCall({}, '/admin/allAlumni/' + props.userDetails._id, 'get')
+                .then((res) => {
+                    setAllProfiles(res.alumni)
+                })
+        } else if (props.viewing === 'STUDENT') {
+            makeCall({}, '/admin/allStudents/' + props.userDetails._id, 'get')
+                .then((res) => {
+                    setAllProfiles(res.students)
+                })
+        }
+    }, [props]);
+
+    //Setting up display post API calls
+    useEffect(() => {
+        completeProfile();
+        constructDisplay();
+    }, [allProfiles]);
+
+    //Page change
+    useEffect(() => {
+        setPages(Math.ceil(filteredProfiles.length / pageSize));
+        constructDisplay()
+    }, [currPage, filteredProfiles]);
+
+    //Search change
+    useEffect(() => {
+        if (filter === 'all') {
+            setFilteredProfiles(allProfiles.filter((profile) => {
+                return profile.allText.includes(search.toLowerCase());
+            }));
+        } else if (filter === 'School:') {
+            setFilteredProfiles(allProfiles.filter((profile) => {
+                return (profile.allText.includes(search.toLowerCase()) 
+                    && profile.school.name.includes(secondaryFilter));
+            }));
+        } else if (filter === 'Grade:') {
+            setFilteredProfiles(allProfiles.filter((profile) => {
+                return (profile.allText.includes(search.toLowerCase()) 
+                    && profile.grade === secondaryFilter);
+            }));
+        } else if (filter === 'Grad Year:') {
+            setFilteredProfiles(allProfiles.filter((profile) => {
+                return (profile.allText.includes(search.toLowerCase()) 
+                    && profile.gradYear === secondaryFilter);
+            }));
+        }
+    }, [search, secondaryFilter])
+
+    //Filter category change
+    useEffect(() => {
+        if (filter === 'School:') {
+            setSecondaryFilterOptions(schoolOptions)
+        } else if (filter === 'Grad Year:') {
+            setSecondaryFilterOptions(gradYearOptions)
+        } else if (filter === 'Grade:') {
+            setSecondaryFilterOptions(gradeOptions)
+        }
+        setSecondaryFilter('')
+    }, [filter])
+
+    /* Helper functions */
+    const completeProfile = () => {
+        for (let profile of allProfiles) {
+            if (props.viewing === 'ALUMNI') {
+                profile.allText = (
+                    profile.city + ' ' + profile.country + ' '
+                    + profile.jobTitleName + ' ' + profile.companyName + ' '
+                    + profile.name + ' ' + profile.gradYear + ' '
+                    + profile.school.name
+                ).toLowerCase();
+            } else if (props.viewing === 'STUDENT') {
+                profile.allText = (
+                    profile.name + ' ' + profile.grade + ' '
+                    + profile.school.name
+                ).toLowerCase();
+            }
+        }
+        setFilteredProfiles(allProfiles)
+    }
+
+    const constructDisplay = () => {
+        if (filteredProfiles.length === 0 || filteredProfiles === null) return;
+        let cardArray = []
+        for (let i = 0; i < pageSize; i++) {
+            let profile = filteredProfiles[(currPage - 1) * pageSize + i]
+            if (profile) { 
+                cardArray.push(profileCard(profile, props.viewing))
+            }
+        }
+        setDisplay(cardArray)
+    }
+
+    const profileCard = (profile, role) => {
+        return(
+            <Grid key={profile._id}>
+                <Grid.Row columns={2} verticalAlign='middle'>
+                    <Grid.Column width={4}>
+                        <Image
+                            size='small'
+                            centered
+                            rounded
+                            src={profile.imageURL}
+                        />
+                    </Grid.Column>
+                    <Grid.Column>
+                        <Card fluid>
+                            <Card.Content>
+                                <Card.Header>
+                                <Grid>
+                                    <Grid.Row columns={2}>
+                                        <Grid.Column>{profile.name}</Grid.Column>
+                                        {role === 'ALUMNI' ? 
+                                            (
+                                                <Grid.Column textAlign='right'>
+                                                    Graduated: {profile.gradYear}
+                                                </Grid.Column> 
+                                            ) : (
+                                                <Grid.Column textAlign='right'>
+                                                    Grade: {profile.grade}
+                                                </Grid.Column>
+                                            )
+                                        }
+                                    </Grid.Row>
+                                </Grid>
+                                </Card.Header>
+                                <Card.Description>School: {profile.school.name}</Card.Description>
+                            </Card.Content>
+                            <Card.Content extra>
+                                <Button
+                                    positive
+                                    data-id={profile._id}
+                                    op={'approve'}
+                                >
+                                    Approve
+                                </Button>
+                                <Button
+                                    negative
+                                    data-id={profile._id}
+                                    op={'suspend'}
+                                >
+                                    Suspend
+                                </Button>
+                                {role === 'ALUMNI' ? 
+                                    (
+                                        <Button
+                                            basic
+                                            primary
+                                            data-id={profile._id}
+                                            op={'view_feedback'}
+                                        >
+                                            Feedback
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            basic
+                                            primary
+                                            data-id={profile._id}
+                                            op={'promote_to_moderator'}
+                                        >
+                                            Promote
+                                        </Button>
+                                    )
+                                }
+                            </Card.Content>
+                        </Card>
+                    </Grid.Column>
+                </Grid.Row>
+            </Grid>
+        )
+    }
+
+    const handlePaginationChange = (e, { activePage }) => {
+        setCurrPage(activePage)
+    }
+
+    /* Display Elements */
+    const searchBar = (
+        <Grid>
+            <Grid.Row columns={'equal'}>
+                <Grid.Column width={8}>
+                        <Search
+                            open={false}
+                            showNoResults={false}
+                            onSearchChange={(e, {value}) => setSearch(value)}
+                            input={{fluid: true}}
+                            placeholder={"Search"}
+                        />
+                </Grid.Column>
+                <Grid.Column width={3} textAlign='left'>
+                    <Dropdown
+                        placeholder='Search By:'
+                        floating
+                        selection
+                        options={filterOptions()}
+                        name='filter'
+                        onChange={(e, {value}) => setFilter(value)}
+                    />
+                </Grid.Column>
+                {filter !== 'all' &&
+                    <Grid.Column width={3}>
+                        <Dropdown 
+                            placeholder={filter}
+                            options={secondaryFilterOptions}
+                            selection
+                            floating
+                            onChange={(e, {value}) => setSecondaryFilter(value)}
+                        />
+                    </Grid.Column>
+                }
+            </Grid.Row>
+        </Grid>
+    )
+
+    const resultsBar = (
+        <Grid>
+            <Grid.Row centered>
+                Found {filteredProfiles.length} Results!
+            </Grid.Row>
+        </Grid>
+    )
+
+    return(
+        <div>
+            {searchBar}
+            {(search || secondaryFilter) && resultsBar}
+            {display}
+            <Segment>
+                <Responsive as={Pagination} minWidth={726}
+                    value={currPage}
+                    totalPages={pages}
+                    onPageChange={handlePaginationChange}
+                />
+                <Responsive as={Pagination} maxWidth={726}
+                    value={currPage}
+                    totalPages={pages}
+                    siblingRange={0}
+                    boundaryRange={0}
+                    onPageChange={handlePaginationChange}
+                />
+            </Segment>
+        </div>
+    )
+}
