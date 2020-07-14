@@ -4,7 +4,8 @@ var router = express.Router();
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
 var adminSchema = require('../models/adminSchema');
-const studentSchema = require('../models/studentSchema');
+var studentSchema = require('../models/studentSchema');
+var requestSchema = require('../models/requestSchema');
 require('mongoose').Promise = global.Promise
 
 async function isAdmin(id) {
@@ -77,6 +78,44 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
     } catch (e) {
         console.log('admin/toggleApprove error: ' + e)
         res.status(500).send({'toggleApprove error' : e})
+    }
+});
+
+router.get('/feedback/:adminId/:profileId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId;
+    let profileId = req.params.profileId;
+    let public = [];
+    let private = [];
+    let testimonial = [];
+    try {
+        if (!isAdmin(adminId)) {
+            throw new Error('Invalid Admin ID');
+        }
+        let allFeedback = await requestSchema.find({mentor: profileId}, 'publicFeedback privateFeedback testimonial')
+        for (let feedback of allFeedback) {
+            feedback = feedback.toObject()
+            if (feedback.publicFeedback) {
+                public.push(feedback.publicFeedback);
+            } 
+            if (feedback.privateFeedback) {
+                private.push(feedback.privateFeedback);
+            }
+            if (feedback.testimonial) {
+                testimonial.push(feedback.testimonial);
+            }
+        }
+        let profile = await alumniSchema.findById(profileId)
+        res.status(200).send(
+            {
+                public: public,
+                private: private,
+                testimonial: testimonial,
+                profile: profile
+            }
+        );
+    } catch (e) {
+        console.log('admin/feedback error: ' + e);
+        res.status(500).send({'admin/feedback error' : e})
     }
 });
 

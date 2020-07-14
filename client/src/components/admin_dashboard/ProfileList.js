@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
+import FeedbackModal from './FeedbackModal'
 import { makeCall } from '../../apis';
 
 export default function ProfileList(props){
@@ -12,6 +13,8 @@ export default function ProfileList(props){
     const [filter, setFilter] = useState('all')
     const [secondaryFilter, setSecondaryFilter] = useState('')
     const [secondaryFilterOptions, setSecondaryFilterOptions] = useState([])
+    const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
+    const [profileId, setProfileId] = useState('')
     
     const pageSize = 4;
 
@@ -241,6 +244,7 @@ export default function ProfileList(props){
                                             primary
                                             dataid={profile._id}
                                             op={'view_feedback'}
+                                            onClick={handleButtonPress.bind(this)}
                                         >
                                             Feedback
                                         </Button>
@@ -274,7 +278,15 @@ export default function ProfileList(props){
                 .then((res) => {
                     setAllProfiles(res.profiles)
                 })
+        } else if (op === 'view_feedback') {
+            setProfileId(dataid)
+            setFeedbackModalOpen(true)
         }
+    }
+
+    const closeFeedbackModal = () => {
+        setFeedbackModalOpen(false)
+        setProfileId('')
     }
 
     /* Display Elements */
@@ -325,6 +337,14 @@ export default function ProfileList(props){
 
     return(
         <div>
+            {feedbackModalOpen && 
+                <FeedbackModal
+                    modalOpen={feedbackModalOpen}
+                    toggleModal={closeFeedbackModal}
+                    profileId={profileId}
+                    userDetails={props.userDetails._id}
+                />
+            }
             {searchBar}
             {(search || secondaryFilter) && resultsBar}
             {display}
