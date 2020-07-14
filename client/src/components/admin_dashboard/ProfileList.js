@@ -216,6 +216,9 @@ export default function ProfileList(props){
                                     </Grid.Row>
                                 </Grid>
                                 </Card.Header>
+                                {role === 'STUDENT' && profile.isModerator && 
+                                    <Card.Meta>Moderator</Card.Meta>
+                                }
                                 <Card.Description>School: {profile.school.name}</Card.Description>
                             </Card.Content>
                             <Card.Content extra>
@@ -253,7 +256,8 @@ export default function ProfileList(props){
                                             basic
                                             primary
                                             dataid={profile._id}
-                                            op={'promote_to_moderator'}
+                                            op={'toggle_moderator'}
+                                            onClick={handleButtonPress.bind(this)}
                                         >
                                             Promote
                                         </Button>
@@ -281,6 +285,11 @@ export default function ProfileList(props){
         } else if (op === 'view_feedback') {
             setProfileId(dataid)
             setFeedbackModalOpen(true)
+        } else if (op === 'toggle_moderator') {
+            makeCall({studentId: dataid}, '/admin/toggleModerator/' + props.userDetails._id, 'patch')
+                .then((res) => {
+                    setAllProfiles(res.students)
+                })
         }
     }
 

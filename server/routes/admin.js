@@ -119,4 +119,22 @@ router.get('/feedback/:adminId/:profileId', passport.authenticate('jwt', {sessio
     }
 });
 
+router.patch('/toggleModerator/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    let studentId = req.body.studentId
+    try {
+        if (!isAdmin(adminId)) {
+            throw new Error('Invalid Admin ID');
+        }
+        let student = await studentSchema.findById(studentId)
+        student.isModerator = !student.isModerator
+        await student.save()
+        let dbData = await studentSchema.find({}).populate('school')
+        res.status(200).send({'students': dbData})
+    } catch (e) {
+        console.log('admin/allStudents error: ' + e);
+        res.status(500).send({'admin/allStudents error' : e})
+    }
+});
+
 module.exports = router;
