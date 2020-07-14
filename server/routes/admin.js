@@ -51,4 +51,33 @@ router.get('/allStudents/:adminId', passport.authenticate('jwt', {session: false
     }
 });
 
+router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    let profileId = req.body.profileId;
+    let type = req.body.type;
+    try {
+        if (!isAdmin(adminId)) {
+            throw new Error('Invalid Admin ID');
+        }
+        if (type === 'ALUMNI') {
+            let alumni = await alumniSchema.findById(profileId);
+            alumni.approved = !alumni.approved;
+            await alumni.save()
+            let dbData = await alumniSchema.find({}).populate('school')
+            res.status(200).send({profiles: dbData})
+            return;
+        } else if (type === 'STUDENT') {
+            let student = await studentSchema.findById(profileId);
+            student.approved = !student.approved;
+            await student.save()
+            let dbData = await studentSchema.find({}).populate('school')
+            res.status(200).send({profiles: dbData})
+            return;
+        }
+    } catch (e) {
+        console.log('admin/toggleApprove error: ' + e)
+        res.status(500).send({'toggleApprove error' : e})
+    }
+});
+
 module.exports = router;
