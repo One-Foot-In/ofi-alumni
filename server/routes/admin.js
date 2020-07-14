@@ -9,7 +9,8 @@ require('mongoose').Promise = global.Promise
 
 async function isAdmin(id) {
     let admin = await adminSchema.findById(id)
-    return (admin !== null)
+    let alumni = await alumniSchema.findById(id).populate('user')
+    return (admin !== null || (alumni && alumni.user.role.includes('ADMIN')))
 }
 
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
