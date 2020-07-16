@@ -17,7 +17,7 @@ export default function FeedbackModal(props) {
                 setTestimonial(res.testimonial)
                 setProfile(res.profile)
             });
-    }, [props.profileId])
+    }, [props])
 
     const handleClick = (e, titleProps) => {
         const { index } = titleProps
