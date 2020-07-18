@@ -38,7 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));
  * Otherwise, it will use a cloud hosted DB set in the .env file
  * MongoDB must be installed
  */
-const testDB = true;
+const testDB = false;
 
 /* Mongoose Setup */
 const mongoose = require('mongoose');
