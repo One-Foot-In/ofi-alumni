@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, Responsive } from 'semantic-ui-react'
+import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
+import FeedbackModal from './FeedbackModal'
 import { makeCall } from '../../apis';
 
 export default function ProfileList(props){
@@ -12,6 +13,8 @@ export default function ProfileList(props){
     const [filter, setFilter] = useState('all')
     const [secondaryFilter, setSecondaryFilter] = useState('')
     const [secondaryFilterOptions, setSecondaryFilterOptions] = useState([])
+    const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
+    const [profileId, setProfileId] = useState('')
     
     const pageSize = 4;
 
@@ -56,7 +59,6 @@ export default function ProfileList(props){
         options.sort(function(a,b){return a.value-b.value})
         return options;
     };
-
     const filterOptions = () => {
         let filters = [
             {
@@ -135,7 +137,7 @@ export default function ProfileList(props){
                     && profile.gradYear === secondaryFilter);
             }));
         }
-    }, [search, secondaryFilter])
+    }, [search, secondaryFilter, filteredProfiles])
 
     //Filter category change
     useEffect(() => {
@@ -214,30 +216,38 @@ export default function ProfileList(props){
                                     </Grid.Row>
                                 </Grid>
                                 </Card.Header>
+                                {role === 'STUDENT' && profile.isModerator && 
+                                    <Card.Meta>Moderator</Card.Meta>
+                                }
                                 <Card.Description>School: {profile.school.name}</Card.Description>
                             </Card.Content>
                             <Card.Content extra>
-                                <Button
-                                    positive
-                                    data-id={profile._id}
-                                    op={'approve'}
-                                >
-                                    Approve
-                                </Button>
-                                <Button
-                                    negative
-                                    data-id={profile._id}
-                                    op={'suspend'}
-                                >
-                                    Suspend
-                                </Button>
+                                { profile.approved ?
+                                    <Button
+                                        negative
+                                        dataid={profile._id}
+                                        op={'toggle_approve'}
+                                        onClick={handleButtonPress.bind(this)}
+                                    >
+                                        Suspend
+                                    </Button> :
+                                    <Button
+                                        positive
+                                        dataid={profile._id}
+                                        op={'toggle_approve'}
+                                        onClick={handleButtonPress.bind(this)}
+                                    >
+                                        Approve
+                                    </Button>
+                                }  
                                 {role === 'ALUMNI' ? 
                                     (
                                         <Button
                                             basic
                                             primary
-                                            data-id={profile._id}
+                                            dataid={profile._id}
                                             op={'view_feedback'}
+                                            onClick={handleButtonPress.bind(this)}
                                         >
                                             Feedback
                                         </Button>
@@ -245,8 +255,9 @@ export default function ProfileList(props){
                                         <Button
                                             basic
                                             primary
-                                            data-id={profile._id}
-                                            op={'promote_to_moderator'}
+                                            dataid={profile._id}
+                                            op={'toggle_moderator'}
+                                            onClick={handleButtonPress.bind(this)}
                                         >
                                             Promote
                                         </Button>
@@ -262,6 +273,29 @@ export default function ProfileList(props){
 
     const handlePaginationChange = (e, { activePage }) => {
         setCurrPage(activePage)
+    }
+
+    const handleButtonPress = (e, { dataid, op }) => {
+        if (op === 'toggle_approve') {
+            makeCall({profileId: dataid, type: props.viewing}, 
+                '/admin/toggleApprove/' + props.userDetails._id, 'patch')
+                .then((res) => {
+                    setAllProfiles(res.profiles)
+                })
+        } else if (op === 'view_feedback') {
+            setProfileId(dataid)
+            setFeedbackModalOpen(true)
+        } else if (op === 'toggle_moderator') {
+            makeCall({studentId: dataid}, '/admin/toggleModerator/' + props.userDetails._id, 'patch')
+                .then((res) => {
+                    setAllProfiles(res.students)
+                })
+        }
+    }
+
+    const closeFeedbackModal = () => {
+        setFeedbackModalOpen(false)
+        setProfileId('')
     }
 
     /* Display Elements */
@@ -312,20 +346,21 @@ export default function ProfileList(props){
 
     return(
         <div>
+            {feedbackModalOpen && 
+                <FeedbackModal
+                    modalOpen={feedbackModalOpen}
+                    toggleModal={closeFeedbackModal}
+                    profileId={profileId}
+                    userDetails={props.userDetails._id}
+                />
+            }
             {searchBar}
             {(search || secondaryFilter) && resultsBar}
             {display}
             <Segment>
-                <Responsive as={Pagination} minWidth={726}
-                    value={currPage}
+                <Pagination
+                    activePage={currPage}
                     totalPages={pages}
-                    onPageChange={handlePaginationChange}
-                />
-                <Responsive as={Pagination} maxWidth={726}
-                    value={currPage}
-                    totalPages={pages}
-                    siblingRange={0}
-                    boundaryRange={0}
                     onPageChange={handlePaginationChange}
                 />
             </Segment>

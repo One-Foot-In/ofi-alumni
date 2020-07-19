@@ -16,6 +16,7 @@ import AlumniMentorship from './components/AlumniMentorship';
 import StudentMentorship from './components/StudentMentorship'
 import AlumniNetworking from './components/AlumniNetworking'
 import ProfileList from './components/admin_dashboard/ProfileList';
+import CollegesList from './components/admin_dashboard/CollegesList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
 
@@ -577,7 +578,9 @@ class App extends Component {
                           navItems={adminNavBarItems()}
                           activeItem={'colleges'}
                       />
-                      <p>Colleges</p>
+                      <CollegesList
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
