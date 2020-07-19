@@ -42,6 +42,7 @@ const testDB = false;
 
 /* Mongoose Setup */
 const mongoose = require('mongoose');
+console.log("db credentials are", process.env.DB, process.env.DBUSER, process.env.DBHOST, process.env.DBPASSWORD);
 const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
 
 /* Mongoose Models */
