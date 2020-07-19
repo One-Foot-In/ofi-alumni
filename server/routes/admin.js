@@ -1,7 +1,7 @@
 var express = require('express');
 var passport = require("passport");
 var router = express.Router();
-var userSchema = require('../models/userSchema');
+var collegeSchema = require('../models/collegeSchema');
 var alumniSchema = require('../models/alumniSchema');
 var adminSchema = require('../models/adminSchema');
 var studentSchema = require('../models/studentSchema');
@@ -49,6 +49,20 @@ router.get('/allStudents/:adminId', passport.authenticate('jwt', {session: false
     } catch (e) {
         console.log('admin/allStudents error: ' + e);
         res.status(500).send({'admin/allStudents error' : e})
+    }
+});
+
+router.get('/allColleges/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    try {
+        if (!isAdmin(adminId)) {
+            throw new Error('Invalid Admin ID');
+        }
+        let dbData = await collegeSchema.find({})
+        res.status(200).send({'colleges': dbData})
+    } catch (e) {
+        console.log('admin/allColleges error: ' + e);
+        res.status(500).send({'admin/allColleges error' : e})
     }
 });
 
@@ -133,6 +147,33 @@ router.patch('/toggleModerator/:adminId', passport.authenticate('jwt', {session:
         res.status(200).send({'students': dbData})
     } catch (e) {
         console.log('admin/allStudents error: ' + e);
+        res.status(500).send({'admin/allStudents error' : e})
+    }
+});
+
+router.patch('/mergeColleges/:adminid', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    let colleges = req.body.items
+    let name = req.body.name
+    let location = await collegeSchema.findById(colleges[0])
+    let country = location.country
+    try {
+        if (!isAdmin(adminId)) {
+            throw new Error('Invalid Admin ID');
+        }
+        let newCollege = new collegeSchema({name: name, country: country});
+        await newCollege.save();
+        let update = {
+            college: newCollege._id,
+            collegeName: newCollege.name
+        }
+        for (let college of colleges) {
+            let alumni = await alumniSchema.updateMany({college: college}, update)
+            await collegeSchema.findByIdAndDelete(college)
+        }
+        res.status(200).send({'message': 'Successfully merged colleges'})
+    } catch (e) {
+        console.log('/mergeColleges error:' + e);
         res.status(500).send({'admin/allStudents error' : e})
     }
 });

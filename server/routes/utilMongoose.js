@@ -621,7 +621,6 @@ router.post('/newAdmin/', async (req, res) => {
         const name = req.body.name;
         const timeZone = req.body.timeZone;
         const password = req.body.password;
-        console.log(password)
 
         const role = "ADMIN"
         const emailVerified = true
