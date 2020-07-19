@@ -28,7 +28,8 @@ router.get('/allAlumni/:adminId', passport.authenticate('jwt', {session: false})
     let adminId = req.params.adminId
     try {
         if (!isAdmin(adminId)) {
-            throw new Error('Invalid Admin ID');
+            res.status(400).send('Invalid Admin ID');
+            return;
         }
         let dbData = await alumniSchema.find({}).populate('school')
         res.status(200).send({'alumni': dbData})
@@ -42,7 +43,8 @@ router.get('/allStudents/:adminId', passport.authenticate('jwt', {session: false
     let adminId = req.params.adminId
     try {
         if (!isAdmin(adminId)) {
-            throw new Error('Invalid Admin ID');
+            res.status(400).send('Invalid Admin ID');
+            return;
         }
         let dbData = await studentSchema.find({}).populate('school')
         res.status(200).send({'students': dbData})
@@ -56,7 +58,8 @@ router.get('/allColleges/:adminId', passport.authenticate('jwt', {session: false
     let adminId = req.params.adminId
     try {
         if (!isAdmin(adminId)) {
-            throw new Error('Invalid Admin ID');
+            res.status(400).send('Invalid Admin ID');
+            return;
         }
         let dbData = await collegeSchema.find({})
         res.status(200).send({'colleges': dbData})
@@ -72,7 +75,8 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
     let type = req.body.type;
     try {
         if (!isAdmin(adminId)) {
-            throw new Error('Invalid Admin ID');
+            res.status(400).send('Invalid Admin ID');
+            return;
         }
         if (type === 'ALUMNI') {
             let alumni = await alumniSchema.findById(profileId);
@@ -103,7 +107,8 @@ router.get('/feedback/:adminId/:profileId', passport.authenticate('jwt', {sessio
     let testimonial = [];
     try {
         if (!isAdmin(adminId)) {
-            throw new Error('Invalid Admin ID');
+            res.status(400).send('Invalid Admin ID');
+            return;
         }
         let allFeedback = await requestSchema.find({mentor: profileId}, 'publicFeedback privateFeedback testimonial')
         for (let feedback of allFeedback) {
@@ -138,7 +143,8 @@ router.patch('/toggleModerator/:adminId', passport.authenticate('jwt', {session:
     let studentId = req.body.studentId
     try {
         if (!isAdmin(adminId)) {
-            throw new Error('Invalid Admin ID');
+            res.status(400).send('Invalid Admin ID');
+            return;
         }
         let student = await studentSchema.findById(studentId)
         student.isModerator = !student.isModerator
@@ -159,7 +165,8 @@ router.patch('/mergeColleges/:adminid', passport.authenticate('jwt', {session: f
     let country = location.country
     try {
         if (!isAdmin(adminId)) {
-            throw new Error('Invalid Admin ID');
+            res.status(400).send('Invalid Admin ID');
+            return;
         }
         let newCollege = new collegeSchema({name: name, country: country});
         await newCollege.save();

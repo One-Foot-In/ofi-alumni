@@ -93,7 +93,7 @@ export default function CollegesList(props) {
     }
 
     const constructDisplay = () => {
-        if (filteredColleges.length === 0 || filteredColleges === null) return;
+        if (!filteredColleges || !filteredColleges.length) return;
         let cardArray = []
         for (let i = 0; i < pageSize; i++) {
             let college = filteredColleges[(currPage - 1) * pageSize + i]
@@ -160,7 +160,7 @@ export default function CollegesList(props) {
 
     const closeMergeModal = () => {
         setMergeModalOpen(false)
-            makeCall({}, '/admin/allColleges/' + props.userDetails._id, 'get')
+        makeCall({}, '/admin/allColleges/' + props.userDetails._id, 'get')
             .then((res) => {
                     setAllColleges(res.colleges)
                 })
