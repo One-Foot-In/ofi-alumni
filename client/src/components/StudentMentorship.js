@@ -269,7 +269,7 @@ class SchedulingCards extends Component {
                 </Button.Group>
                 </>
             )
-        } else if (this.props.activeSet === 'completed' && (!scheduling.publicFeedback || !scheduling.privateFeedback || !scheduling.testimonial)) {
+        } else if (this.props.activeSet === 'completed' && (!scheduling.publicFeedback && !scheduling.privateFeedback && !scheduling.testimonial)) {
             return(
                 <Button
                     color='teal'
@@ -398,7 +398,7 @@ class SchedulingCards extends Component {
                         <Button onClick={this.toggleFeedbackModal.bind(this)}>
                             Done
                         </Button>
-                        <Button onClick={this.submitFinalNote.bind(this)} primary disabled={!this.state.publicFeedback || !this.state.privateFeedback}>
+                        <Button onClick={this.submitFinalNote.bind(this)} primary disabled={!this.state.publicFeedback && !this.state.privateFeedback}>
                             Submit
                         </Button>
                     </Modal.Actions>

@@ -15,6 +15,8 @@ import StudentVerification from './components/StudentVerification'
 import AlumniMentorship from './components/AlumniMentorship';
 import StudentMentorship from './components/StudentMentorship'
 import AlumniNetworking from './components/AlumniNetworking'
+import ProfileList from './components/admin_dashboard/ProfileList';
+import CollegesList from './components/admin_dashboard/CollegesList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
 
@@ -261,8 +263,10 @@ class App extends Component {
     let result;
     if (role === 'STUDENT') {
       result = await makeCall({}, ('/student/one/'+id), 'get')
-    } else {
+    } else if (role === 'ALUMNI') {
       result = await makeCall({}, ('/alumni/one/'+id), 'get')
+    } else if (role === 'ADMIN') {
+      result = await makeCall({}, ('/admin/one/'+id), 'get')
     }
     return result.result
   }
@@ -538,7 +542,10 @@ class App extends Component {
                           navItems={adminNavBarItems()}
                           activeItem={'students'}
                       />
-                      <p>Students</p>
+                      <ProfileList
+                          viewing={'STUDENT'}
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                     <Redirect to={"/login"}/>
                 }
@@ -553,7 +560,10 @@ class App extends Component {
                           navItems={adminNavBarItems()}
                           activeItem={'alumni'}
                       />
-                      <p>Alumni</p>
+                      <ProfileList
+                          viewing={'ALUMNI'}
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -568,7 +578,9 @@ class App extends Component {
                           navItems={adminNavBarItems()}
                           activeItem={'colleges'}
                       />
-                      <p>Colleges</p>
+                      <CollegesList
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
