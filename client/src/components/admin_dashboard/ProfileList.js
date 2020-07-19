@@ -172,7 +172,7 @@ export default function ProfileList(props){
     }
 
     const constructDisplay = () => {
-        if (filteredProfiles.length === 0 || filteredProfiles === null) return;
+        if (!filteredProfiles || !filteredProfiles.length) return;
         let cardArray = []
         for (let i = 0; i < pageSize; i++) {
             let profile = filteredProfiles[(currPage - 1) * pageSize + i]
