@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'semantic-ui-react';
 
-const LINKEDIN_RIDERECT = 'http://localhost:5000/linkedin'
+const LINKEDIN_RIDERECT = 'http://localhost:8081/linkedin'
 const LINKEDIN_CLIENT_ID = process.env.REACT_APP_LINKEDIN_API_KEY
 
 /*

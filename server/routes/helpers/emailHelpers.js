@@ -1,7 +1,7 @@
 const sg = require('@sendgrid/mail');
 require('dotenv').config();
 
-const BACKEND = process.env.BACKEND || 'http://localhost:5000'
+const BACKEND = process.env.BACKEND || 'http://localhost:8081'
 const APP = process.env.APP || 'http://localhost:3000'
 var htmlBuilder = require('./emailBodyBuilder').buildBody
 

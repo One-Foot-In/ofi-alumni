@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 /* 
  * If testDB is true, uses a locally hosted mongoDB
@@ -42,7 +42,6 @@ const testDB = false;
 
 /* Mongoose Setup */
 const mongoose = require('mongoose');
-console.log("db credentials are", process.env.DB, process.env.DBUSER, process.env.DBHOST, process.env.DBPASSWORD);
 const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
 
 /* Mongoose Models */
@@ -104,7 +103,7 @@ async function main() {
       }
     ));
 
-    app.use('/', indexRouter);
+    app.use(indexRouter);
 
     // test Router for testing health, database connection, and post
     app.use('/util-deprecated/', utilRouter);

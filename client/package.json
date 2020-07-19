@@ -25,11 +25,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && mv build ../server/build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:5000/",
+  "proxy": "http://localhost:8081/",
   "browserslist": {
     "production": [
       ">0.2%",
