@@ -2,6 +2,7 @@ var express = require('express');
 var passport = require("passport");
 var router = express.Router();
 var collegeSchema = require('../models/collegeSchema');
+var schoolSchema = require('../models/schoolSchema');
 var alumniSchema = require('../models/alumniSchema');
 var adminSchema = require('../models/adminSchema');
 var studentSchema = require('../models/studentSchema');
@@ -66,6 +67,21 @@ router.get('/allColleges/:adminId', passport.authenticate('jwt', {session: false
     } catch (e) {
         console.log('admin/allColleges error: ' + e);
         res.status(500).send({'admin/allColleges error' : e})
+    }
+});
+
+router.get('/allSchools/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        let dbData = await schoolSchema.find({})
+        res.status(200).send({'schools': dbData})
+    } catch (e) {
+        console.log('admin/allSchools error: ' + e);
+        res.status(500).send({'admin/allSchools error' : e})
     }
 });
 
