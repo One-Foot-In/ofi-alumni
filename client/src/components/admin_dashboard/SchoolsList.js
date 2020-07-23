@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
 import SchoolImageModal from './SchoolImageModal';
+import NewSchoolModal from './NewSchoolModal';
 import { makeCall } from '../../apis';
 
 export default function SchoolsList(props) {
@@ -10,6 +11,7 @@ export default function SchoolsList(props) {
     const [pages, setPages] = useState(0)
     const [currPage, setCurrPage] = useState(1)
     const [search, setSearch] = useState('')
+    const [newSchoolModalOpen, setNewSchoolModalOpen] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [currSchoolId, setCurrSchoolId] = useState('')
     const [currSchoolName, setCurrSchoolName] = useState('')
@@ -18,11 +20,13 @@ export default function SchoolsList(props) {
 
     //Mounting
     useEffect(() => {
-        makeCall({}, '/admin/allSchools/' + props.userDetails._id, 'get')
-            .then((res) => {
-                setAllSchools(res.schools)
-            })
-    }, [props]);
+        if(!newSchoolModalOpen) {
+            makeCall({}, '/admin/allSchools/' + props.userDetails._id, 'get')
+                .then((res) => {
+                    setAllSchools(res.schools)
+                })
+        }
+    }, [props, newSchoolModalOpen]);
 
     //Setting up display post API calls
     useEffect(() => {
@@ -147,8 +151,22 @@ export default function SchoolsList(props) {
                     modalOpen={imageModalOpen}
                     closeModal={() => setImageModalOpen(!setImageModalOpen)}
             />
+
+            <NewSchoolModal 
+                modalOpen={newSchoolModalOpen}
+                toggleModal={() => setNewSchoolModalOpen(false)}
+                userId={props.userDetails._id}
+            />
             {searchBar}
             {search && resultsBar}
+            <br/>
+            <Button
+                primary
+                onClick={() => setNewSchoolModalOpen(true)}
+                fluid
+            >
+                Add New School
+            </Button>
             <br/>
             {display}
             <Segment textAlign='center'>

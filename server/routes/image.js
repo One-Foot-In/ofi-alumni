@@ -47,6 +47,8 @@ async function isAdmin(id) {
     return (admin !== null || (alumni && alumni.user.role.includes('ADMIN')))
 }
 
+//TODO: Fix alumni, student, and school routes
+
 router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const form = new multiparty.Form();

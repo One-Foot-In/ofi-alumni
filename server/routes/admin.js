@@ -177,7 +177,7 @@ router.patch('/mergeColleges/:adminid', passport.authenticate('jwt', {session: f
     let adminId = req.params.adminId
     let colleges = req.body.items
     let name = req.body.name
-    let location = await collegeSchema.findById(colleges[0])
+    let school = new schoolSchema
     let country = location.country
     try {
         if (!isAdmin(adminId)) {
@@ -198,6 +198,28 @@ router.patch('/mergeColleges/:adminid', passport.authenticate('jwt', {session: f
     } catch (e) {
         console.log('/mergeColleges error:' + e);
         res.status(500).send({'admin/allStudents error' : e})
+    }
+});
+
+router.post('/addSchool/:adminid', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    let country = req.body.country
+    let name = req.body.name
+
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        let school = new schoolSchema({
+            name: name,
+            country: country
+        })
+        await school.save();
+        res.status(200).send({'message': 'Successfully merged colleges'})
+    } catch (e) {
+        console.log('/addSchool error:' + e);
+        res.status(500).send({'error' : 'Add School Error' + e})
     }
 });
 
