@@ -216,7 +216,7 @@ router.post('/addSchool/:adminid', passport.authenticate('jwt', {session: false}
             country: country
         })
         await school.save();
-        res.status(200).send({'message': 'Successfully merged colleges'})
+        res.status(200).send({'message': 'Successfully added school'})
     } catch (e) {
         console.log('/addSchool error:' + e);
         res.status(500).send({'error' : 'Add School Error' + e})
