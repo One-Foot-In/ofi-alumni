@@ -177,7 +177,7 @@ router.patch('/mergeColleges/:adminid', passport.authenticate('jwt', {session: f
     let adminId = req.params.adminId
     let colleges = req.body.items
     let name = req.body.name
-    let school = new schoolSchema
+    let location = await collegeSchema.findById(colleges[0])
     let country = location.country
     try {
         if (!isAdmin(adminId)) {
