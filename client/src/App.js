@@ -26,6 +26,7 @@ import * as actions from './redux/actions'
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
 export const ADMIN = "ADMIN"
+export const COLLEGE_REP = "COLLEGE_REP"
 
 /*
   STORE SETUP
@@ -290,6 +291,8 @@ class App extends Component {
       result = await makeCall({}, ('/alumni/one/'+id), 'get')
     } else if (role === 'ADMIN') {
       result = await makeCall({}, ('/admin/one/'+id), 'get')
+    } else if (role === 'COLLEGE_REP') {
+      result = await makeCall({}, ('/collegeRep/one/'+id), 'get')
     }
     return result.result
   }
@@ -627,6 +630,56 @@ class App extends Component {
                       <SchoolsList
                           userDetails={this.state.userDetails}
                       />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+        </>
+        )
+      case COLLEGE_REP:
+        return (
+          <>
+          <Route exact path={`/`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={collegeRepNavBarItems()}
+                          activeItem={'announcements'}
+                      />
+                      <p>Announcements</p>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/profile`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={collegeRepNavBarItems()}
+                          activeItem={'profile'}
+                      />
+                      <p>Profile</p>
+                  </> :
+                    <Redirect to={"/login"}/>
+                }
+          />
+          <Route exact path={`/shortlists`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={collegeRepNavBarItems()}
+                          activeItem={'shortlists'}
+                      />
+                      <p>Shortlists</p>
                   </> :
                   <Redirect to={"/login"}/>
               }
