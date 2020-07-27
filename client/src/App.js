@@ -194,6 +194,27 @@ const studentNavBarItems = (isModerator) => {
   return navBarItems;
 }
 
+const collegeRepNavBarItems = () => {
+  let navBarItems = [
+    {
+      id: 'announcements',
+      name: 'Announcements',
+      navLink: '/'
+    },
+    {
+      id: 'profile',
+      name: 'Profile',
+      navLink: '/profile'
+    },
+    {
+      id: 'shortlists',
+      name: 'Shortlists',
+      navLink: '/shortlists'
+    }
+  ]
+  return navBarItems;
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -202,6 +223,7 @@ class App extends Component {
       fetchingAuth: true,
       approved: false,
       role: null,
+      roleChanged: false,
       schoolId: '',
       userDetails: {}
     };
@@ -295,7 +317,13 @@ class App extends Component {
 
   liftRole(role) {
     this.setState({
-      role: role
+      role: role,
+      roleChanged: true
+    }, () => {
+      console.log(this.state.roleChanged)
+      this.setState({
+        roleChanged: false
+      })
     })
   }
 
@@ -701,6 +729,9 @@ class App extends Component {
               {this.renderScreens(this.state.role)}
             </Container>
             </>
+          }
+          {this.state.roleChanged && 
+            <Redirect to="/"/>
           }
         </Router>
     )
