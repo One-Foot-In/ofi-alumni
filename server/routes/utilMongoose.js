@@ -654,6 +654,52 @@ router.post('/newAdmin/', async (req, res) => {
     }
 })
 
+router.patch('/promoteAdmin/alumniId/', async (req, res) => {
+    const alumniId = req.body.id;
+    try {
+        let alumni = await alumniSchema.findById(alumniId)
+        let user = await userSchema.findById(alumni.user)
+        let roles = user.role
+        roles.push('ADMIN')
+        user.role = roles
+        await user.save()
+        res.status(200).send({'New Admin': alumni})
+    } catch (e) {
+        console.log('/promoteAdmin failed ' + e.message)
+        res.status(500).send({'promotion by alumniID failed': e})
+    }
+})
+
+router.patch('/promoteAdmin/email/', async (req, res) => {
+    const email = req.body.email;
+    try {
+        let user = await userSchema.findOne({email: email})
+        let roles = user.role
+        roles.push('ADMIN')
+        user.role = roles
+        await user.save()
+        res.status(200).send({'New Admin': user})
+    } catch (e) {
+        console.log('/promoteAdmin failed ' + e.message)
+        res.status(500).send({'promotion by email failed': e})
+    }
+})
+
+router.patch('/promoteAdmin/userId/', async (req, res) => {
+    const id = req.body.id;
+    try {
+        let user = await userSchema.findById(id)
+        let roles = user.role
+        roles.push('ADMIN')
+        user.role = roles
+        await user.save()
+        res.status(200).send({'New Admin': user})
+    } catch (e) {
+        console.log('/promoteAdmin failed ' + e.message)
+        res.status(500).send({'promotion by userID failed': e})
+    }
+})
+
 /* College Rep */
 router.get('/newCollegeRep/', async (req, res) => {
     try {
