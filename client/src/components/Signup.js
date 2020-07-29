@@ -1,6 +1,6 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Icon, Message, Grid, Dropdown, Label, Image, Divider, Input } from 'semantic-ui-react';
+import { Form, Button, Icon, Message, Grid, Dropdown, Label, Image, Divider, Input, Checkbox } from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
 import LocationSelectionModal from './LocationSelectionModal';
@@ -10,6 +10,7 @@ import MajorSelectionModal from './MajorSelectionModal';
 import CompanySelectionModal from './CompanySelectionModal';
 import JobTitleSelectionModal from './JobTitleSelectionModal';
 import ImageSelectModal from './ImageSelectModal';
+import TermsOfAgreementsModal from'./TermsOfAgreementsModal';
 
 let fieldStyle = {
     width: '90%',
@@ -92,8 +93,12 @@ export default class Signup extends React.Component {
             interestsModalOpen: false,
             companyModalOpen: false,
             jobTitleModalOpen: false,
-            imageModalOpen: false
+            imageModalOpen: false,
+            termsModalOpen: false,
+            // terms of agreements checkbox
+            userAgreedTerms: false,
         }
+
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeGrade = this.handleChangeGrade.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -123,8 +128,10 @@ export default class Signup extends React.Component {
         this.getImageInput = this.getImageInput.bind(this);
         this.getImageDisplay = this.getImageDisplay.bind(this);
         this.handleImageModal = this.handleImageModal.bind(this);
+        this.handleTermsModal = this.handleTermsModal.bind(this);
         this.canAddimage = this.canAddimage.bind(this);
         this.handleTopicSelection = this.handleTopicSelection.bind(this);
+        this.handleCheckedAgreement = this.handleCheckedAgreement.bind(this);
     }
 
     canAddimage() {
@@ -271,6 +278,16 @@ export default class Signup extends React.Component {
         this.setState({imageModalOpen: !this.state.imageModalOpen})
     }
 
+    handleTermsModal() {
+        this.setState({termsModalOpen: !this.state.termsModalOpen})
+    }
+
+    handleCheckedAgreement(e, data){
+        console.log("Checked value is", data.checked)
+        e.preventDefault();
+        this.setState({userAgreedTerms: data.checked})
+    }
+
     removeInterest(e, interestMarker) {
         e.preventDefault()
         this.setState({
@@ -319,7 +336,7 @@ export default class Signup extends React.Component {
                     }}
                 />
             </Button>
-            </>
+            </>    
         )
     }
 
@@ -489,7 +506,7 @@ export default class Signup extends React.Component {
     }
 
     validateSubmitReadiness() {
-        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password) && this.state.imageUrl;
+        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password) && this.state.userAgreedTerms; //&& this.state.imageUrl
         if (this.props.isAlumni) {
             return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId) && this.state.topics.length && this.state.zoomLink && this.state.city && this.state.country;
         }
@@ -858,7 +875,7 @@ export default class Signup extends React.Component {
                         >
                         </Form.Dropdown>
                         <Form.Field
-                            required={true}
+                            //required={true}
                         >
                             <label>Image</label>
                             {
@@ -887,6 +904,30 @@ export default class Signup extends React.Component {
                             this.getAlumniFields() :
                             this.getStudentFields()
                         }
+                        <Divider/>
+                        <Form.Field
+                            required={true}
+                            style = {fieldStyle}
+                        >
+                            <label> Terms of Agreements</label>
+                            <Button
+                                primary color="blue"
+                                type="button"
+                                onClick={() => {this.setState({termsModalOpen: true})}}
+                                size="mini"
+                            >
+                            View Terms of Agreements
+                            </Button>
+                            <TermsOfAgreementsModal
+                                modalOpen={this.state.termsModalOpen}
+                                close={this.handleTermsModal}
+                            />
+                            <Checkbox 
+                                label = 'I agree to the Terms of Agreements'
+                                onChange={this.handleCheckedAgreement}
+                            />
+                        </Form.Field>
+
                         <Divider/>
                         <Button 
                             color="blue" 
