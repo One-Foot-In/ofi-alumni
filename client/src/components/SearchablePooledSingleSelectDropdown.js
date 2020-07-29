@@ -35,7 +35,7 @@ export default class SearchablePooledSingleSelectDropdown extends Component {
         let result = await makeCall(null, this.props.endpoint, 'get')
         this.setState({
             options: result.options,
-        })
+        });
     }
 
     handleSelection(e, {value}) {

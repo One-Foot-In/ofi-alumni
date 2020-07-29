@@ -5,6 +5,7 @@ var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
 var newsSchema = require('../models/newsSchema');
+var actionItemsSchema = require('../models/actionItemSchema')
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendNewRequestEmail = require('../routes/helpers/emailHelpers').sendNewRequestEmail
 var sendRequestConfirmedEmail = require('../routes/helpers/emailHelpers').sendRequestConfirmedEmail
@@ -319,6 +320,55 @@ router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {sessio
     } catch (e) {
         console.log('getConfirmed error: ' + e)
         res.status(500).send({message: 'getConfirmed error: ' + e})
+    }
+})
+
+router.patch('/actionitems/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    let alumniId = req.params.id;
+    let timeOffset = req.params.timeOffset;
+    let requestId = req.body.requestId;
+    let actionItems = req.body.actionItems;
+    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
+    let requests = []
+    try {
+        let request = await requestSchema.findById(requestId);
+        request.actionItems = actionItems;
+        await request.save()
+        for (let status of conditions) {
+            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
+            for (let request of dbData) {
+                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
+            }
+            requests.push(dbData)
+        }
+        res.json({'requests' : requests});
+    } catch (e) {
+        console.log('/request/actionItems Error: ' + e)
+        res.status(500).send({
+            message: 'Failed to add alumni note: ' + e
+        })
+    }
+
+
+});
+
+router.post('/addActionItem/', async (req, res, next) => {
+    try {
+        const name = req.body.name;
+        const actionitem_instance = new actionItemsSchema(
+            {
+                name: name
+            }
+        );
+        await actionitem_instance.save();
+
+        res.status(200).send({
+            message: 'Successfully added action item',
+        });
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failed adding action item: ' + e
+        });
     }
 })
 

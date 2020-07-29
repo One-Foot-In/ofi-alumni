@@ -15,6 +15,7 @@ import swal from "sweetalert";
 export default class JobTitleUpdateModal extends Component {
     constructor(props){
         super(props)
+        console.log("job props: ", props);
         this.state = {
             newJobTitle: '', // name when new major entered
             existingJobTitleId: '', // mongoId when existing major selected

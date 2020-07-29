@@ -7,6 +7,7 @@
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "material-ui": "^0.20.2",
+    "npm-install-missing": "^0.1.4",
     "react": "^16.8.6",
     "react-alert": "^5.5.0",
     "react-alert-template-basic": "^1.0.0",

@@ -5,6 +5,7 @@ import swal from 'sweetalert'
 import TopicPreferencesModal from './TopicPreferencesModal'
 import TimePreferencesModal from './TimePreferencesModal'
 import ZoomUpdateModal from './ZoomUpdateModal'
+import PooledMultiSelectDropdown from './PooledMultiSelectDropdown'
 
 export const timeSlotOptions = [
     '12am - 1am',
@@ -81,7 +82,7 @@ export default class AlumniMentorship extends Component {
             userDetails: null,
             timePreferencesModalOpen: false,
             topicPreferencesModalOpen: false,
-            zoomUpdateOpen: false
+            zoomUpdateOpen: false,
         }
         this.handleStatusUpdate = this.handleStatusUpdate.bind(this)
         this.openTimePreferencesModal = this.openTimePreferencesModal.bind(this)
@@ -164,6 +165,7 @@ export default class AlumniMentorship extends Component {
     }
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
+
 
     render() {
         let details = this.props.userDetails
@@ -384,14 +386,19 @@ export default class AlumniMentorship extends Component {
  *                  used to disable approval, preventing double booking
  */
 class RequestCards extends Component {
+    
+
     state={
         requests: [],
         display: [],
         showFeedbackModal: false,
         showAlumniNoteModal: false,
+        showActionItemsModal: false,
         requestDetails: null,
         finalNote: '',
-        alumniNote: ''
+        alumniNote: '',
+        existingActionItems: [],
+        newActionItems: []
     }
     // This allows the component to update its state should a prop value change
     async componentWillReceiveProps({requests}) {
@@ -507,6 +514,7 @@ class RequestCards extends Component {
             )
         } else if (this.props.activeSet === 'completed' && !request.finalNote) {
             return(
+                <>
                 <Button
                     color='teal'
                     requestId={request._id}
@@ -514,6 +522,14 @@ class RequestCards extends Component {
                 >
                     Leave a note!
                 </Button>
+                <Button
+                    color='teal'
+                    requestId={request._id}
+                    onClick={this.toggleActionItemModal.bind(this)}
+                >
+                    Add action items!
+                </Button>
+                </>
             )
         }
     }
@@ -539,6 +555,19 @@ class RequestCards extends Component {
             })
         }
     }
+
+    toggleActionItemModal(e) {
+        let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
+        let actionItems = null
+        if (requestDetails) {
+            actionItems = requestDetails.actionItems
+        }
+        this.setState({
+            showActionItemsModal: !this.state.showActionItemsModal,
+            requestDetails: requestDetails,
+            actionItems: actionItems
+        });
+    } 
 
     toggleFeedbackModal(e) {
         let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
@@ -577,7 +606,7 @@ class RequestCards extends Component {
 
 
     async submitFinalNote(e) {
-        let requests = await makeCall({
+        let requests = await  makeCall({
             requestId: this.state.requestDetails._id,
             finalNote: this.state.finalNote
         }, `/request/leaveFinalNote/${this.props.userId}/${this.props.timeOffset}`, 'patch')
@@ -587,7 +616,7 @@ class RequestCards extends Component {
 
     handleValueChange(e, {name, value}) {
         e.preventDefault();
-        this.setState({
+        this.setState({ 
             [name]: value
         })
     }
@@ -598,6 +627,22 @@ class RequestCards extends Component {
             display.push(this.constructRequest(request))
         }
         this.setState({display: display})
+    }
+
+    getActionItemsInput(selection) {
+        console.log(selection);
+        this.setState({
+            existingActionItems: selection.old,
+            newActionItems: selection.new,
+        });
+    }
+
+    async submitActionItems() {
+        let requests = await  makeCall({
+            requestId: this.state.requestDetails._id,
+            actionItems: this.state.existingActionItems
+        }, `/request/actionitems/${this.props.userId}/${this.props.timeOffset}`, 'patch')
+        this.setState({showActionItemsModal: false});
     }
 
     render() {
@@ -636,6 +681,42 @@ class RequestCards extends Component {
                             Done
                         </Button>
                         <Button onClick={this.submitFinalNote.bind(this)} disabled={!this.state.finalNote} primary>
+                            Submit
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
+            }
+            {this.state.showActionItemsModal && 
+                <Modal open={this.state.showActionItemsModal}>
+                    <Modal.Header>Add action items for {this.state.requestDetails.student.name}</Modal.Header>
+                    <Modal.Content>
+                    <Grid stackable>
+                        <Grid.Row columns={"equal"}>
+                            <Grid.Column width={4}>
+                                <Image
+                                    floated='left'
+                                    size='small'
+                                    src={this.state.requestDetails.student.imageURL}
+                                    rounded
+                                />
+                            </Grid.Column>
+                            <Grid.Column>
+                                Please select up to 3 action items for {this.state.requestDetails.student.name}
+                                <PooledMultiSelectDropdown 
+                                 allowAddition='true'
+                                 endpoint={`/drop/actionitems`}
+                                 dataType={"Action Item"}
+                                 getInputs={this.getActionItemsInput.bind(this)}
+                                />
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={this.toggleActionItemModal.bind(this)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={this.submitActionItems.bind(this)} primary>
                             Submit
                         </Button>
                     </Modal.Actions>
