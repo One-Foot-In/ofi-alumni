@@ -2,6 +2,7 @@ var express = require('express');
 var passport = require("passport");
 var router = express.Router();
 var collegeSchema = require('../models/collegeSchema');
+var schoolSchema = require('../models/schoolSchema');
 var alumniSchema = require('../models/alumniSchema');
 var adminSchema = require('../models/adminSchema');
 var studentSchema = require('../models/studentSchema');
@@ -66,6 +67,21 @@ router.get('/allColleges/:adminId', passport.authenticate('jwt', {session: false
     } catch (e) {
         console.log('admin/allColleges error: ' + e);
         res.status(500).send({'admin/allColleges error' : e})
+    }
+});
+
+router.get('/allSchools/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        let dbData = await schoolSchema.find({})
+        res.status(200).send({'schools': dbData})
+    } catch (e) {
+        console.log('admin/allSchools error: ' + e);
+        res.status(500).send({'admin/allSchools error' : e})
     }
 });
 
@@ -182,6 +198,28 @@ router.patch('/mergeColleges/:adminid', passport.authenticate('jwt', {session: f
     } catch (e) {
         console.log('/mergeColleges error:' + e);
         res.status(500).send({'admin/allStudents error' : e})
+    }
+});
+
+router.post('/addSchool/:adminid', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    let country = req.body.country
+    let name = req.body.name
+
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        let school = new schoolSchema({
+            name: name,
+            country: country
+        })
+        await school.save();
+        res.status(200).send({'message': 'Successfully added school'})
+    } catch (e) {
+        console.log('/addSchool error:' + e);
+        res.status(500).send({'error' : 'Add School Error' + e})
     }
 });
 

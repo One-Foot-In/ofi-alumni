@@ -15,6 +15,7 @@ var indexRouter = require('./routes/index');
 var alumniRouter = require('./routes/alumni');
 var studentsRouter = require('./routes/students');
 var adminRouter = require('./routes/admin');
+var collegeRepRouter = require('./routes/collegeRep');
 var userRouter = require('./routes/user');
 var dropdownRouter = require('./routes/dropdown');
 var utilRouter = require('./routes/util');
@@ -118,6 +119,8 @@ async function main() {
     app.use('/student/', studentsRouter);
 
     app.use('/admin/', adminRouter);
+
+    app.use('/collegeRep/', collegeRepRouter);
 
     app.use('/user/', userRouter);
 

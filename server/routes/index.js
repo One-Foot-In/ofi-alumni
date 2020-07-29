@@ -7,6 +7,7 @@ var crypto = require('crypto-random-string');
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var adminSchema = require('../models/adminSchema');
+var collegeRepSchema = require('../models/collegeRepSchema');
 var userSchema = require('../models/userSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
@@ -91,6 +92,17 @@ router.post('/login', (req, res, next) => {
                 {
                   role: userRole,
                   details: admin
+                }
+              )
+            } else if (userRole.includes("COLLEGE_REP")) {
+              const collegeRep = await collegeRepSchema.findOne({user: user._id});
+              payload.id = collegeRep._id
+              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              res.cookie('jwt', cookie);
+              res.status(200).send(
+                {
+                  role: userRole,
+                  details: collegeRep
                 }
               )
             } else {
