@@ -285,14 +285,19 @@ class App extends Component {
 
   async fetchProfile(role, id) {
     let result;
-    if (role === 'STUDENT') {
-      result = await makeCall({}, ('/student/one/'+id), 'get')
-    } else if (role === 'ALUMNI') {
-      result = await makeCall({}, ('/alumni/one/'+id), 'get')
-    } else if (role === 'ADMIN') {
-      result = await makeCall({}, ('/admin/one/'+id), 'get')
-    } else if (role === 'COLLEGE_REP') {
-      result = await makeCall({}, ('/collegeRep/one/'+id), 'get')
+    switch (role) {
+      case STUDENT:
+        result = await makeCall({}, ('/student/one/'+id), 'get');
+        break;
+      case ALUMNI:
+        result = await makeCall({}, ('/alumni/one/'+id), 'get')
+        break;
+      case ADMIN:
+        result = await makeCall({}, ('/admin/one/'+id), 'get')
+        break;
+      case COLLEGE_REP:
+        result = await makeCall({}, ('/collegeRep/one/'+id), 'get')
+        break;
     }
     return result.result
   }
@@ -323,7 +328,6 @@ class App extends Component {
       role: role,
       roleChanged: true
     }, () => {
-      console.log(this.state.roleChanged)
       this.setState({
         roleChanged: false
       })
