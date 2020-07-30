@@ -10,7 +10,7 @@ import MajorSelectionModal from './MajorSelectionModal';
 import CompanySelectionModal from './CompanySelectionModal';
 import JobTitleSelectionModal from './JobTitleSelectionModal';
 import ImageSelectModal from './ImageSelectModal';
-import TermsOfAgreementsModal from'./TermsOfAgreementsModal';
+import TermsOfAgreementModal from'./TermsOfAgreementModal';
 
 let fieldStyle = {
     width: '90%',
@@ -95,7 +95,7 @@ export default class Signup extends React.Component {
             jobTitleModalOpen: false,
             imageModalOpen: false,
             termsModalOpen: false,
-            // terms of agreements checkbox
+            // terms of agreement checkbox
             userAgreedTerms: false,
         }
 
@@ -335,7 +335,7 @@ export default class Signup extends React.Component {
                     }}
                 />
             </Button>
-            </>    
+            </>
         )
     }
 
@@ -908,25 +908,24 @@ export default class Signup extends React.Component {
                             required={true}
                             style = {fieldStyle}
                         >
-                            <label> Terms of Agreements</label>
+                            <label> Terms of Agreement</label>
                             <Button
                                 primary color="blue"
                                 type="button"
-                                onClick={() => {this.handleTermsModal}}
+                                onClick={() => {this.setState({termsModalOpen: true})}}
                                 size="mini"
                             >
-                            View Terms of Agreements
+                            View Terms of Agreement
                             </Button>
-                            <TermsOfAgreementsModal
+                            <TermsOfAgreementModal
                                 modalOpen={this.state.termsModalOpen}
                                 close={this.handleTermsModal}
                             />
                             <Checkbox 
-                                label = 'I agree to the Terms of Agreements'
+                                label = 'I agree to the Terms of Agreement'
                                 onChange={this.handleCheckedAgreement}
                             />
                         </Form.Field>
-
                         <Divider/>
                         <Button 
                             color="blue" 

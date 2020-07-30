@@ -6,7 +6,7 @@ import {Button, Modal } from 'semantic-ui-react';
     - modalOpen
     - closeModal: ()
 */
-export default class JobTitleSelectionModal extends Component {
+export default class TermsOfAgreementModal extends Component {
     constructor(props){
         super(props)
     }
