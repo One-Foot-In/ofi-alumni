@@ -17,7 +17,8 @@ We rely heavily on the [Semantic UI React library](https://react.semantic-ui.com
 ## Server
 
 * We separate concerns by ROLES in the system, and each ROLE should get it's own router
-* The `util` router is used to make testing easier
+* Each ROLE has a corresponding Profile schema found in `server/models` for details that can be used on the front end (Alumni, Student, etc.)
+* The `util` router (in utilMongoose.js) is used to make testing easier
 * The index router contains APIs that span across roles, e.g. authentication and verification end-points
 
 ## Starting mongo locally

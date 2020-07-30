@@ -8,7 +8,7 @@ const userSchema = new Schema(
     passwordHash: {type: String, required: true},
     verificationToken: {type: String, required: true},
     passwordChangeToken: {type: String, required: false},
-    role: {type: String, required: true},
+    role: [{type: String, required: true, enum: ['ALUMNI', 'STUDENT', 'ADMIN', 'COLLEGE_REP']}],
     emailVerified: {type: Boolean, required: true}
   }
 );

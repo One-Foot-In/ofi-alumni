@@ -6,6 +6,8 @@ var bcrypt = require('bcrypt');
 var crypto = require('crypto-random-string');
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
+var adminSchema = require('../models/adminSchema');
+var collegeRepSchema = require('../models/collegeRepSchema');
 var userSchema = require('../models/userSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
@@ -55,8 +57,10 @@ router.post('/login', (req, res, next) => {
             return next(error);
           }
           try {
-            let userRole = user.role && user.role.toUpperCase()
-            if (userRole === "ALUMNI") {
+            let userRole = user.role && user.role.map(role => {
+              return role.toUpperCase()
+            })
+            if (userRole.includes("ALUMNI")) {
               const alumni = await alumniSchema.findOne({user: user._id})
               payload.id = alumni._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
@@ -69,7 +73,7 @@ router.post('/login', (req, res, next) => {
                   details: alumni
                 }
               );
-            } else if (userRole === "STUDENT") {
+            } else if (userRole.includes("STUDENT")) {
               const student = await studentSchema.findOne({user: user._id});
               payload.id = student._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
@@ -81,6 +85,28 @@ router.post('/login', (req, res, next) => {
                   details: student
                 }
               );
+            } else if (userRole.includes("ADMIN")) {
+              const admin = await adminSchema.findOne({user: user._id});
+              payload.id = admin._id
+              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              res.cookie('jwt', cookie);
+              res.status(200).send(
+                {
+                  role: userRole,
+                  details: admin
+                }
+              )
+            } else if (userRole.includes("COLLEGE_REP")) {
+              const collegeRep = await collegeRepSchema.findOne({user: user._id});
+              payload.id = collegeRep._id
+              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              res.cookie('jwt', cookie);
+              res.status(200).send(
+                {
+                  role: userRole,
+                  details: collegeRep
+                }
+              )
             } else {
               res.status(500).send({error: true, message: 'Could not determine role.'});
             }
