@@ -283,7 +283,6 @@ export default class Signup extends React.Component {
     }
 
     handleCheckedAgreement(e, data){
-        console.log("Checked value is", data.checked)
         e.preventDefault();
         this.setState({userAgreedTerms: data.checked})
     }
@@ -506,7 +505,7 @@ export default class Signup extends React.Component {
     }
 
     validateSubmitReadiness() {
-        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password) && this.state.userAgreedTerms; //&& this.state.imageUrl
+        const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password) && this.state.userAgreedTerms && this.state.imageUrl;
         if (this.props.isAlumni) {
             return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId) && this.state.topics.length && this.state.zoomLink && this.state.city && this.state.country;
         }
@@ -875,7 +874,7 @@ export default class Signup extends React.Component {
                         >
                         </Form.Dropdown>
                         <Form.Field
-                            //required={true}
+                            required={true}
                         >
                             <label>Image</label>
                             {
@@ -913,7 +912,7 @@ export default class Signup extends React.Component {
                             <Button
                                 primary color="blue"
                                 type="button"
-                                onClick={() => {this.setState({termsModalOpen: true})}}
+                                onClick={() => {this.handleTermsModal}}
                                 size="mini"
                             >
                             View Terms of Agreements
