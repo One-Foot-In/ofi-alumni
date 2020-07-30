@@ -15,7 +15,8 @@ const studentSchema = new Schema(
     school: {type: Schema.Types.ObjectId, ref: 'School', required: true},
     schoolLogo: {type: String, default:'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'},
     isModerator: {type: Boolean, default: false},
-    interests: {type: Array, required: false}
+    interests: {type: Array, required: false},
+    colleges: [{type: Schema.Types.ObjectId, ref: 'College'}]
   }
 );
 

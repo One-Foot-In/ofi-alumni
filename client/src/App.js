@@ -15,6 +15,7 @@ import StudentVerification from './components/StudentVerification'
 import AlumniMentorship from './components/AlumniMentorship';
 import StudentMentorship from './components/StudentMentorship'
 import AlumniNetworking from './components/AlumniNetworking'
+import CollegeShortlist from './components/CollegeShortlist';
 import ProfileList from './components/admin_dashboard/ProfileList';
 import CollegesList from './components/admin_dashboard/CollegesList';
 import NewsFeed from './components/NewsFeed'
@@ -181,6 +182,11 @@ const studentNavBarItems = (isModerator) => {
         id: 'mentorship',
         name: 'Mentorship',
         navLink: '/mentorship'
+    },
+    {
+      id: 'workspace',
+      name: 'Workspace',
+      navLink: '/workspace'
     }
   ]
   if (isModerator) {
@@ -489,6 +495,24 @@ class App extends Component {
                       />
                       <StudentMentorship 
                           userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/workspace`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
+                          activeItem={'workspace'}
+                      />
+                      <CollegeShortlist
+                          details={this.state.userDetails}
+                          refreshProfile={this.refreshProfile}
                       />
                   </> :
                   <Redirect to={"/login"}/>

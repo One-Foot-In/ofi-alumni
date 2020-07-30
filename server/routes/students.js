@@ -6,6 +6,7 @@ var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
+var collegeSchema = require('../models/collegeSchema');
 var newsSchema = require('../models/newsSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
@@ -33,6 +34,29 @@ router.post('/', async (req, res, next) => {
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
+
+        // find or create College
+        // const newCollege = req.body.newCollege
+        // const collegeCountry = req.body.collegeCountry
+        // let existingCollegeId = req.body.existingCollegeId
+        // var college
+        // if (newCollege) {
+        //     // to prevent users from accidentally adding an existing college as custom entry
+        //     let collegeFound = await collegeSchema.find({name: newCollege, country: collegeCountry})
+        //     if (!collegeFound.length) {
+        //         var newCollegeCreated = new collegeSchema({
+        //             name: newCollege,
+        //             country: collegeCountry
+        //         })
+        //         await newCollegeCreated.save()
+        //         college = newCollegeCreated
+        //     } else {
+        //         college = collegeFound[0]
+        //     }
+        // } else if (existingCollegeId) {
+        //     college = await collegeSchema.findOne({_id: existingCollegeId})
+        // }
+
         var passwordHash = await bcrypt.hash(password, HASH_COST)
         // find schoolLogo
         let school = await schoolSchema.findOne({_id: schoolId})
@@ -87,7 +111,7 @@ router.post('/', async (req, res, next) => {
 
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        const dbData = await studentSchema.findOne({_id: req.params.id})
+        const dbData = await studentSchema.findOne({_id: req.params.id}).populate("colleges")
         res.json({'result' : dbData});
     } catch (e) {
         console.log("Error: util#oneStudent", e);
@@ -147,6 +171,39 @@ router.patch('/interests/add/:id', async (req, res, next) => {
         res.status(200).send({message: "Successfully added student's interests"})
     } catch (e) {
         console.log("Error: student#interests/add", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/college/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        // find or create College
+        const newCollege = req.body.newCollege
+        const collegeCountry = req.body.collegeCountry
+        let existingCollegeId = req.body.existingCollegeId
+        var college
+        if (newCollege) {
+            // to prevent users from accidentally adding an existing college as custom entry
+            let collegeFound = await collegeSchema.find({name: newCollege, country: collegeCountry})
+            if (!collegeFound.length) {
+                var newCollegeCreated = new collegeSchema({
+                    name: newCollege,
+                    country: collegeCountry
+                })
+                await newCollegeCreated.save()
+                college = newCollegeCreated
+            } else {
+                college = collegeFound[0]
+            }
+        } else if (existingCollegeId) {
+            college = await collegeSchema.findOne({_id: existingCollegeId})
+        }
+        let student = await studentSchema.findOne({_id: req.params.id})
+        student.colleges.push(college._id)
+        await student.save()
+        res.status(200).send({student: student})
+    } catch (e) {
+        console.log("Error: student#college/update", e);
         res.status(500).send({'error' : e});
     }
 })

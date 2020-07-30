@@ -85,6 +85,10 @@ export default class CollegeUpdateModal extends Component {
         })
     }
 
+    findDuplicate = (newCollege) => {
+        return this.props.details.colleges.some(college => college == newCollege);
+    }
+
     submit(e) {
         e.preventDefault()
         this.setState({
@@ -98,7 +102,11 @@ export default class CollegeUpdateModal extends Component {
             }
             try {
                 const result = await makeCall(payload, `/alumni/college/update/${this.props.id}`, 'patch')
-                if (!result || result.error) {
+
+                const studentResult = await makeCall(payload, `/student/college/update/${this.props.id}`, 'patch')
+                // if (!studentResult || studentResult.error) {
+
+                if ((!result || result.error) && (!studentResult || studentResult.error)) {
                     this.setState({
                         submitting: false
                     }, () => {
@@ -108,7 +116,19 @@ export default class CollegeUpdateModal extends Component {
                             icon: "error",
                         });
                     })
-                } else {
+                } 
+                // else if (this.findDuplicate(studentResult)) {
+                //     this.setState({
+                //         submitting: false
+                //     }, () => {
+                //         swal({
+                //             title: "Error!",
+                //             text: "Duplicate college.",
+                //             icon: "error",
+                //         });
+                //     })
+                // }
+                else {
                     this.setState({
                         submitting: false
                     }, () => {
