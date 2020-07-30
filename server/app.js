@@ -132,6 +132,12 @@ async function main() {
 
     app.use('/conversations/', conversationsRouter);
 
+    // any router that is not captured by express
+    // app will cause the frontend to be served
+    app.get('*', (req, res) => {
+       res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
+    })
+
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {
       next(createError(404));
