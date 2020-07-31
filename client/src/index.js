@@ -4,6 +4,7 @@ import App from './App';
 import { Provider } from 'react-redux';
 import configureStore from "./redux/store"
 
+//jsx的语法
 ReactDOM.render(
         <Provider 
             store={configureStore({})
