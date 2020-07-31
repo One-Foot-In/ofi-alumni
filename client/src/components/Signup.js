@@ -921,7 +921,8 @@ export default class Signup extends React.Component {
                                 modalOpen={this.state.termsModalOpen}
                                 close={this.handleTermsModal}
                             />
-                            <Checkbox 
+                            <Checkbox
+                                style={{ 'margin-top': '10px' }}
                                 label = 'I agree to the Terms of Agreement'
                                 onChange={this.handleCheckedAgreement}
                             />
