@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 export const makeCall = async (payload, api, method) => {
-    const BACKEND = process.env.REACT_APP_BACKEND || "http://localhost:8081"
+    const BACKEND = process.env.REACT_APP_BACKEND || "http://localhost:5000"
     method = method.toUpperCase()
     var headers = new Headers();
     headers.append('Content-Type', 'application/json');
@@ -29,7 +29,7 @@ export const makeCall = async (payload, api, method) => {
 }
 
 export const makeCallWithImage = async (payload, api, method) => {
-    const BACKEND = process.env.REACT_APP_BACKEND || "http://localhost:8081"
+    const BACKEND = process.env.REACT_APP_BACKEND || "http://localhost:5000"
     method = method.toUpperCase()
     var headers = new Headers();
     headers.append('Accept', 'application/json');
