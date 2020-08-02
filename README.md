@@ -24,3 +24,7 @@ We rely heavily on the [Semantic UI React library](https://react.semantic-ui.com
 ## Starting mongo locally
 
 * Use `mongod --dbpath=data/db`
+
+## Deployments
+
+* In a deployment environment, run `npm run build`. This should create an optimized production build of the React frontn-end app for the server directory to serve. Then `cd server` and `npm start` (or use `pm2` if you need to run the app in the background, as you would in an EC2 instance).
