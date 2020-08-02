@@ -105,7 +105,7 @@ async function main() {
       }
     ));
 
-    app.use(indexRouter);
+    app.use('/', indexRouter);
 
     // test Router for testing health, database connection, and post
     app.use('/util-deprecated/', utilRouter);
