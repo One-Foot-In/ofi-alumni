@@ -132,8 +132,8 @@ async function main() {
 
     app.use('/conversations/', conversationsRouter);
 
-    // any router that is not captured by express
     // app will cause the frontend to be served
+    // for any end-point path that it cannot resolve
     app.get('*', (req, res) => {
        res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
     })
