@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Menu, Label, Card, Button, Icon } from 'semantic-ui-react';
-import CollegeUpdateModal from './alumni_profile_update_modals/CollegeUpdateModal';
+import CollegeShortlistModal from './CollegeShortlistModal';
 
 const STUDENT = "STUDENT"
 
@@ -10,8 +10,7 @@ export default class CollegeShortlist extends Component {
         this.state = {
             activeItem: "shortlist",
             collegeModalOpen: false,
-            shortlist: [],
-            // userDetails: null,
+            collegeShortlist: [],
         }
         this.openCollegeModal = this.openCollegeModal.bind(this);
         this.closeCollegeModal = this.closeCollegeModal.bind(this);
@@ -31,12 +30,15 @@ export default class CollegeShortlist extends Component {
     }
 
     findDuplicate = (newCollege) => {
-        return this.props.details.colleges.some(college => college == newCollege);
+        return this.props.details.collegeShortlist.some(college => college == newCollege);
       }
 
     render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
+        if (details.collegeShortlist.size > 0) {
+            this.collegeShortlist = details.collegeShortlist.map(e => e.name).join(', ');
+        }
 
         return (
             <div>
@@ -49,7 +51,7 @@ export default class CollegeShortlist extends Component {
                 >
                     College Shortlist
                     {   (this.state.shortlist !== []) && 
-                         <Label color='teal'>{details.colleges.length}</Label>
+                         <Label color='teal'>{details.collegeShortlist.length}</Label>
                     }
                 </Menu.Item>
                 
@@ -59,7 +61,8 @@ export default class CollegeShortlist extends Component {
                     <Card fluid>
                     <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
-                    <Card.Description>Colleges: {details.colleges.map(e => e.name).join(', ') || 'Unavailable'}
+                    <Card.Description>Colleges: {this.collegeShortlist || 'Unavailable'}
+                    {/* <Card.Description>Colleges: {details.collegeShortlist.map(e => e.name).join(', ') || 'Unavailable'} */}
                     
                         {
                             !isViewOnly ? 
@@ -73,11 +76,11 @@ export default class CollegeShortlist extends Component {
                                 >
                                     <Icon name='pencil' color="blue"/>
                                 </Button>
-                                <CollegeUpdateModal
+                                <CollegeShortlistModal
                                     modalOpen={this.state.collegeModalOpen}
                                     closeModal={this.closeCollegeModal}
                                     id={details._id}
-                                    shortlist={details.colleges}
+                                    collegeShortlist={details.collegeShortlist}
                                 />
                             </> : null
                         }
