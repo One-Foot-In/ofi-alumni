@@ -166,7 +166,6 @@ export default class AlumniMentorship extends Component {
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
 
-
     render() {
         let details = this.props.userDetails
         let availabilities = details.availabilities;
@@ -386,8 +385,6 @@ export default class AlumniMentorship extends Component {
  *                  used to disable approval, preventing double booking
  */
 class RequestCards extends Component {
-    
-
     state={
         requests: [],
         display: [],
@@ -606,7 +603,7 @@ class RequestCards extends Component {
 
 
     async submitFinalNote(e) {
-        let requests = await  makeCall({
+        let requests = await makeCall({
             requestId: this.state.requestDetails._id,
             finalNote: this.state.finalNote
         }, `/request/leaveFinalNote/${this.props.userId}/${this.props.timeOffset}`, 'patch')
@@ -616,9 +613,7 @@ class RequestCards extends Component {
 
     handleValueChange(e, {name, value}) {
         e.preventDefault();
-        this.setState({ 
-            [name]: value
-        })
+        this.setState({[name]: value});
     }
 
     constructDisplay(requests) {
@@ -630,7 +625,6 @@ class RequestCards extends Component {
     }
 
     getActionItemsInput(selection) {
-        console.log(selection);
         this.setState({
             existingActionItems: selection.old,
             newActionItems: selection.new,
@@ -638,10 +632,10 @@ class RequestCards extends Component {
     }
 
     async submitActionItems() {
-        let requests = await  makeCall({
+        let requests = await makeCall({
             requestId: this.state.requestDetails._id,
             actionItems: this.state.existingActionItems
-        }, `/request/actionitems/${this.props.userId}/${this.props.timeOffset}`, 'patch')
+        }, `/request/actionItems/${this.props.userId}/${this.props.timeOffset}`, 'patch')
         this.setState({showActionItemsModal: false});
     }
 

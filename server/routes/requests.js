@@ -323,7 +323,7 @@ router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {sessio
     }
 })
 
-router.patch('/actionitems/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+router.patch('/actionItems/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     let alumniId = req.params.id;
     let timeOffset = req.params.timeOffset;
     let requestId = req.body.requestId;

@@ -776,32 +776,19 @@ router.get('/data/clear/all', async (req, res, next) => {
 router.post('/addActionItems/', async (req, res, next) => {
     try {
         const name = req.body.name;
-        const user_instance = new actionItemSchema(
+        const actionitem_instance = new actionItemSchema(
             {
                 name: name
             }
         );
-        await user_instance.save();
-
-        var student_instance = new studentSchema(
-            {
-                name: name,
-                user: user_instance._id,
-                grade: grade,
-                //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-                //issuesLiked: [{type: Schema.Types.ObjectId, ref: 'issueSchema'}]
-                timeZone: timeZone
-            }
-        )
-        let insert = await student_instance.save();
-
+        await actionitem_instance.save();
         res.status(200).send({
-            message: 'Successfully added student',
-            student: student_instance
+            message: 'Successfully added action items',
+            actionitem: actionitem_instance
         });
     } catch (e) {
         res.status(500).send({
-            message: 'Failed adding student: ' + e
+            message: 'Failed adding action item: ' + e
         });
     }
 });

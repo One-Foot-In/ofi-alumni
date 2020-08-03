@@ -131,7 +131,7 @@ router.get('/colleges/:country', async (req, res) => {
   }
 })
 
-router.get('/actionitems', async (req, res) => {
+router.get('/actionItems', async (req, res) => {
   try {
     let actionitems = await actionitemSchema.find()
     let actionitemsOptions = actionitems.map( actionitem => {

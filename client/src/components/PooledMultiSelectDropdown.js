@@ -12,7 +12,6 @@ props:
 export default class PooledMultiSelectDropdown extends Component {
     constructor(props){
         super(props)
-        console.log(props); 
         this.state = {
             options: [],
             value: [],
