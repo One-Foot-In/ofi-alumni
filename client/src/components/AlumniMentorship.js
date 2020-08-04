@@ -624,10 +624,18 @@ class RequestCards extends Component {
         this.setState({display: display})
     }
 
-    getActionItemsInput(selection) {
+    async getActionItemsInput(selection) {
         this.setState({
             existingActionItems: selection.old,
             newActionItems: selection.new,
+        } , async () => {
+            var actionitem;
+            for (actionitem in this.state.newActionItems) {
+                let addActionItem = await makeCall({
+                  name: this.state.newActionItems[actionitem].value
+                }, `/request/addActionItem/`, 'post');
+                this.setState({newActionItems: this.state.newActionItems.splice(1,actionitem)});
+            }
         });
     }
 
@@ -698,7 +706,7 @@ class RequestCards extends Component {
                                 Please select up to 3 action items for {this.state.requestDetails.student.name}
                                 <PooledMultiSelectDropdown 
                                  allowAddition='true'
-                                 endpoint={`/drop/actionitems`}
+                                 endpoint={`/drop/actionItems`}
                                  dataType={"Action Item"}
                                  getInputs={this.getActionItemsInput.bind(this)}
                                 />
