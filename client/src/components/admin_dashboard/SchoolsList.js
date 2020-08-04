@@ -153,6 +153,7 @@ export default function SchoolsList(props) {
             />
 
             <NewSchoolModal 
+                type={"SCHOOL"}
                 modalOpen={newSchoolModalOpen}
                 toggleModal={() => setNewSchoolModalOpen(false)}
                 userId={props.userDetails._id}

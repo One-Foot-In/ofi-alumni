@@ -223,4 +223,26 @@ router.post('/addSchool/:adminid', passport.authenticate('jwt', {session: false}
     }
 });
 
+router.post('/addCollege/:adminid', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    let country = req.body.country
+    let name = req.body.name
+
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        let college = new collegeSchema({
+            name: name,
+            country: country
+        })
+        await college.save();
+        res.status(200).send({'message': 'Successfully added college'})
+    } catch (e) {
+        console.log('/addCollege error:' + e);
+        res.status(500).send({'error' : 'Add College Error' + e})
+    }
+});
+
 module.exports = router;

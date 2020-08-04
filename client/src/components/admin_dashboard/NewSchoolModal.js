@@ -11,13 +11,15 @@ export default function NewSchoolModal(props) {
     const [result, setResult] = useState({})
 
     useEffect(() => {
-        makeCall({}, '/drop/countries/', 'get')
+        if (!countries.length) {
+            makeCall({}, '/drop/countries/', 'get')
             .then((res) => {
                 setCountries(res.options)
                 setCountry('')
                 setName('')
                 setLoading(false)
             })
+        }
     }, [props]);
 
     useEffect(() => {
@@ -38,15 +40,22 @@ export default function NewSchoolModal(props) {
 
     const handleClick = () => {
         setLoading(true)
-        makeCall({name: name, country: country},
-            '/admin/addSchool/' + props.userId, 'post').then((res) => {
-                setResult(res)
-            })
+        if (props.type === "SCHOOL") {
+            makeCall({name: name, country: country},
+                '/admin/addSchool/' + props.userId, 'post').then((res) => {
+                    setResult(res)
+                })
+        } else if (props.type === "COLLEGE") {
+            makeCall({name: name, country: country},
+                '/admin/addCollege/' + props.userId, 'post').then((res) => {
+                    setResult(res)
+                })
+        }
     }
 
     return(
         <Modal open={props.modalOpen} onClose={props.toggleModal} closeIcon>
-            <Modal.Header>Add a New School</Modal.Header>
+            <Modal.Header>Add a New {props.type === "SCHOOL" ? "School" : "College"} </Modal.Header>
             <Modal.Content>
                 <h3>Country:</h3>
                 <Dropdown
@@ -56,7 +65,7 @@ export default function NewSchoolModal(props) {
                     placeholder={'Select Country'}
                     onChange={(e, {value}) => setCountry(value)}
                 />
-                <h3>School Name:</h3>
+                <h3>{props.type === "SCHOOL" ? "School" : "College"} Name:</h3>
                 <Input 
                     fluid 
                     value={name} 
@@ -66,7 +75,7 @@ export default function NewSchoolModal(props) {
             </Modal.Content>
             <Modal.Actions>
                 <Button disabled={!name || !country} primary onClick={handleClick.bind(this)} loading={loading}>
-                    Add School
+                    Add {props.type === "SCHOOL" ? "School" : "College"}
                 </Button>
                 <Button onClick={props.toggleModal}>Close</Button>
             </Modal.Actions>
