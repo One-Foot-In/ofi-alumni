@@ -10,14 +10,14 @@ export default class TermsOfAgreementModal extends Component {
     constructor(props){
         super(props)
     }
-
+    
+    // TODO: Replace with actual terms
     render() {
         return (
             <Modal
                 open={this.props.modalOpen}
                 style={{overflow: 'auto', maxHeight: 600}}
             >
-                // TODO: Replace with actual terms
                 <Modal.Header>Terms Of Agreement</Modal.Header>
                 <Modal.Content>
                     <p>
