@@ -908,7 +908,6 @@ export default class Signup extends React.Component {
                             required={true}
                             style = {fieldStyle}
                         >
-                            <label> Terms of Agreement</label>
                             <Button
                                 primary color="blue"
                                 type="button"
