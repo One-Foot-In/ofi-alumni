@@ -912,7 +912,7 @@ export default class Signup extends React.Component {
                             <Button
                                 primary color="blue"
                                 type="button"
-                                onClick={() => {this.setState({termsModalOpen: true})}}
+                                onClick = {this.handleTermsModal}
                                 size="mini"
                             >
                             View Terms of Agreement
