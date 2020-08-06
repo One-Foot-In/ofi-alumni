@@ -14,6 +14,7 @@ export default class CollegeShortlist extends Component {
         }
         this.openCollegeModal = this.openCollegeModal.bind(this);
         this.closeCollegeModal = this.closeCollegeModal.bind(this);
+        var shortlist = this.shortlist.bind(this);
     }
 
     openCollegeModal() {
@@ -28,20 +29,24 @@ export default class CollegeShortlist extends Component {
             this.props.refreshProfile(STUDENT, this.props.details._id)
         })
     }
-
-    findDuplicate = (newCollege) => {
-        return this.props.details.collegeShortlist.some(college => college == newCollege);
-      }
+    shortlist(update) {
+        alert('We pass argument from Child to Parent: ' + update);
+        this.setState({
+            collegeShortlist: update,
+        })
+    }
 
     render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
+        var shortlist = this.shortlist;
         if (details.collegeShortlist.size > 0) {
             this.collegeShortlist = details.collegeShortlist.map(e => e.name).join(', ');
         }
 
         return (
             <div>
+            
             <Menu secondary stackable>
                 <Menu.Item
                     id='shortlist'
@@ -61,8 +66,8 @@ export default class CollegeShortlist extends Component {
                     <Card fluid>
                     <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
-                    <Card.Description>Colleges: {this.collegeShortlist || 'Unavailable'}
-                    {/* <Card.Description>Colleges: {details.collegeShortlist.map(e => e.name).join(', ') || 'Unavailable'} */}
+                    {/* <Card.Description>Colleges: {this.collegeShortlist || 'Unavailable'} */}
+                    <Card.Description>Colleges: {details.collegeShortlist.map(e => e.name).join(', ') || 'Unavailable'}
                     
                         {
                             !isViewOnly ? 
@@ -78,9 +83,10 @@ export default class CollegeShortlist extends Component {
                                 </Button>
                                 <CollegeShortlistModal
                                     modalOpen={this.state.collegeModalOpen}
-                                    closeModal={this.closeCollegeModal}
                                     id={details._id}
                                     collegeShortlist={details.collegeShortlist}
+                                    shortlist = {shortlist.bind(this)}
+                                    closeModal={this.closeCollegeModal}
                                 />
                             </> : null
                         }
@@ -90,6 +96,7 @@ export default class CollegeShortlist extends Component {
                 </div>
             }
             </div>
+            
         )
     }
 }

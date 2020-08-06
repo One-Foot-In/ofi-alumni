@@ -16,79 +16,66 @@ export default class CollegeShortlistModal extends Component {
     constructor(props){
         super(props)
         this.state = {
-            // newCollege: '', // name when new college entered
             existingCollegeId: '', // mongoId when existing college selected
             existingCollegeName: '',
-            // countryOptions: [],
+            countryOptions: [],
             submitting: false,
-            allcolleges: '/util/allcolleges/',
-            // colleges: this.props.colleges,
         }
-        // this.handleCountrySelection = this.handleCountrySelection.bind(this)
+        this.handleCountrySelection = this.handleCountrySelection.bind(this)
         this.getCollegeInput = this.getCollegeInput.bind(this)
-        // this.deleteCountry = this.deleteCountry.bind(this)
+        this.deleteCountry = this.deleteCountry.bind(this)
         this.submit = this.submit.bind(this)
         this.clearState = this.clearState.bind(this)
     }
 
-    // async componentWillMount() {
-    //     let result = await makeCall(null, '/drop/countries', 'get')
-    //     this.setState({countryOptions: result.options})
-    // }
+    async componentWillMount() {
+        let result = await makeCall(null, '/drop/countries', 'get')
+        this.setState({countryOptions: result.options})
+    }
 
-    // handleCountrySelection(e, {value}) {
-    //     e.preventDefault()
-    //     this.setState({
-    //         country: value
-    //     })
-    // }
+    handleCountrySelection(e, {value}) {
+        e.preventDefault()
+        this.setState({
+            country: value
+        })
+    }
 
     // getCollegeInput(selection, isNew) {
     getCollegeInput(selection) {
         if (selection) {
-            // if (isNew) {
-            //     this.setState({
-            //         // newCollege: selection.value,
-            //         existingCollegeId: '',
-            //         existingCollegeName: ''
-            //     })
-            // } else {
-                this.setState({
-                    // newCollege: '',
-                    existingCollegeId: selection.value,
-                    existingCollegeName: selection.text
-                })
-            // }
+            this.setState({
+                existingCollegeId: selection.value,
+                existingCollegeName: selection.text
+            })
         } else {
             this.setState({
-                // newCollege: '',
                 existingCollegeId: '',
                 existingCollegeName: ''
             })
         }
     }
 
-    // deleteCountry(e) {
-    //     e.preventDefault()
-    //     this.setState({
-    //         country: '',
-    //         newCollege: '',
-    //         existingCollegeId: '',
-    //         existingCollegeName: ''
-    //     })
-    // }
+    deleteCountry(e) {
+        e.preventDefault()
+        this.setState({
+            country: '',
+            newCollege: '',
+            existingCollegeId: '',
+            existingCollegeName: ''
+        })
+    }
 
     clearState() {
         this.setState({
-            // country: '',
-            // newCollege: '',
+            country: '',
             existingCollegeId: '',
             existingCollegeName: ''
         })
     }
 
     findDuplicate = (newCollege) => {
-        return this.props.details.collegeShortlist.some(college => college === newCollege);
+        return this.props.collegeShortlist.some(college => 
+            (college.name + " (" + this.state.country + ")").localeCompare(newCollege) === 0);
     }
 
     submit(e) {
@@ -97,15 +84,24 @@ export default class CollegeShortlistModal extends Component {
             submitting: true
         }, async () => {
             let payload = {
-                // collegeCountry: this.state.country,
-                // newCollege: this.state.newCollege,
+                collegeCountry: this.state.country,
                 existingCollegeId: this.state.existingCollegeId,
                 existingCollegeName: this.state.existingCollegeName
             }
             try {
-                const studentResult = await makeCall(payload, `/student/college/update/${this.props.id}`, 'patch')
-
-                if (!studentResult || studentResult.error) {
+                const result = await makeCall(payload, `/student/college/update/${this.props.id}`, 'patch')
+                if (this.findDuplicate(this.state.existingCollegeName)) {
+                    this.setState({
+                        submitting: false
+                    }, () => {
+                        swal({
+                            title: "Error!",
+                            text: "Duplicate college.",
+                            icon: "error",
+                        });
+                    })
+                }
+                else if (!result || result.error) {
                     this.setState({
                         submitting: false
                     }, () => {
@@ -116,31 +112,21 @@ export default class CollegeShortlistModal extends Component {
                         });
                     })
                 } 
-                // else if (this.findDuplicate(studentResult)) {
-                //     this.setState({
-                //         submitting: false
-                //     }, () => {
-                //         swal({
-                //             title: "Error!",
-                //             text: "Duplicate college.",
-                //             icon: "error",
-                //         });
-                //     })
-                // }
+                
                 else {
                     this.setState({
-                        submitting: false
+                        submitting: false,
+                        goodInput: true
                     }, () => {
                         swal({
                             title: "Done!",
                             text: "Your college has been successfully updated!",
                             icon: "success",
-                        }).then(() => {
-                            this.clearState();
-                            this.props.closeModal();
                         })
                     })
-                    
+                    console.log(this.props.collegeShortlist);
+                    this.props.collegeShortlist.push(this.state.existingCollegeName);
+                    console.log(this.props.collegeShortlist);
                 }
             } catch (e) {
                 this.setState({
@@ -154,36 +140,62 @@ export default class CollegeShortlistModal extends Component {
     }
 
     render() {
+        var shortlist = this.props.shortlist;
         return (
             <Modal
                 open={this.props.modalOpen}
             >
                 <Modal.Header>Select your college</Modal.Header>
                 <Modal.Content>
-                    {
-                        <Grid centered>
-                            <Grid.Row>
-                                <PooledSingleSelectDropdown
-                                    endpoint={'/util/allcolleges/'}
-                                    // endpoint={'/drop/colleges/'}
-                                    dataType={'College'}
-                                    getInputs={this.getCollegeInput}
-                                    allowAddition={false}
-                                /> 
-                            </Grid.Row>
-                        </Grid>
+                {
+                        this.state.country ? 
+                        <>
+                            <Grid centered>
+                                <Grid.Row>
+                                    <Label>
+                                        {this.state.country}
+                                        <Icon
+                                            onClick={this.deleteCountry}
+                                            name='delete'
+                                        />
+                                    </Label>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <PooledSingleSelectDropdown
+                                        endpoint={`/drop/colleges/${this.state.country}`}
+                                        allowAddition={false}
+                                        dataType={"College"}
+                                        getInput={this.getCollegeInput}
+                                    /> 
+                                </Grid.Row>
+                            </Grid>
+                        </> : 
+                        <Dropdown
+                            placeholder="Search for the country you're in"
+                            style={{ 'margin': '5px', 'width': '80%'}}
+                            fluid
+                            search
+                            selection
+                            options={this.state.countryOptions}
+                            value={this.state.country}
+                            onChange={this.handleCountrySelection}
+                        />
                     }
                 </Modal.Content>
                 <Modal.Actions>
-                    <Button // Workspace button
+                    <Button 
                         // disabled={!this.state.newCollege && !this.state.existingCollegeId}
-                        onClick={this.submit}>
+                        onClick={
+                            this.submit
+                            // this.props.shortlist(this.props.collegeShortlist)
+                        }
+                        >
                         Submit
                     </Button>
-                    <Button onClick={() => { // Modal button
-                        this.props.collegeShortlist.push(this.getCollegeInput)
+                    <Button onClick={() => { 
+                        this.props.shortlist(this.props.collegeShortlist);
                         this.clearState();
-                        this.props.closeModal()
+                        this.props.closeModal();
                     }}>
                         Close
                     </Button>
