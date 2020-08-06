@@ -18,7 +18,8 @@ export default function CollegesList(props) {
     const [mergeModalOpen, setMergeModalOpen] = useState(false)
 
     const pageSize = 6;
-
+    
+    //统计出所有学生的国家的位置，将国家的位置保存在一个数组中。
     const locationOptions = () => {
         let options = [];
         for (let college of allColleges) {
@@ -46,7 +47,7 @@ export default function CollegesList(props) {
         }
     ]
     
-    //Mounting
+    //Mounting   把allCollege从数据库中取出来。
     useEffect(() => {
        makeCall({}, '/admin/allColleges/' + props.userDetails._id, 'get')
             .then((res) => {
@@ -54,7 +55,7 @@ export default function CollegesList(props) {
                 })
         }, [props]);
 
-    //Setting up display post API calls
+    //Setting up display post API calls ，拼接大学名字和国家，并按国家的名字排序。
     useEffect(() => {
         completeColleges()
     }, [allColleges]);
@@ -65,7 +66,7 @@ export default function CollegesList(props) {
         constructDisplay()
     }, [currPage, filteredColleges]);
 
-    //Search
+    //Search   查找符合filter的college并将他们放到FilteredColleges中
     useEffect(() => {
         if (filter === 'all') {
             setFilteredColleges(allColleges.filter((college) => {
@@ -80,6 +81,7 @@ export default function CollegesList(props) {
         }
     }, [search, secondaryFilter, filteredColleges, filter])
     
+    //把college的名字和国家拼起来，形成一个完全的名字，把这些大学按照国家名字排序。
     const completeColleges = () => {
         for (let college of allColleges) {
             college.allText = college.name + ' ' + college.location
@@ -91,7 +93,8 @@ export default function CollegesList(props) {
         })
         setFilteredColleges(sortedColleges)
     }
-
+    
+    //把filterCollege中的college使用collegeCard函数进行渲染，然后把Display的值设置成collegeCard.
     const constructDisplay = () => {
         if (!filteredColleges || !filteredColleges.length) return;
         let cardArray = []
@@ -136,6 +139,7 @@ export default function CollegesList(props) {
     const handleCheck = (e, { dataid }) => {
         let checkedColleges = selectedIds;
         let collegeId = dataid
+        // 这句话是什么意思？
         if (checkedColleges[collegeId] !== undefined) {
             delete checkedColleges[collegeId]
         } else {
@@ -143,7 +147,7 @@ export default function CollegesList(props) {
         }
         //Check for more than one location
         let locations = []
-        let colleges = Object.values(checkedColleges)
+        let colleges = Object.values(checkedColleges)     //返回一个包含对象自身的所有可枚举属性值的数组
         for (let i = 0; i < colleges.length; i++) {
             if (!(locations.includes(colleges[i].country))){
                 locations.push(colleges[i].country)
@@ -154,7 +158,7 @@ export default function CollegesList(props) {
         } else {
             setMergeButtonDisabled(false);
         }
-        setSelectedIds(checkedColleges)
+        setSelectedIds(checkedColleges)        
         setMergeButtonActive(Object.keys(selectedIds).length > 1)
     }
 
@@ -196,7 +200,7 @@ export default function CollegesList(props) {
                         <Dropdown 
                             placeholder={filter}
                             options={locationOptions()}
-                            selection
+                            selection       
                             floating
                             onChange={(e, {value}) => setSecondaryFilter(value)}
                         />

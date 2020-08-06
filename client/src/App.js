@@ -19,6 +19,7 @@ import ProfileList from './components/admin_dashboard/ProfileList';
 import CollegesList from './components/admin_dashboard/CollegesList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
+import DataMangement from './components/admin_dashboard/DataManagement'; 
 
 import * as actions from './redux/actions'
 
@@ -527,7 +528,9 @@ class App extends Component {
                           navItems={adminNavBarItems()}
                           activeItem={'data'}
                       />
-                      <p>Data Management</p>
+                      <p><DataMangement
+                        userDetails={this.state.userDetails}
+                      /></p>
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -579,7 +582,7 @@ class App extends Component {
                           activeItem={'colleges'}
                       />
                       <CollegesList
-                          userDetails={this.state.userDetails}
+                          userDetails={this.state.userDetBails}
                       />
                   </> :
                   <Redirect to={"/login"}/>

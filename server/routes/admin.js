@@ -39,6 +39,21 @@ router.get('/allAlumni/:adminId', passport.authenticate('jwt', {session: false})
     }
 });
 
+router.get('/allInterests/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    try{
+        if(!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        let dbData = await interestsSchema.find({})
+        res.status(200).send({'interests': dbData})       
+    } catch (e) {
+        console.log('admin/allStudents error' + e);
+        res.status(500).send({'admin/allStudents error' : e})
+    }
+});
+
 router.get('/allStudents/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
     let adminId = req.params.adminId
     try {
