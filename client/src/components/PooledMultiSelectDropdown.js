@@ -72,7 +72,7 @@ export default class PooledMultiSelectDropdown extends Component {
             customValue: e.target.value 
         })
     }
-
+    
     handleSelection(e, {value}) {
         e.preventDefault()
         this.setState({

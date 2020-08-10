@@ -628,22 +628,27 @@ class RequestCards extends Component {
         this.setState({
             existingActionItems: selection.old,
             newActionItems: selection.new,
-        } , async () => {
-            var actionitem;
-            for (actionitem in this.state.newActionItems) {
-                let addActionItem = await makeCall({
-                  name: this.state.newActionItems[actionitem].value
-                }, `/request/addActionItem/`, 'post');
-                this.setState({newActionItems: this.state.newActionItems.splice(1,actionitem)});
-            }
         });
     }
 
     async submitActionItems() {
         let requests = await makeCall({
             requestId: this.state.requestDetails._id,
-            actionItems: this.state.existingActionItems
-        }, `/request/actionItems/${this.props.userId}/${this.props.timeOffset}`, 'patch')
+            existingActionItems: this.state.existingActionItems
+        }, `/request/actionItems/${this.state}/`, 'patch')
+        if (!requests || requests.error) {
+            swal({
+                title: "Error!",
+                text: "There was an error updating this request, please try again.",
+                icon: "error",
+            });
+        } else {
+            swal({
+                title: "Done!",
+                text: "Successfully updated this request!",
+                icon: "success"
+            })
+        }
         this.setState({showActionItemsModal: false});
     }
 

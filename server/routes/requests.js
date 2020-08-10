@@ -323,53 +323,55 @@ router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {sessio
     }
 })
 
-router.patch('/actionItems/:id/:timeOffset', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
-    let alumniId = req.params.id;
-    let timeOffset = req.params.timeOffset;
-    let requestId = req.body.requestId;
-    let actionItems = req.body.actionItems;
-    let conditions = ['Awaiting Confirmation', 'Confirmed', 'Completed']
-    let requests = []
-    try {
-        let request = await requestSchema.findById(requestId);
-        request.actionItems = actionItems;
-        await request.save()
-        for (let status of conditions) {
-            const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
-            for (let request of dbData) {
-                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
+const generateNewAndExistingActionItems = async (existingActionItems, newActionItems) => {
+    const existingActionItemsIds = existingActionItems.map(actionItem => actionItem.value).flat()
+    let existingActionItemsRecords = await actionItemsSchema.find().where('_id').in(existingActionItemsIds).exec()
+    // create action itmes added
+    if (newActionItems.length) {
+        for (let i = 0; i < newActionItems.length; i++) {
+            // check to see if action items name already exists
+            let actionItemsExists = await interestsSchema.find({name: newInterests[i].value})
+            if (!actionItemsExists.length) {
+                var newActionItemCreated = new actionItemsSchema({
+                    name: newActionItems[i].value
+                })
+                await newActionItemCreated.save()
+                existingActionItemsRecords.push(newActionItemCreated)
+            } else {
+                // user accidentally added an interest that already exists as a new interest
+                existingActionItemsRecords.push(actionItemsExists[0])
             }
-            requests.push(dbData)
         }
-        res.json({'requests' : requests});
-    } catch (e) {
-        console.log('/request/actionItems Error: ' + e)
-        res.status(500).send({
-            message: 'Failed to add alumni note: ' + e
-        })
     }
+    return existingActionItemsRecords;
+}
 
+const getUniqueActionItems = (allActionItems) => {
+    let allUniqueNames = new Set()
+    let uniqueActionItems = []
+    for (let i = 0; i < allActionItems.length; i++) {
+        if (!allUniqueNames.has(allActionItems[i].name)) {
+            allUniqueNames.add(allActionItems[i].name)
+            uniqueActionItems.push(allActionItems[i])
+        }
+    }
+    return uniqueActionItems
+}
 
-});
-
-router.post('/addActionItem/', async (req, res, next) => {
+router.patch('/actionItems/:id/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        const name = req.body.name;
-        const actionitem_instance = new actionItemsSchema(
-            {
-                name: name
-            }
-        );
-        await actionitem_instance.save();
-
-        res.status(200).send({
-            message: 'Successfully added action item',
-        });
+        let requestId = req.body.requestId;
+        let request = await requestSchema.findById(requestId);
+        const existingActionItems = req.body.existingActionItems
+        const newActionItems = []
+        let actionItemsToAdd = await generateNewAndExistingActionItems(existingActionItems, newActionItems)
+        request.actionItems = getUniqueActionItems([...request.actionItems, ...actionItemsToAdd])
+        await request.save()
+        res.status(200).send({message: "Successfully added action iems"})
     } catch (e) {
-        res.status(500).send({
-            message: 'Failed adding action item: ' + e
-        });
+        console.log("Error: actionitems/", e);
+        res.status(500).send({'error' : e});
     }
-})
+});
 
 module.exports = router;
