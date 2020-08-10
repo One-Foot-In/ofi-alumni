@@ -14,7 +14,7 @@ export default class CollegeShortlist extends Component {
         }
         this.openCollegeModal = this.openCollegeModal.bind(this);
         this.closeCollegeModal = this.closeCollegeModal.bind(this);
-        var shortlist = this.shortlist.bind(this);
+        this.addToShortlist = this.addToShortlist.bind(this);
     }
 
     openCollegeModal() {
@@ -29,21 +29,23 @@ export default class CollegeShortlist extends Component {
             this.props.refreshProfile(STUDENT, this.props.details._id)
         })
     }
-    shortlist(update) {
-        alert('We pass argument from Child to Parent: ' + update);
+    addToShortlist(newCollege) {        
+        let currentCollegeShortlist = this.props.details.collegeShortlist
+        currentCollegeShortlist.push(newCollege) 
         this.setState({
-            collegeShortlist: update,
+            shortlist: currentCollegeShortlist
         })
+        // let currentCollegeShortlist = this.state.collegeShortlist
+        this.state.collegeShortlist.push(newCollege);
     }
 
     render() {
         const details = this.props.details;
         const isViewOnly = this.props.isViewOnly;
-        var shortlist = this.shortlist;
-        if (details.collegeShortlist.size > 0) {
-            this.collegeShortlist = details.collegeShortlist.map(e => e.name).join(', ');
-        }
-
+        // if (details.collegeShortlist.size > 0) {
+            
+        //     this.collegeShortlist = details.collegeShortlist.map(e => e.name).join(', ');
+        // }
         return (
             <div>
             
@@ -57,6 +59,7 @@ export default class CollegeShortlist extends Component {
                     College Shortlist
                     {   (this.state.shortlist !== []) && 
                          <Label color='teal'>{details.collegeShortlist.length}</Label>
+                        //  <Label color='teal'>{this.state.collegeShortlist.length}</Label>
                     }
                 </Menu.Item>
                 
@@ -66,8 +69,11 @@ export default class CollegeShortlist extends Component {
                     <Card fluid>
                     <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
-                    {/* <Card.Description>Colleges: {this.collegeShortlist || 'Unavailable'} */}
-                    <Card.Description>Colleges: {details.collegeShortlist.map(e => e.name).join(', ') || 'Unavailable'}
+                    {/* <Card.Description>Colleges: {this.state.collegeShortlist[0] || 'Unavailable'} */}
+                    <Card.Description>Colleges: {details.collegeShortlist.map(e => 
+                        <li>{e.name}</li> || <li>{e}</li>) || 'Unavailable' }
+                    
+                        {/* <li key={e.name}>{e.name}</li> ) || 'Unavailable' } */}
                     
                         {
                             !isViewOnly ? 
@@ -84,8 +90,9 @@ export default class CollegeShortlist extends Component {
                                 <CollegeShortlistModal
                                     modalOpen={this.state.collegeModalOpen}
                                     id={details._id}
+                                    // collegeShortlist={this.state.collegeShortlist}
+                                    addToShortlist={this.addToShortlist}
                                     collegeShortlist={details.collegeShortlist}
-                                    shortlist = {shortlist.bind(this)}
                                     closeModal={this.closeCollegeModal}
                                 />
                             </> : null

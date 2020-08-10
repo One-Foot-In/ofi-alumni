@@ -40,7 +40,6 @@ export default class CollegeShortlistModal extends Component {
         })
     }
 
-    // getCollegeInput(selection, isNew) {
     getCollegeInput(selection) {
         if (selection) {
             this.setState({
@@ -73,7 +72,7 @@ export default class CollegeShortlistModal extends Component {
         })
     }
 
-    findDuplicate = (newCollege) => {
+    isDuplicateCollegeEntry = (newCollege) => {
         return this.props.collegeShortlist.some(college => 
             (college.name + " (" + this.state.country + ")").localeCompare(newCollege) === 0);
     }
@@ -90,18 +89,19 @@ export default class CollegeShortlistModal extends Component {
             }
             try {
                 const result = await makeCall(payload, `/student/college/update/${this.props.id}`, 'patch')
-                if (this.findDuplicate(this.state.existingCollegeName)) {
-                    this.setState({
-                        submitting: false
-                    }, () => {
-                        swal({
-                            title: "Error!",
-                            text: "Duplicate college.",
-                            icon: "error",
-                        });
-                    })
-                }
-                else if (!result || result.error) {
+                // if (this.isDuplicateCollegeEntry(this.state.existingCollegeName)) {
+                //     this.setState({
+                //         submitting: false
+                //     }, () => {
+                //         swal({
+                //             title: "Error!",
+                //             text: "Duplicate college.",
+                //             icon: "error",
+                //         });
+                //     })
+                // }
+                // else if (!result || result.error) {
+                if (!result || result.error) {
                     this.setState({
                         submitting: false
                     }, () => {
@@ -125,7 +125,9 @@ export default class CollegeShortlistModal extends Component {
                         })
                     })
                     console.log(this.props.collegeShortlist);
-                    this.props.collegeShortlist.push(this.state.existingCollegeName);
+                    // this.props.addToShortlist(this.state.existingCollegeId);
+                    this.props.addToShortlist(this.state.existingCollegeName);
+
                     console.log(this.props.collegeShortlist);
                 }
             } catch (e) {
@@ -140,7 +142,8 @@ export default class CollegeShortlistModal extends Component {
     }
 
     render() {
-        var shortlist = this.props.shortlist;
+        var shortlist = this.props.addToShortlist;
+        // console.log(this.isDuplicateCollegeEntry(this.state.existingCollegeName));
         return (
             <Modal
                 open={this.props.modalOpen}
@@ -184,16 +187,13 @@ export default class CollegeShortlistModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button 
-                        // disabled={!this.state.newCollege && !this.state.existingCollegeId}
-                        onClick={
-                            this.submit
-                            // this.props.shortlist(this.props.collegeShortlist)
-                        }
+                        disabled={this.isDuplicateCollegeEntry(this.state.existingCollegeName)}
+                        onClick={this.submit}
                         >
                         Submit
                     </Button>
                     <Button onClick={() => { 
-                        this.props.shortlist(this.props.collegeShortlist);
+                        // this.props.addToShortlist(this.props.collegeShortlist);
                         this.clearState();
                         this.props.closeModal();
                     }}>

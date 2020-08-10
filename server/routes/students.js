@@ -163,9 +163,7 @@ router.patch('/college/update/:id', passport.authenticate('jwt', {session: false
             college = await collegeSchema.findOne({_id: existingCollegeId})
         }
         let student = await studentSchema.findOne({_id: req.params.id})
-        // if (!student.error) {
-            // student.collegeShortlist.push(college._id)
-        // }
+        student.collegeShortlist.push(college._id);
         
         await student.save()
         res.status(200).send({student: student})
