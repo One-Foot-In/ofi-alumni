@@ -107,7 +107,7 @@ export default class CollegeShortlistModal extends Component {
                     }, () => {
                         swal({
                             title: "Done!",
-                            text: "Your college has been successfully updated!",
+                            text: "Your college shortlist has been successfully updated!",
                             icon: "success",
                         })
                     })
@@ -169,6 +169,7 @@ export default class CollegeShortlistModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button 
+                        variant="primary"
                         disabled={this.isDuplicateCollegeEntry(this.state.existingCollegeName)}
                         onClick={this.submit}
                         >

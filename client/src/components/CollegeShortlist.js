@@ -34,9 +34,8 @@ export default class CollegeShortlist extends Component {
         let currentCollegeShortlist = this.props.details.collegeShortlist
         currentCollegeShortlist.push(newCollege) 
         this.setState({
-            shortlist: currentCollegeShortlist
+            collegeShortlist: currentCollegeShortlist
         })
-        this.state.collegeShortlist.push(newCollege);
     }
 
     render() {
