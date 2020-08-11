@@ -8,7 +8,7 @@ var companySchema = require('../models/companySchema');
 var majorSchema = require('../models/majorSchema');
 var interestsSchema = require('../models/interestsSchema');
 var COUNTRIES = require("../countries").COUNTRIES
-var actionitemSchema = require("../models/actionItemSchema");
+var actionItemSchema = require("../models/actionItemSchema");
 require('mongoose').Promise = global.Promise
 
 router.get('/countries/', async (req, res, next) => {
@@ -133,8 +133,8 @@ router.get('/colleges/:country', async (req, res) => {
 
 router.get('/actionItems', async (req, res) => {
   try {
-    let actionitems = await actionitemSchema.find()
-    let actionitemsOptions = actionitems.map( actionitem => {
+    let actionItems = await actionItemSchema.find()
+    let actionitemsOptions = actionItems.map( actionitem => {
       return {
         key: actionitem.name,
         value: actionitem._id,

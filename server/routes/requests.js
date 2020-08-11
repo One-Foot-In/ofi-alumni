@@ -5,7 +5,7 @@ var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
 var newsSchema = require('../models/newsSchema');
-var actionItemsSchema = require('../models/actionItemSchema')
+var actionItemSchema = require('../models/actionItemSchema')
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendNewRequestEmail = require('../routes/helpers/emailHelpers').sendNewRequestEmail
 var sendRequestConfirmedEmail = require('../routes/helpers/emailHelpers').sendRequestConfirmedEmail
@@ -325,14 +325,14 @@ router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {sessio
 
 const generateNewAndExistingActionItems = async (existingActionItems, newActionItems) => {
     const existingActionItemsIds = existingActionItems.map(actionItem => actionItem.value).flat()
-    let existingActionItemsRecords = await actionItemsSchema.find().where('_id').in(existingActionItemsIds).exec()
+    let existingActionItemsRecords = await actionItemSchema.find().where('_id').in(existingActionItemsIds).exec()
     // create action itmes added
     if (newActionItems.length) {
         for (let i = 0; i < newActionItems.length; i++) {
             // check to see if action items name already exists
-            let actionItemsExists = await interestsSchema.find({name: newInterests[i].value})
+            let actionItemsExists = await actionItemSchema.find({name: newActionItems[i].value})
             if (!actionItemsExists.length) {
-                var newActionItemCreated = new actionItemsSchema({
+                var newActionItemCreated = new actionItemSchema({
                     name: newActionItems[i].value
                 })
                 await newActionItemCreated.save()
@@ -363,10 +363,11 @@ router.patch('/actionItems/:id/', passport.authenticate('jwt', {session: false})
         let requestId = req.body.requestId;
         let request = await requestSchema.findById(requestId);
         const existingActionItems = req.body.existingActionItems
-        const newActionItems = []
-        let actionItemsToAdd = await generateNewAndExistingActionItems(existingActionItems, newActionItems)
+        const newActionItems = req.body.newActionItems || []
+        let actionItemsToAdd = await generateNewAndExistingActionItems(existingActionItems, newActionItems);
+        console.log("To add: ",actionItemsToAdd);
         request.actionItems = getUniqueActionItems([...request.actionItems, ...actionItemsToAdd])
-        await request.save()
+        await request.save();
         res.status(200).send({message: "Successfully added action iems"})
     } catch (e) {
         console.log("Error: actionitems/", e);

@@ -634,18 +634,19 @@ class RequestCards extends Component {
     async submitActionItems() {
         let requests = await makeCall({
             requestId: this.state.requestDetails._id,
-            existingActionItems: this.state.existingActionItems
+            existingActionItems: this.state.existingActionItems,
+            newActionItems: this.state.newActionItems
         }, `/request/actionItems/${this.state}/`, 'patch')
         if (!requests || requests.error) {
             swal({
                 title: "Error!",
-                text: "There was an error updating this request, please try again.",
+                text: "The action items for " + this.state.requestDetails.student.name +  " were not updated, please try again.",
                 icon: "error",
             });
         } else {
             swal({
                 title: "Done!",
-                text: "Successfully updated this request!",
+                text: "Successfully updated action items for " +  this.state.requestDetails.student.name + ".",
                 icon: "success"
             })
         }
@@ -708,7 +709,9 @@ class RequestCards extends Component {
                                 />
                             </Grid.Column>
                             <Grid.Column>
-                                Please select up to 3 action items for {this.state.requestDetails.student.name}
+                                <Modal.Description> 
+                                    Please select up to 3 action items for {this.state.requestDetails.student.name} 
+                                </Modal.Description>
                                 <PooledMultiSelectDropdown 
                                  allowAddition='true'
                                  endpoint={`/drop/actionItems`}
