@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Search, Pagination, Grid, Segment, Button, Dropdown, Checkbox, Label } from 'semantic-ui-react'
 import { makeCall } from '../../apis';
 import MergeModal from './MergeModal'
-import NewSchoolModal from './NewSchoolModal'
+import NewInstitutionModal from './NewInstitutionModal'
 
 export default function CollegesList(props) {
     const [allColleges, setAllColleges] = useState([])
@@ -17,7 +17,7 @@ export default function CollegesList(props) {
     const [filter, setFilter] = useState('all')
     const [secondaryFilter, setSecondaryFilter] = useState('')
     const [mergeModalOpen, setMergeModalOpen] = useState(false)
-    const [newSchoolModalOpen, setNewSchoolModalOpen] = useState(false)
+    const [newInstitutionModalOpen, setNewInstitutionModalOpen] = useState(false)
 
     const pageSize = 6;
 
@@ -50,13 +50,13 @@ export default function CollegesList(props) {
     
     //Mounting
     useEffect(() => {
-        if(!newSchoolModalOpen) {
+        if(!newInstitutionModalOpen) {
             makeCall({}, '/admin/allColleges/' + props.userDetails._id, 'get')
                 .then((res) => {
                     setAllColleges(res.colleges)
                 })
         }
-    }, [props, newSchoolModalOpen]);
+    }, [props, newInstitutionModalOpen]);
 
     //Setting up display post API calls
     useEffect(() => {
@@ -220,10 +220,10 @@ export default function CollegesList(props) {
 
     return(
         <div>
-            <NewSchoolModal 
+            <NewInstitutionModal 
                 type={"COLLEGE"}
-                modalOpen={newSchoolModalOpen}
-                toggleModal={() => setNewSchoolModalOpen(false)}
+                modalOpen={newInstitutionModalOpen}
+                toggleModal={() => setNewInstitutionModalOpen(false)}
                 userId={props.userDetails._id}
             />
             {mergeModalOpen && 
@@ -258,7 +258,7 @@ export default function CollegesList(props) {
             }
             <Button
                 primary
-                onClick={() => setNewSchoolModalOpen(true)}
+                onClick={() => setNewInstitutionModalOpen(true)}
                 fluid
             >
                 Add New College
