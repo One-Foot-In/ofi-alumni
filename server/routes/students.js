@@ -155,8 +155,6 @@ router.patch('/interests/add/:id', async (req, res, next) => {
 
 router.patch('/college/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        // find or create College
-        // const collegeCountry = req.body.collegeCountry
         let existingCollegeId = req.body.existingCollegeId
         var college
         if (existingCollegeId) {
@@ -164,6 +162,7 @@ router.patch('/college/update/:id', passport.authenticate('jwt', {session: false
         }
         let student = await studentSchema.findOne({_id: req.params.id})
         student.collegeShortlist.push(college._id);
+        student.markModified('collegeShortlist');
         
         await student.save()
         res.status(200).send({student: student})

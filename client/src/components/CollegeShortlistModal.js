@@ -89,18 +89,6 @@ export default class CollegeShortlistModal extends Component {
             }
             try {
                 const result = await makeCall(payload, `/student/college/update/${this.props.id}`, 'patch')
-                // if (this.isDuplicateCollegeEntry(this.state.existingCollegeName)) {
-                //     this.setState({
-                //         submitting: false
-                //     }, () => {
-                //         swal({
-                //             title: "Error!",
-                //             text: "Duplicate college.",
-                //             icon: "error",
-                //         });
-                //     })
-                // }
-                // else if (!result || result.error) {
                 if (!result || result.error) {
                     this.setState({
                         submitting: false
@@ -125,7 +113,6 @@ export default class CollegeShortlistModal extends Component {
                         })
                     })
                     console.log(this.props.collegeShortlist);
-                    // this.props.addToShortlist(this.state.existingCollegeId);
                     this.props.addToShortlist(this.state.existingCollegeName);
 
                     console.log(this.props.collegeShortlist);
@@ -143,7 +130,6 @@ export default class CollegeShortlistModal extends Component {
 
     render() {
         var shortlist = this.props.addToShortlist;
-        // console.log(this.isDuplicateCollegeEntry(this.state.existingCollegeName));
         return (
             <Modal
                 open={this.props.modalOpen}
@@ -193,7 +179,6 @@ export default class CollegeShortlistModal extends Component {
                         Submit
                     </Button>
                     <Button onClick={() => { 
-                        // this.props.addToShortlist(this.props.collegeShortlist);
                         this.clearState();
                         this.props.closeModal();
                     }}>
