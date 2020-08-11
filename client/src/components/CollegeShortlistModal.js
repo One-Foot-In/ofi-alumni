@@ -99,12 +99,11 @@ export default class CollegeShortlistModal extends Component {
                             icon: "error",
                         });
                     })
+                    this.props.closeModal();
                 } 
-                
                 else {
                     this.setState({
                         submitting: false,
-                        goodInput: true
                     }, () => {
                         swal({
                             title: "Done!",
@@ -112,10 +111,8 @@ export default class CollegeShortlistModal extends Component {
                             icon: "success",
                         })
                     })
-                    console.log(this.props.collegeShortlist);
                     this.props.addToShortlist(this.state.existingCollegeName);
-
-                    console.log(this.props.collegeShortlist);
+                    this.props.closeModal();
                 }
             } catch (e) {
                 this.setState({
@@ -125,7 +122,6 @@ export default class CollegeShortlistModal extends Component {
                 })
             }
         })
-        this.props.closeModal()
     }
 
     render() {
