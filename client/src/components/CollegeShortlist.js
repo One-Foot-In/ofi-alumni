@@ -65,7 +65,7 @@ export default class CollegeShortlist extends Component {
                     <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
                     <Card.Description>Colleges: {details.collegeShortlist.map(e => 
-                        <li>{e.name}</li> || <li>{e}</li>) || 'Unavailable' }
+                        <li key={e.id}>{e.name}</li> || <li>{e}</li>) || 'Unavailable' }
                         {
                             !isViewOnly ? 
                             <>
