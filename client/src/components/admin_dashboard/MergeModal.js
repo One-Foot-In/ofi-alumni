@@ -24,7 +24,7 @@ export default function MergeModal(props) {
                 props.toggleModal()
             })
     }
-
+ 
     return(
         <Modal open={props.modalOpen} onClose={props.toggleModal} closeIcon>
             <Modal.Header>Merge Selected Options:</Modal.Header>

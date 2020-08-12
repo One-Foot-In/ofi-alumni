@@ -49,7 +49,7 @@ router.get('/allInterests/:adminId', passport.authenticate('jwt', {session: fals
         let dbData = await interestsSchema.find({})
         res.status(200).send({'interests': dbData})       
     } catch (e) {
-        console.log('admin/allStudents error' + e);
+        console.log('admin/allStudents error: ' + e);
         res.status(500).send({'admin/allStudents error' : e})
     }
 });

@@ -29,7 +29,7 @@ const searchOptions = [
     },
     {
         key: 'Interest',
-        text: 'Interest',
+        text: 'In·terest',
         value: 'interest'
     }
 ]
@@ -43,7 +43,7 @@ export default class DataManagement extends Component {
             allInterests : [],
             checkedInterests : [],
             sortedInterests : [],
-            display : [],
+            display : [],      
             search : '',  
             currPage : 1,
             pageSize : 0,
@@ -55,15 +55,19 @@ export default class DataManagement extends Component {
         this.handlePaginationChange =  this.handlePaginationChange.bind(this)
     }
 
-    getInterests(){
-        makeCall({}, '/admin/allInterests/' + this.props.userDetails._id, 'get')
-        .then((res) =>{
-            this.setState(
-                {allInterests : res.interests})
-        })
+    async getInterests(){
+        // makeCall({}, '/admin/allInterests/' + this.props.userDetails._id, 'get')
+        // .then((res) =>{
+        //     this.setState(
+        //         {allInterests : res.interests})
+        // })
+        let res = await  makeCall({},'/admin/allInterests/' + this.props.userDetails._id, 'get')
+        this.setState({allInterests : res.interests})
     };
 
-    componentWillMount(){
+    
+
+    componentDidßMount(){
         this.getInterests();
         let items = this.state.allInterests;
         let sortedInterests = items.sort( (a,b) => {
@@ -97,7 +101,7 @@ export default class DataManagement extends Component {
                 <Card.Content>
                     <Card.Header>
                     <Grid>
-                        <Grid.Row columns={2}>
+                        <Grid.Row columns={1}>
                             <Grid.Column>{interset.name}</Grid.Column>
                         </Grid.Row>
                     </Grid>
