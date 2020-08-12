@@ -365,7 +365,6 @@ router.patch('/actionItems/:id/', passport.authenticate('jwt', {session: false})
         const existingActionItems = req.body.existingActionItems
         const newActionItems = req.body.newActionItems || []
         let actionItemsToAdd = await generateNewAndExistingActionItems(existingActionItems, newActionItems);
-        console.log("To add: ",actionItemsToAdd);
         request.actionItems = getUniqueActionItems([...request.actionItems, ...actionItemsToAdd])
         await request.save();
         res.status(200).send({message: "Successfully added action iems"})
