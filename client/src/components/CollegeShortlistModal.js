@@ -88,7 +88,7 @@ export default class CollegeShortlistModal extends Component {
                 existingCollegeName: this.state.existingCollegeName
             }
             try {
-                const result = await makeCall(payload, `/student/college/update/${this.props.id}`, 'patch')
+                const result = await makeCall(payload, `/student/collegeShortlist/update/${this.props.id}`, 'patch')
                 if (!result || result.error) {
                     this.setState({
                         submitting: false
@@ -169,7 +169,7 @@ export default class CollegeShortlistModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button 
-                        variant="primary"
+                        primary
                         disabled={this.isDuplicateCollegeEntry(this.state.existingCollegeName)}
                         onClick={this.submit}
                         >

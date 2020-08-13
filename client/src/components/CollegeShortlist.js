@@ -62,19 +62,23 @@ export default class CollegeShortlist extends Component {
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
                     <Card fluid>
                     <Card.Content>
-                    <Card.Header>{details.name || 'Unavailable'}</Card.Header>
-                    <Card.Description>Colleges: {details.collegeShortlist.map(e => 
-                        <li key={e.id}>{e.name}</li> || <li>{e}</li>) || 'Unavailable' }
+                    <Card.Header>{`${details.name}'s College Picks`}</Card.Header>
+                    { !details.collegeShortlist.length ?
+                    <Card.Description> Add colleges to begin your college shortlist!</Card.Description> : 
+                        <Card.Description>Colleges: {details.collegeShortlist.map(e => 
+                        <li key={e.id}>{e.name}</li> ) } </Card.Description> }
+                        <Card.Description>               
                         {
                             !isViewOnly ? 
                             <>
                                 <Button
                                     style={{'margin': '0 0 2px 2px'}}
                                     icon
-                                    inverted
+                                    color="blue"
+                                    type="button"
                                     size="mini"
                                     onClick={this.openCollegeModal}
-                                >
+                                >   Add College  
                                     <Icon name='pencil' color="blue"/>
                                 </Button>
                                 <CollegeShortlistModal
@@ -86,7 +90,8 @@ export default class CollegeShortlist extends Component {
                                 />
                             </> : null
                         }
-                    </Card.Description>
+                    </Card.Description> 
+                    
                     </Card.Content>
                     </Card>
                 </div>

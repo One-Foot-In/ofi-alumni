@@ -153,7 +153,7 @@ router.patch('/interests/add/:id', async (req, res, next) => {
     }
 })
 
-router.patch('/college/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+router.patch('/collegeShortlist/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let existingCollegeId = req.body.existingCollegeId
         var college = await collegeSchema.findOne({_id: existingCollegeId})
