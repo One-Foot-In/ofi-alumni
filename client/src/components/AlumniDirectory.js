@@ -12,8 +12,8 @@ const searchOptions = [
         value: 'all'
     },
     {
-        key: 'Location',
-        text: 'Location',
+        key: 'Country',
+        text: 'Country',
         value: 'country'
     },
     {
@@ -66,7 +66,7 @@ export default class AlumniDirectory extends Component {
             isLoading: false,
             value: '',
             totalPages: 0,
-            entries:[],
+            entries: [],
             gradYears: [],
             allText: [],
             topicsArray: [],
@@ -110,7 +110,7 @@ export default class AlumniDirectory extends Component {
         let gradYears = [];
         let allText = [];
         let topicsArray = [];
-        let allTopicsSet = new Set()
+        let allTopicsSet = new Set();
         let display = [];
         let i = 0, j = 0;
 
@@ -124,7 +124,7 @@ export default class AlumniDirectory extends Component {
             }
 
             if (!allTopicsSet.has((topicObj) => {return post.topics.includes(topicObj,'value')})){
-                for( j = 0; j < post.topics.length; j++) {
+                for(j = 0; j < post.topics.length; j++) {
                     allTopicsSet.add({
                         key: post.topics[j],
                         text: post.topics[j],
