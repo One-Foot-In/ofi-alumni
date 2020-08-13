@@ -5,7 +5,7 @@ import { makeCall } from "../apis";
 import swal from "sweetalert";
 
 /*
-    Modal makes a PATCH call to update alumni information
+    Modal makes a PATCH call to update college shortlist information
     props:
     - modalOpen
     - closeModal
