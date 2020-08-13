@@ -241,7 +241,7 @@ export default class Header extends Component {
     }
 
     renderLogo() {
-        let imageLink = this.props.loggedIn && this.state.currRole !== 'ADMIN' ? 
+        let imageLink = this.props.loggedIn && this.state.currRole !== 'ADMIN' && this.state.currRole !== 'COLLEGE_REP' ? 
             this.props.schoolLogo : require('./logo.png');
         return (
                 <Image centered src={imageLink} size='small'/>                

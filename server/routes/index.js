@@ -7,10 +7,12 @@ var crypto = require('crypto-random-string');
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 var adminSchema = require('../models/adminSchema');
+var collegeRepSchema = require('../models/collegeRepSchema');
 var userSchema = require('../models/userSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
 require('dotenv').config();
+var path = require('path');
 var sendPasswordChangeEmail = require('./helpers/emailHelpers').sendPasswordChangeEmail
 var sendTemporaryPasswordEmail = require('./helpers/emailHelpers').sendTemporaryPasswordEmail
 
@@ -22,7 +24,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret_sauce';
 const JWT_EXPIRATION_MS = process.env.JWT_EXPIRATION_MS || '25000000'; // > 6 hrs;
 
 router.get('/', function(req, res, next) {
-  res.status(200).send("This is the index page!");
+  let filepath = path.join(__dirname, '../build', 'index.html')
+  res.sendFile(filepath);
 });
 
 router.get('/logout', (req, res, next) => {
@@ -91,6 +94,17 @@ router.post('/login', (req, res, next) => {
                 {
                   role: userRole,
                   details: admin
+                }
+              )
+            } else if (userRole.includes("COLLEGE_REP")) {
+              const collegeRep = await collegeRepSchema.findOne({user: user._id});
+              payload.id = collegeRep._id
+              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              res.cookie('jwt', cookie);
+              res.status(200).send(
+                {
+                  role: userRole,
+                  details: collegeRep
                 }
               )
             } else {

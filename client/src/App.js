@@ -18,6 +18,7 @@ import AlumniNetworking from './components/AlumniNetworking'
 import CollegeShortlist from './components/CollegeShortlist';
 import ProfileList from './components/admin_dashboard/ProfileList';
 import CollegesList from './components/admin_dashboard/CollegesList';
+import SchoolsList from './components/admin_dashboard/SchoolsList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
 
@@ -26,6 +27,7 @@ import * as actions from './redux/actions'
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
 export const ADMIN = "ADMIN"
+export const COLLEGE_REP = "COLLEGE_REP"
 
 /*
   STORE SETUP
@@ -199,6 +201,27 @@ const studentNavBarItems = (isModerator) => {
   return navBarItems;
 }
 
+const collegeRepNavBarItems = () => {
+  let navBarItems = [
+    {
+      id: 'announcements',
+      name: 'Announcements',
+      navLink: '/'
+    },
+    {
+      id: 'profile',
+      name: 'Profile',
+      navLink: '/profile'
+    },
+    {
+      id: 'shortlists',
+      name: 'Shortlists',
+      navLink: '/shortlists'
+    }
+  ]
+  return navBarItems;
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -207,6 +230,7 @@ class App extends Component {
       fetchingAuth: true,
       approved: false,
       role: null,
+      roleChanged: false,
       schoolId: '',
       userDetails: {}
     };
@@ -267,12 +291,19 @@ class App extends Component {
 
   async fetchProfile(role, id) {
     let result;
-    if (role === 'STUDENT') {
-      result = await makeCall({}, ('/student/one/'+id), 'get')
-    } else if (role === 'ALUMNI') {
-      result = await makeCall({}, ('/alumni/one/'+id), 'get')
-    } else if (role === 'ADMIN') {
-      result = await makeCall({}, ('/admin/one/'+id), 'get')
+    switch (role) {
+      case STUDENT:
+        result = await makeCall({}, ('/student/one/'+id), 'get');
+        break;
+      case ALUMNI:
+        result = await makeCall({}, ('/alumni/one/'+id), 'get')
+        break;
+      case ADMIN:
+        result = await makeCall({}, ('/admin/one/'+id), 'get')
+        break;
+      case COLLEGE_REP:
+        result = await makeCall({}, ('/collegeRep/one/'+id), 'get')
+        break;
     }
     return result.result
   }
@@ -300,7 +331,12 @@ class App extends Component {
 
   liftRole(role) {
     this.setState({
-      role: role
+      role: role,
+      roleChanged: true
+    }, () => {
+      this.setState({
+        roleChanged: false
+      })
     })
   }
 
@@ -619,7 +655,59 @@ class App extends Component {
                           navItems={adminNavBarItems()}
                           activeItem={'schools'}
                       />
-                      <p>Schools</p>
+                      <SchoolsList
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+        </>
+        )
+      case COLLEGE_REP:
+        return (
+          <>
+          <Route exact path={`/`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={collegeRepNavBarItems()}
+                          activeItem={'announcements'}
+                      />
+                      <p>Announcements</p>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/profile`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={collegeRepNavBarItems()}
+                          activeItem={'profile'}
+                      />
+                      <p>Profile</p>
+                  </> :
+                    <Redirect to={"/login"}/>
+                }
+          />
+          <Route exact path={`/shortlists`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={collegeRepNavBarItems()}
+                          activeItem={'shortlists'}
+                      />
+                      <p>Shortlists</p>
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -722,6 +810,9 @@ class App extends Component {
               {this.renderScreens(this.state.role)}
             </Container>
             </>
+          }
+          {this.state.roleChanged && 
+            <Redirect to="/"/>
           }
         </Router>
     )

@@ -15,6 +15,7 @@ var indexRouter = require('./routes/index');
 var alumniRouter = require('./routes/alumni');
 var studentsRouter = require('./routes/students');
 var adminRouter = require('./routes/admin');
+var collegeRepRouter = require('./routes/collegeRep');
 var userRouter = require('./routes/user');
 var dropdownRouter = require('./routes/dropdown');
 var utilRouter = require('./routes/util');
@@ -32,14 +33,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 /* 
  * If testDB is true, uses a locally hosted mongoDB
  * Otherwise, it will use a cloud hosted DB set in the .env file
  * MongoDB must be installed
  */
-const testDB = true;
+const testDB = (process.env.DEV_MODE.toLowerCase() === "true");
 
 /* Mongoose Setup */
 const mongoose = require('mongoose');
@@ -119,6 +120,8 @@ async function main() {
 
     app.use('/admin/', adminRouter);
 
+    app.use('/collegeRep/', collegeRepRouter);
+
     app.use('/user/', userRouter);
 
     app.use('/drop/', dropdownRouter);
@@ -128,6 +131,12 @@ async function main() {
     app.use('/image/', imageRouter);
 
     app.use('/conversations/', conversationsRouter);
+
+    // app will cause the frontend to be served
+    // for any end-point path that it cannot resolve
+    app.get('*', (req, res) => {
+       res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
+    })
 
     // catch 404 and forward to error handler
     app.use(function(req, res, next) {

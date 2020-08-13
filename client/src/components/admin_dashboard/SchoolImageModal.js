@@ -1,24 +1,21 @@
 import React, { Component } from 'react';
 import {Button, Modal, Form} from 'semantic-ui-react';
 import swal from "sweetalert";
-import { makeCallWithImage } from "../apis";
-
-const BACKEND = process.env.REACT_APP_BACKEND || "http://localhost:5000"
+import { makeCallWithImage } from "../../apis";
 
 /*
 props:
     - modalOpen: boolean
-    - close: ()
-    - getInput: ()
-    - email
+    - closeModal: ()
+    - isAlumni: boolean
     - id
 */
-export default class ImageSelectModal extends Component {
+export default class ImageUpdateModal extends Component {
     constructor(props){
         super(props)
         this.state = {
-            imageFile: null,
-            loading: false
+            submitting: false,
+            imageFile: null
         }
         this.selectFile = this.selectFile.bind(this)
         this.submit = this.submit.bind(this)
@@ -48,23 +45,22 @@ export default class ImageSelectModal extends Component {
     async submit(e) {
         e.preventDefault()
         this.setState({loading: true})
-        const result = await makeCallWithImage({email: this.props.email, imageFile: this.state.imageFile}, '/image/add', 'post');
+        const result = await makeCallWithImage({schoolId: this.props.id, adminId: this.props.userId, imageFile: this.state.imageFile}, '/image/school', 'post');
         if (!result || result.error) {
             this.setState({
                 loading: false
-             }, () => {
-                 swal({
-                     title: "Error!",
-                     text: `Something went wrong, please try uploading again!`,
-                     icon: "error",
-                 });
-             });
+            }, () => {
+                swal({
+                    title: "Error!",
+                    text: `Something went wrong, please try uploading again!`,
+                    icon: "error",
+                });
+            });
         } else {
             this.setState({
                 loading: false
             }, () => {
-                this.props.getInput(result.imageUrl)
-                this.props.close()
+                this.props.closeModal()
             }); 
         }
     }
@@ -74,12 +70,12 @@ export default class ImageSelectModal extends Component {
             <Modal
                 open={this.props.modalOpen}
             >
-                <Modal.Header>Upload a profile image</Modal.Header>
+                <Modal.Header>Upload a new logo for {this.props.school}</Modal.Header>
                 <Modal.Content>
                     <Form>
                         <Form.Field>
-                            <label>Choose profile photo</label>
-                            <input type="file" onChange={this.selectFile} class="ui huge yellow center floated button"/>
+                            <label>Choose logo</label>
+                            <input type="file" onChange={this.selectFile} className="ui huge yellow center floated button"/>
                         </Form.Field>
                     </Form>
                 </Modal.Content>
@@ -92,7 +88,7 @@ export default class ImageSelectModal extends Component {
                     >
                         Upload
                     </Button>
-                    <Button onClick={this.props.close}>
+                    <Button onClick={this.props.closeModal}>
                         Close
                     </Button>
                 </Modal.Actions>
