@@ -40,6 +40,12 @@ const searchOptions = [
         key: 'Graduation Year',
         text: 'Graduation Year',
         value: 'gradYear'
+    },
+    {
+        key: 'Topics of Consultancy',
+        text: 'Topics of Consultancy',
+        value: 'topics'
+
     }
 ]
 
@@ -63,6 +69,7 @@ export default class AlumniDirectory extends Component {
             entries:[],
             gradYears: [],
             allText: [],
+            topicsArray: [],
             display: [],
             numResults: 0,
             filter: 'all',
@@ -102,32 +109,51 @@ export default class AlumniDirectory extends Component {
     populateSearchDropdownStates(entries) {
         let gradYears = [];
         let allText = [];
+        let topicsArray = [];
+        let allTopicsSet = new Set()
         let display = [];
-        let i = 0;
+        let i = 0, j = 0;
+
         for (let post of entries) {
-            if(!gradYears.find(year => year['value'] === post.gradYear)) {
+            if (!gradYears.find(year => year['value'] === post.gradYear)) {
                 gradYears.push({
                     key: post.gradYear,
                     text: post.gradYear,
                     value: post.gradYear
                 });
             }
+
+            if (!allTopicsSet.has((topicObj) => {return post.topics.includes(topicObj,'value')})){
+                for( j = 0; j < post.topics.length; j++) {
+                    allTopicsSet.add({
+                        key: post.topics[j],
+                        text: post.topics[j],
+                        value: post.topics[j]
+                    });
+                }
+            }
+
             allText.push(
-                        post.city + ' '
+                        post.collegeName + ' '
+                         + post.city + ' '
                          + post.country + ' '
                          + post.jobTitleName + ' '
                          + post.companyName + ' '
                          + post.name + ' '
-                         + post.gradYear);
+                         + post.gradYear + ' '
+                         + post.topics);
+            
             display.push(this.constructProfile(post, i));
             i++;
         }
+        topicsArray = Array.from(allTopicsSet)
+
         gradYears.sort(function(a,b){return a.value-b.value})
-        this.setState({
-                        gradYears: gradYears,
+        this.setState({ gradYears: gradYears,
                         allText: allText,
+                        topicsArray: topicsArray,
                         display: display
-                     })
+                        })
     }
 
     constructProfile(post, i) {
@@ -208,6 +234,7 @@ export default class AlumniDirectory extends Component {
         let searchPattern = new RegExp(value, 'i');
         let display = [];
         let i = 0;
+
         for (let post of this.state.entries) {
             if (this.state.filter !== 'all' && post[this.state.filter]) {
                 if (post[this.state.filter].toString().match(searchPattern) !== null) {
@@ -238,6 +265,8 @@ export default class AlumniDirectory extends Component {
     handleDropdownChange = (e, { name, value }) => {
         if (name === 'year') {
             this.search(value)
+        } else if (name == 'topics') {
+            this.search(value)
         }
         this.setState({ [name]: value })
     }
@@ -257,8 +286,10 @@ export default class AlumniDirectory extends Component {
             filter,
             numResults,
             gradYears,
+            topicsArray,
             display,
             value,
+            allText,
         } = this.state
 
         /* results row */
@@ -275,7 +306,7 @@ export default class AlumniDirectory extends Component {
 
         /* Search Area */
         let searchRow;
-        if (filter !== 'gradYear') {
+        if (filter !== 'gradYear' && filter !== 'topics') {
             searchRow = (
                 <Grid.Row columns={2}>
                 <Grid.Column>
@@ -294,6 +325,33 @@ export default class AlumniDirectory extends Component {
                         selection
                         options={searchOptions}
                         name='filter'
+                        onChange={this.handleDropdownChange}
+                    />
+                </Grid.Column>
+                </Grid.Row>
+            )
+        } else if(filter == 'topics') {
+            searchRow = (
+                <Grid.Row columns={2}>
+                <Grid.Column>
+                        <Dropdown
+                            button
+                            fluid
+                            floating
+                            search
+                            label='Topics Of Consultancy:'
+                            name='topics'
+                            options={topicsArray}
+                            onChange={this.handleDropdownChange}
+                        />
+                </Grid.Column>
+                <Grid.Column>
+                    <Dropdown
+                        placeholder='Search By:'
+                        floating
+                        selection
+                        name='filter'
+                        options={searchOptions}
                         onChange={this.handleDropdownChange}
                     />
                 </Grid.Column>
