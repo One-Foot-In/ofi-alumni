@@ -4,11 +4,12 @@
   "scripts": {
     "client": "cd client && yarn start",
     "server": "cd server && npm run start",
-    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
+    "build": "cd client && npm run build"
   },
   "dependencies": {
-    "body-parser": "^1.18.3",
-    "express": "^4.16.4"
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
   },
   "devDependencies": {
     "concurrently": "^4.0.1"

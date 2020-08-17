@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Search, Pagination, Grid, Segment, Button, Dropdown, Checkbox, Label } from 'semantic-ui-react'
 import { makeCall } from '../../apis';
 import MergeModal from './MergeModal'
+import NewInstitutionModal from './NewInstitutionModal'
 
 export default function CollegesList(props) {
     const [allColleges, setAllColleges] = useState([])
@@ -16,6 +17,7 @@ export default function CollegesList(props) {
     const [filter, setFilter] = useState('all')
     const [secondaryFilter, setSecondaryFilter] = useState('')
     const [mergeModalOpen, setMergeModalOpen] = useState(false)
+    const [newInstitutionModalOpen, setNewInstitutionModalOpen] = useState(false)
 
     const pageSize = 6;
 
@@ -48,11 +50,13 @@ export default function CollegesList(props) {
     
     //Mounting
     useEffect(() => {
-       makeCall({}, '/admin/allColleges/' + props.userDetails._id, 'get')
-            .then((res) => {
+        if(!newInstitutionModalOpen) {
+            makeCall({}, '/admin/allColleges/' + props.userDetails._id, 'get')
+                .then((res) => {
                     setAllColleges(res.colleges)
                 })
-        }, [props]);
+        }
+    }, [props, newInstitutionModalOpen]);
 
     //Setting up display post API calls
     useEffect(() => {
@@ -216,6 +220,12 @@ export default function CollegesList(props) {
 
     return(
         <div>
+            <NewInstitutionModal 
+                type={"COLLEGE"}
+                modalOpen={newInstitutionModalOpen}
+                toggleModal={() => setNewInstitutionModalOpen(false)}
+                userId={props.userDetails._id}
+            />
             {mergeModalOpen && 
                 <MergeModal
                     viewing={'COLLEGES'}
@@ -234,6 +244,7 @@ export default function CollegesList(props) {
                 </Label>
             }
             {mergeButtonActive && 
+                <>
                 <Button 
                     primary 
                     fluid
@@ -242,7 +253,16 @@ export default function CollegesList(props) {
                 >
                     Merge Colleges
                 </Button>
+                <br/>
+                </>
             }
+            <Button
+                primary
+                onClick={() => setNewInstitutionModalOpen(true)}
+                fluid
+            >
+                Add New College
+            </Button>
             <br/>
             <Grid centered>
                 <Grid.Row>
