@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
 import SchoolImageModal from './SchoolImageModal';
-import NewSchoolModal from './NewSchoolModal';
+import NewInstitutionModal from './NewInstitutionModal';
 import { makeCall } from '../../apis';
 
 export default function SchoolsList(props) {
@@ -11,7 +11,7 @@ export default function SchoolsList(props) {
     const [pages, setPages] = useState(0)
     const [currPage, setCurrPage] = useState(1)
     const [search, setSearch] = useState('')
-    const [newSchoolModalOpen, setNewSchoolModalOpen] = useState(false)
+    const [newInstitutionModalOpen, setNewInstitutionModalOpen] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [currSchoolId, setCurrSchoolId] = useState('')
     const [currSchoolName, setCurrSchoolName] = useState('')
@@ -20,13 +20,13 @@ export default function SchoolsList(props) {
 
     //Mounting
     useEffect(() => {
-        if(!newSchoolModalOpen) {
+        if(!newInstitutionModalOpen) {
             makeCall({}, '/admin/allSchools/' + props.userDetails._id, 'get')
                 .then((res) => {
                     setAllSchools(res.schools)
                 })
         }
-    }, [props, newSchoolModalOpen]);
+    }, [props, newInstitutionModalOpen]);
 
     //Setting up display post API calls
     useEffect(() => {
@@ -152,9 +152,10 @@ export default function SchoolsList(props) {
                     closeModal={() => setImageModalOpen(!setImageModalOpen)}
             />
 
-            <NewSchoolModal 
-                modalOpen={newSchoolModalOpen}
-                toggleModal={() => setNewSchoolModalOpen(false)}
+            <NewInstitutionModal 
+                type={"SCHOOL"}
+                modalOpen={newInstitutionModalOpen}
+                toggleModal={() => setNewInstitutionModalOpen(false)}
                 userId={props.userDetails._id}
             />
             {searchBar}
@@ -162,7 +163,7 @@ export default function SchoolsList(props) {
             <br/>
             <Button
                 primary
-                onClick={() => setNewSchoolModalOpen(true)}
+                onClick={() => setNewInstitutionModalOpen(true)}
                 fluid
             >
                 Add New School
