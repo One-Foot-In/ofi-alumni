@@ -46,6 +46,11 @@ const searchOptions = [
         text: 'Topics of Consultancy',
         value: 'topics'
 
+    },
+    {
+        key: 'Interests',
+        text: 'Interests',
+        value: 'interests'
     }
 ]
 
@@ -70,6 +75,7 @@ export default class AlumniDirectory extends Component {
             gradYears: [],
             allText: [],
             topicsArray: [],
+            interestsArray: [],
             display: [],
             numResults: 0,
             filter: 'all',
@@ -111,6 +117,8 @@ export default class AlumniDirectory extends Component {
         let allText = [];
         let topicsArray = [];
         let allTopicsSet = new Set();
+        let interestsArray = [];
+        let interestsSet = new Set();
         let display = [];
         let i = 0, j = 0;
 
@@ -133,6 +141,16 @@ export default class AlumniDirectory extends Component {
                 }
             }
 
+            if (!interestsSet.has((interestsObj) => {return post.interests.includes(interestsObj,'value')})){
+                for(j = 0; j < post.interests.length; j++) {
+                    interestsSet.add({
+                        key: post.interests[j]._id,
+                        text: post.interests[j].name,
+                        value: post.interests[j]._id
+                    });
+                }
+            }
+
             allText.push(
                         post.collegeName + ' '
                          + post.city + ' '
@@ -146,12 +164,16 @@ export default class AlumniDirectory extends Component {
             display.push(this.constructProfile(post, i));
             i++;
         }
+
         topicsArray = Array.from(allTopicsSet)
+        interestsArray = Array.from(interestsSet)
+        console.log(interestsArray)
 
         gradYears.sort(function(a,b){return a.value-b.value})
         this.setState({ gradYears: gradYears,
                         allText: allText,
                         topicsArray: topicsArray,
+                        interestsArray: interestsArray,
                         display: display
                         })
     }
@@ -287,6 +309,7 @@ export default class AlumniDirectory extends Component {
             numResults,
             gradYears,
             topicsArray,
+            interestsArray,
             display,
             value,
             allText,
@@ -306,7 +329,7 @@ export default class AlumniDirectory extends Component {
 
         /* Search Area */
         let searchRow;
-        if (filter !== 'gradYear' && filter !== 'topics') {
+        if (filter !== 'gradYear' && filter !== 'topics' && filter !== 'interests') {
             searchRow = (
                 <Grid.Row columns={2}>
                 <Grid.Column>
@@ -330,7 +353,7 @@ export default class AlumniDirectory extends Component {
                 </Grid.Column>
                 </Grid.Row>
             )
-        } else if(filter == 'topics') {
+        } else if (filter == 'topics') {
             searchRow = (
                 <Grid.Row columns={2}>
                 <Grid.Column>
@@ -342,6 +365,33 @@ export default class AlumniDirectory extends Component {
                             label='Topics Of Consultancy:'
                             name='topics'
                             options={topicsArray}
+                            onChange={this.handleDropdownChange}
+                        />
+                </Grid.Column>
+                <Grid.Column>
+                    <Dropdown
+                        placeholder='Search By:'
+                        floating
+                        selection
+                        name='filter'
+                        options={searchOptions}
+                        onChange={this.handleDropdownChange}
+                    />
+                </Grid.Column>
+                </Grid.Row>
+            )
+        } else if (filter == 'interests') {
+            searchRow = (
+                <Grid.Row columns={2}>
+                <Grid.Column>
+                        <Dropdown
+                            button
+                            fluid
+                            floating
+                            search
+                            label='Interests:'
+                            name='interests'
+                            options={interestsArray}
                             onChange={this.handleDropdownChange}
                         />
                 </Grid.Column>
