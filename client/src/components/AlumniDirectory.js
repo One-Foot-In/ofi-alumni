@@ -116,7 +116,7 @@ export default class AlumniDirectory extends Component {
         let gradYears = [];
         let allText = [];
         let topicsArray = [];
-        let allTopicsSet = new Set();
+        let topicsSet = new Set();
         let interestsArray = [];
         let interestsSet = new Set();
         let display = [];
@@ -131,25 +131,34 @@ export default class AlumniDirectory extends Component {
                 });
             }
 
-            if (!allTopicsSet.has((topicObj) => {return post.topics.includes(topicObj,'value')})){
-                for(j = 0; j < post.topics.length; j++) {
-                    allTopicsSet.add({
-                        key: post.topics[j],
-                        text: post.topics[j],
-                        value: post.topics[j]
+            let topicsForAlumnus = post.topics;
+            for (let topic in topicsForAlumnus) {
+                if (!topicsSet.has(topic)) {
+                    topicsSet.add({
+                        key: post.topics[topic],
+                        text: post.topics[topic],
+                        value: post.topics[topic]
                     });
                 }
             }
 
-            if (!interestsSet.has((interestsObj) => {return post.interests.includes(interestsObj,'value')})){
-                for(j = 0; j < post.interests.length; j++) {
+            console.log("1. Topics Set: ", topicsSet)
+
+            let interestsForAlumnus = post.interests;
+            let interestStringValuesForAlumnus = interestsForAlumnus.map(interestObj => interestObj.text);
+            
+            for (let interest in interestStringValuesForAlumnus) {
+                if (!interestsSet.has(interest)) {
                     interestsSet.add({
-                        key: post.interests[j]._id,
-                        text: post.interests[j].name,
-                        value: post.interests[j]._id
+                        key: post.interests[interest]._id,
+                        text: post.interests[interest].name,
+                        value: post.interests[interest]._id
+
                     });
                 }
             }
+
+            console.log("2. Interests Set: ", interestsSet)
 
             allText.push(
                         post.collegeName + ' '
@@ -165,9 +174,11 @@ export default class AlumniDirectory extends Component {
             i++;
         }
 
-        topicsArray = Array.from(allTopicsSet)
+        topicsArray = Array.from(topicsSet)
         interestsArray = Array.from(interestsSet)
-        console.log(interestsArray)
+
+        console.log("3. Topics Array: ", topicsArray)
+        console.log("4. Interests Array: ", interestsArray)
 
         gradYears.sort(function(a,b){return a.value-b.value})
         this.setState({ gradYears: gradYears,
@@ -315,6 +326,10 @@ export default class AlumniDirectory extends Component {
             allText,
         } = this.state
 
+
+        console.log("5. Topics Array: ", topicsArray)
+        console.log("6. Interests Array: ", interestsArray)
+
         /* results row */
         let resultsRow;
         if (value !== '') {
@@ -355,6 +370,8 @@ export default class AlumniDirectory extends Component {
             )
         } else if (filter == 'topics') {
             searchRow = (
+                console.log("7. TopicsArray in Render: ", topicsArray),
+
                 <Grid.Row columns={2}>
                 <Grid.Column>
                         <Dropdown
@@ -382,6 +399,8 @@ export default class AlumniDirectory extends Component {
             )
         } else if (filter == 'interests') {
             searchRow = (
+                console.log("8. InterestsArray in Render: ", interestsArray),
+
                 <Grid.Row columns={2}>
                 <Grid.Column>
                         <Dropdown
