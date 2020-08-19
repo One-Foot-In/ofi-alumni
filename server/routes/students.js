@@ -87,7 +87,7 @@ router.post('/', async (req, res, next) => {
 
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        const dbData = await studentSchema.findOne({_id: req.params.id})
+        const dbData = await studentSchema.findOne({_id: req.params.id}).populate('school')
         res.json({'result' : dbData});
     } catch (e) {
         console.log("Error: util#oneStudent", e);
