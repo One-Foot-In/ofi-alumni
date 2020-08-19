@@ -70,8 +70,8 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
 
     let role = ["ALUMNI"];
     if ((Math.random() * 10 + 1) >= 5) role.push("ADMIN");
-    const emailVerified = false
-    const approved = false
+    const emailVerified = true
+    const approved = (Math.random() * 10 + 1) >= 5
     const verificationToken = crypto({length: 16});
     var passwordHash = await bcrypt.hash(password, HASH_COST)
     
@@ -120,8 +120,8 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
     const password = MOCK_PASSWORD;
 
     const role = ["STUDENT"]
-    const emailVerified = false
-    const approved = false
+    const emailVerified = true
+    const approved = (Math.random() * 10 + 1) >= 5
     const verificationToken = crypto({length: 16});
     var passwordHash = await bcrypt.hash(password, HASH_COST)
 

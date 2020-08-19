@@ -21,9 +21,10 @@ export const makeCall = async (payload, api, method) => {
         const resJson = await resolvedRes.json()
         return resJson;
     } else {
+        const resJson = await resolvedRes.json()
         return({
-            error: resolvedRes.error || `Error completing ${api}`,
-            status: resolvedRes.status
+            error: resJson.error || `Error completing ${api}`,
+            status: resJson.status
         });
     }
 }
@@ -52,9 +53,10 @@ export const makeCallWithImage = async (payload, api, method) => {
         const resJson = await resolvedRes.json()
         return resJson;
     } else {
+        const resJson = await resolvedRes.json()
         return({
-            error: resolvedRes.error || `Error completing ${api}`,
-            status: resolvedRes.status
+            error: resJson.error || `Error completing ${api}`,
+            status: resJson.status
         });
     }
 }
