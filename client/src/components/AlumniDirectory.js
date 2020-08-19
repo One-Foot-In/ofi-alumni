@@ -133,11 +133,11 @@ export default class AlumniDirectory extends Component {
 
             let topicsForAlumnus = post.topics;
             for (let topic in topicsForAlumnus) {
-                if (!topicsSet.has(topic)) {
+                if (!topicsSet.has(topicsForAlumnus[topic])) {
                     topicsSet.add({
-                        key: post.topics[topic],
-                        text: post.topics[topic],
-                        value: post.topics[topic]
+                        key: topicsForAlumnus[topic],
+                        text: topicsForAlumnus[topic],
+                        value: topicsForAlumnus[topic]
                     });
                 }
             }
@@ -148,11 +148,11 @@ export default class AlumniDirectory extends Component {
             let interestStringValuesForAlumnus = interestsForAlumnus.map(interestObj => interestObj.text);
             
             for (let interest in interestStringValuesForAlumnus) {
-                if (!interestsSet.has(interest)) {
+                if (!interestsSet.has(interestsForAlumnus[interest])) {
                     interestsSet.add({
-                        key: post.interests[interest]._id,
-                        text: post.interests[interest].name,
-                        value: post.interests[interest]._id
+                        key: interestsForAlumnus[interest]._id,
+                        text: interestsForAlumnus[interest].name,
+                        value: interestsForAlumnus[interest]._id
 
                     });
                 }
