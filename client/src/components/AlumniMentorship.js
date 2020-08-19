@@ -633,10 +633,9 @@ class RequestCards extends Component {
 
     async submitActionItems() {
         let requests = await makeCall({
-            requestId: this.state.requestDetails._id,
             existingActionItems: this.state.existingActionItems,
             newActionItems: this.state.newActionItems
-        }, `/request/actionItems/${this.state}/`, 'patch')
+        }, `/request/actionItems/${this.state.requestDetails._id}/`, 'patch')
         if (!requests || requests.error) {
             swal({
                 title: "Error!",
@@ -726,7 +725,8 @@ class RequestCards extends Component {
                         <Button onClick={this.toggleActionItemModal.bind(this)}>
                             Cancel
                         </Button>
-                        <Button onClick={this.submitActionItems.bind(this)} primary>
+                        <Button onClick={this.submitActionItems.bind(this)} 
+                         disabled = {this.state.existingActionItems || this.state.newActionItems} primary>
                             Submit
                         </Button>
                     </Modal.Actions>
