@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Grid, Button, Modal, Form, Image, Label, Dropdown} from 'semantic-ui-react';
+import {Grid, Button, Modal, Form, Image, Label, Dropdown, Header, Segment} from 'semantic-ui-react';
 import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
 import swal from "sweetalert";
@@ -18,7 +18,7 @@ props:
 - email
 - schoolLogo
 */
-export default class Header extends Component {
+export default class HeaderComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -163,73 +163,48 @@ export default class Header extends Component {
                     </Button>
                 </Modal.Actions>
             </Modal>
-            <Button
-                disabled={this.state.sendingRequest}
-                basic
-                color='yellow'
-                style={
-                    {
-                        'height':'80%', 
-                        'margin': '2px 0 2px 0',
-                        'margin': '0 10px 0 0'
-                    }
-                }
-                onClick={(e) => this.openPasswordModal(e)}
-            >
-                Change Password
-            </Button>
-            <Button
-                basic
-                color='orange'
-                style={
-                    {
-                        'height':'80%', 
-                        'margin': '2px 0 2px 0',
-                        'margin': '0 0 0 10px'
-                    }
-                } 
-                className="ui button" 
-                onClick={this.props.logout}
-            >
-                Log Out
-            </Button>
+            <Button.Group compact vertical>
+                <Button
+                    disabled={this.state.sendingRequest}
+                    color='yellow'
+                    basic
+                    onClick={(e) => this.openPasswordModal(e)}
+                >
+                    Change Password
+                </Button>
+                <br/>
+                <Button
+                    basic
+                    color='orange'
+                    onClick={this.props.logout}
+                >
+                    Log Out
+                </Button>
+            </Button.Group>
+            
         </>
 
         let loggedOutGroup =
-        <>
+        <Button.Group vertical compact>
             <Link to="/register">
                 <Button
                     disabled={this.state.sendingRequest}
                     basic
                     color='yellow'
-                    style={
-                        {
-                            'height':'80%', 
-                            'margin': '2px 0 2px 0',
-                            'margin': '0 10px 0 0'
-                        }
-                    }
                 >
                     Register
                 </Button>
             </Link>
+            <br/>
             <Link to="/login">
                 <Button 
                     basic
                     color='orange'
-                    style={
-                        {
-                            'height':'80%', 
-                            'margin': '2px 0 2px 0',
-                            'margin': '0 0 0 10px'
-                        }
-                    } 
-                    className="ui button" 
                 >
                     Log In
                 </Button>
             </Link>
-        </>
+        </Button.Group>
         return (
         <Grid.Column
             width = {6}
@@ -242,9 +217,11 @@ export default class Header extends Component {
 
     renderLogo() {
         let imageLink = this.props.loggedIn && this.state.currRole !== 'ADMIN' && this.state.currRole !== 'COLLEGE_REP' ? 
-            this.props.schoolLogo : require('./logo.png');
+            this.props.school.logoURL : require('./logo.png');
         return (
-                <Image centered src={imageLink} size='small'/>                
+                <>
+                <Image centered src={imageLink} size='small'/>  
+                </>         
         )
     }
 
@@ -315,8 +292,15 @@ export default class Header extends Component {
                     <Grid.Column width={6}>
                         {this.renderLogo()}
                     </Grid.Column>
-                    <Grid.Column width={5} verticalAlign='middle'>
+                    <Grid.Column width={5} verticalAlign='middle' textAlign='left'>
                         {this.renderLoginStateInfo()}
+                    </Grid.Column>
+                </Grid.Row>
+                <Grid.Row columns={"equal"}>
+                    <Grid.Column textAlign='center'>
+                        {this.props.school && this.props.loggedIn &&
+                            <Header as='h4'>{this.props.school.name}</Header>
+                        }  
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
