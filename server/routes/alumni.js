@@ -243,7 +243,7 @@ router.post('/approve/', passport.authenticate('jwt', {session: false}), async(r
 
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        let alumnus = await alumniSchema.findOne({_id: req.params.id})
+        let alumnus = await alumniSchema.findOne({_id: req.params.id}).populate('school')
         alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
         res.json({'result' : alumnus});
     } catch (e) {
