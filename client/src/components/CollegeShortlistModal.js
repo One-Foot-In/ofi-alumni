@@ -77,9 +77,9 @@ export default class CollegeShortlistModal extends Component {
             (college.name + " (" + this.state.country + ")").localeCompare(newCollege) === 0);
     }
 
-    submit(e) {
+    async submit(e) {
         e.preventDefault()
-        this.setState({
+        await this.setState({
             submitting: true
         }, async () => {
             let payload = {

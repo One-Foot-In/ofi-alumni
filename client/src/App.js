@@ -284,6 +284,8 @@ class App extends Component {
 
   async refreshProfile(role, id) {
     let userDetails = await this.fetchProfile(role, id)
+    console.log("refreshed profile")
+    console.log(userDetails)
     this.setState({
       userDetails: userDetails
     })
