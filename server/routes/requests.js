@@ -326,7 +326,7 @@ router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {sessio
 const generateNewAndExistingActionItems = async (existingActionItems, newActionItems) => {
     const existingActionItemsIds = existingActionItems.map(actionItem => actionItem.value).flat()
     let existingActionItemsRecords = await actionItemSchema.find().where('_id').in(existingActionItemsIds).exec()
-    // create action itmes added
+    // create action items added
     if (newActionItems.length) {
         for (let i = 0; i < newActionItems.length; i++) {
             // check to see if action items name already exists
@@ -338,7 +338,7 @@ const generateNewAndExistingActionItems = async (existingActionItems, newActionI
                 await newActionItemCreated.save()
                 existingActionItemsRecords.push(newActionItemCreated)
             } else {
-                // user accidentally added an interest that already exists as a new interest
+                // user accidentally added an actionItem that already exists as a new actionItem
                 existingActionItemsRecords.push(actionItemsExists[0])
             }
         }
@@ -360,7 +360,7 @@ const getUniqueActionItems = (allActionItems) => {
 
 router.patch('/actionItems/:id/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        let requestId = req.body.requestId;
+        let requestId = req.params.id;
         let request = await requestSchema.findById(requestId);
         const existingActionItems = req.body.existingActionItems
         const newActionItems = req.body.newActionItems || []

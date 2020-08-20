@@ -555,14 +555,9 @@ class RequestCards extends Component {
 
     toggleActionItemModal(e) {
         let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
-        let actionItems = null
-        if (requestDetails) {
-            actionItems = requestDetails.actionItems
-        }
         this.setState({
             showActionItemsModal: !this.state.showActionItemsModal,
-            requestDetails: requestDetails,
-            actionItems: actionItems
+            requestDetails: requestDetails
         });
     } 
 
@@ -633,10 +628,9 @@ class RequestCards extends Component {
 
     async submitActionItems() {
         let requests = await makeCall({
-            requestId: this.state.requestDetails._id,
             existingActionItems: this.state.existingActionItems,
             newActionItems: this.state.newActionItems
-        }, `/request/actionItems/${this.state}/`, 'patch')
+        }, `/request/actionItems/${this.state.requestDetails._id}/`, 'patch')
         if (!requests || requests.error) {
             swal({
                 title: "Error!",
@@ -726,7 +720,12 @@ class RequestCards extends Component {
                         <Button onClick={this.toggleActionItemModal.bind(this)}>
                             Cancel
                         </Button>
-                        <Button onClick={this.submitActionItems.bind(this)} primary>
+                        <Button 
+                            onClick={this.submitActionItems.bind(this)} 
+                            disabled = {!(this.state.existingActionItems && this.state.existingActionItems.length) 
+                            && !(this.state.newActionItems && this.state.newActionItems.length)} 
+                            primary
+                        >
                             Submit
                         </Button>
                     </Modal.Actions>
