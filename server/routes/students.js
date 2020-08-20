@@ -153,18 +153,41 @@ router.patch('/interests/add/:id', async (req, res, next) => {
     }
 })
 
-router.patch('/collegeShortlist/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+router.patch('/collegeShortlist/update/:collegeType/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let existingCollegeId = req.body.existingCollegeId
         var college = await collegeSchema.findOne({_id: existingCollegeId})
         let student = await studentSchema.findOne({_id: req.params.id})
-        student.collegeShortlist.push(college._id);
+        var collegeType = await studentSchema.findOne({_collegeType: req.params.collegeType})
+        switch(collegeType) {
+            case "Reach":
+                student.reachColleges.push(college._id);
+                break;
+            case "Match":
+                student.mathColleges.push(college._id);
+                break;
+            default: // Safety
+                student.safetyColleges.push(college._id);
+        }
+        // student.collegeShortlist.push(college._id);
         student.markModified('collegeShortlist');
         
         await student.save()
         res.status(200).send({student: student})
     } catch (e) {
         console.log("Error: student#college/update", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/collegeShortlist/remove/:id', async (req, res, next) => {
+    try {
+        const student = await studentSchema.findOne({_id: req.params.id})
+        student.collegeShortlist = student.collegeShortlist.filter(college => college._id.toString() !== req.body.collegeIdToRemove)
+        await student.save()
+        res.status(200).send({message: "Successfully removed student's college"})
+    } catch (e) {
+        console.log("Error: student#interests/remove", e);
         res.status(500).send({'error' : e});
     }
 })

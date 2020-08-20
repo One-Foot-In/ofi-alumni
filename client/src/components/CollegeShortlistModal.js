@@ -20,10 +20,12 @@ export default class CollegeShortlistModal extends Component {
             existingCollegeName: '',
             countryOptions: [],
             submitting: false,
+            collegeType: '',
         }
         this.handleCountrySelection = this.handleCountrySelection.bind(this)
         this.getCollegeInput = this.getCollegeInput.bind(this)
         this.deleteCountry = this.deleteCountry.bind(this)
+        this.getCollegeType = this.getCollegeType.bind(this)
         this.submit = this.submit.bind(this)
         this.clearState = this.clearState.bind(this)
     }
@@ -38,6 +40,13 @@ export default class CollegeShortlistModal extends Component {
         this.setState({
             country: value
         })
+    }
+
+    getCollegeType(value) {
+        this.setState({
+            collegeType: value
+        })
+        console.log("getting college type");
     }
 
     getCollegeInput(selection) {
@@ -64,6 +73,7 @@ export default class CollegeShortlistModal extends Component {
         })
     }
 
+
     clearState() {
         this.setState({
             country: '',
@@ -73,8 +83,24 @@ export default class CollegeShortlistModal extends Component {
     }
 
     isDuplicateCollegeEntry = (newCollege) => {
-        return this.props.collegeShortlist.some(college => 
-            (college.name + " (" + this.state.country + ")").localeCompare(newCollege) === 0);
+        let list;
+        // console.log(this.collegeType);
+        if (this.collegeType === "Reach") {
+            list = this.props.reachColleges;
+            console.log("reached Reach");
+        }
+        else if (this.collegeType === "Match") {
+            list = this.props.matchColleges;
+        }
+        else {
+            list = this.props.safetyColleges;
+        }
+        if (list != null) {
+            return list.some(college => 
+                (college.name + " (" + this.state.country + ")").localeCompare(newCollege) === 0);
+        }
+        return false;
+        
     }
 
     submit(e) {
@@ -85,10 +111,11 @@ export default class CollegeShortlistModal extends Component {
             let payload = {
                 collegeCountry: this.state.country,
                 existingCollegeId: this.state.existingCollegeId,
-                existingCollegeName: this.state.existingCollegeName
+                existingCollegeName: this.state.existingCollegeName,
+                collegeType: this.state.collegeType
             }
             try {
-                const result = await makeCall(payload, `/student/collegeShortlist/update/${this.props.id}`, 'patch')
+                const result = await makeCall(payload, `/student/collegeShortlist/update/${this.collegeType}/${this.props.id}`, 'patch')
                 if (!result || result.error) {
                     this.setState({
                         submitting: false
@@ -165,6 +192,7 @@ export default class CollegeShortlistModal extends Component {
                             value={this.state.country}
                             onChange={this.handleCountrySelection}
                         />
+                        
                     }
                 </Modal.Content>
                 <Modal.Actions>
