@@ -8,6 +8,7 @@ var companySchema = require('../models/companySchema');
 var majorSchema = require('../models/majorSchema');
 var interestsSchema = require('../models/interestsSchema');
 var COUNTRIES = require("../countries").COUNTRIES
+var actionItemSchema = require("../models/actionItemSchema");
 require('mongoose').Promise = global.Promise
 
 router.get('/countries/', async (req, res, next) => {
@@ -126,6 +127,23 @@ router.get('/colleges/:country', async (req, res) => {
     res.status(200).send({options: collegeOptions})
   } catch (e) {
     console.error("Error dropdown.js#collegeOptions", e)
+    res.status(500).json({success:false, error: e})
+  }
+})
+
+router.get('/actionItems', async (req, res) => {
+  try {
+    let actionItems = await actionItemSchema.find()
+    let actionitemsOptions = actionItems.map( actionitem => {
+      return {
+        key: actionitem.name,
+        value: actionitem._id,
+        text: actionitem.name,
+      }
+    })
+    res.status(200).send({options: actionitemsOptions})
+  } catch (e) {
+    console.log("Error index.js#actionitemsOptions", e)
     res.status(500).json({success:false, error: e})
   }
 })
