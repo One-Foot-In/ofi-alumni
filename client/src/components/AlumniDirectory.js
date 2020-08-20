@@ -46,11 +46,6 @@ const searchOptions = [
         text: 'Topics of Consultancy',
         value: 'topics'
 
-    },
-    {
-        key: 'Interests',
-        text: 'Interests',
-        value: 'interests'
     }
 ]
 
@@ -75,7 +70,6 @@ export default class AlumniDirectory extends Component {
             gradYears: [],
             allText: [],
             topicsArray: [],
-            interestsArray: [],
             display: [],
             numResults: 0,
             filter: 'all',
@@ -117,8 +111,6 @@ export default class AlumniDirectory extends Component {
         let allText = [];
         let topicsArray = [];
         let topicsSet = new Set();
-        let interestsArray = [];
-        let interestsSet = new Set();
         let display = [];
         let i = 0, j = 0;
 
@@ -142,24 +134,6 @@ export default class AlumniDirectory extends Component {
                 }
             }
 
-            console.log("1. Topics Set: ", topicsSet)
-
-            let interestsForAlumnus = post.interests;
-            let interestStringValuesForAlumnus = interestsForAlumnus.map(interestObj => interestObj.text);
-            
-            for (let interest in interestStringValuesForAlumnus) {
-                if (!interestsSet.has(interestsForAlumnus[interest])) {
-                    interestsSet.add({
-                        key: interestsForAlumnus[interest]._id,
-                        text: interestsForAlumnus[interest].name,
-                        value: interestsForAlumnus[interest]._id
-
-                    });
-                }
-            }
-
-            console.log("2. Interests Set: ", interestsSet)
-
             allText.push(
                         post.collegeName + ' '
                          + post.city + ' '
@@ -175,16 +149,10 @@ export default class AlumniDirectory extends Component {
         }
 
         topicsArray = Array.from(topicsSet)
-        interestsArray = Array.from(interestsSet)
-
-        console.log("3. Topics Array: ", topicsArray)
-        console.log("4. Interests Array: ", interestsArray)
-
         gradYears.sort(function(a,b){return a.value-b.value})
         this.setState({ gradYears: gradYears,
                         allText: allText,
                         topicsArray: topicsArray,
-                        interestsArray: interestsArray,
                         display: display
                         })
     }
@@ -320,15 +288,10 @@ export default class AlumniDirectory extends Component {
             numResults,
             gradYears,
             topicsArray,
-            interestsArray,
             display,
             value,
             allText,
         } = this.state
-
-
-        console.log("5. Topics Array: ", topicsArray)
-        console.log("6. Interests Array: ", interestsArray)
 
         /* results row */
         let resultsRow;
@@ -344,7 +307,7 @@ export default class AlumniDirectory extends Component {
 
         /* Search Area */
         let searchRow;
-        if (filter !== 'gradYear' && filter !== 'topics' && filter !== 'interests') {
+        if (filter !== 'gradYear' && filter !== 'topics') {
             searchRow = (
                 <Grid.Row columns={2}>
                 <Grid.Column>
@@ -382,35 +345,6 @@ export default class AlumniDirectory extends Component {
                             label='Topics Of Consultancy:'
                             name='topics'
                             options={topicsArray}
-                            onChange={this.handleDropdownChange}
-                        />
-                </Grid.Column>
-                <Grid.Column>
-                    <Dropdown
-                        placeholder='Search By:'
-                        floating
-                        selection
-                        name='filter'
-                        options={searchOptions}
-                        onChange={this.handleDropdownChange}
-                    />
-                </Grid.Column>
-                </Grid.Row>
-            )
-        } else if (filter == 'interests') {
-            searchRow = (
-                console.log("8. InterestsArray in Render: ", interestsArray),
-
-                <Grid.Row columns={2}>
-                <Grid.Column>
-                        <Dropdown
-                            button
-                            fluid
-                            floating
-                            search
-                            label='Interests:'
-                            name='interests'
-                            options={interestsArray}
                             onChange={this.handleDropdownChange}
                         />
                 </Grid.Column>
