@@ -555,14 +555,9 @@ class RequestCards extends Component {
 
     toggleActionItemModal(e) {
         let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
-        let actionItems = null
-        if (requestDetails) {
-            actionItems = requestDetails.actionItems
-        }
         this.setState({
             showActionItemsModal: !this.state.showActionItemsModal,
-            requestDetails: requestDetails,
-            actionItems: actionItems
+            requestDetails: requestDetails
         });
     } 
 
@@ -725,8 +720,12 @@ class RequestCards extends Component {
                         <Button onClick={this.toggleActionItemModal.bind(this)}>
                             Cancel
                         </Button>
-                        <Button onClick={this.submitActionItems.bind(this)} 
-                         disabled = {this.state.existingActionItems || this.state.newActionItems} primary>
+                        <Button 
+                            onClick={this.submitActionItems.bind(this)} 
+                            disabled = {!(this.state.existingActionItems && this.state.existingActionItems.length) 
+                            && !(this.state.newActionItems && this.state.newActionItems.length)} 
+                            primary
+                        >
                             Submit
                         </Button>
                     </Modal.Actions>
