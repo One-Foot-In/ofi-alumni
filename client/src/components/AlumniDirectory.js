@@ -333,8 +333,6 @@ export default class AlumniDirectory extends Component {
             )
         } else if (filter == 'topics') {
             searchRow = (
-                console.log("7. TopicsArray in Render: ", topicsArray),
-
                 <Grid.Row columns={2}>
                 <Grid.Column>
                         <Dropdown
