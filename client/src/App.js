@@ -767,7 +767,6 @@ class App extends Component {
             <Header
               loggedIn={this.state.loggedIn}
               logout={this.logout}
-              email={this.state.userDetails && this.state.userDetails.email}
               school={this.state.userDetails && this.state.userDetails.school}
               userId={this.state.userDetails && this.state.userDetails.user}
               role={this.state.role}
