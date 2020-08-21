@@ -369,9 +369,29 @@ router.patch('/actionItems/:id/', passport.authenticate('jwt', {session: false})
         await request.save();
         res.status(200).send({message: "Successfully added action iems"})
     } catch (e) {
-        console.log("Error: actionitems/", e);
+        console.log("Error: actionItems/", e);
         res.status(500).send({'error' : e});
     }
 });
+
+router.get('/studentActionItems/:id/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let studentId = req.params.id;
+        let requestArray = await requestSchema.find({student: studentId});
+        let allActionItems = [];
+        for (var i = 0; i < requestArray.length; i++) {
+            for (var j = 0; j < requestArray[i].actionItems.length; j++){
+                allActionItems.push(requestArray[i].actionItems[j]);
+            }
+        }
+        res.status(200).send({actionItemsArray: allActionItems});
+
+    } catch (e) {
+        console.log("Error: studentActionItems/", e);
+        res.status(500).send({'error' : e});
+    }
+    console.log(requestArray);
+});
+
 
 module.exports = router;

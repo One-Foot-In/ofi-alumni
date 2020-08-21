@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Menu, Label, Card, Button, Icon } from 'semantic-ui-react';
 import CollegeShortlistModal from './CollegeShortlistModal';
+import StudentActionItems from './StudentActionItems';
+
 
 const STUDENT = "STUDENT"
 
@@ -15,6 +17,11 @@ export default class CollegeShortlist extends Component {
         this.openCollegeModal = this.openCollegeModal.bind(this);
         this.closeCollegeModal = this.closeCollegeModal.bind(this);
         this.addToShortlist = this.addToShortlist.bind(this);
+        this.handleMenuClick = this.handleMenuClick.bind(this);
+    }
+
+    handleMenuClick(event) {
+        this.setState({activeItem: event.target.id });
     }
 
     openCollegeModal() {
@@ -56,7 +63,14 @@ export default class CollegeShortlist extends Component {
                          <Label color='teal'>{details.collegeShortlist.length}</Label>
                     }
                 </Menu.Item>
-                
+                <Menu.Item
+                    id='actionitems'
+                    name='Action Items'
+                    active={this.state.activeItem === 'actionitems'}
+                    onClick={this.handleMenuClick}
+                >
+                    Action Items
+                </Menu.Item>
             </Menu>
             {this.state.activeItem === 'shortlist' &&
                 <div style={{paddingLeft: 13, paddingRight: 13}}>
@@ -95,6 +109,10 @@ export default class CollegeShortlist extends Component {
                     </Card.Content>
                     </Card>
                 </div>
+            }
+            {
+                this.state.activeItem === 'actionitems' &&
+                <StudentActionItems userDetails = {this.props.details} />
             }
             </div>
             
