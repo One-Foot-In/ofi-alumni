@@ -44,9 +44,9 @@ router.post('/login', (req, res, next) => {
     'local',
     (error, user, info) => {
       if (error) {
-        next(error);
+        res.status(500).send({ error });
       } else if (!user) {
-        next("User not found.")
+        res.status(404).send({ error: 'The user was not found on the system!' });
       } else {
         var payload = {
           role: user.role,
@@ -60,8 +60,16 @@ router.post('/login', (req, res, next) => {
             let userRole = user.role && user.role.map(role => {
               return role.toUpperCase()
             })
+            if (!user.emailVerified) {
+              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email.` });
+              return;
+            }
             if (userRole.includes("ALUMNI")) {
               const alumni = await alumniSchema.findOne({user: user._id})
+              if (!alumni.approved) {
+                res.status(404).send({ error: `Your account is currently pending approval.` });
+                return;
+              }
               payload.id = alumni._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response
@@ -75,6 +83,10 @@ router.post('/login', (req, res, next) => {
               );
             } else if (userRole.includes("STUDENT")) {
               const student = await studentSchema.findOne({user: user._id});
+              if (!student.approved) {
+                res.status(404).send({ error: `Your account is currently pending approval.` });
+                return;
+              }
               payload.id = student._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response
@@ -87,6 +99,10 @@ router.post('/login', (req, res, next) => {
               );
             } else if (userRole.includes("ADMIN")) {
               const admin = await adminSchema.findOne({user: user._id});
+              if (!admin.approved) {
+                res.status(404).send({ error: `Your account is currently pending approval.` });
+                return;
+              }
               payload.id = admin._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               res.cookie('jwt', cookie);
@@ -98,6 +114,10 @@ router.post('/login', (req, res, next) => {
               )
             } else if (userRole.includes("COLLEGE_REP")) {
               const collegeRep = await collegeRepSchema.findOne({user: user._id});
+              if (!collegeRep.approved) {
+                res.status(404).send({ error: `Your account is currently pending approval.` });
+                return;
+              }
               payload.id = collegeRep._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               res.cookie('jwt', cookie);
