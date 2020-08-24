@@ -85,7 +85,7 @@ export default class AlumniDirectory extends Component {
         })
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await this.getEntries()
         let totalPages = 0;
         if (result.alumni !== null) {

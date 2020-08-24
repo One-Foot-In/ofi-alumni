@@ -33,7 +33,7 @@ export default class Navbar extends Component {
         this.handleClick = this.handleClick.bind(this)
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.setState({sidebarVisible: false})
     }
 

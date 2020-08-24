@@ -19,7 +19,7 @@ export default class NewsFeed extends Component {
         display: []
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let newsItems = await this.getNews(this.props.userRole)
         if (newsItems.news) {
             this.setState({

@@ -25,7 +25,7 @@ export default class TopicPreferencesModal extends Component {
         this.submitPreferences = this.submitPreferences.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let topicOptions = await makeCall(null, `/alumni/topicOptions`, 'get')
         this.setState({
             topicOptions: topicOptions.topics.map(option => {

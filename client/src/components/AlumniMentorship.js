@@ -140,7 +140,7 @@ export default class AlumniMentorship extends Component {
         })
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let timeOffset = this.props.userDetails.timeZone
         let requests = await this.getRequests(timeOffset)
         let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
@@ -397,12 +397,12 @@ class RequestCards extends Component {
         alumniNote: ''
     }
     // This allows the component to update its state should a prop value change
-    async componentWillReceiveProps({requests}) {
+    async UNSAFE_componentWillReceiveProps({requests}) {
         await this.setState({requests: requests})
         this.constructDisplay(this.state.requests)
     }
     // This ensures that the component doesn't use an old prop on menu change
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.constructDisplay(this.props.requests)
     }
 
