@@ -15,7 +15,7 @@ function getErrorLabel(content) {
 props:
 - loggedIn: boolean
 - logout: ()
-- email
+- userId
 - schoolLogo
 */
 export default class HeaderComponent extends Component {
@@ -94,38 +94,42 @@ export default class HeaderComponent extends Component {
         e.preventDefault();
         const payload = {
             newPassword: this.state.password,
-            email: this.props.email
+            userId: this.props.userId
         }
-        try {
-            const result = await makeCall(payload, '/password/change', 'post');
-            if (!result || result.error) {
-                this.setState({
-                    sendingPasswordRequest: false
-                }, () => {
-                    swal({
-                        title: "Error!",
-                        text: `There was an error completing your request, please try again.`,
-                        icon: "error",
+        this.setState({
+            sendingPasswordRequest: true
+        }, async () => {
+            try {
+                const result = await makeCall(payload, '/password/change', 'post');
+                if (!result || result.error) {
+                    this.setState({
+                        sendingPasswordRequest: false
+                    }, () => {
+                        swal({
+                            title: "Error!",
+                            text: `There was an error completing your request, please try again.`,
+                            icon: "error",
+                        });
+                    }); 
+                } else {
+                    this.setState({
+                        sendingPasswordRequest: false,
+                        password: '',
+                        confirmPassword: '',
+                        modalOpen: false
+                    }, () => {
+                        swal({
+                            title: "Success!",
+                            text: `Your password has been successfully changed!`,
+                            icon: "success",
+                        });
                     });
-                }); 
-            } else {
-                this.setState({
-                    sendingPasswordRequest: false,
-                    password: '',
-                    confirmPassword: '',
-                    modalOpen: false
-                }, () => {
-                    swal({
-                        title: "Success!",
-                        text: `Your password has been successfully changed!`,
-                        icon: "success",
-                    });
-                });
+                }
             }
-        }
-        catch (e) {
-            console.log("Error: Header#sendNewPasswordRequest", e);
-        }
+            catch (e) {
+                console.log("Error: Header#sendNewPasswordRequest", e);
+            }
+        })
     }
     
     renderLoginStateInfo() {

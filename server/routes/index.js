@@ -141,9 +141,9 @@ router.get('/verification/:email/:verificationToken', async (req, res, next) => 
 router.post('/password/change', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
   try {
     const password = req.body.newPassword
-    const email = req.body.email
+    const userId = req.body.userId
     const passwordHash = await bcrypt.hash(password, HASH_COST);
-    let user = await userSchema.findOne({email: email})
+    let user = await userSchema.findById(userId)
     user.passwordHash = passwordHash
     await user.save()
     res.status(200).send({message: 'Successfully changed password!'})
