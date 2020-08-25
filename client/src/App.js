@@ -236,7 +236,7 @@ class App extends Component {
     this.liftRole = this.liftRole.bind(this);
   }
 
-  async componentWillMount() {
+  async UNSAFE_componentWillMount() {
     var role;
     var profile;
     var id;

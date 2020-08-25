@@ -25,7 +25,7 @@ export default class AlumniContactModal extends Component {
         this.submitRequest = this.submitRequest.bind(this)
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.setState({
             alumni: this.props.alumni, 
         })

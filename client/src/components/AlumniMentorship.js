@@ -140,7 +140,7 @@ export default class AlumniMentorship extends Component {
         })
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let timeOffset = this.props.userDetails.timeZone
         let requests = await this.getRequests(timeOffset)
         let confirmedTimes = await this.populateConfirmedTimes(requests.requests[1])
@@ -180,11 +180,12 @@ export default class AlumniMentorship extends Component {
             <Button
                 primary
                 style={{'margin-right': '5px'}}
+                compact
                 floated='right'
                 color="blue"
                 onClick={this.openTimePreferencesModal}
             >
-                Update Time Availabilities
+                Update Times
             </Button>
             <TimePreferencesModal
                 modalOpen={this.state.timePreferencesModalOpen}
@@ -200,11 +201,12 @@ export default class AlumniMentorship extends Component {
             <Button
                 primary
                 style={{'margin-left': '2px'}}
+                compact
                 floated='right'
                 color="blue"
                 onClick={this.openTopicPreferencesModal}
             >
-                Update Topic Preferences
+                Update Topics
             </Button>
             <TopicPreferencesModal
                 modalOpen={this.state.topicPreferencesModalOpen}
@@ -222,6 +224,7 @@ export default class AlumniMentorship extends Component {
                 style={{'margin-right': '5px'}}
                 floated='right'
                 color="blue"
+                compact
                 onClick={this.openZoomUpdateModal}
             >
                 Update Video Meeting Link
@@ -238,7 +241,7 @@ export default class AlumniMentorship extends Component {
         let topicListItems = []
         for (let topic of details.topics) {
             topicListItems.push(
-                <List.Item>{topic}</List.Item>
+                <List.Item key={topic}>{topic}</List.Item>
             )
         }
 
@@ -334,7 +337,7 @@ export default class AlumniMentorship extends Component {
                                     <Header as='h3'> Current Meeting Link:</Header>
                                     {details.zoomLink}
                                 </Grid.Column>
-                                <Grid.Column width={4}>
+                                <Grid.Column width={4} verticalAlign={'top'}>
                                     {zoomLinkUpdate}
                                 </Grid.Column>
                             </Grid.Row>
@@ -344,7 +347,7 @@ export default class AlumniMentorship extends Component {
                                     <List divided bulleted>{topicListItems}</List>
                                 </Grid.Column>
                                 <Grid.Column></Grid.Column>
-                                <Grid.Column width={4}>
+                                <Grid.Column width={4} verticalAlign={'top'}>
                                     {topicAvailabilitiesUpdate}
                                 </Grid.Column>
                             </Grid.Row>
@@ -353,7 +356,7 @@ export default class AlumniMentorship extends Component {
                                 <Header as='h3'> Current Time Availabilities:</Header>
                                     {timeDisplay}
                                 </Grid.Column>
-                                <Grid.Column width={4}>
+                                <Grid.Column width={4} verticalAlign={'top'}>
                                     {timeAvailabilitiesUpdate}
                                 </Grid.Column>
                             </Grid.Row>
@@ -394,12 +397,12 @@ class RequestCards extends Component {
         alumniNote: ''
     }
     // This allows the component to update its state should a prop value change
-    async componentWillReceiveProps({requests}) {
+    async UNSAFE_componentWillReceiveProps({requests}) {
         await this.setState({requests: requests})
         this.constructDisplay(this.state.requests)
     }
     // This ensures that the component doesn't use an old prop on menu change
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.constructDisplay(this.props.requests)
     }
 

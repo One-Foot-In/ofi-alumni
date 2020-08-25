@@ -59,7 +59,7 @@ export default class StudentMentorship extends Component {
         })
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let timeOffset = this.props.userDetails.timeZone
         let schedulings = await this.getSchedulings(timeOffset)
         this.setState({
@@ -173,12 +173,12 @@ class SchedulingCards extends Component {
         showFeedbackModal: false
     }
     // This allows the component to update its state should a prop value change
-    async componentWillReceiveProps({schedulings}) {
+    async UNSAFE_componentWillReceiveProps({schedulings}) {
         await this.setState({schedulings: schedulings})
         this.constructDisplay(this.state.schedulings)
     }
     // This ensures that the component doesn't use an old prop on menu change
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.constructDisplay(this.props.schedulings)
     }
 

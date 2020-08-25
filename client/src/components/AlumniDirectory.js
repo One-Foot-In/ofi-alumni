@@ -85,7 +85,7 @@ export default class AlumniDirectory extends Component {
         })
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await this.getEntries()
         let totalPages = 0;
         if (result.alumni !== null) {
@@ -132,7 +132,7 @@ export default class AlumniDirectory extends Component {
 
     constructProfile(post, i) {
         return (
-            <Grid.Row columns={2}>
+            <Grid.Row columns={2} key={i}>
                 <Grid.Column width={4}>
                     <Image
                         size='small'

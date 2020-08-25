@@ -26,7 +26,7 @@ export default class CollegeSelectionModal extends Component {
         this.submit = this.submit.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, '/drop/countries', 'get')
         this.setState({countryOptions: result.options})
     }

@@ -17,7 +17,7 @@ export default class AlumniVerification extends Component {
         recentName: ''
     }
 
-    async componentWillMount(){
+    async UNSAFE_componentWillMount(){
         let result = await this.getEntries()
         this.setState({
             entries: result.unapproved.reverse()
