@@ -19,7 +19,6 @@ class StudentActionItems extends Component {
    	  })
    }
    render() {
-   	   console.log(this.state.actionItemsToDisplay);
        return (
        		<>
            {
@@ -35,7 +34,7 @@ class StudentActionItems extends Component {
            	    <List divided relaxed>
            		{this.state.actionItemsToDisplay.map((actionItem, index) => (
            			<List.Item>
-           				<Checkbox /> {actionItem} 
+           				<Checkbox /> {actionItem.name}
            			</List.Item>
            		))}
            		</List>
