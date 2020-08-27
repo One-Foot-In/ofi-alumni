@@ -122,7 +122,7 @@ export default class AlumniContactModal extends Component {
                     <Button
                         primary
                         onClick={this.submitRequest}
-                        disabled={this.state.message === ''}
+                        disabled={this.state.message === '' || this.state.submitting}
                     >
                         Submit Request
                     </Button>

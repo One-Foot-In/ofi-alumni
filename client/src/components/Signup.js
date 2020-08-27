@@ -931,7 +931,7 @@ export default class Signup extends React.Component {
                             color="blue" 
                             type='submit'
                             loading={this.state.submitting}
-                            disabled={!this.validateSubmitReadiness()}
+                            disabled={!this.validateSubmitReadiness() || this.state.submitting}
                         >
                             <Icon name="unlock"/>
                             Submit

@@ -121,7 +121,7 @@ export default class CompanyUpdateModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
-                        disabled={!this.state.newCompany && !this.state.existingCompanyId}
+                        disabled={!this.state.newCompany && !this.state.existingCompanyId || this.state.submitting}
                         onClick={this.submit}>
                         Submit
                     </Button>

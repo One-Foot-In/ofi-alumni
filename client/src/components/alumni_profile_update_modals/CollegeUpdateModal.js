@@ -178,7 +178,7 @@ export default class CollegeUpdateModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
-                        disabled={!this.state.newCollege && !this.state.existingCollegeId}
+                        disabled={!this.state.newCollege && !this.state.existingCollegeId || this.state.submitting}
                         onClick={this.submit}>
                         Submit
                     </Button>
