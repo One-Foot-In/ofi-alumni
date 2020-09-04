@@ -15,6 +15,7 @@ var majorSchema = require('../models/majorSchema');
 var interestsSchema = require('../models/interestsSchema');
 var newsSchema = require('../models/newsSchema');
 const conversationSchema = require('../models/conversationSchema');
+const collegeRepSchema = require('../models/collegeRepSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
 var sendTestEmail = require('../routes/helpers/emailHelpers').sendTestEmail
@@ -653,12 +654,99 @@ router.post('/newAdmin/', async (req, res) => {
     }
 })
 
-router.get('/data/clear/admin', async (req, res) => {
+router.patch('/promoteAdmin/alumniId/', async (req, res) => {
+    const alumniId = req.body.id;
     try {
-        let admin = await adminSchema.deleteMany({})
-        res.status(200).send({'message': 'deleted all admin items!'})
+        let alumni = await alumniSchema.findById(alumniId)
+        let user = await userSchema.findById(alumni.user)
+        let roles = user.role
+        roles.push('ADMIN')
+        user.role = roles
+        await user.save()
+        res.status(200).send({'New Admin': alumni})
     } catch (e) {
-        res.status(500).send({'admin deletion error': e})
+        console.log('/promoteAdmin failed ' + e.message)
+        res.status(500).send({'promotion by alumniID failed': e})
+    }
+})
+
+router.patch('/promoteAdmin/email/', async (req, res) => {
+    const email = req.body.email;
+    try {
+        let user = await userSchema.findOne({email: email})
+        let roles = user.role
+        roles.push('ADMIN')
+        user.role = roles
+        await user.save()
+        res.status(200).send({'New Admin': user})
+    } catch (e) {
+        console.log('/promoteAdmin failed ' + e.message)
+        res.status(500).send({'promotion by email failed': e})
+    }
+})
+
+router.patch('/promoteAdmin/userId/', async (req, res) => {
+    const id = req.body.id;
+    try {
+        let user = await userSchema.findById(id)
+        let roles = user.role
+        roles.push('ADMIN')
+        user.role = roles
+        await user.save()
+        res.status(200).send({'New Admin': user})
+    } catch (e) {
+        console.log('/promoteAdmin failed ' + e.message)
+        res.status(500).send({'promotion by userID failed': e})
+    }
+})
+
+/* College Rep */
+router.get('/newCollegeRep/', async (req, res) => {
+    try {
+        const email = "rep@ofi.com";
+        const name = "Reppy McRepFace";
+        const timeZone = -400;
+        const password = "p";
+
+        const role = "COLLEGE_REP"
+        const emailVerified = true
+        const approved = true
+        const verificationToken = crypto({length: 16});
+        var passwordHash = await bcrypt.hash(password, HASH_COST)
+        const college = await collegeSchema.findOne({})
+        const user_instance = new userSchema(
+            {
+              email: email,
+              passwordHash: passwordHash,
+              verificationToken: verificationToken,
+              role: role,
+              emailVerified: emailVerified,
+            }
+        );
+        await user_instance.save();
+        const collegeRep_instance = new collegeRepSchema(
+            {
+                name: name,
+                timeZone: timeZone,
+                user: user_instance._id,
+                approved: approved,
+                college: college._id
+            }
+        );
+        await collegeRep_instance.save();
+        res.status(200).send({'New College Rep': collegeRep_instance})
+    } catch (e) {
+        console.log('/newCollegeRep error: '+ e);
+        res.status(500).send({'newCollegeRep error': e});
+    }
+})
+
+router.get('/data/clear/collegeRep', async (req, res) => {
+    try {
+        let reps = await collegeRepSchema.deleteMany({})
+        res.status(200).send({'message': 'deleted all college rep items!'})
+    } catch (e) {
+        res.status(500).send({'college rep deletion error': e})
     }
 })
 
@@ -668,6 +756,7 @@ router.get('/data/clear/all', async (req, res, next) => {
         await alumniSchema.deleteMany({});
         await studentSchema.deleteMany({});
         await adminSchema.deleteMany({});
+        await collegeRepSchema.deleteMany({})
         await userSchema.deleteMany({});
         await requestSchema.deleteMany({});
         await schoolSchema.deleteMany({});

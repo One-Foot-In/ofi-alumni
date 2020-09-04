@@ -7,6 +7,8 @@ var fileType = require('file-type');
 var bluebird = require('bluebird');
 var multiparty = require('multiparty');
 require('dotenv').config();
+var adminSchema = require('../models/adminSchema');
+var schoolSchema = require('../models/schoolSchema');
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
 require('mongoose').Promise = global.Promise
@@ -38,6 +40,14 @@ const params = {
 };
 return await s3.upload(params).promise();
 };
+
+async function isAdmin(id) {
+    let admin = await adminSchema.findById(id)
+    let alumni = await alumniSchema.findById(id).populate('user')
+    return (admin !== null || (alumni && alumni.user.role.includes('ADMIN')))
+}
+
+//TODO: Fix alumni, student, and school routes
 
 router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
@@ -85,6 +95,37 @@ router.post('/student/:studentId', passport.authenticate('jwt', {session: false}
         })
     } catch (e) {
         console.log("Error: image#student", e);
+        res.status(500).send({'error' : e});
+    }
+});
+
+router.post('/school/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        const form = new multiparty.Form();
+        form.parse(req, async (error, fields, files) => {
+            if (!error && files.imageFile) {
+                let adminId = fields.adminId[0]
+                let schoolId = fields.schoolId[0]
+                if (!isAdmin(adminId)) {
+                    res.status(400).send('Invalid Admin ID');
+                    return;
+                }
+                const path = files.imageFile[0].path;
+                const buffer = fs.readFileSync(path);
+                const type = await fileType.fromBuffer(buffer);
+                const fileName = `school-${schoolId}`;
+                const data = await uploadFile(buffer, fileName, type);
+                let imageLocation = data.Location;
+                let school = await schoolSchema.findOne({_id: schoolId})
+                school.logoURL = imageLocation
+                await school.save()
+                res.status(200).send({
+                    success: true
+                })
+            }
+        }) 
+    } catch (e) {
+        console.log("Error: image#school", e);
         res.status(500).send({'error' : e});
     }
 });
