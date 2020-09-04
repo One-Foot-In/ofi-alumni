@@ -169,4 +169,16 @@ router.patch('/collegeShortlist/update/:id', passport.authenticate('jwt', {sessi
     }
 })
 
+router.patch('/collegeShortlist/remove/:id', async (req, res, next) => {
+    try {
+        const student = await studentSchema.findOne({_id: req.params.id})
+        student.collegeShortlist = student.collegeShortlist.filter(college => college._id.toString() !== req.body.collegeId)
+        await student.save()
+        res.status(200).send({message: "Successfully removed student's college"})
+    } catch (e) {
+        console.log("Error: student#college/remove", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 module.exports = router;

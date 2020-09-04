@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Menu, Label, Card, Button, Icon } from 'semantic-ui-react';
 import CollegeShortlistModal from './CollegeShortlistModal';
+import { makeCall } from "../apis";
 
 const STUDENT = "STUDENT"
 
@@ -11,6 +12,7 @@ export default class CollegeShortlist extends Component {
             activeItem: "shortlist",
             collegeModalOpen: false,
             collegeShortlist: [],
+            deleteCollege: false,
         }
         this.openCollegeModal = this.openCollegeModal.bind(this);
         this.closeCollegeModal = this.closeCollegeModal.bind(this);
@@ -28,6 +30,19 @@ export default class CollegeShortlist extends Component {
         }, () => {
             this.props.refreshProfile(STUDENT, this.props.details._id)
         })
+    }
+
+    async removeCollege(e, collegeId) {
+        e.preventDefault()
+        this.setState({deleteCollege: true},
+            async () => {
+                await makeCall({collegeId: collegeId}, `/student/collegeShortlist/remove/${this.props.details._id}`, 'patch')
+                this.setState({
+                    deleteCollege: false
+                }, () => 
+                    this.props.refreshProfile(STUDENT, this.props.details._id)
+                )
+            })
     }
 
     addToShortlist(newCollege) {        
@@ -65,8 +80,25 @@ export default class CollegeShortlist extends Component {
                     <Card.Header>{`${details.name}'s College Picks`}</Card.Header>
                     { !details.collegeShortlist.length ?
                     <Card.Description> Add colleges to begin your college shortlist!</Card.Description> : 
-                        <Card.Description>Colleges: {details.collegeShortlist.map(e => 
-                        <li key={e.id}>{e.name}</li> ) } </Card.Description> }
+                        <Card.Description>Colleges: {details.collegeShortlist.map(college => 
+                        <Label
+                                key={college._id}
+                                style={{
+                                    'margin': '3px'
+                                }}
+                                color='blue'
+                            >
+                                {college.name}
+                                {
+                                    !this.props.isViewOnly &&
+                                    <Icon
+                                        onClick={(e) => this.removeCollege(e, college._id)}
+                                        name='delete'
+                                    />
+                                }
+                            </Label>
+                        ) } 
+                        </Card.Description> }
                         <Card.Description>               
                         {
                             !isViewOnly ? 
