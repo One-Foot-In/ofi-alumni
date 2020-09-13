@@ -2,8 +2,6 @@ var express = require('express');
 var passport = require("passport");
 var router = express.Router();
 var AWS = require('aws-sdk');
-var fs = require('fs');
-var fileType = require('file-type');
 var bluebird = require('bluebird');
 require('dotenv').config();
 var adminSchema = require('../models/adminSchema');
@@ -68,24 +66,14 @@ async function isAdmin(id) {
     return (admin !== null || (alumni && alumni.user.role.includes('ADMIN')))
 }
 
-router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}), multerUpload.single('imageFile'), async (req, res, next) => {
     try {
-        const form = new multiparty.Form();
-        form.parse(req, async (error, fields, files) => {
-            if (!error) {
-                const path = files.imageFile[0].path;
-                const buffer = fs.readFileSync(path);
-                const type = await fileType.fromBuffer(buffer);
-                const fileName = `alumni-${req.params.alumniId}`;
-                const data = await uploadFile(buffer, fileName, type);
-                let imageLocation = data.Location;
-                let alumni = await alumniSchema.findOne({_id: req.params.alumniId})
-                alumni.imageURL = imageLocation
-                await alumni.save()
-                res.status(200).send({
-                    success: true
-                })
-            }
+        let imageLocation = req.file.location
+        let alumni = await alumniSchema.findOne({_id: req.params.alumniId})
+        alumni.imageURL = imageLocation
+        await alumni.save()
+        res.status(200).send({
+            success: true
         })
     } catch (e) {
         console.log("Error: image#alumni", e);
@@ -93,24 +81,14 @@ router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}),
     }
 });
 
-router.post('/student/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+router.post('/student/:studentId', passport.authenticate('jwt', {session: false}), multerUpload.single('imageFile'), async (req, res, next) => {
     try {
-        const form = new multiparty.Form();
-        form.parse(req, async (error, fields, files) => {
-            if (!error) {
-                const path = files.imageFile[0].path;
-                const buffer = fs.readFileSync(path);
-                const type = await fileType.fromBuffer(buffer);
-                const fileName = `student-${req.params.studentId}`;
-                const data = await uploadFile(buffer, fileName, type);
-                let imageLocation = data.Location;
-                let student = await studentSchema.findOne({_id: req.params.studentId})
-                student.imageURL = imageLocation
-                await student.save()
-                res.status(200).send({
-                    success: true
-                })
-            }
+        let imageLocation = req.file.location
+        let student = await studentSchema.findOne({_id: req.params.studentId})
+        student.imageURL = imageLocation
+        await student.save()
+        res.status(200).send({
+            success: true
         })
     } catch (e) {
         console.log("Error: image#student", e);
@@ -118,31 +96,15 @@ router.post('/student/:studentId', passport.authenticate('jwt', {session: false}
     }
 });
 
-router.post('/school/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+router.post('/school/', passport.authenticate('jwt', {session: false}), multerUpload.single('imageFile'), async (req, res, next) => {
     try {
-        const form = new multiparty.Form();
-        form.parse(req, async (error, fields, files) => {
-            if (!error && files.imageFile) {
-                let adminId = fields.adminId[0]
-                let schoolId = fields.schoolId[0]
-                if (!isAdmin(adminId)) {
-                    res.status(400).send('Invalid Admin ID');
-                    return;
-                }
-                const path = files.imageFile[0].path;
-                const buffer = fs.readFileSync(path);
-                const type = await fileType.fromBuffer(buffer);
-                const fileName = `school-${schoolId}`;
-                const data = await uploadFile(buffer, fileName, type);
-                let imageLocation = data.Location;
-                let school = await schoolSchema.findOne({_id: schoolId})
-                school.logoURL = imageLocation
-                await school.save()
-                res.status(200).send({
-                    success: true
-                })
-            }
-        }) 
+        let imageLocation = req.file.location
+        let school = await schoolSchema.findOne({_id: schoolId})
+        school.logoURL = imageLocation
+        await school.save()
+        res.status(200).send({
+            success: true
+        })
     } catch (e) {
         console.log("Error: image#school", e);
         res.status(500).send({'error' : e});
