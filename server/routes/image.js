@@ -27,27 +27,32 @@ AWS.config.setPromisesDependency(bluebird);
 // create S3 instance
 const s3 = new AWS.S3();
 
-var multerUpload = multer({
-    limits: {
-        fileSize: 20 * 1048576 // 20MB max fileSize, will need to reduce this and apply frontend check for max file size
-    },
-    storage: multerS3({
-        s3: s3,
-        bucket: process.env.S3_BUCKET,
-        acl: 'public-read',
-        cacheControl: 'max-age=31536000',
-        contentType: multerS3.AUTO_CONTENT_TYPE,
-        key: async (req, file, cb) => {
+var multerUpload = (keyCallBack) => {
+    return multer({
+        limits: {
+            fileSize: 20 * 1048576 // 20MB max fileSize, will need to reduce this and apply frontend check for max file size
+        },
+        storage: multerS3({
+            s3: s3,
+            bucket: process.env.S3_BUCKET,
+            acl: 'public-read',
+            cacheControl: 'max-age=31536000',
+            contentType: multerS3.AUTO_CONTENT_TYPE,
+            key: keyCallBack
+        })
+    })
+};
+
+// TODO: this potentially leaves S3 bucket being polluted with images, but these images will never be associated to any user
+router.post('/add', multerUpload(
+        async (req, file, cb) => {
             let email = req.body.email;
             let emailHash = await bcrypt.hash(email, HASH_COST);
             let fileName = `${emailHash.replace('/', '')}-${moment().format('MM-DD-YYYY')}`;
             cb(null, fileName);
         }
-    })
-});
-
-// TODO: this potentially leaves S3 bucket being polluted with images, but these images will never be associated to any user
-router.post('/add', multerUpload.single('imageFile'), async (req, res, next) => {
+    ).single('imageFile'),
+    async (req, res, next) => {
     try {
         let imageLocation = req.file.location;
         res.status(200).send({
@@ -66,7 +71,11 @@ async function isAdmin(id) {
     return (admin !== null || (alumni && alumni.user.role.includes('ADMIN')))
 }
 
-router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}), multerUpload.single('imageFile'), async (req, res, next) => {
+router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}), multerUpload(
+    async (req, file, cb) => {
+        cb(null, `alumni-${req.params.alumniId}`);
+    }
+).single('imageFile'), async (req, res, next) => {
     try {
         let imageLocation = req.file.location
         let alumni = await alumniSchema.findOne({_id: req.params.alumniId})
@@ -81,7 +90,11 @@ router.post('/alumni/:alumniId', passport.authenticate('jwt', {session: false}),
     }
 });
 
-router.post('/student/:studentId', passport.authenticate('jwt', {session: false}), multerUpload.single('imageFile'), async (req, res, next) => {
+router.post('/student/:studentId', passport.authenticate('jwt', {session: false}), multerUpload(
+    async (req, file, cb) => {
+        cb(null, `student-${req.params.studentId}`);
+    }
+).single('imageFile'), async (req, res, next) => {
     try {
         let imageLocation = req.file.location
         let student = await studentSchema.findOne({_id: req.params.studentId})
@@ -96,8 +109,18 @@ router.post('/student/:studentId', passport.authenticate('jwt', {session: false}
     }
 });
 
-router.post('/school/', passport.authenticate('jwt', {session: false}), multerUpload.single('imageFile'), async (req, res, next) => {
+router.post('/school/', passport.authenticate('jwt', {session: false}), multerUpload(
+    async (req, file, cb) => {
+        cb(null, `school-${req.body.schoolId}`);
+    }
+).single('imageFile'), async (req, res, next) => {
     try {
+        let adminId = req.body.adminId
+        let schoolId = req.body.schoolId
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
         let imageLocation = req.file.location
         let school = await schoolSchema.findOne({_id: schoolId})
         school.logoURL = imageLocation
