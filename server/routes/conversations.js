@@ -23,8 +23,7 @@ router.post('/add/', passport.authenticate('jwt', {session: false}), async (req,
                 {
                     alumni: [senderId, recipientId],
                     messages: [],
-                    seen: [],
-                    dateCreated: moment.utc(new Date())
+                    seen: []
                 }
             )
         }
@@ -103,8 +102,7 @@ router.patch('/sendMessage/:id', passport.authenticate('jwt', {session: false}),
         
         conversation.messages.unshift({
             senderId: senderId,
-            message: message,
-            dateSent: moment.utc(new Date())
+            message: message
         });
 
         let seen = new Array(conversation.alumni.length).fill(false);

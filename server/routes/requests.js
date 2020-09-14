@@ -9,7 +9,6 @@ var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendNewRequestEmail = require('../routes/helpers/emailHelpers').sendNewRequestEmail
 var sendRequestConfirmedEmail = require('../routes/helpers/emailHelpers').sendRequestConfirmedEmail
 require('mongoose').Promise = global.Promise
-var moment = require('moment');
 
 router.get('/', async (req, res, next) => {
     res.status(200).send({
@@ -115,8 +114,7 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
                 grade: grade,
                 supportData: {
                     topic: request.topic
-                },
-                dateCreated: moment.utc(new Date())
+                }
             })
             await news_instance.save();
 
