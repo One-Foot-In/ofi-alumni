@@ -11,6 +11,7 @@ var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sen
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
 var getUniqueInterests = require("./alumni").getUniqueInterests
 require('mongoose').Promise = global.Promise
+var moment = require('moment');
 
 const HASH_COST = 10;
 
@@ -68,7 +69,8 @@ router.post('/', async (req, res, next) => {
                 students: [student_instance._id],
                 school: schoolId,
                 role: 'STUDENT',
-                grade: grade
+                grade: grade,
+                dateCreated: moment.utc(new Date())
             }
         )
         await news_instance.save();

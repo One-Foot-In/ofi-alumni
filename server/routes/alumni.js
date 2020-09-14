@@ -15,6 +15,7 @@ var majorSchema = require('../models/majorSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
 require('mongoose').Promise = global.Promise
+var moment = require('moment');
 
 const HASH_COST = 10;
 
@@ -190,7 +191,8 @@ router.post('/', async (req, res, next) => {
         const news_instance = new newsSchema({
             event: 'New Alumni',
             alumni: [alumni_instance._id],
-            school: schoolId
+            school: schoolId,
+            dateCreated: moment.utc(new Date())
         })
         await news_instance.save();
         await sendAlumniVerificationEmail(email, verificationToken, school.name)
@@ -279,6 +281,7 @@ router.patch('/topicPreferences/:id', passport.authenticate('jwt', {session: fal
             event: 'New Topics',
             alumni: [alumni._id],
             school: alumni.school,
+            dateCreated: moment.utc(new Date())
         })
         await news_instance.save()
         res.status(200).send({message: "Successfully updated alumni's topic preferences"})
