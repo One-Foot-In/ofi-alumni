@@ -23,10 +23,19 @@ export default class ImageSelectModal extends Component {
         this.selectFile = this.selectFile.bind(this)
         this.submit = this.submit.bind(this)
         this.fileTypeIsImage = this.fileTypeIsImage.bind(this)
+        this.checkFileSizeLimit = this.checkFileSizeLimit.bind(this)
     }
 
     fileTypeIsImage (file) {
         return file && (file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png')
+    }
+
+    checkFileSizeLimit(file) {
+        if (file.size > 5 * 1024 * 1024) {
+            return false; 
+        } else {
+            return true;
+        }
     }
 
     selectFile(e) {
@@ -42,6 +51,18 @@ export default class ImageSelectModal extends Component {
                 text: "Please select a jpeg, jpg, or a png file",
                 icon: "warning",
             });
+        }
+        if (this.checkFileSizeLimit(file)) {
+            this.setState({
+                imageSize: true
+            })
+        } else {
+            swal({
+                title: "Whoops!",
+                text: "Please select photo whose file size is less than 5MB",
+                icon: "warning",
+            });
+            return;
         }
     }
 
@@ -88,8 +109,8 @@ export default class ImageSelectModal extends Component {
                         primary
                         onClick={this.submit}
                         loading={this.state.loading}
-                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile) || this.state.loading}
-                    >
+                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile) || (this.state.fileSize === false)}                    
+                        >
                         Upload
                     </Button>
                     <Button onClick={this.props.close}>
