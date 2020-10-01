@@ -522,7 +522,7 @@ export default class Signup extends React.Component {
                     error={!this.state.graduationYearValid}
                 >
                     {!this.state.graduationYearValid ? getErrorLabel('Please input a valid graduation year') : null}
-                    <label>Graduation Year</label>
+                    <label>High School Graduation Year</label>
                     <input placeholder='YYYY' name="graduationYear" onChange={this.handleChange} />
                 </Form.Field>
                 <Form.Field
