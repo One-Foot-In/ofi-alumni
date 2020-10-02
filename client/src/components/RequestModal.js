@@ -57,6 +57,7 @@ export default class RequestModal extends Component {
         }
         this.handleValueChange = this.handleValueChange.bind(this)
         this.submitRequest = this.submitRequest.bind(this)
+        this.isSubmitReady = this.isSubmitReady.bind(this)
     }
 
     async UNSAFE_componentWillMount() {
@@ -165,13 +166,16 @@ export default class RequestModal extends Component {
         })
     }
 
+    isSubmitReady() {
+        return this.state.topicValue || this.state.note
+    }
+
     handleValueChange(e, {name, value}) {
         e.preventDefault();
         this.setState({
             [name]: value
         })
     }
-
 
     render() {
         return (
@@ -201,6 +205,7 @@ export default class RequestModal extends Component {
                                         options={this.state.availabilityOptions} 
                                         onChange={this.handleValueChange}
                                         value={this.state.availabilityValue}
+                                        noResultsMessage='No Times Found'
                                         name='availabilityValue'
                                     />
                                     <Form.Dropdown
@@ -211,6 +216,7 @@ export default class RequestModal extends Component {
                                         options={this.state.topicOptions} 
                                         onChange={this.handleValueChange}
                                         value={this.state.topicValue}
+                                        noResultsMessage='No Topics Found'
                                         name='topicValue'
                                     />
                                     <Form.TextArea 
@@ -229,10 +235,7 @@ export default class RequestModal extends Component {
                     <Button
                         primary
                         onClick={this.submitRequest}
-                        disabled={
-                                ((this.state.topicValue === '' || 
-                                this.state.availabilityValue === ''))
-                            }
+                        disabled={!this.isSubmitReady()}
                     >
                         Submit Request
                     </Button>
