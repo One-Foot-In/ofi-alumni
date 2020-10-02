@@ -91,7 +91,8 @@ export default class ZoomUpdateModal extends Component {
                 <Modal.Actions>
                     <Button
                         primary
-                        disabled={this.props.zoomLink === this.state.zoomLink}
+                        disabled={this.props.zoomLink === this.state.zoomLink || this.state.submitting} 
+                        loading={this.state.submitting}
                         onClick={this.submit}
                     >
                         Submit

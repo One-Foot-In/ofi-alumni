@@ -142,6 +142,7 @@ export default class LocationSelectionModal extends Component {
                     <Button
                         disabled={!this.state.city || !this.state.country || this.state.submitting}
                         onClick={this.submit}>
+                        loading={this.state.submitting}
                         Update
                     </Button>
                     <Button 

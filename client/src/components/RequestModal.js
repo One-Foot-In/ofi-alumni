@@ -234,6 +234,7 @@ export default class RequestModal extends Component {
                                 this.state.availabilityValue === '')) || 
                                 this.state.submitting
                             }
+                        loading={this.state.submitting}
                     >
                         Submit Request
                     </Button>

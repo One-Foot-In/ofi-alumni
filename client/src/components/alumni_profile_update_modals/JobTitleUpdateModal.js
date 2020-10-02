@@ -122,7 +122,8 @@ export default class JobTitleUpdateModal extends Component {
                 <Modal.Actions>
                     <Button
                         disabled={!this.state.newJobTitle && !this.state.existingJobTitleId || this.state.submitting}
-                        onClick={this.submit}>
+                        onClick={this.submit}
+                        loading={this.state.submitting}>
                         Submit
                     </Button>
                     <Button onClick={() => {

@@ -170,7 +170,8 @@ export default class CollegeShortlistModal extends Component {
                 <Modal.Actions>
                     <Button 
                         primary
-                        disabled={this.isDuplicateCollegeEntry(this.state.existingCollegeName)}
+                        disabled={this.isDuplicateCollegeEntry(this.state.existingCollegeName) || this.state.submitting}
+                        loading={this.state.submitting}
                         onClick={this.submit}
                         >
                         Submit
