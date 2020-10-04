@@ -101,7 +101,7 @@ export default class ImageUpdateModal extends Component {
                         primary
                         onClick={this.submit}
                         loading={this.state.submitting}
-                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile)}
+                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile) || this.state.submitting}
                     >
                         Upload
                     </Button>
