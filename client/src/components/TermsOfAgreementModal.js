@@ -1,22 +1,35 @@
 import React, { Component } from 'react';
 import {Button, Modal } from 'semantic-ui-react';
-
 /*
     props:
     - modalOpen
     - closeModal: ()
 */
 export default class TermsOfAgreementModal extends Component {
-    constructor(props){
+    constructor(props) {
         super(props)
+        this.state = {
+            hasRead: false
+        }
+        this.handleScroll = this.handleScroll.bind(this);
     }
-    
+
+    handleScroll(event) {
+        const target = event.target;
+        const pixelThreshold = 20;
+        if (target.scrollHeight - target.scrollTop - pixelThreshold <= target.clientHeight) {
+            this.setState({
+                hasRead: true
+            })
+        }
+    }
     // TODO: Replace with actual terms
     render() {
         return (
             <Modal
                 open={this.props.modalOpen}
                 style={{overflow: 'auto', maxHeight: 600}}
+                onScroll={this.handleScroll}
             >
                 <Modal.Header>Terms Of Agreement</Modal.Header>
                 <Modal.Content>
@@ -58,7 +71,10 @@ export default class TermsOfAgreementModal extends Component {
                     </p>
                 </Modal.Content>
                 <Modal.Actions>
-                    <Button onClick={this.props.close}>
+                    <Button
+                        onClick={this.props.close}
+                        disabled={!this.state.hasRead}
+                    >
                         Close
                     </Button>
                 </Modal.Actions>
