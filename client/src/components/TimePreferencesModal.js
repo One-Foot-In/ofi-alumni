@@ -336,8 +336,9 @@ export default class TimePreferencesModal extends Component {
                 <Modal.Actions>
                     <Button
                         primary
-                        disabled={!this.hasNewPreferences()}
+                        disabled={!this.hasNewPreferences() || this.state.submitting}
                         onClick={this.submitPreferences}
+                        loading={this.state.submitting}
                     >
                         Submit New Preferences
                     </Button>
