@@ -4,6 +4,7 @@ import swal from "sweetalert";
 import { makeCallWithImage } from "../apis";
 
 const BACKEND = process.env.REACT_APP_BACKEND || "http://localhost:5000"
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 
 /*
 props:
@@ -31,11 +32,7 @@ export default class ImageSelectModal extends Component {
     }
 
     checkFileSizeLimit(file) {
-        if (file.size > 5 * 1024 * 1024) {
-            return false; 
-        } else {
-            return true;
-        }
+        return file.size > FILE_SIZE_LIMIT;
     }
 
     selectFile(e) {
@@ -109,7 +106,7 @@ export default class ImageSelectModal extends Component {
                         primary
                         onClick={this.submit}
                         loading={this.state.loading}
-                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile) || (this.state.fileSize === false)}                    
+                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile) || (this.state.imageSize === false)}                    
                         >
                         Upload
                     </Button>

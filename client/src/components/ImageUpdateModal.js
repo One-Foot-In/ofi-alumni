@@ -3,6 +3,7 @@ import {Button, Modal, Form} from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCallWithImage } from "../apis";
 
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 /*
 props:
     - modalOpen: boolean
@@ -29,17 +30,12 @@ export default class ImageUpdateModal extends Component {
     }
 
     checkFileSizeLimit(file) {
-        if (file.size > 5 * 1024 * 1024) {
-            return false; 
-        } else {
-            return true;
-        }
+        return file.size > FILE_SIZE_LIMIT;
     }
 
     selectFile(e) {
         e.preventDefault();
         let file = e.target.files[0]
-        this.checkFileSizeLimit(file);
         if (this.fileTypeIsImage(file)) {
             this.setState({
                 imageFile: e.target.files[0]
@@ -125,7 +121,7 @@ export default class ImageUpdateModal extends Component {
                         primary
                         onClick={this.submit}
                         loading={this.state.submitting}
-                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile) || (this.state.fileSize === false)}
+                        disabled={!this.state.imageFile || !this.fileTypeIsImage(this.state.imageFile) || (this.state.imageSize === false)}
                     >
                         Upload
                     </Button>
