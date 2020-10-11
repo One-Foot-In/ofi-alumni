@@ -6,7 +6,6 @@ import {Button, Modal } from 'semantic-ui-react';
     - modalOpen
     - closeModal: ()
     - isAlumni
-    - role
 */
 
 const getAlumniTerms = () => {
