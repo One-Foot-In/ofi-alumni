@@ -145,7 +145,7 @@ export default class TimeZoneDropdown extends Component {
         offset: 0
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.setState({offset: this.props.userDetails.timeZone.toString()})
     }
 

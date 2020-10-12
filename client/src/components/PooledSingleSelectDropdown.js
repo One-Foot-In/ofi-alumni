@@ -26,7 +26,7 @@ export default class PooledSingleSelectDropdown extends Component {
         this.commitCustomValue = this.commitCustomValue.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, this.props.endpoint, 'get')
         this.setState({
             options: result.options,

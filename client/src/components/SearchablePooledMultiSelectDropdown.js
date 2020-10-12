@@ -31,7 +31,7 @@ export default class SearchablePooledMultiSelectDropdown extends Component {
         this.handleSelection = this.handleSelection.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, this.props.endpoint, 'get')
         this.setState({
             options: result.options,

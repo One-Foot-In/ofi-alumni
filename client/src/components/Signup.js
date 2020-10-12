@@ -437,7 +437,7 @@ export default class Signup extends React.Component {
         )
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, '/drop/schoolsOptions', 'get')
         let topicOptions = await makeCall(null, `/alumni/topicOptions`, 'get')
         this.setState({

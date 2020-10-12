@@ -30,7 +30,7 @@ export default class CollegeUpdateModal extends Component {
         this.clearState = this.clearState.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, '/drop/countries', 'get')
         this.setState({countryOptions: result.options})
     }

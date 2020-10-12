@@ -59,7 +59,7 @@ export default class RequestModal extends Component {
         this.submitRequest = this.submitRequest.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         await this.setState({
             alumni: this.props.alumni, 
             timeOffset: this.props.userDetails.timeZone
