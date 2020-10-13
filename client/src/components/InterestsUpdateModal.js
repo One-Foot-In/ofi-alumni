@@ -120,7 +120,8 @@ export default class InterestsUpdateModal extends Component {
                 <Modal.Actions>
                     <Button
                         primary
-                        disabled={!this.state.newInterests.length && !this.state.existingInterests.length}
+                        disabled={!this.state.newInterests.length && !this.state.existingInterests.length || this.state.submitting}
+                        loading={this.state.submitting}
                         onClick={this.submit}
                     >
                         Submit

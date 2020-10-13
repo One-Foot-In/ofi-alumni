@@ -118,7 +118,8 @@ export default class TopicPreferencesModal extends Component {
                 <Modal.Actions>
                     <Button
                         primary
-                        disabled={!this.hasNewPreferences()}
+                        disabled={!this.hasNewPreferences() || this.state.submitting}
+                        loading={this.state.submitting}
                         onClick={this.submitPreferences}
                     >
                         Submit New Preferences
