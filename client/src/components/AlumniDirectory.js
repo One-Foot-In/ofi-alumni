@@ -161,18 +161,33 @@ export default class AlumniDirectory extends Component {
                             <Card.Description>Company: {post.companyName}</Card.Description>
                             <br />
                         </Card.Content>
-                        {this.requestVisible(post, i)}
+                        {this.requestButton(post, i)}
                     </Card>
                 </Grid.Column>
             </Grid.Row>
         )
     }
 
-    requestVisible(post, i) {
+    requestButton(post, i) {
+        if (post._id !== this.props.userDetails._id && (this.props.role === 'STUDENT' || this.props.role === 'ALUMNI')) {
+            return (
+                <Button 
+                    primary 
+                    data-id={i}
+                    onClick={this.handleRequestButton.bind(this)}
+                >
+                    Connect with {post.name}!
+                </Button>
+            )
+        }
+        return null
+    }
+
+    // Deprecated at early stages when contact is not restricted by missing zoomLink and/or topics
+    requestButtonRestricted(post, i) {
         var requestButton;
             if (post._id !== this.props.userDetails._id && this.props.role === 'STUDENT') {
-                if (('zoomLink' in post && 
-                    (post.zoomLink !== null && post.zoomLink !== '')) && post.topics.length > 0) {
+                if (('zoomLink' in post && post.zoomLink) && post.topics.length > 0) {
                     requestButton = <Button 
                                         primary 
                                         data-id={i}

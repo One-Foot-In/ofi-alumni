@@ -278,7 +278,7 @@ router.patch('/topicPreferences/:id', passport.authenticate('jwt', {session: fal
         const news_instance = new newsSchema({
             event: 'New Topics',
             alumni: [alumni._id],
-            school: alumni.school,
+            school: alumni.school
         })
         await news_instance.save()
         res.status(200).send({message: "Successfully updated alumni's topic preferences"})

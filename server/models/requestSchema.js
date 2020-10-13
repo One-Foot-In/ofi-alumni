@@ -14,7 +14,7 @@ const requestSchema = new Schema(
     mentor: {type: Schema.Types.ObjectId, ref: 'Alumni'},
     time: [timeAvailabilitySchema],
     zoomLink: {type: String},
-    topic: {type: String, required: true},
+    topic: {type: String},
     status: {type: String, 
                 enum: [ 
                         'Awaiting Confirmation',
