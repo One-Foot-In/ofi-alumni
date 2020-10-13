@@ -1,8 +1,13 @@
+const faviconLink = 'https://ofi-alumni-test.s3.us-east-2.amazonaws.com/favicon.ico'
+const facebookLink ='https://www.facebook.com/onefootinorg'
+const bannerImageLink = 'https://onefootin-dev.s3.us-east-2.amazonaws.com/achievement-3408115_1920.jpg'
+const ofiLogoLink = 'https://ofi-alumni-test.s3.us-east-2.amazonaws.com/%242b%2404%245OsMxDeei1LoP.ObG35lgupvDvnoJTym6rJxRltUg8kufXo8ZRJC-09-14-2020'
+
 const buildBody = (body, title, clickMe, link) => {
     return `
     <html><head>
 <title>One Foot In</title>
-<link rel="shortcut icon" href="https://ofi-alumni-test.s3.us-east-2.amazonaws.com/favicon.ico">
+<link rel="shortcut icon" href="${faviconLink}">
 <style type="text/css">
 table[name="blk_permission"], table[name="blk_footer"] {display:none;} 
 </style>
@@ -110,7 +115,7 @@ table[name="bmeMainBody"], body {background-color:#ffffff;}
 <table width="100%" cellspacing="0" cellpadding="0" border="0" name="bmeMainBody" style="background-color: rgb(255, 255, 255);" bgcolor="#ffffff"><tbody><tr><td width="100%" valign="top" align="center">    
 <table cellspacing="0" cellpadding="0" border="0" name="bmeMainColumnParentTable" width="100%"><tbody><tr><td name="bmeMainColumnParent" style="border: 0px none transparent; border-radius: 0px; border-collapse: separate; border-spacing: 0px; overflow: visible;">     
 <table name="bmeMainColumn" class="bmeMainColumn" style="max-width: 100%; overflow: visible;" cellspacing="0" cellpadding="0" border="0" align="center" width="100%">    <tbody><tr><td width="100%" class="blk_container bmeHolder" name="bmePreHeader" valign="top" align="center" style="color: rgb(102, 102, 102); border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#ffffff"></td></tr> <tr><td width="100%" class="bmeHolder" valign="top" align="center" name="bmeMainContentParent" style="border: 0px none transparent; border-radius: 0px; border-collapse: separate; border-spacing: 0px; overflow: hidden;">     
-<table name="bmeMainContent" style="border-radius: 0px; border-collapse: separate; border-spacing: 0px; border: 0px none transparent; overflow: visible;" width="100%" cellspacing="0" cellpadding="0" border="0" align="center"> <tbody><tr><td width="100%" class="blk_container bmeHolder" name="bmeHeader" valign="top" align="center" style="border: 0px none transparent; background-color: rgb(245, 242, 208);" bgcolor="#f5f2d0"><div id="dv_9" class="blk_wrapper">    
+<table name="bmeMainContent" style="border-radius: 0px; border-collapse: separate; border-spacing: 0px; border: 0px none transparent; overflow: visible;" width="100%" cellspacing="0" cellpadding="0" border="0" align="center"> <tbody><tr><td width="100%" class="blk_container bmeHolder" name="bmeHeader" valign="top" align="center" style="border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#f5f2d0"><div id="dv_9" class="blk_wrapper">    
 <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style=""><tbody><tr><td class="tblCellMain" style="padding: 10px 20px;">    
 <table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;"><tbody><tr><td><span></span></td></tr></tbody>    
 </table></td></tr></tbody>    
@@ -120,7 +125,12 @@ table[name="bmeMainBody"], body {background-color:#ffffff;}
 </table></td></tr></tbody>    
 </table></div><div id="dv_1" class="blk_wrapper">    
 <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_image"><tbody><tr><td>    
-<table width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td align="center" class="bmeImage" style="border-collapse: collapse; padding: 10px 0px;"><img src="https://onefootin-dev.s3.us-east-2.amazonaws.com/achievement-3408115_1920.jpg" width="600" style="max-width: 1200px; display: block; width: 600px;" alt="" border="0"></td></tr></tbody>    
+<table width="100%" cellspacing="0" cellpadding="0" border="0">
+<tbody>
+<tr><td align="center" class="bmeImage" style="border-collapse: collapse; padding: 10px 0px;"><img src="${ofiLogoLink}" style=" max-height: 150px; max-width: 150px; display: block;" alt="" border="0"></td>
+<tr><td align="center" class="bmeImage" style="border-collapse: collapse; padding: 10px 0px;"><img src="${bannerImageLink}" width="600" style="max-width: 1200px; display: block; width: 600px;" alt="" border="0"></td></tr>
+</tr>
+</tbody>    
 </table></td></tr></tbody>    
 </table></div><div id="dv_11" class="blk_wrapper">    
 <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style=""><tbody><tr><td class="tblCellMain" style="padding: 20px;">    
@@ -163,7 +173,7 @@ table[name="bmeMainBody"], body {background-color:#ffffff;}
 <table class="tblContainer mblSocialContain" cellspacing="0" cellpadding="0" border="0" align="center" style="text-align:center;"><tbody><tr><td class="tdItemContainer" style="">    
 <table cellspacing="0" cellpadding="0" border="0" class="mblSocialContain" style="table-layout: auto;"><tbody><tr><td valign="top" name="bmeSocialTD" class="bmeSocialTD"><!--[if gte mso 6]></td><td align="left" valign="top"><![endif]-->    
 <table cellspacing="0" cellpadding="0" border="0" class="bmeFollowItem" type="facebook" style="float: left; display: block;" align="left"><tbody><tr><td align="left" class="bmeFollowItemIcon" gutter="10" width="24" style="padding-right:10px;height:20px;">    
-<a href="https://www.facebook.com/onefootinorg" target="_blank" style="display: inline-block;background-color: rgb(53, 91, 161);border-radius: 4px;border-style: none; border-width: 0px; border-color: rgba(0, 0, 0, 0);"><img src="https://ui.benchmarkemail.com/images/editor/socialicons/fb_btn.png" alt="Facebook" style="display: block; max-width: 114px;" border="0" width="24" height="24"></a></td></tr></tbody>    
+<a href="${facebookLink}" target="_blank" style="display: inline-block;background-color: rgb(53, 91, 161);border-radius: 4px;border-style: none; border-width: 0px; border-color: rgba(0, 0, 0, 0);"><img src="https://ui.benchmarkemail.com/images/editor/socialicons/fb_btn.png" alt="Facebook" style="display: block; max-width: 114px;" border="0" width="24" height="24"></a></td></tr></tbody>    
 </table><!--[if gte mso 6]></td><td align="left" valign="top"><![endif]-->    
 <table cellspacing="0" cellpadding="0" border="0" class="bmeFollowItem" type="twitter" style="float: left; display: block;" align="left"><tbody><tr></tr></tbody>    
 </table><!--[if gte mso 6]></td><td align="left" valign="top"><![endif]-->    
