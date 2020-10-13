@@ -195,14 +195,18 @@ export default class StudentProfile extends Component {
 
                     <Card.Description>Grade: {details.grade || 'Unavailable'}</Card.Description>
                 </Card.Content>
-                <Card.Content>
-                    <Card.Header>Interests</Card.Header>
-                    <Segment
-                        loading={this.state.removingInterest}
-                    >
-                        {this.getInterests()}
-                    </Segment>
-                </Card.Content>
+                {
+                    isViewOnly && !(details.interests.length) ?
+                        null :
+                        <Card.Content>
+                            <Card.Header>Interests</Card.Header>
+                            <Segment
+                                loading={this.state.removingInterest}
+                            >
+                                {this.getInterests()}
+                            </Segment>
+                        </Card.Content>
+                }
             </Card>
             <div padding-top="10px" />
             </div>

@@ -110,6 +110,7 @@ async function main() {
     // test Router for testing health, database connection, and post
     app.use('/util-deprecated/', utilRouter);
 
+    // TODO: comment out util-router wire-up in production instance
     app.use('/util/', mongooseUtilRouter);
 
     app.use('/request/', requestRouter);

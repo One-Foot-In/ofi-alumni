@@ -159,7 +159,7 @@ export default class AlumniMentorship extends Component {
 
     populateConfirmedTimes(requests) {
        return requests.map(confirmedRequest => {
-            return (confirmedRequest.time[0].id)
+            return (confirmedRequest.time && confirmedRequest.time.length) ? confirmedRequest.time[0].id : null
         })
     }
 
@@ -407,6 +407,8 @@ class RequestCards extends Component {
     }
 
     constructRequest(request) {
+        let requestTime = (request.time && request.time.length) ? `${request.time[0].day} from ${timeSlotOptions[request.time[0].time/100]}` : "A time has not been set for this meeting."
+        let requestTopic = request.topic ? request.topic : "A topic has not been selected for this meeting."
         const cardHeader = (this.props.activeSet !== 'completed'? 'Meeting requested by: ' : 'Completed call with: ')
         return (
             <Grid key={request._id} columns={'equal'}>
@@ -426,8 +428,8 @@ class RequestCards extends Component {
                                 {cardHeader} {request.student.name}
                             </Card.Header>           
                             <Card.Meta>{request.status}</Card.Meta>
-                            <Card.Description><b>Topic:</b> {request.topic}</Card.Description>
-                            <Card.Description><b>Time:</b> {request.time[0].day} from {timeSlotOptions[request.time[0].time/100]}</Card.Description>
+                            <Card.Description><b>Topic:</b> {requestTopic}</Card.Description>
+                            <Card.Description><b>Time:</b> {requestTime}</Card.Description>
                             { request.studentNote &&
                                 <Card.Description><b>Note from student:</b> {request.studentNote}</Card.Description>
                             }
@@ -452,7 +454,8 @@ class RequestCards extends Component {
 
     buttonDisplay(request) {
         if (this.props.activeSet === 'unconfirmed') {
-            let disableApprove = this.props.confirmedTimes.includes(request.time[0].id)
+            // disallow mentor from approving a request if the request has a time set, and the mentor already has the time confirmed
+            let disableApprove = request.time && request.time.length && this.props.confirmedTimes.includes(request.time[0].id)
             return (
                 <Button.Group>
                     <Button
