@@ -235,7 +235,8 @@ export default class RequestModal extends Component {
                     <Button
                         primary
                         onClick={this.submitRequest}
-                        disabled={!this.isSubmitReady()}
+                        disabled={!this.isSubmitReady() || this.state.submitting}
+                        loading={this.state.submitting}
                     >
                         Submit Request
                     </Button>
