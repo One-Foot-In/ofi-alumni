@@ -917,6 +917,7 @@ export default class Signup extends React.Component {
                             <TermsOfAgreementModal
                                 modalOpen={this.state.termsModalOpen}
                                 close={this.handleTermsModal}
+                                isAlumni={this.props.isAlumni}
                             />
                             <Checkbox
                                 style={{ 'margin-top': '10px' }}
