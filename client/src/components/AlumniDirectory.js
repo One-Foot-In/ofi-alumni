@@ -169,12 +169,22 @@ export default class AlumniDirectory extends Component {
     }
 
     requestButton(post, i) {
-        if (post._id !== this.props.userDetails._id && (this.props.role === 'STUDENT' || this.props.role === 'ALUMNI')) {
+        if (post._id !== this.props.userDetails._id && (this.props.role === 'STUDENT')) {
             return (
                 <Button 
                     primary 
                     data-id={i}
                     onClick={this.handleRequestButton.bind(this)}
+                >
+                    Connect with {post.name}!
+                </Button>
+            )
+        } else if (post._id !== this.props.userDetails._id && this.props.role === 'ALUMNI') {
+            return (
+                <Button
+                    primary
+                    data-id={i}
+                    onClick={this.handleConnectButton.bind(this)}
                 >
                     Connect with {post.name}!
                 </Button>
