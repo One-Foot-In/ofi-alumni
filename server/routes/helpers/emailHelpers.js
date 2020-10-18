@@ -37,7 +37,9 @@ const sendAlumniVerificationEmail = async (to, token, schoolName) => {
     )
   )
   // console.log("Sending email with", emailObject)
+  console.log(`DEBUG: about to send email to ${to}`)
   await sg.send(emailObject, true)
+  console.log(`DEBUG: email sent successfully to ${to}`)
 }
 
 const sendStudentVerificationEmail = async (to, token, schoolName) => {
@@ -52,7 +54,9 @@ const sendStudentVerificationEmail = async (to, token, schoolName) => {
     )
   )
   // console.log("Sending email with", emailObject)
+  console.log(`DEBUG: about to send email to ${to}`)
   await sg.send(emailObject, true)
+  console.log(`DEBUG: email sent successfully to ${to}`)
 }
 
 const sendNewRequestEmail = async (to) => {
