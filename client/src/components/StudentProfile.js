@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Card, Image, Dimmer, Label, Segment, Icon } from 'semantic-ui-react';
 import ImageUpdateModal from './ImageUpdateModal';
+import DeleteAccountModal from './DeleteAccountModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
 import { makeCall } from "../apis";
 
@@ -21,8 +22,9 @@ export default class StudentProfile extends Component {
         this.state = {
             imageModalOpen: false,
             interestsModalOpen: false,
-            removingInterest: false,
-            imageActive: false
+            submittingRequest: false,
+            imageActive: false,
+            deleteConfirmationModalOpen: false
         }
         this.openImageModal = this.openImageModal.bind(this)
         this.closeImageModal = this.closeImageModal.bind(this)
@@ -68,16 +70,17 @@ export default class StudentProfile extends Component {
     }
     async removeInterest(e, interestIdToRemove) {
         e.preventDefault()
-        this.setState({removingInterest: true},
+        this.setState({submittingRequest: true},
             async () => {
                 await makeCall({interestIdToRemove: interestIdToRemove}, `/student/interests/remove/${this.props.details._id}`, 'patch')
                 this.setState({
-                    removingInterest: false
+                    submittingRequest: false
                 }, () => 
                     this.props.refreshProfile(STUDENT, this.props.details._id)
                 )
             })
     }
+
     getInterests() {
         let allInterests = this.props.details.interests
         return (
@@ -192,7 +195,6 @@ export default class StudentProfile extends Component {
                 }
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
-
                     <Card.Description>Grade: {details.grade || 'Unavailable'}</Card.Description>
                 </Card.Content>
                 {
@@ -201,11 +203,24 @@ export default class StudentProfile extends Component {
                         <Card.Content>
                             <Card.Header>Interests</Card.Header>
                             <Segment
-                                loading={this.state.removingInterest}
+                                loading={this.state.submittingRequest}
                             >
                                 {this.getInterests()}
                             </Segment>
                         </Card.Content>
+                }
+                {
+                    isViewOnly ?
+                    null :
+                    <Card.Content
+                        centered
+                    >
+                        <DeleteAccountModal
+                            logout={this.props.logout}
+                            isAlumni={false}
+                            id={this.props.details._id}
+                        />
+                    </Card.Content>
                 }
             </Card>
             <div padding-top="10px" />

@@ -151,4 +151,18 @@ router.patch('/interests/add/:id', async (req, res, next) => {
     }
 })
 
+router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.id})
+        await userSchema.findByIdAndRemove({_id: student.user })
+        await newsSchema.deleteMany({ student: { $in: student._id }})
+        await requestSchema.deleteMany({ student: { $in: student._id }})
+        await studentSchema.findOneAndRemove({_id: student._id})
+        res.status(200).send({message: "Successfully removed student"})
+    } catch (e) {
+        console.log("Error: student#delete", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 module.exports = router;
