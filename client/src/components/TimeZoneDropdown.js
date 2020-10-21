@@ -6,127 +6,127 @@ var timeZoneOptions = [
     {
         key: '-1200',
         value: '-1200',
-        text: 'BIT/IDLW (UTC/GMT -12)'
+        text: 'BIT'
     },
     {
         key: '-1100',
         value: '-1100',
-        text: 'NUT/SST (UTC/GMT -11)',
+        text: 'NUT',
     },
     {
         key: '-1000',
         value: '-1000',
-        text: 'HST/SDT (UTC/GMT -10)',
+        text: 'HST',
     },
     {
         key: '-900',
         value: '-900',
-        text: 'AKST/HDT (UTC/GMT -9)',
+        text: 'AKST',
     },
     {
         key: '-800',
         value: '-800',
-        text: 'PST/AKDT (UTC/GMT -8)',
+        text: 'PST',
     },
     {
         key: '-700',
         value: '-700',
-        text: 'MST/PDT (UTC/GMT -7)',
+        text: 'MST',
     },
     {
         key: '-600',
         value: '-600',
-        text: 'CST/MDT (UTC/GMT -6)',
+        text: 'CST',
     },
     {
         key: '-500',
         value: '-500',
-        text: 'EST/CDT (UTC/GMT -5)',
+        text: 'EST',
     },
     {
         key: '-400',
         value: '-400',
-        text: 'AST/EDT (UTC/GMT -4)',
+        text: 'AST',
     },
     {
         key: '-300',
         value: '-300',
-        text: 'ART/ADT (UTC/GMT -3)',
+        text: 'ART',
     },
     {
         key: '-200',
         value: '-200',
-        text: 'BST (UTC/GMT -2)',
+        text: 'BST',
     },
     {
         key: '-100',
         value: '-100',
-        text: 'CVT/EGT (UTC/GMT -1)',
+        text: 'CVT',
     },
     {
         key: '0',
         value: '0',
-        text: 'UTC/GMT +0',
+        text: 'GMT',
     },
     {
         key: '100',
         value: '100',
-        text: 'BST/IST/WAT (UTC/GMT +1)',
+        text: 'BST',
     },
     {
         key: '200',
         value: '200',
-        text: 'CAT/EET (UTC/GMT +2)',
+        text: 'CAT',
     },
     {
         key: '300',
         value: '300',
-        text: 'EAT/FET (UTC/GMT +3)',
+        text: 'EAT',
     },
     {
         key: '400',
         value: '400',
-        text: 'AZT/GST (UTC/GMT +4)',
+        text: 'AZT',
     },
     {
         key: '500',
         value: '500',
-        text: 'PKT/TJT (UTC/GMT +5)',
+        text: 'PKT',
     },
     {
         key: '600',
         value: '600',
-        text: 'BST/KGT (UTC/GMT +6)',
+        text: 'BST',
     },
     {
         key: '700',
         value: '700',
-        text: 'ICT/WIT (UTC/GMT +7)',
+        text: 'ICT',
     },
     {
         key: '800',
         value: '800',
-        text: 'AWST/CT/HKT (UTC/GMT +8)',
+        text: 'AWST',
     },
     {
         key: '900',
         value: '900',
-        text: 'EIT/JST (UTC/GMT +9)',
+        text: 'EIT',
     },
     {
         key: '1000',
         value: '1000',
-        text: 'AEST/PGT (UTC/GMT +10)',
+        text: 'AEST',
     },
     {
         key: '1100',
         value: '1100',
-        text: 'AEDT/NFT (UTC/GMT +11)',
+        text: 'AEDT',
     },
     {
         key: '1200',
         value: '1200',
-        text: 'NZST (UTC/GMT +12)',
+        text: 'NZST',
     }
 ]
 
