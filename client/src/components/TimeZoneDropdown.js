@@ -6,52 +6,52 @@ var timeZoneOptions = [
     {
         key: '-1200',
         value: '-1200',
-        text: 'BIT'
+        text: 'BIT/IDLW'
     },
     {
         key: '-1100',
         value: '-1100',
-        text: 'NUT',
+        text: 'NUT/SST',
     },
     {
         key: '-1000',
         value: '-1000',
-        text: 'HST',
+        text: 'HST/SDT',
     },
     {
         key: '-900',
         value: '-900',
-        text: 'AKST',
+        text: 'AKST/HDT',
     },
     {
         key: '-800',
         value: '-800',
-        text: 'PST',
+        text: 'PST/AKDT',
     },
     {
         key: '-700',
         value: '-700',
-        text: 'MST',
+        text: 'MST/PDT',
     },
     {
         key: '-600',
         value: '-600',
-        text: 'CST',
+        text: 'CST/MDT',
     },
     {
         key: '-500',
         value: '-500',
-        text: 'EST',
+        text: 'EST/CDT',
     },
     {
         key: '-400',
         value: '-400',
-        text: 'AST',
+        text: 'AST/EDT',
     },
     {
         key: '-300',
         value: '-300',
-        text: 'ART',
+        text: 'ART/ADT',
     },
     {
         key: '-200',
@@ -61,67 +61,67 @@ var timeZoneOptions = [
     {
         key: '-100',
         value: '-100',
-        text: 'CVT',
+        text: 'CVT/EGT',
     },
     {
         key: '0',
         value: '0',
-        text: 'GMT',
+        text: 'GMT/UTC',
     },
     {
         key: '100',
         value: '100',
-        text: 'BST',
+        text: 'BST/IST/WAT',
     },
     {
         key: '200',
         value: '200',
-        text: 'CAT)',
+        text: 'CAT/EET',
     },
     {
         key: '300',
         value: '300',
-        text: 'EAT',
+        text: 'EAT/FET',
     },
     {
         key: '400',
         value: '400',
-        text: 'AZT',
+        text: 'AZT/GST',
     },
     {
         key: '500',
         value: '500',
-        text: 'PKT',
+        text: 'PKT/TJT',
     },
     {
         key: '600',
         value: '600',
-        text: 'BST',
+        text: 'BST/KGT',
     },
     {
         key: '700',
         value: '700',
-        text: 'ICT',
+        text: 'ICT/WIT',
     },
     {
         key: '800',
         value: '800',
-        text: 'AWST',
+        text: 'AWST/CT/HKT',
     },
     {
         key: '900',
         value: '900',
-        text: 'EIT',
+        text: 'EIT/JST',
     },
     {
         key: '1000',
         value: '1000',
-        text: 'AEST',
+        text: 'AEST/PGT',
     },
     {
         key: '1100',
         value: '1100',
-        text: 'AEDT',
+        text: 'AEDT/NFT',
     },
     {
         key: '1200',
