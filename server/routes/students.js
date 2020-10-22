@@ -7,6 +7,7 @@ var userSchema = require('../models/userSchema');
 var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
+var requestSchema = require('../models/requestSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
 var getUniqueInterests = require("./alumni").getUniqueInterests
@@ -155,9 +156,9 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
     try {
         let student = await studentSchema.findOne({_id: req.params.id})
         await userSchema.findByIdAndRemove({_id: student.user })
-        await newsSchema.deleteMany({ student: { $in: student._id }})
-        await requestSchema.deleteMany({ student: { $in: student._id }})
-        await studentSchema.findOneAndRemove({_id: student._id})
+        await newsSchema.deleteMany({ student: { $in: [student._id] }})
+        await requestSchema.deleteMany({ student: { $in: [student._id] }})
+        await studentSchema.findOneAndRemove({_id: student._id })
         res.status(200).send({message: "Successfully removed student"})
     } catch (e) {
         console.log("Error: student#delete", e);

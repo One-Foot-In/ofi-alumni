@@ -212,9 +212,7 @@ export default class StudentProfile extends Component {
                 {
                     isViewOnly ?
                     null :
-                    <Card.Content
-                        centered
-                    >
+                    <Card.Content>
                         <DeleteAccountModal
                             logout={this.props.logout}
                             isAlumni={false}

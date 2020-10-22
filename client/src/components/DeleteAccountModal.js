@@ -16,27 +16,21 @@ export default class DeleteAccountModal extends Component {
             submittingRequest: false,
             modalOpen: false
         }
+        this.toggleModal = this.toggleModal.bind(this)
+        this.deleteAccount = this.deleteAccount.bind(this)
     }
-    openModal(e) {
-        console.log("opening modal")
-        e.preventDefault();
+    toggleModal() {
         this.setState({
-            modalOpen: true
-        })
-    }
-    closeModal(e) {
-        e.preventDefault();
-        this.setState({
-            modalOpen: false
+            modalOpen: !this.state.modalOpen
         })
     }
 
     deleteAccount() {
-        this.props.closeModal()
+        this.toggleModal()
         this.setState({
             submittingRequest: true
         }, async () => {
-            let result = await makeCall({}, `/${this.props.isAlumni ? 'alumni': 'student'}/${this.props.details._id}`, 'delete')
+            let result = await makeCall({}, `/${this.props.isAlumni ? 'alumni': 'student'}/${this.props.id}`, 'delete')
             if (!result || result.error) {
                 this.setState({
                     submittingRequest: false
@@ -69,11 +63,11 @@ export default class DeleteAccountModal extends Component {
             <Button
                 color="red"
                 type="button"
-                onClick={this.openModal.bind(this)}
+                onClick={this.toggleModal}
             >
                 Delete Account
                 <Icon
-                    name="delete"
+                    name="trash alternate outline"
                     style={{
                         'margin': '3px'
                     }}
@@ -93,7 +87,7 @@ export default class DeleteAccountModal extends Component {
                             Yes
                         </Button>
                         <Button
-                            onClick={this.closeModal.bind(this)}
+                            onClick={this.toggleModal}
                         >
                             No
                         </Button>

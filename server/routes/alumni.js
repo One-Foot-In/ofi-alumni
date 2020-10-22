@@ -508,8 +508,8 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
     try {
         let alumni = await alumniSchema.findOne({_id: req.params.id})
         await userSchema.findByIdAndRemove({_id: alumni.user })
-        await newsSchema.deleteMany({ alumni: { $in: alumni._id }})
-        await requestSchema.deleteMany({ alumni: { $in: alumni._id }})
+        await newsSchema.deleteMany({ alumni: { $in: [alumni._id] }})
+        await requestSchema.deleteMany({ alumni: { $in: [alumni._id] }})
         await alumniSchema.findOneAndRemove({_id: alumni._id})
         res.status(200).send({message: "Successfully removed alumni"})
     } catch (e) {
