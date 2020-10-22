@@ -23,8 +23,7 @@ export default class StudentProfile extends Component {
             imageModalOpen: false,
             interestsModalOpen: false,
             submittingRequest: false,
-            imageActive: false,
-            deleteConfirmationModalOpen: false
+            imageActive: false
         }
         this.openImageModal = this.openImageModal.bind(this)
         this.closeImageModal = this.closeImageModal.bind(this)
