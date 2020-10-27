@@ -6,127 +6,127 @@ var timeZoneOptions = [
     {
         key: '-1200',
         value: '-1200',
-        text: 'Baker Island | BIT/IDLW'
+        text: 'BIT/IDLW'
     },
     {
         key: '-1100',
         value: '-1100',
-        text: 'Jarvis Island | NUT/SST',
+        text: 'NUT/SST',
     },
     {
         key: '-1000',
         value: '-1000',
-        text: 'Honululu (HI, USA) | HST/SDT',
+        text: 'HST/SDT',
     },
     {
         key: '-900',
         value: '-900',
-        text: 'Anchorage (AK, USA) | AKST/HDT',
+        text: 'AKST/HDT',
     },
     {
         key: '-800',
         value: '-800',
-        text: 'Los Angeles (CA, USA) | PST/AKDT',
+        text: 'PST/AKDT',
     },
     {
         key: '-700',
         value: '-700',
-        text: 'Phonenix (AZ, USA) | MST/PDT',
+        text: 'MST/PDT',
     },
     {
         key: '-600',
         value: '-600',
-        text: 'Chicago (IL, USA) | CST/MDT',
+        text: 'CST/MDT',
     },
     {
         key: '-500',
         value: '-500',
-        text: 'New York (NT, USA) | EST/CDT',
+        text: 'EST/CDT',
     },
     {
         key: '-400',
         value: '-400',
-        text: 'Santiago (Chile) | AST/EDT',
+        text: 'AST/EDT',
     },
     {
         key: '-300',
         value: '-300',
-        text: 'Buenos Aires (Argentina) | ART/ADT',
+        text: 'ART/ADT',
     },
     {
         key: '-200',
         value: '-200',
-        text: 'Fernando de Noronha (Brazil) | BST',
+        text: 'BST',
     },
     {
         key: '-100',
         value: '-100',
-        text: 'Cape Verde | CVT/EGT',
+        text: 'CVT/EGT',
     },
     {
         key: '0',
         value: '0',
-        text: 'London (UK) | UTC/GMT +0',
+        text: 'GMT/UTC',
     },
     {
         key: '100',
         value: '100',
-        text: 'Paris (France) | BST/IST/WAT',
+        text: 'BST/IST/WAT',
     },
     {
         key: '200',
         value: '200',
-        text: 'Athens (Greece) | CAT/EET',
+        text: 'CAT/EET',
     },
     {
         key: '300',
         value: '300',
-        text: 'Istanbul (Turkey) | EAT/FET',
+        text: 'EAT/FET',
     },
     {
         key: '400',
         value: '400',
-        text: 'Dubai (UAE) | AZT/GST',
+        text: 'AZT/GST',
     },
     {
         key: '500',
         value: '500',
-        text: 'Karachi (Pakistan) | PKT/TJT',
+        text: 'PKT/TJT',
     },
     {
         key: '600',
         value: '600',
-        text: 'Dhaka (Bangladesh) | BST/KGT',
+        text: 'BST/KGT',
     },
     {
         key: '700',
         value: '700',
-        text: 'Jakarta (Indonesia) | ICT/WIT',
+        text: 'ICT/WIT',
     },
     {
         key: '800',
         value: '800',
-        text: 'Shanghai (China) | AWST/CT/HKT',
+        text: 'AWST/CT/HKT',
     },
     {
         key: '900',
         value: '900',
-        text: 'Seoul (South Korea) | EIT/JST',
+        text: 'EIT/JST',
     },
     {
         key: '1000',
         value: '1000',
-        text: 'Sydney (Australia) | AEST/PGT',
+        text: 'AEST/PGT',
     },
     {
         key: '1100',
         value: '1100',
-        text: 'Magadan (Russia) | AEDT/NFT',
+        text: 'AEDT/NFT',
     },
     {
         key: '1200',
         value: '1200',
-        text: 'Auckland (New Zealand) | NZST',
+        text: 'NZST',
     }
 ]
 
