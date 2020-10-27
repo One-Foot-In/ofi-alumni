@@ -121,8 +121,9 @@ export default class MajorUpdateModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
-                        disabled={!this.state.newMajor && !this.state.existingMajorId}
-                        onClick={this.submit}>
+                        disabled={!this.state.newMajor && !this.state.existingMajorId || this.state.submitting}
+                        onClick={this.submit}
+                        loading={this.state.submitting}>
                         Submit
                     </Button>
                     <Button onClick={() => {

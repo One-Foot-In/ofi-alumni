@@ -3,7 +3,7 @@ import {Button, Modal, Form} from 'semantic-ui-react';
 import swal from "sweetalert";
 import { makeCallWithImage } from "../apis";
 
-const BACKEND = process.env.REACT_APP_BACKEND || "http://localhost:5000"
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 
 /*
 props:
@@ -23,23 +23,34 @@ export default class ImageSelectModal extends Component {
         this.selectFile = this.selectFile.bind(this)
         this.submit = this.submit.bind(this)
         this.fileTypeIsImage = this.fileTypeIsImage.bind(this)
+        this.fileSizeIsWithinBound = this.fileSizeIsWithinBound.bind(this)
     }
 
     fileTypeIsImage (file) {
         return file && (file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png')
     }
 
+    fileSizeIsWithinBound (file) {
+        return file && file.size < FILE_SIZE_LIMIT
+    }
+
     selectFile(e) {
         e.preventDefault();
         let file = e.target.files[0]
-        if (this.fileTypeIsImage(file)) {
+        if (this.fileTypeIsImage(file) && this.fileSizeIsWithinBound(file)) {
             this.setState({
                 imageFile: e.target.files[0]
             })
-        } else {
+        } else if (!this.fileTypeIsImage(file)) {
             swal({
                 title: "Whoops!",
                 text: "Please select a jpeg, jpg, or a png file",
+                icon: "warning",
+            });
+        } else if (!this.fileSizeIsWithinBound(file)) {
+            swal({
+                title: "Whoops!",
+                text: "Please select an image under 8 MB",
                 icon: "warning",
             });
         }
