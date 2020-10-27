@@ -12,6 +12,7 @@ var companySchema = require('../models/companySchema');
 var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
 var majorSchema = require('../models/majorSchema');
+var requestSchema = require('../models/requestSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers")
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
 require('mongoose').Promise = global.Promise
@@ -499,6 +500,20 @@ router.patch('/location/update/:id', passport.authenticate('jwt', {session: fals
         res.status(200).send({message: "Successfully updated alumni's location"})
     } catch (e) {
         console.log("Error: alumni#location/update", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        await userSchema.findByIdAndRemove({_id: alumni.user })
+        await newsSchema.deleteMany({ alumni: { $in: [alumni._id] }})
+        await requestSchema.deleteMany({ alumni: { $in: [alumni._id] }})
+        await alumniSchema.findOneAndRemove({_id: alumni._id})
+        res.status(200).send({message: "Successfully removed alumni"})
+    } catch (e) {
+        console.log("Error: alumni#delete", e);
         res.status(500).send({'error' : e});
     }
 })
