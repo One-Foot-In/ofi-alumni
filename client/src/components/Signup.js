@@ -437,7 +437,7 @@ export default class Signup extends React.Component {
         )
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, '/drop/schoolsOptions', 'get')
         let topicOptions = await makeCall(null, `/alumni/topicOptions`, 'get')
         this.setState({
@@ -507,7 +507,7 @@ export default class Signup extends React.Component {
     validateSubmitReadiness() {
         const baseCondition = (this.state.name && this.state.email && this.state.password && this.state.schoolSelection && this.state.confirmPassword) && (this.state.confirmPassword === this.state.password) && this.state.userAgreedTerms && this.state.imageUrl;
         if (this.props.isAlumni) {
-            return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId) && this.state.topics.length && this.state.zoomLink && this.state.city && this.state.country;
+            return baseCondition && this.state.graduationYear && (this.state.newCollege || this.state.existingCollegeId) && (this.state.newMajor || this.state.existingMajorId) && this.state.city && this.state.country;
         }
         return baseCondition && this.state.grade;
     }
@@ -522,7 +522,7 @@ export default class Signup extends React.Component {
                     error={!this.state.graduationYearValid}
                 >
                     {!this.state.graduationYearValid ? getErrorLabel('Please input a valid graduation year') : null}
-                    <label>Graduation Year</label>
+                    <label>High School Graduation Year</label>
                     <input placeholder='YYYY' name="graduationYear" onChange={this.handleChange} />
                 </Form.Field>
                 <Form.Field
@@ -603,7 +603,6 @@ export default class Signup extends React.Component {
                     }
                 </Form.Field>
                 <Form.Field
-                    required={true}
                     style={fieldStyle}
                 >
                     <label>Zoom meeting link</label>
@@ -616,10 +615,9 @@ export default class Signup extends React.Component {
                     />
                 </Form.Field>
                 <Form.Field
-                    required={true}
                     style={fieldStyle}
                 >
-                    <label>Topics (select at least one)</label>
+                    <label>Topics you would like to consult on (please select at least one)</label>
                     <Dropdown
                         style={{ 'margin': '5px', 'width': '100%'}}
                         placeholder='Select topics you would like to consult on.'
@@ -919,6 +917,7 @@ export default class Signup extends React.Component {
                             <TermsOfAgreementModal
                                 modalOpen={this.state.termsModalOpen}
                                 close={this.handleTermsModal}
+                                isAlumni={this.props.isAlumni}
                             />
                             <Checkbox
                                 style={{ 'margin-top': '10px' }}

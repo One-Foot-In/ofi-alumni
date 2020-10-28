@@ -23,7 +23,7 @@ export default class Conversation extends Component {
         this.handleValueChange = this.handleValueChange.bind(this)
         this.sendMessage = this.sendMessage.bind(this)
     }
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.createDisplay(this.props.conversation)
         this.setState({conversation: this.props.conversation})
     }

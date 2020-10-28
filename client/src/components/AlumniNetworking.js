@@ -21,7 +21,7 @@ export default class AlumniNetworking extends Component {
         this.openConversation = this.openConversation.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let timeOffsetHours = (parseInt(this.props.userDetails.timeZone) / 100)
         let conversations = await this.getConversations()
         this.setState({

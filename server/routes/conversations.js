@@ -23,7 +23,7 @@ router.post('/add/', passport.authenticate('jwt', {session: false}), async (req,
                 {
                     alumni: [senderId, recipientId],
                     messages: [],
-                    seen: [],
+                    seen: []
                 }
             )
         }
@@ -36,7 +36,6 @@ router.post('/add/', passport.authenticate('jwt', {session: false}), async (req,
         conversation_instance.seen = seen
         
         let insert = await conversation_instance.save();
-
         res.status(200).send({
             message: 'Successfully added message to conversation',
             request: conversation_instance
@@ -76,7 +75,7 @@ router.patch('/one/:id', passport.authenticate('jwt', {session: false}), async (
         
         conversation.seen.set(conversation.alumni.indexOf(alumniId), true);
         await conversation.save()
-        
+
         await conversation.populate('alumni', 'name imageURL').execPopulate();
         for (let message of conversation.messages) {
             let dateSent = moment.utc(message.dateSent).add(timezone, 'h');
@@ -99,7 +98,6 @@ router.patch('/sendMessage/:id', passport.authenticate('jwt', {session: false}),
         const conversationId = req.body.id;
         const message = req.body.message
         const timezone = parseInt(req.body.timezone);
-        
         let conversation = await conversationSchema.findById(conversationId)
         
         conversation.messages.unshift({

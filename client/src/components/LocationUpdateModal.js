@@ -22,7 +22,7 @@ export default class LocationSelectionModal extends Component {
         this.submit = this.submit.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, '/drop/countries', 'get')
         this.setState({options: result.options})
     }
@@ -141,8 +141,9 @@ export default class LocationSelectionModal extends Component {
                 <Modal.Actions>
                     <Button
                         disabled={!this.state.city || !this.state.country || this.state.submitting}
-                        onClick={this.submit}>
+                        onClick={this.submit}
                         loading={this.state.submitting}
+                    >
                         Update
                     </Button>
                     <Button 

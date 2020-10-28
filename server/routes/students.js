@@ -8,6 +8,7 @@ var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
 var collegeSchema = require('../models/collegeSchema');
 var newsSchema = require('../models/newsSchema');
+var requestSchema = require('../models/requestSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
 var getUniqueInterests = require("./alumni").getUniqueInterests
@@ -89,7 +90,7 @@ router.post('/', async (req, res, next) => {
 
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        const dbData = await studentSchema.findOne({_id: req.params.id}).populate("collegeShortlist");
+        const dbData = await studentSchema.findOne({_id: req.params.id}).populate('school')
         res.json({'result' : dbData});
     } catch (e) {
         console.log("Error: util#oneStudent", e);
@@ -165,6 +166,19 @@ router.patch('/collegeShortlist/update/:id', passport.authenticate('jwt', {sessi
         res.status(200).send({student: student})
     } catch (e) {
         console.log("Error: student#college/update", e);
+    }
+})
+
+router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.id})
+        await userSchema.findByIdAndRemove({_id: student.user })
+        await newsSchema.deleteMany({ student: { $in: [student._id] }})
+        await requestSchema.deleteMany({ student: { $in: [student._id] }})
+        await studentSchema.findOneAndRemove({_id: student._id })
+        res.status(200).send({message: "Successfully removed student"})
+    } catch (e) {
+        console.log("Error: student#delete", e);
         res.status(500).send({'error' : e});
     }
 })

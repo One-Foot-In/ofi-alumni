@@ -231,7 +231,6 @@ class App extends Component {
       approved: false,
       role: null,
       roleChanged: false,
-      schoolId: '',
       userDetails: {}
     };
     this.logout = this.logout.bind(this);
@@ -243,7 +242,7 @@ class App extends Component {
     this.liftRole = this.liftRole.bind(this);
   }
 
-  async componentWillMount() {
+  async UNSAFE_componentWillMount() {
     var role;
     var profile;
     var id;
@@ -317,7 +316,9 @@ class App extends Component {
   async logout() {
     await makeCall({}, '/logout', 'get');
     this.setState({
-      loggedIn: false
+      loggedIn: false,
+      userDetails: {},
+      role: null
     });
   }
 
@@ -377,6 +378,7 @@ class App extends Component {
                         isViewOnly={false}
                         details={this.state.userDetails}
                         refreshProfile={this.refreshProfile}
+                        logout={this.logout}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -393,7 +395,7 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
                       <AlumniDirectory
-                        schoolId={this.state.userDetails.school}
+                        schoolId={this.state.userDetails.school._id}
                         userDetails={this.state.userDetails}
                         role={role}
                       />
@@ -450,7 +452,7 @@ class App extends Component {
                       />
                         <AlumniVerification
                           gradYear={this.state.userDetails.gradYear}
-                          schoolId={this.state.userDetails.school}
+                          schoolId={this.state.userDetails.school._id}
                         />
                       </> 
                     :<Redirect to={'/'}/> )
@@ -494,6 +496,7 @@ class App extends Component {
                       <StudentProfile
                         isViewOnly={false}
                         details={this.state.userDetails}
+                        logout={this.logout}
                         refreshProfile={this.refreshProfile}
                       />
                   </> :
@@ -511,7 +514,7 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
                       <AlumniDirectory
-                        schoolId={this.state.userDetails.school}
+                        schoolId={this.state.userDetails.school._id}
                         userDetails={this.state.userDetails}
                         role={role}
                       />
@@ -564,7 +567,7 @@ class App extends Component {
                         />
                         <StudentVerification
                           grade={this.state.userDetails.grade}
-                          schoolId={this.state.userDetails.school}
+                          schoolId={this.state.userDetails.school._id}
                           studentId={this.state.userDetails._id}
                         />
                       </>
@@ -716,17 +719,7 @@ class App extends Component {
         )
       default:
         return (
-          <Route exact path={`/`} render={(props) => 
-            this.state.loggedIn ?
-            <>
-                <Navbar
-                    navItems={studentNavBarItems(this.state.userDetails.isModerator)}
-                    activeItem={'home'}
-                />
-            </> :
-            <Redirect to={"/login"}/>
-            }
-          />
+          <Redirect to={"/login"}/>
         )
     }
   }
@@ -800,8 +793,7 @@ class App extends Component {
             <Header
               loggedIn={this.state.loggedIn}
               logout={this.logout}
-              email={this.state.userDetails && this.state.userDetails.email}
-              schoolLogo={this.state.userDetails && this.state.userDetails.schoolLogo}
+              school={this.state.userDetails && this.state.userDetails.school}
               userId={this.state.userDetails && this.state.userDetails.user}
               role={this.state.role}
               liftRole={this.liftRole}

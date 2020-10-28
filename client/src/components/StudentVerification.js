@@ -24,7 +24,7 @@ export default class StudentVerification extends Component {
         this.handleClick = this.handleClick.bind(this)
     }
 
-    async componentWillMount(){
+    async UNSAFE_componentWillMount(){
         let result = await this.getEntries()
         this.setState({
             entries: result.unapproved.reverse()
