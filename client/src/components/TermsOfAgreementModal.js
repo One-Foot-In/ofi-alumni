@@ -11,7 +11,7 @@ import {Button, Modal } from 'semantic-ui-react';
 const getAlumniTerms = () => {
     return <>
         <p>
-        We are excited you are joining One Foot In! Mentors are the lifeblood of our platform. You may use our platform to connect with other alumni in your school network, and in that sense use the platform as a directory for your school’s alumni network.
+        We are excited you are joining One Foot In! Mentors are the lifeblood of our platform. You may use our platform to connect with other alumni in your school network, and in that sense use the platform as a directory for your school’s alumni network. However, we do not by any means represent any schools or universities themselves, but rather provide a context in which members of these communities can interact.
         </p>
         <p>
         As a mentor, you are strongly encouraged to offer <strong>topics of consultancy</strong> and <strong>recurring weekly times of availability</strong> to allow students/mentees from your school network to request a call with you. You should be able to track all the requests made to you via our web portal. Please be sure to add your <strong>Zoom personal meeting room link</strong> to be able to start meetings from within our portal (You can add the Zoom meeting link post-registration using the Meeting Settings sub-tab in the Mentorship tab).  
@@ -29,6 +29,9 @@ const getStudentTerms = () => {
         </p>
         <p>
         As a student, you must acknowledge that you are over 13 years of age at the time of registration. One Foot In is not open to students under the age of 13.   
+        </p>
+        <p>
+        Additionally, we do not by any means represent any schools or universities themselves, but rather provide a context in which members of these communities can interact. 
         </p>
         <p>
         We do not guarantee results, and will not be bound to deliver on any promises made by our mentors. The mentors on the network are their own advocates, and are expected to offer advice that is informed by their own unique life experiences and outcomes. We believe this unmediated mentorship offers the most value in terms of bringing diverse perspectives, lifepaths, and stories that lets you make an authentic connection.
