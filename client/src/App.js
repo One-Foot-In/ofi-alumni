@@ -386,6 +386,7 @@ class App extends Component {
                         isViewOnly={false}
                         details={this.state.userDetails}
                         refreshProfile={this.refreshProfile}
+                        logout={this.logout}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -503,6 +504,7 @@ class App extends Component {
                       <StudentProfile
                         isViewOnly={false}
                         details={this.state.userDetails}
+                        logout={this.logout}
                         refreshProfile={this.refreshProfile}
                       />
                   </> :

@@ -74,6 +74,7 @@ router.post('/login', (req, res, next) => {
                 return;
               }
               //server update can go here i think
+
               payload.id = alumni._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               console.log(cookie)
@@ -88,10 +89,11 @@ router.post('/login', (req, res, next) => {
               );
             } else if (userRole.includes("STUDENT")) {
               const student = await studentSchema.findOne({user: user._id});
-              if (!student.approved) {
-                res.status(404).send({ error: `Your account is currently pending approval.` });
-                return;
-              }
+              // TODO: bar login when unapproved when users reach critical mass
+              // if (!student.approved) {
+              //   res.status(404).send({ error: `Your account is currently pending approval.` });
+              //   return;
+              // }
               payload.id = student._id
               //also update this part as well
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
