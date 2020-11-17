@@ -1,7 +1,7 @@
 const sg = require('@sendgrid/mail');
 require('dotenv').config();
 require('mongoose').Promise = global.Promise
-var alumniSchema = require('../../models/adminSchema');
+var alumniSchema = require('../../models/alumniSchema');
 var userSchema = require('../../models/userSchema');
 var conversationSchema = require('../../models/conversationSchema');
 var moment = require('moment');
@@ -159,7 +159,7 @@ function getNewMessagesForAlumniString(messageCountByAlumniData) {
   Loops through all conversations the alumni has had in the window of last 7 days, counts messages
   from each alumni in the last 7 days and returns map of identifying alumni data string to messages count
 */
-const getWeeklyMessagesSummaryForAlumni = async (alumni) => {
+const getWeeklyMessagesSummaryForAlumni = async (alumnus) => {
   let lastWeekStartingDate = moment().subtract(7, 'd').toDate()
   let relevantConversations = await conversationSchema.find(
     {
@@ -167,16 +167,15 @@ const getWeeklyMessagesSummaryForAlumni = async (alumni) => {
       "messages.0.dateSent": {$gte: lastWeekStartingDate}
     })
     .populate('alumni')
-    .execPopulate()
   let messageCountByAlumniData = {}
   relevantConversations.forEach(conversation => {
     // this approach assumes that the conversation is between 2 alumni only
-    let otherAlumnus = conversation.alumni.find(alumnus => alumnus._id !== alumnus._id)
+    let otherAlumnus = conversation.alumni.find(alum => alum._id !== alumnus._id)
     // information to be sent in email about alumni receiving emails
     let otherAlumnisDataString = `${otherAlumnus.name} (${otherAlumnus.country}, graduated: ${otherAlumnus.gradYear})`
     let messageCountOverLastWeek = 0
     conversation.messages.forEach(message => {
-      if (message.dateSent > lastWeekStartingDate && message.senderId === otherAlumnus._id) {
+      if (message.dateSent > lastWeekStartingDate && message.senderId.toString() === otherAlumnus._id.toString()) {
         messageCountOverLastWeek++
       }
     })
@@ -186,21 +185,24 @@ const getWeeklyMessagesSummaryForAlumni = async (alumni) => {
 }
 
 const sendAlumnusEmailDigest = async(to, alumnus, token) => {
-    let alumniMessagesSummaryString = getNewMessagesForAlumniString(getWeeklyMessagesSummaryForAlumni(alumnus))
-    let emailObject = createPersonalization(
-      to,
-      'New Messages from other Alumni in last week!',
-      htmlBuilder(
-        `You\'ve received some messages from your fellow alumni in the last week!`,
-        alumniMessagesSummaryString,
-        'Go To App',
-        APP,
-        `${BACKEND}/unsubscribe/${to}/${token}`,
-        'Click here to unsubscribe from weekly digests!'
+    let weeklyMessagesForAlumnus = await getWeeklyMessagesSummaryForAlumni(alumnus)
+    if (Object.entries(weeklyMessagesForAlumnus).length) {
+      let alumniMessagesSummaryString = getNewMessagesForAlumniString()
+      let emailObject = createPersonalization(
+        to,
+        'New Messages from other Alumni in last week!',
+        htmlBuilder(
+          `You\'ve received some messages from your fellow alumni in the last week!`,
+          alumniMessagesSummaryString,
+          'Go To App',
+          APP,
+          `${BACKEND}/unsubscribe/${to}/${token}`,
+          'Click here to unsubscribe from weekly digests!'
+        )
       )
-    )
-    // console.log("Sending email with", emailObject)
-    await sg.send(emailObject, true)
+      // console.log("Sending email with", emailObject)
+      await sg.send(emailObject, true)
+    }
 }
 
 const sendWeeklyEmailDigest = async () => {
