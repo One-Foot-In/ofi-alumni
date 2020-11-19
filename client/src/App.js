@@ -20,8 +20,8 @@ import CollegesList from './components/admin_dashboard/CollegesList';
 import SchoolsList from './components/admin_dashboard/SchoolsList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
-
-import * as actions from './redux/actions'
+import Timer_Layout from './components/IdleAlertFiles/Timer_Layout'
+import * as actions from './redux/actions';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -49,6 +49,7 @@ const mapDispatchToProps = dispatch => ({
 //exploring with code
 
 var inactivityTime = function () {
+  console.log(`i'm watching you...`)
   var time;
   window.onload = resetTimer;
 // DOM Events
@@ -368,6 +369,7 @@ class App extends Component {
                         userDetails={this.state.userDetails}
                         userRole={role}
                       />
+                      <Timer_Layout logout={this.logout}/>
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -739,6 +741,8 @@ class App extends Component {
                   />
               }
           />
+          
+          
           <Route exact path={"/login"} render={(props) => 
               <LoginForm
                 isLoggedIn={this.state.loggedIn}
@@ -747,6 +751,8 @@ class App extends Component {
               />
             }
           />
+          {/* added the route thing to the app file */}
+          {/*<Route path='/' render={(props) => <Timer_Layout {...props} /> } />*/}
           {this.renderLoggedInRoutes(role)}
           <Route>
               <Segment>
@@ -759,6 +765,7 @@ class App extends Component {
 
   render() {
     return (
+      <>
         <Router>
           {this.state.fetchingAuth ? 
             <>
@@ -797,6 +804,7 @@ class App extends Component {
             <Redirect to="/"/>
           }
         </Router>
+        </>
     )
   }
 }

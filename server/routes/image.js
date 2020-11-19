@@ -1,4 +1,4 @@
-var express = require('express');
+/*var express = require('express');
 var passport = require("passport");
 var router = express.Router();
 var AWS = require('aws-sdk');
@@ -135,3 +135,4 @@ router.post('/school/', passport.authenticate('jwt', {session: false}), multerUp
 });
 
 module.exports = router;
+*/

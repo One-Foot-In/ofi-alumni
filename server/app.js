@@ -23,7 +23,8 @@ var mongooseUtilRouter = require('./routes/utilMongoose');
 var requestRouter = require('./routes/requests');
 var newsRouter = require('./routes/newsfeed');
 var imageRouter = require('./routes/image');
-var conversationsRouter = require('./routes/conversations')
+var conversationsRouter = require('./routes/conversations');
+
 
 require('dotenv').config();
 
@@ -129,7 +130,7 @@ async function main() {
 
     app.use('/news/', newsRouter);
 
-    app.use('/image/', imageRouter);
+    //app.use('/image/', imageRouter);
 
     app.use('/conversations/', conversationsRouter);
 

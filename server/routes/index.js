@@ -21,7 +21,8 @@ const APP_LINK = process.env.APP || 'http://localhost:3000/'
 const HASH_COST = 10;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_sauce';
-const JWT_EXPIRATION_MS = process.env.JWT_EXPIRATION_MS || '30000'; // > 6 hrs; og number = 25000000
+const JWT_EXPIRATION_MS = process.env.JWT_EXPIRATION_MS || '25000000'; // > 6 hrs; og number = 25000000
+
 
 router.get('/', function(req, res, next) {
   let filepath = path.join(__dirname, '../build', 'index.html')
@@ -52,8 +53,7 @@ router.post('/login', (req, res, next) => {
       } else {
         var payload = {
           role: user.role,
-          //expiring time is here on line 55!
-          expires: Date.now() + parseInt(JWT_EXPIRATION_MS),
+          //removed the expiration date; when cookie doesn't have expiration, its session specific by default
         };
         req.login(payload, {session: false}, async (error) => {
           if (error) {
