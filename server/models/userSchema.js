@@ -9,6 +9,7 @@ const userSchema = new Schema(
     verificationToken: {type: String, required: true},
     passwordChangeToken: {type: String, required: false},
     role: [{type: String, required: true, enum: ['ALUMNI', 'STUDENT', 'ADMIN', 'COLLEGE_REP']}],
+    accessContexts: [{type: String, default: ['INTRASCHOOL'], enum: ['INTRASCHOOL', 'INTERSCHOOL', 'GLOBAL']}],
     emailVerified: {type: Boolean, required: true}
   }
 );

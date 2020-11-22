@@ -229,7 +229,7 @@ class App extends Component {
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
-    this.liftPayload = this.liftPayload.bind(this);
+    this.completeLogin = this.completeLogin.bind(this);
     this.renderScreens = this.renderScreens.bind(this);
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
     this.refreshProfile = this.refreshProfile.bind(this);
@@ -316,12 +316,10 @@ class App extends Component {
     });
   }
 
-  liftPayload(details) {
-      this.setState({
-        role : details.userRole,
-        userDetails: details.userToSend
-      });
-      window.location.reload()
+
+  completeLogin() {
+    // TECH DEBT: Without window reload, there is an infinite loop of redirects to '/'
+    window.location.reload();
   }
 
   liftRole(role) {
@@ -391,6 +389,7 @@ class App extends Component {
                       <AlumniDirectory
                         schoolId={this.state.userDetails.school._id}
                         userDetails={this.state.userDetails}
+                        accessContexts={this.state.accessContexts}
                         role={role}
                       />
                   </> :
@@ -510,6 +509,7 @@ class App extends Component {
                       <AlumniDirectory
                         schoolId={this.state.userDetails.school._id}
                         userDetails={this.state.userDetails}
+                        accessContexts={this.state.accessContexts}
                         role={role}
                       />
                   </> :
@@ -728,7 +728,7 @@ class App extends Component {
           <Route exact path={"/login"} render={(props) => 
               <LoginForm
                 isLoggedIn={this.state.loggedIn}
-                liftPayload={this.liftPayload}
+                completeLogin={this.completeLogin}
                 login={this.login}
               />
             }

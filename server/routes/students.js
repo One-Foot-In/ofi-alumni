@@ -89,7 +89,11 @@ router.post('/', async (req, res, next) => {
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const dbData = await studentSchema.findOne({_id: req.params.id}).populate('school')
-        res.json({'result' : dbData});
+        const userRecord = await userSchema.findById(dbData.user)
+        res.json({
+            result : dbData,
+            accessContexts: userRecord.accessContexts || ["INTRASCHOOL"]
+        });
     } catch (e) {
         console.log("Error: util#oneStudent", e);
         res.status(500).send({'error' : e});

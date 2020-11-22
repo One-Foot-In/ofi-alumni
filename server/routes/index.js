@@ -64,6 +64,7 @@ router.post('/login', (req, res, next) => {
               res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email.` });
               return;
             }
+            let cookie = null
             if (userRole.includes("ALUMNI")) {
               const alumni = await alumniSchema.findOne({user: user._id})
               // TODO: bar login when unapproved when users reach critical mass
@@ -72,16 +73,7 @@ router.post('/login', (req, res, next) => {
               //   return;
               // }
               payload.id = alumni._id
-              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
-              // set jwt-signed cookie on response
-              alumni.availabilities = timezoneHelpers.applyTimezone(alumni.availabilities, alumni.timeZone)
-              res.cookie('jwt', cookie);
-              res.status(200).send(
-                {
-                  role: userRole,
-                  details: alumni
-                }
-              );
+              cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
             } else if (userRole.includes("STUDENT")) {
               const student = await studentSchema.findOne({user: user._id});
               // TODO: bar login when unapproved when users reach critical mass
@@ -90,15 +82,9 @@ router.post('/login', (req, res, next) => {
               //   return;
               // }
               payload.id = student._id
-              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response
               res.cookie('jwt', cookie);
-              res.status(200).send(
-                {
-                  role: userRole,
-                  details: student
-                }
-              );
             } else if (userRole.includes("ADMIN")) {
               const admin = await adminSchema.findOne({user: user._id});
               if (!admin.approved) {
@@ -106,14 +92,7 @@ router.post('/login', (req, res, next) => {
                 return;
               }
               payload.id = admin._id
-              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
-              res.cookie('jwt', cookie);
-              res.status(200).send(
-                {
-                  role: userRole,
-                  details: admin
-                }
-              )
+              cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
             } else if (userRole.includes("COLLEGE_REP")) {
               const collegeRep = await collegeRepSchema.findOne({user: user._id});
               if (!collegeRep.approved) {
@@ -121,17 +100,12 @@ router.post('/login', (req, res, next) => {
                 return;
               }
               payload.id = collegeRep._id
-              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
-              res.cookie('jwt', cookie);
-              res.status(200).send(
-                {
-                  role: userRole,
-                  details: collegeRep
-                }
-              )
+              cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
             } else {
               res.status(500).send({error: true, message: 'Could not determine role.'});
             }
+            res.cookie('jwt', cookie);
+            res.status(200).json({message: 'Login successful!'})
           } catch (e) {
             console.log("Error: error fetching user after authentication", e);
             res.status(500).send({ error: e });

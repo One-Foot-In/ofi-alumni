@@ -5,6 +5,7 @@ var bcrypt = require('bcrypt');
 var passport = require("passport");
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
+var studentSchema = require('../models/studentSchema');
 var collegeSchema = require('../models/collegeSchema');
 var jobTitleSchema = require('../models/jobTitleSchema');
 var interestsSchema = require('../models/interestsSchema');
@@ -144,7 +145,9 @@ router.post('/', async (req, res, next) => {
 
         // find schoolLogo
         let school = await schoolSchema.findOne({_id: schoolId})
+        // all alumni are started with INTRASCHOOL as default role
         const role = ["ALUMNI"]
+        const accessContexts = ['INTRASCHOOL']
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
@@ -156,6 +159,7 @@ router.post('/', async (req, res, next) => {
               passwordHash: passwordHash,
               verificationToken: verificationToken,
               role: role,
+              accessContexts: accessContexts,
               emailVerified: emailVerified,
               approved: approved
             }
@@ -207,10 +211,39 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/all/:schoolId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+/*
+    API used by students and alumni alike
+    Return all alumni accessible in intraschool, interschool (country-wide), or global context
+    @param schoolId - ID of school for alumnus/ student
+    @param role - role that the user is requesting context for
+    @param userId
+*/
+router.get('/all/:schoolId/:accessContext/:userId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        let alumni = await alumniSchema.find({school: req.params.schoolId})
-        res.json({'alumni' : alumni});
+        let accessContext = req.params.accessContext
+        let userRecord = await userSchema.findById(req.params.userId)
+        if (accessContext &&!userRecord.accessContexts.contains(accessContext)) {
+            res.status(404).json({
+                message : `User does not have access level ${accessContext}`
+            });
+        } else {
+            let isAlumni = userRecord.role.contains("ALUMNI")
+            let alumni = []
+            if (!accessContext || accessContext === "INTRASCHOOL") {
+                alumni = await alumniSchema.find({school: req.params.schoolId})
+            } else if (accessContext === "INTERSCHOOL") {
+                if (isAlumni) {
+                    let alumnusRecord = await alumniSchema.find({user: req.params.userId})
+                    alumni = await alumniSchema.find({country: alumnusRecord.country})
+                } else {
+                    let studentRecord = await studentSchema.find({user: req.params.userId})
+                    alumni = await alumniSchema.find({country: studentRecord.country})
+                }
+            } else if (accessContext === "GLOBAL") {
+                alumni = await alumniSchema.find()
+            }
+        }
+        res.status(200).json({'alumni' : alumni});
     } catch (e) {
         console.log("Error: alumni#allAlumni", e);
         res.status(500).send({'error' : e});
@@ -245,8 +278,12 @@ router.post('/approve/', passport.authenticate('jwt', {session: false}), async(r
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let alumnus = await alumniSchema.findOne({_id: req.params.id}).populate('school')
+        const userRecord = await userSchema.findById(alumnus.user)
         alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
-        res.json({'result' : alumnus});
+        res.json({
+            result : alumnus,
+            accessContexts: userRecord.accessContexts || ["INTRASCHOOL"]
+        });
     } catch (e) {
         console.log("Error: alumni#oneAlumni", e);
         res.status(500).send({'error' : e});

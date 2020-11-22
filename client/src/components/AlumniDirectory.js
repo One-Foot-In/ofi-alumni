@@ -3,6 +3,7 @@ import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, Respo
 import { makeCall } from '../apis';
 import RequestModal from './RequestModal'
 import AlumniContactModal from './AlumniContactModal'
+import AccessControlDropdown from './AccessContextDropdown'
 
 // Filter dropdown options
 const searchOptions = [
@@ -49,6 +50,7 @@ const pageSize = 3;
 props:
 - schoolId: String
 - userDetails: {}
+- accessContexts: []
 - role
 */
 export default class AlumniDirectory extends Component {
@@ -69,9 +71,38 @@ export default class AlumniDirectory extends Component {
             requestModalOpen: false,
             alumniContactModalOpen: false,
             alumniDetails: null,
+            accessContext: "INTERSCHOOL"
         }
         this.toggleRequestModal = this.toggleRequestModal.bind(this)
         this.toggleAlumniContactModal = this.toggleAlumniContactModal.bind(this)
+        this.liftAccessContext = this.liftAccessContext.bind(this)
+        this.setAlumniDirectory = this.setAlumniDirectory.bind(this)
+    }
+
+    liftAccessContext(newAccessControl) {
+        this.setState({
+            accessContext: newAccessControl
+        }, async () => {
+            let result = await this.getEntries()
+            if (!result || result.error) {
+                // TECH DEBT: Error toast
+            } else {
+                this.setAlumniDirectory(result)
+            }
+        })
+    }
+
+    setAlumniDirectory(result) {
+        let totalPages = 0;
+        if (result.alumni !== null) {
+            totalPages = Math.ceil(result.alumni.length/pageSize);
+        }
+        this.setState({
+            entries: result.alumni,
+            totalPages: totalPages,
+            numEntries: result.alumni.length
+        })
+        this.populateSearchDropdownStates(this.state.entries)
     }
 
     toggleRequestModal() {
@@ -87,16 +118,11 @@ export default class AlumniDirectory extends Component {
 
     async UNSAFE_componentWillMount() {
         let result = await this.getEntries()
-        let totalPages = 0;
-        if (result.alumni !== null) {
-            totalPages = Math.ceil(result.alumni.length/pageSize);
+        if (!result || result.error) {
+            // TECH DEBT: Error toast
+        } else {
+            this.setAlumniDirectory(result)
         }
-        this.setState({
-            entries: result.alumni,
-            totalPages: totalPages,
-            numEntries: result.alumni.length
-        })
-        this.populateSearchDropdownStates(this.state.entries)
     }
 
     populateSearchDropdownStates(entries) {
@@ -223,7 +249,7 @@ export default class AlumniDirectory extends Component {
     }
 
     getEntries() {
-        return makeCall(null, `/alumni/all/${this.props.schoolId}`, 'get').catch(e => console.log(e))
+        return makeCall(null, `/alumni/all/${this.props.schoolId}/${this.state.accessContext}/${this.props.userDetails.user}`, 'get').catch(e => console.log(e))
     }
 
     search(value) {
@@ -300,10 +326,22 @@ export default class AlumniDirectory extends Component {
 
         /* Search Area */
         let searchRow;
+        let hasMoreThanOneAccessContext = this.props.accessContexts && this.props.accessContexts.length > 1
         if (filter !== 'gradYear') {
             searchRow = (
-                <Grid.Row columns={2}>
-                <Grid.Column>
+                <Grid.Row columns={hasMoreThanOneAccessContext ? 3 : 2}>
+                {
+                    hasMoreThanOneAccessContext ?
+                    <Grid.Column width={4}>
+                        <AccessControlDropdown
+                            liftAccessContext={this.leftAccessContext}
+                            accessContexts={this.populateSearchDropdownStates.accessContexts}
+                            accessContext={this.state.accessContext}
+                        />
+                    </Grid.Column>
+                    : null
+                }
+                <Grid.Column width={hasMoreThanOneAccessContext ? 8 : 10}>
                         <Search
                             open={false}
                             showNoResults={false}
@@ -312,7 +350,7 @@ export default class AlumniDirectory extends Component {
                             placeholder={"Search"}
                         />
                 </Grid.Column>
-                <Grid.Column>
+                <Grid.Column width={hasMoreThanOneAccessContext ? 4 : 6}>
                     <Dropdown
                         placeholder='Search By:'
                         floating
@@ -355,7 +393,6 @@ export default class AlumniDirectory extends Component {
 
         return ( 
             <Grid stackable divided="vertically">
-                
                 {searchRow}
                 {resultsRow}
                 {this.state.requestModalOpen && 
