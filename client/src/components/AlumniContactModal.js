@@ -31,8 +31,18 @@ export default class AlumniContactModal extends Component {
         })
     }
 
+    sendGoogleAnalytics(event) {
+        ga('send', {
+            hitType: 'event',
+            eventCategory: 'Alumni Conversation',
+            eventAction: 'Submitted Request',
+            eventLabel: event.target.href
+          });
+    }
+      
     submitRequest(e) {
         e.preventDefault()
+        sendGoogleAnalytics(e);
         
         this.setState({
             submitting: true
