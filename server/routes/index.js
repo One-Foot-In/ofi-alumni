@@ -200,8 +200,9 @@ router.get('/tempPassword/:to/:token', async (req, res, next) => {
     }
     if (passwordChangeToken === user.passwordChangeToken) {
       let newTempPass = crypto({length: 10})
-    let passwordHash = await bcrypt.hash(newTempPass, HASH_COST)
+      let passwordHash = await bcrypt.hash(newTempPass, HASH_COST)
       user.passwordHash = passwordHash
+      user.passwordChangeToken = null // reset token to prevent multiple password changes with stale link
       await user.save()
       await sendTemporaryPasswordEmail(email, newTempPass)
       res.status(200).send(htmlBuilder('Thanks!', 'Thank you for verifying your request for a password change! We will send you an email with a temporary password shortly.', 'Go To App', APP_LINK))
