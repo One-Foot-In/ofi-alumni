@@ -14,7 +14,6 @@ export default class Layout extends Component {
             userLoggedIn: false,
             isTimedOut: false
         }
-
         this.idleTimer = null
         this.onAction = this._onAction.bind(this)
         this.onActive = this._onActive.bind(this)
