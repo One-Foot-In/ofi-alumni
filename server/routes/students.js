@@ -11,6 +11,8 @@ var requestSchema = require('../models/requestSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
 var getUniqueInterests = require("./alumni").getUniqueInterests
+var generateNewAndExistingColleges = require("./alumni").generateNewAndExistingColleges;
+var getUniqueColleges = require("./alumni").getUniqueColleges
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -163,6 +165,50 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
     } catch (e) {
         console.log("Error: student#delete", e);
         res.status(500).send({'error' : e});
+    }
+})
+
+
+router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+    try{
+        let student = await studentSchema.findOne({_id: req.params.id});
+        const existingColleges = req.body.existingColleges;
+        const newColleges = req.body.newColleges || [];
+        console.log(existingColleges)
+        console.log(newColleges)
+        let collegesToAdd = await generateNewAndExistingColleges(existingColleges, newColleges);
+        student.interests = getUniqueColleges([...student.collegeShortList, ...collegesToAdd]);
+        await student.save();
+        res.status(200).json({message: `you have added ${collegeInQuestion} to you short list`})
+    } catch(e){
+        console.log('Error: cannot add college');
+        res.status(500).json({'error': e})
+    }
+})
+
+/*
+router.patch('/interests/remove/:id', async (req, res, next) => {
+    try {
+        const student = await studentSchema.findOne({_id: req.params.id})
+        student.interests = student.interests.filter(interest => interest._id.toString() !== req.body.interestIdToRemove)
+        await student.save()
+        res.status(200).send({message: "Successfully removed student's interest"})
+    } catch (e) {
+        console.log("Error: student#interests/remove", e);
+        res.status(500).send({'error' : e});
+    }
+})
+*/
+
+router.patch('/collegeShortList/remove/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+    try{
+        const student = await studentSchema.findOne({_id: req.params.id});
+        student.interests = student.interests.filter(college => college.name.toString !== req.body.collegeToRemove);
+        await student.save()
+        res.status(200).json({message: 'Successfully removed college from list'})
+    } catch(e){
+        console.log("Error: College can't be removed at this time")
+        res.status(500).json({"error": e})
     }
 })
 

@@ -13,8 +13,10 @@ var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
 var majorSchema = require('../models/majorSchema');
 var requestSchema = require('../models/requestSchema');
-var timezoneHelpers = require("../helpers/timezoneHelpers")
+var timezoneHelpers = require("../helpers/timezoneHelpers");
+const { json } = require('body-parser');
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
+
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -59,6 +61,28 @@ const generateNewAndExistingInterests = async (existingInterests, newInterests) 
     return existingInterestsRecords
 }
 
+const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
+    const existingCollegeIds = existingColleges.map(school => school.value).flat();
+    let existingCollegeRecords = await schoolSchema.find().where('_id').in(existingCollegeIds).exec();
+    if(newCollege.length > 0){
+        for (let i = 0; i < newCollege.lenggth; i++){
+            let collegeExists = await schoolSchema.find({name: newCollege[i].value});
+            if(!collegeExists.length){
+                var newCollegeMade = new schoolSchema({
+                    name: newCollege[i].value,
+                    country: newCollege[i].value
+                })
+                await newCollegeMade.save()
+                existingCollegeRecords.push(newCollegeMade)
+            }else{
+                existingCollegeRecords.push(collegeExists[0])
+            }
+        }
+    }
+    return existingCollegeRecords
+}
+
+
 const getUniqueInterests = (allInterests) => {
     let allUniqueNames = new Set()
     let uniqueInterests = []
@@ -69,6 +93,18 @@ const getUniqueInterests = (allInterests) => {
         }
     }
     return uniqueInterests
+}
+
+const getUniqueCollege = (allColleges) => {
+    let allUniqueColleges = new Set();
+    let uniqueColleges = [];
+    for (let i = 0; i < allColleges.length; i++){
+        if (!allUniqueColleges.has(allColleges[i].name)){
+            allUniqueColleges.add(allColleges[i].name);
+            uniqueColleges.push(allColleges[i]);
+        }
+    }
+    return uniqueColleges
 }
 
 router.post('/', async (req, res, next) => {
@@ -515,6 +551,39 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
     } catch (e) {
         console.log("Error: alumni#delete", e);
         res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {session: false}, */ async (req, res, next) => {
+    try{
+        let alumni = await alumniSchema.findOne({_id: req.params.id});
+        //let alumniCollegeList = alumni.collegesAcceptedInto;
+        const existingColleges = req.body.existingColleges;
+        //ok so i'm existingColleges.map() isn't a thing, so i'm a bit confused
+        const newColleges = req.body.newColleges;
+        console.log(existingColleges)
+        console.log(newColleges)
+        let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges)
+        alumni.collegesAcceptedInto = getUniqueCollege([...alumni.collegesAcceptedInto, ...collegesToAdd])
+        await alumni.save(); 
+        console.log(alumni.collegesAcceptedInto)
+        res.status(200).json({message: `your colleges have been added successfully!`});
+    }catch(e){
+        console.log("Error: cannot add college", e);
+        res.status(500).json({'error': e});
+    };
+});
+
+router.patch('/collegesAcceptedInto/delete/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+    try{
+        const alumni = await alumniSchema.findOne({_id: req.params.id});
+        console.log(req.body.collegesToRemove)
+        alumni.collegesAcceptedInto = alumni.collegesAcceptedInto.filter(college => college.name.toString() !== req.body.collegesToRemove)
+        await alumni.save()
+        res.status(200).json({message: "Successfully removed college from list!"});
+    }catch(e){
+        console.log("error: alumni college removal error")
+        res.status(500).json({'error': e})
     }
 })
 
