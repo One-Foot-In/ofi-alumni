@@ -63,12 +63,12 @@ const generateNewAndExistingInterests = async (existingInterests, newInterests) 
 
 const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
     const existingCollegeIds = existingColleges.map(school => school.value).flat();
-    let existingCollegeRecords = await schoolSchema.find().where('_id').in(existingCollegeIds).exec();
+    let existingCollegeRecords = await collegeSchema.find().where('_id').in(existingCollegeIds).exec();
     if(newCollege.length > 0){
-        for (let i = 0; i < newCollege.lenggth; i++){
-            let collegeExists = await schoolSchema.find({name: newCollege[i].value});
+        for (let i = 0; i < newCollege.length; i++){
+            let collegeExists = await collegeSchema.find({name: newCollege[i].value});
             if(!collegeExists.length){
-                var newCollegeMade = new schoolSchema({
+                var newCollegeMade = new collegeSchema({
                     name: newCollege[i].value,
                     country: newCollege[i].value
                 })
