@@ -21,7 +21,7 @@ const APP_LINK = process.env.APP || 'http://localhost:3000/'
 const HASH_COST = 10;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_sauce';
-const JWT_EXPIRATION_MS = process.env.JWT_EXPIRATION_MS || '30000'; // > 6 hrs; og number = 25000000
+const JWT_EXPIRATION_MS = process.env.JWT_EXPIRATION_MS || '25000000';
 
 router.get('/', function(req, res, next) {
   let filepath = path.join(__dirname, '../build', 'index.html')
@@ -39,7 +39,6 @@ router.get('/logout', (req, res, next) => {
 });
 
 // login route
-//ok basically most of the roles here will need server/cookie confirm updates updates
 router.post('/login', (req, res, next) => {
   //password auth
   passport.authenticate(
@@ -52,7 +51,6 @@ router.post('/login', (req, res, next) => {
       } else {
         var payload = {
           role: user.role,
-          //expiring time is here on line 55!
           expires: Date.now() + parseInt(JWT_EXPIRATION_MS),
         };
         req.login(payload, {session: false}, async (error) => {
