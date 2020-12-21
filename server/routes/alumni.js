@@ -148,6 +148,7 @@ router.post('/', async (req, res, next) => {
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
+        const emailSubscriptionToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
 
         const user_instance = new userSchema(
@@ -157,6 +158,8 @@ router.post('/', async (req, res, next) => {
               verificationToken: verificationToken,
               role: role,
               emailVerified: emailVerified,
+              emailSubscribed: true,
+              emailSubscriptionToken: emailSubscriptionToken,
               approved: approved
             }
         );
