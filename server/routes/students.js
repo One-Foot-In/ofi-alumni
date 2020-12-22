@@ -6,6 +6,7 @@ var bcrypt = require('bcrypt');
 var userSchema = require('../models/userSchema');
 var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
+var collegeSchema = require('../models/collegeSchema');
 var newsSchema = require('../models/newsSchema');
 var requestSchema = require('../models/requestSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
@@ -34,6 +35,7 @@ router.post('/', async (req, res, next) => {
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
+        const emailSubscriptionToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
         // find schoolLogo
         let school = await schoolSchema.findOne({_id: schoolId})
@@ -44,6 +46,8 @@ router.post('/', async (req, res, next) => {
               verificationToken: verificationToken,
               role: role,
               emailVerified: emailVerified,
+              emailSubscribed: true,
+              emailSubscriptionToken: emailSubscriptionToken,
               approved: approved
             }
         );
@@ -153,6 +157,21 @@ router.patch('/interests/add/:id', async (req, res, next) => {
     } catch (e) {
         console.log("Error: student#interests/add", e);
         res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/collegeShortlist/update/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let existingCollegeId = req.body.existingCollegeId
+        var college = await collegeSchema.findOne({_id: existingCollegeId})
+        let student = await studentSchema.findOne({_id: req.params.id})
+        student.collegeShortlist.push(college._id);
+        student.markModified('collegeShortlist');
+        
+        await student.save()
+        res.status(200).send({student: student})
+    } catch (e) {
+        console.log("Error: student#college/update", e);
     }
 })
 

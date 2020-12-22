@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt');
 const cors = require('cors');
+var CronJob = require('cron').CronJob;
+var { sendWeeklyEmailDigest } = require('./routes/helpers/emailHelpers');
 
 // passport for authentication by local strategy
 var passport = require("passport");
@@ -40,6 +42,7 @@ app.use(express.static(path.join(__dirname, 'build')));
  * Otherwise, it will use a cloud hosted DB set in the .env file
  * MongoDB must be installed
  */
+ 
 const testDB = (process.env.DEV_MODE.toLowerCase() === "true");
 
 /* Mongoose Setup */
@@ -65,6 +68,17 @@ let corsOptions = {
   credentials: true,
 }
 app.use(cors(corsOptions));
+
+// CRON EXPRESSIONS
+/*
+  Seconds: 0-59
+  Minutes: 0-59
+  Hours: 0-23
+  Day of Month: 1-31
+  Months: 0-11 (Jan-Dec)
+  Day of Week: 0-6 (Sun-Sat)
+*/
+const emailDigestCron = process.env.EMAIL_DIGEST_CRON || '0 0 12 * * 6' // Sunday noon
 
 async function main() {
   try {
@@ -104,6 +118,14 @@ async function main() {
         return done(null, jwtPayload);
       }
     ));
+
+    var emailDigestJob = new CronJob(emailDigestCron, async () => {
+        await sendWeeklyEmailDigest();
+    }, null, true, 'America/New_York');
+
+    if (process.env.ACTIVATE_CRON) {
+      emailDigestJob.start()
+    }
 
     app.use('/', indexRouter);
 

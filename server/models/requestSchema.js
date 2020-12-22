@@ -26,6 +26,7 @@ const requestSchema = new Schema(
     studentNote: {type: String},
     alumniNote: {type: String},
     finalNote: {type: String},
+    actionItems: [{type: String}],
     publicFeedback: {type: String},
     privateFeedback: {type: String},
     testimonial: {type: String}

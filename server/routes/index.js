@@ -188,6 +188,29 @@ router.get('/tempPassword/:to/:token', async (req, res, next) => {
   }
 });
 
+router.get('/unsubscribe/:to/:token', async (req, res, next) => {
+  try {
+    let email = req.params.to
+    let unsubscribeToken = req.params.token
+    var user = await userSchema.findOne({'email': email});
+    if (!user) {
+      res.status(404).send({message: 'Could not find a user with given email!'})
+    }
+    if (unsubscribeToken === user.emailSubscriptionToken) {
+      user.emailSubscribed = false
+      // refresh subscription token
+      user.emailSubscriptionToken = crypto({length: 16})
+      await user.save()
+      res.status(200).send(htmlBuilder('Unsubscribed!', 'You have sucessfully unsubscribed from all daily digests! You will find the option to resubscribe to these weekly digests on your Profile', 'Go To App', APP_LINK))
+    } else {
+      res.status(500).send(htmlBuilder('Whoops!', 'Something went wrong! Please contact support at onefootincollege@gmail.com', 'Go To App', APP_LINK))
+    }
+  } catch(e) {
+    console.log("Error index.js#unsubscribe", e)
+    res.status(500).json(e)
+  }
+});
+
 router.get('/isLoggedIn', passport.authenticate('jwt', {session: false}), (req, res, next) => {
   res.json({message: "You have a fresh cookie!"});
 });
