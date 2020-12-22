@@ -225,28 +225,28 @@ router.get('/all/:schoolId/:accessContext/:userId', passport.authenticate('jwt',
     try {
         let accessContext = req.params.accessContext
         let userRecord = await userSchema.findById(req.params.userId)
-        if (accessContext &&!userRecord.accessContexts.contains(accessContext)) {
+        if (accessContext &&!userRecord.accessContexts.includes(accessContext)) {
             res.status(404).json({
                 message : `User does not have access level ${accessContext}`
             });
         } else {
-            let isAlumni = userRecord.role.contains("ALUMNI")
+            let isAlumni = userRecord.role.includes("ALUMNI")
             let alumni = []
             if (!accessContext || accessContext === "INTRASCHOOL") {
                 alumni = await alumniSchema.find({school: req.params.schoolId})
             } else if (accessContext === "INTERSCHOOL") {
                 if (isAlumni) {
-                    let alumnusRecord = await alumniSchema.find({user: req.params.userId})
-                    alumni = await alumniSchema.find({country: alumnusRecord.country})
+                    let alumnusCountry = await alumniSchema.findOne({user: req.params.userId}, {country: 1})
+                    alumni = await alumniSchema.find({country: alumnusCountry.country})
                 } else {
-                    let studentRecord = await studentSchema.find({user: req.params.userId})
-                    alumni = await alumniSchema.find({country: studentRecord.country})
+                    let studentCountry = await studentSchema.findOne({user: req.params.userId}, {country: 1})
+                    alumni = await alumniSchema.find({country: studentCountry.country})
                 }
             } else if (accessContext === "GLOBAL") {
                 alumni = await alumniSchema.find()
             }
+            res.status(200).json({'alumni' : alumni});
         }
-        res.status(200).json({'alumni' : alumni});
     } catch (e) {
         console.log("Error: alumni#allAlumni", e);
         res.status(500).send({'error' : e});

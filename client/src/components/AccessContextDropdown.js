@@ -7,8 +7,7 @@ import { Dropdown, Label } from 'semantic-ui-react'
     accessContext: String
 */
 export default function AccessControlDropdown (props) {
-    const [accessContext, setAccessContext] = useState("INTERSCHOOL")
-
+    const [accessContext, setAccessContext] = useState("INTRASCHOOL")
     // Lifts new access context whenever there is a change in access context
     useEffect(() => {
         props.liftAccessContext(accessContext)
@@ -17,9 +16,20 @@ export default function AccessControlDropdown (props) {
         <Label basic >Current Context:
             <Dropdown
                 compact
-                style={{'marginLeft': '5px'}}
+                style={
+                    {
+                        'marginLeft': '5px',
+                        'minWidth': '150px'
+                    }
+                }
                 selection
-                options={props.accessContexts}
+                options={props.accessContexts.map(ac => {
+                    return {
+                        text: ac,
+                        value: ac,
+                        key: ac
+                    }
+                })}
                 value={accessContext || props.accessContext}
                 onChange={(e, {value}) => setAccessContext(value)}
             />

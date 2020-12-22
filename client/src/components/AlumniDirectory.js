@@ -71,7 +71,7 @@ export default class AlumniDirectory extends Component {
             requestModalOpen: false,
             alumniContactModalOpen: false,
             alumniDetails: null,
-            accessContext: "INTERSCHOOL"
+            accessContext: "INTRASCHOOL"
         }
         this.toggleRequestModal = this.toggleRequestModal.bind(this)
         this.toggleAlumniContactModal = this.toggleAlumniContactModal.bind(this)
@@ -334,8 +334,8 @@ export default class AlumniDirectory extends Component {
                     hasMoreThanOneAccessContext ?
                     <Grid.Column width={4}>
                         <AccessControlDropdown
-                            liftAccessContext={this.leftAccessContext}
-                            accessContexts={this.populateSearchDropdownStates.accessContexts}
+                            liftAccessContext={this.liftAccessContext}
+                            accessContexts={this.props.accessContexts}
                             accessContext={this.state.accessContext}
                         />
                     </Grid.Column>

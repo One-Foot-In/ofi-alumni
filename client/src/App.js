@@ -259,8 +259,10 @@ class App extends Component {
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
         role = parsedJWT.role;
         id = parsedJWT.id;
-        profile = await this.fetchProfile(role[0], id);
+        let result = await this.fetchProfile(role[0], id);
+        profile = result.result
         this.setState({
+          accessContexts: result.accessContexts,
           role: role[0],
           userDetails: profile,
           approved: profile.approved,
@@ -282,9 +284,10 @@ class App extends Component {
   }
 
   async refreshProfile(role, id) {
-    let userDetails = await this.fetchProfile(role, id)
+    let result = await this.fetchProfile(role, id)
     this.setState({
-      userDetails: userDetails
+      userDetails: result.result,
+      accessContexts: result.accessContexts
     })
   }
 
@@ -304,7 +307,7 @@ class App extends Component {
         result = await makeCall({}, ('/collegeRep/one/'+id), 'get')
         break;
     }
-    return result.result
+    return result
   }
 
   login() {
@@ -340,6 +343,7 @@ class App extends Component {
   }
 
   renderLoggedInRoutes(role) {
+    console.log("acs are ", this.state.accessContexts)
     switch (role) {
       case ALUMNI:
         return (
