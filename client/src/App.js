@@ -343,7 +343,6 @@ class App extends Component {
   }
 
   renderLoggedInRoutes(role) {
-    console.log("acs are ", this.state.accessContexts)
     switch (role) {
       case ALUMNI:
         return (

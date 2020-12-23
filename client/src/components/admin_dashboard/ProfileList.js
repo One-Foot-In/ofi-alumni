@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown } from 'semantic-ui-react'
+import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, List, Checkbox } from 'semantic-ui-react'
 import FeedbackModal from './FeedbackModal'
 import { makeCall } from '../../apis';
 
@@ -183,6 +183,37 @@ export default function ProfileList(props){
         setDisplay(cardArray)
     }
 
+    const accessContextCheckBox = (accessContexts, userId) => {
+        return (
+            <List>
+                <List.Item>
+                    <Checkbox
+                        checked={accessContexts.includes('INTRASCHOOL')}
+                        label='INTRASCHOOL'
+                        userId={userId}
+                        onChange={handleAccessChange.bind(this)}
+                    />
+                </List.Item>
+                <List.Item>
+                    <Checkbox
+                        checked={accessContexts.includes('INTERSCHOOL')}
+                        label='INTERSCHOOL'
+                        userId={userId}
+                        onChange={handleAccessChange.bind(this)}
+                    />
+                </List.Item>
+                <List.Item>
+                    <Checkbox
+                        checked={accessContexts.includes('GLOBAL')}
+                        label='GLOBAL'
+                        userId={userId}
+                        onChange={handleAccessChange.bind(this)}
+                    />
+                </List.Item>
+            </List>
+        )
+    }
+
     const profileCard = (profile, role) => {
         return(
             <Grid key={profile._id}>
@@ -259,10 +290,20 @@ export default function ProfileList(props){
                                             op={'toggle_moderator'}
                                             onClick={handleButtonPress.bind(this)}
                                         >
-                                            Promote
+                                            {profile.isModerator ? 'Demote' : 'Promote'}
                                         </Button>
                                     )
                                 }
+                            </Card.Content>
+                            <Card.Content extra>
+                                <Grid stackable>
+                                    <Grid.Row>
+                                        <Grid.Column width="6">Access levels granted</Grid.Column>
+                                        <Grid.Column>
+                                            {accessContextCheckBox(profile.accessContexts, profile.user)}
+                                        </Grid.Column>
+                                    </Grid.Row>
+                                </Grid>
                             </Card.Content>
                         </Card>
                     </Grid.Column>
@@ -290,6 +331,24 @@ export default function ProfileList(props){
                 .then((res) => {
                     setAllProfiles(res.students)
                 })
+        }
+    }
+
+    const handleAccessChange = async (e, { userId, label, checked }) => {
+        let res = await makeCall(
+            {
+                userId: userId,
+                type: props.viewing,
+                newAccessContext: label,
+                isGranting: checked
+            }, 
+            '/admin/changeAccess/' + props.userDetails._id,
+            'patch'
+        )
+        if (res.status === 200) {
+            setAllProfiles(res.profiles)
+        } else {
+            // TODO: error case handling
         }
     }
 

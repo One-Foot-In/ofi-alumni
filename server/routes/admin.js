@@ -7,6 +7,7 @@ var alumniSchema = require('../models/alumniSchema');
 var adminSchema = require('../models/adminSchema');
 var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
+var userSchema = require('../models/userSchema');
 require('mongoose').Promise = global.Promise
 
 async function isAdmin(id) {
@@ -36,8 +37,15 @@ router.get('/allAlumni/:adminId', passport.authenticate('jwt', {session: false})
             res.status(400).send('Invalid Admin ID');
             return;
         }
-        let dbData = await alumniSchema.find({}).populate('school')
-        res.status(200).send({'alumni': dbData})
+        let alumniData = await alumniSchema.find({}).populate('school')
+        let alumni = []
+        for (let alumnusModel of alumniData) {
+            let alumnus = alumnusModel.toObject()
+            let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
+            alumnus.accessContexts = userRecordWithAccessContext.accessContexts
+            alumni.push(alumnus)
+        }
+        res.status(200).send({'alumni': alumni})
     } catch (e) {
         console.log('admin/allAlumni error: ' + e);
         res.status(500).send({'admin/allAlumni error' : e})
@@ -51,8 +59,15 @@ router.get('/allStudents/:adminId', passport.authenticate('jwt', {session: false
             res.status(400).send('Invalid Admin ID');
             return;
         }
-        let dbData = await studentSchema.find({}).populate('school')
-        res.status(200).send({'students': dbData})
+        let studentsData = await studentSchema.find({}).populate('school')
+        let students = []
+        for (let studentModel of studentsData) {
+            let student = studentModel.toObject()
+            let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
+            student.accessContexts = userRecordWithAccessContext.accessContexts
+            students.push(student)
+        }
+        res.status(200).send({'students': students})
     } catch (e) {
         console.log('admin/allStudents error: ' + e);
         res.status(500).send({'admin/allStudents error' : e})
@@ -98,24 +113,100 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
             res.status(400).send('Invalid Admin ID');
             return;
         }
+        let dbData = []
         if (type === 'ALUMNI') {
             let alumni = await alumniSchema.findById(profileId);
             alumni.approved = !alumni.approved;
             await alumni.save()
-            let dbData = await alumniSchema.find({}).populate('school')
-            res.status(200).send({profiles: dbData})
-            return;
+            let alumniData = await alumniSchema.find({}).populate('school')
+            for (let alumnusModel of alumniData) {
+                let alumnus = alumnusModel.toObject()
+                let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
+                alumnus.accessContexts = userRecordWithAccessContext.accessContexts
+                dbData.push(alumnus)
+            }
         } else if (type === 'STUDENT') {
             let student = await studentSchema.findById(profileId);
             student.approved = !student.approved;
             await student.save()
-            let dbData = await studentSchema.find({}).populate('school')
-            res.status(200).send({profiles: dbData})
-            return;
+            let studentsData = await studentSchema.find({}).populate('school')
+            for (let studentModel of studentsData) {
+                let student = studentModel.toObject()
+                let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
+                student.accessContexts = userRecordWithAccessContext.accessContexts
+                dbData.push(student)
+            }
         }
+        res.status(200).send({profiles: dbData})
+        return;
     } catch (e) {
         console.log('admin/toggleApprove error: ' + e)
         res.status(500).send({'toggleApprove error' : e})
+    }
+});
+
+router.patch('/changeAccess/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    let userId = req.body.userId;
+    let type = req.body.type;
+    let accessContext = req.body.newAccessContext;
+    let isGranting = req.body.isGranting;
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        if (!(["GLOBAL", "INTRASCHOOL", "INTERSCHOOL"].includes(accessContext))) {
+            res.status(500).json({
+                message: 'Invalid access context provided'
+            });
+            return;
+        }
+        let user = await userSchema.findById(userId);
+        let newAccessContexts = []
+        if (isGranting) {
+            if (user.accessContexts.includes(accessContext)) {
+                res.status(200).json({
+                    message: 'User already has request access level'
+                });
+                return;
+            } else {
+                user.accessContexts.push(accessContext)
+                newAccessContexts = user.accessContexts
+            }
+        } else {
+            if (!user.accessContexts.includes(accessContext)) {
+                res.status(200).json({
+                    message: 'User does not currently have access level that is being revoked'
+                });
+                return;
+            } else {
+                user.accessContexts = user.accessContexts.filter(context => context !== accessContext);
+                newAccessContexts = user.accessContexts
+            }
+        }
+        user.save()
+        let dbData = []
+        if (type === 'ALUMNI') {
+            let alumniData = await alumniSchema.find({}).populate('school')
+            for (let alumnusModel of alumniData) {
+                let alumnus = alumnusModel.toObject()
+                alumnus.accessContexts = newAccessContexts
+                dbData.push(alumnus)
+            }
+        } else if (type === 'STUDENT') {
+            let studentData = await studentSchema.find({}).populate('school')
+            for (let studentModel of studentData) {
+                let student = studentModel.toObject()
+                student.accessContexts = newAccessContexts
+                dbData.push(student)
+            }
+        }
+        res.status(200).send({profiles: dbData});
+        return;
+    } catch (e) {
+        console.log('admin/changeAccess error: ' + e)
+        res.status(500).send({'changeAccess error' : e})
     }
 });
 
@@ -169,11 +260,18 @@ router.patch('/toggleModerator/:adminId', passport.authenticate('jwt', {session:
         let student = await studentSchema.findById(studentId)
         student.isModerator = !student.isModerator
         await student.save()
-        let dbData = await studentSchema.find({}).populate('school')
-        res.status(200).send({'students': dbData})
+        let studentsData = await studentSchema.find({}).populate('school')
+        let students = []
+        for (let studentModel of studentsData) {
+            let student = studentModel.toObject()
+            let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
+            student.accessContexts = userRecordWithAccessContext.accessContexts
+            students.push(student)
+        }
+        res.status(200).send({'students': students})
     } catch (e) {
-        console.log('admin/allStudents error: ' + e);
-        res.status(500).send({'admin/allStudents error' : e})
+        console.log('admin/toggleModerator error: ' + e);
+        res.status(500).send({'admin/toggleModerator error' : e})
     }
 });
 
@@ -201,7 +299,7 @@ router.patch('/mergeColleges/:adminid', passport.authenticate('jwt', {session: f
         res.status(200).send({'message': 'Successfully merged colleges'})
     } catch (e) {
         console.log('/mergeColleges error:' + e);
-        res.status(500).send({'admin/allStudents error' : e})
+        res.status(500).send({'admin/mergeColleges error' : e})
     }
 });
 
