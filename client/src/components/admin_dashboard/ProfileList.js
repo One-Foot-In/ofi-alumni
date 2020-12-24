@@ -93,12 +93,17 @@ export default function ProfileList(props){
         if (props.viewing === 'ALUMNI') {
             makeCall({}, '/admin/allAlumni/' + props.userDetails._id, 'get')
                 .then((res) => {
-                    setAllProfiles(res.alumni)
+                    // null check to ensure server-side error does not return a non-iterable
+                    if (res.alumni) {
+                        setAllProfiles(res.alumni)
+                    }
                 })
         } else if (props.viewing === 'STUDENT') {
             makeCall({}, '/admin/allStudents/' + props.userDetails._id, 'get')
                 .then((res) => {
-                    setAllProfiles(res.students)
+                    if (res.students) {
+                        setAllProfiles(res.students)
+                    }
                 })
         }
     }, [props]);
@@ -137,7 +142,7 @@ export default function ProfileList(props){
                     && profile.gradYear === secondaryFilter);
             }));
         }
-    }, [search, secondaryFilter, filteredProfiles])
+    }, [search, secondaryFilter])
 
     //Filter category change
     useEffect(() => {
@@ -176,7 +181,7 @@ export default function ProfileList(props){
         let cardArray = []
         for (let i = 0; i < pageSize; i++) {
             let profile = filteredProfiles[(currPage - 1) * pageSize + i]
-            if (profile) { 
+            if (profile) {
                 cardArray.push(profileCard(profile, props.viewing))
             }
         }
@@ -321,7 +326,9 @@ export default function ProfileList(props){
             makeCall({profileId: dataid, type: props.viewing}, 
                 '/admin/toggleApprove/' + props.userDetails._id, 'patch')
                 .then((res) => {
-                    setAllProfiles(res.profiles)
+                    if (res.profiles) {
+                        setAllProfiles(res.profiles)
+                    }
                 })
         } else if (op === 'view_feedback') {
             setProfileId(dataid)
@@ -329,13 +336,15 @@ export default function ProfileList(props){
         } else if (op === 'toggle_moderator') {
             makeCall({studentId: dataid}, '/admin/toggleModerator/' + props.userDetails._id, 'patch')
                 .then((res) => {
-                    setAllProfiles(res.students)
+                    if (res.students) {
+                        setAllProfiles(res.students)
+                    }
                 })
         }
     }
 
-    const handleAccessChange = async (e, { userId, label, checked }) => {
-        let res = await makeCall(
+    const handleAccessChange = (e, { userId, label, checked }) => {
+        makeCall(
             {
                 userId: userId,
                 type: props.viewing,
@@ -344,12 +353,11 @@ export default function ProfileList(props){
             }, 
             '/admin/changeAccess/' + props.userDetails._id,
             'patch'
-        )
-        if (res.status === 200) {
-            setAllProfiles(res.profiles)
-        } else {
-            // TODO: error case handling
-        }
+        ).then((res) => {
+            if (res.profiles) {
+                setAllProfiles(res.profiles)
+            }
+        })
     }
 
     const closeFeedbackModal = () => {
