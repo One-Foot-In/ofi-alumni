@@ -120,6 +120,20 @@ export default class AlumniNetworking extends Component {
                 />
             }
             {this.state.display}
+            {!this.state.display.length &&
+                <Message info>
+                <Message.Header>No {this.props.activeSet} Conversations!</Message.Header>
+                {
+                    this.props.activeSet === 'unconfirmed' &&
+                    <Message.Content>Begin a conversation by connecting with an alumni!</Message.Content>
+                }
+                {
+                    this.props.activeSet === 'confirmed' &&
+                    <Message.Content>Check back later!</Message.Content>
+                }
+                </Message>
+            }
+            {this.state.display}
             </>
         )
     }
