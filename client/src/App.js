@@ -46,20 +46,6 @@ const mapDispatchToProps = dispatch => ({
   increment: num => dispatch(actions.increment(num))
 })
 
-//exploring with code
-
-var inactivityTime = function () {
-  var time;
-  window.onload = resetTimer;
-// DOM Events
-  document.onmousemove = resetTimer;
-  document.onkeypress = resetTimer;
-  function resetTimer() {
-      clearTimeout(time);
-      time = setTimeout(alert('aaaaaahhhhhhhh'), 3000)
-  }
-};
-
 let registerButtonGroup = (props) =>
     <Grid centered >
         <Grid.Row>
