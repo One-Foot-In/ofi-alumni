@@ -21,7 +21,7 @@ const APP_LINK = process.env.APP || 'http://localhost:3000/'
 const HASH_COST = 10;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_sauce';
-const JWT_EXPIRATION_MS = process.env.JWT_EXPIRATION_MS || '30000'; // > 6 hrs; og number = 25000000
+const JWT_EXPIRATION_MS = process.env.JWT_EXPIRATION_MS || '25000000'; // > 6 hrs;
 
 router.get('/', function(req, res, next) {
   let filepath = path.join(__dirname, '../build', 'index.html')
@@ -39,9 +39,7 @@ router.get('/logout', (req, res, next) => {
 });
 
 // login route
-//ok basically most of the roles here will need server/cookie confirm updates updates
 router.post('/login', (req, res, next) => {
-  //password auth
   passport.authenticate(
     'local',
     (error, user, info) => {
@@ -52,7 +50,6 @@ router.post('/login', (req, res, next) => {
       } else {
         var payload = {
           role: user.role,
-          //expiring time is here on line 55!
           expires: Date.now() + parseInt(JWT_EXPIRATION_MS),
         };
         req.login(payload, {session: false}, async (error) => {
@@ -73,12 +70,9 @@ router.post('/login', (req, res, next) => {
                 res.status(404).send({ error: `Your account is currently pending approval.` });
                 return;
               }
-              //server update can go here i think
-
               payload.id = alumni._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
-              console.log(cookie)
-              // set jwt-signed cookie on response + set up timezones
+              // set jwt-signed cookie on response
               alumni.availabilities = timezoneHelpers.applyTimezone(alumni.availabilities, alumni.timeZone)
               res.cookie('jwt', cookie);
               res.status(200).send(
@@ -95,7 +89,6 @@ router.post('/login', (req, res, next) => {
               //   return;
               // }
               payload.id = student._id
-              //also update this part as well
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response
               res.cookie('jwt', cookie);
@@ -220,15 +213,8 @@ router.get('/tempPassword/:to/:token', async (req, res, next) => {
     res.status(500).json(e)
   }
 });
-//this might be where to put it actually; its gets the thing
+
 router.get('/isLoggedIn', passport.authenticate('jwt', {session: false}), (req, res, next) => {
-  console.log(console.log(req))
-  console.log((req.user.expires))
-  //req.user.expires = the expiration date of the cookie
-  console.log(parseInt(Date.now()))
-  if(req.user.expires < Date.now()){
-    console.log('the req.user.expires thing works')
-  }
   res.json({message: "You have a fresh cookie!"});
 });
 
