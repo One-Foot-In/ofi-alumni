@@ -191,14 +191,16 @@ router.patch('/changeAccess/:adminId', passport.authenticate('jwt', {session: fa
             let alumniData = await alumniSchema.find({}).populate('school')
             for (let alumnusModel of alumniData) {
                 let alumnus = alumnusModel.toObject()
-                alumnus.accessContexts = newAccessContexts
+                let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
+                alumnus.accessContexts = userRecordWithAccessContext.accessContexts
                 dbData.push(alumnus)
             }
         } else if (type === 'STUDENT') {
-            let studentData = await studentSchema.find({}).populate('school')
-            for (let studentModel of studentData) {
+            let studentsData = await studentSchema.find({}).populate('school')
+            for (let studentModel of studentsData) {
                 let student = studentModel.toObject()
-                student.accessContexts = newAccessContexts
+                let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
+                student.accessContexts = userRecordWithAccessContext.accessContexts
                 dbData.push(student)
             }
         }
