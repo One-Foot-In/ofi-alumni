@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Image, Grid, Label} from 'semantic-ui-react'
+import { Card, Image, Grid, Label, Message } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import Conversation from './ConversationModal'
 /*
@@ -118,6 +118,20 @@ export default class AlumniNetworking extends Component {
                     closeModal={this.closeConversationModal}
                     userDetails={this.props.userDetails}
                 />
+            }
+            {this.state.display}
+            {!this.state.display.length &&
+                <Message info>
+                <Message.Header>No {this.props.activeSet} Conversations!</Message.Header>
+                {
+                    this.props.activeSet === 'unconfirmed' &&
+                    <Message.Content>Begin a conversation by connecting with an alumni!</Message.Content>
+                }
+                {
+                    this.props.activeSet === 'confirmed' &&
+                    <Message.Content>Check back later!</Message.Content>
+                }
+                </Message>
             }
             {this.state.display}
             </>

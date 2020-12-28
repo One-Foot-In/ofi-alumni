@@ -66,11 +66,10 @@ router.post('/login', (req, res, next) => {
             }
             if (userRole.includes("ALUMNI")) {
               const alumni = await alumniSchema.findOne({user: user._id})
-              // TODO: bar login when unapproved when users reach critical mass
-              // if (!alumni.approved) {
-              //   res.status(404).send({ error: `Your account is currently pending approval.` });
-              //   return;
-              // }
+              if (!alumni.approved) {
+                res.status(404).send({ error: `Your account is currently pending approval.` });
+                return;
+              }
               payload.id = alumni._id
               const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response
@@ -200,8 +199,9 @@ router.get('/tempPassword/:to/:token', async (req, res, next) => {
     }
     if (passwordChangeToken === user.passwordChangeToken) {
       let newTempPass = crypto({length: 10})
-    let passwordHash = await bcrypt.hash(newTempPass, HASH_COST)
+      let passwordHash = await bcrypt.hash(newTempPass, HASH_COST)
       user.passwordHash = passwordHash
+      user.passwordChangeToken = null // reset token to prevent multiple password changes with stale link
       await user.save()
       await sendTemporaryPasswordEmail(email, newTempPass)
       res.status(200).send(htmlBuilder('Thanks!', 'Thank you for verifying your request for a password change! We will send you an email with a temporary password shortly.', 'Go To App', APP_LINK))
