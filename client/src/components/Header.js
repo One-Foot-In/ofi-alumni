@@ -220,8 +220,7 @@ export default class HeaderComponent extends Component {
     }
 
     renderLogo() {
-        let imageLink = this.props.loggedIn 
-            && this.state.currRole === 'INTRASCHOOL' ? 
+        let imageLink = this.props.loggedIn && this.state.currRole !== 'ADMIN' && this.state.currRole !== 'COLLEGE_REP' ? 
             this.props.school.logoURL : require('./logo.png');
         return (
                 <>
