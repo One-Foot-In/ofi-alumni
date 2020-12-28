@@ -193,6 +193,7 @@ export default function ProfileList(props){
             <List>
                 <List.Item>
                     <Checkbox
+                        disabled
                         checked={accessContexts.includes('INTRASCHOOL')}
                         label='INTRASCHOOL'
                         userId={userId}
