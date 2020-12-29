@@ -133,7 +133,6 @@ export default class AlumniNetworking extends Component {
                 }
                 </Message>
             }
-            {this.state.display}
             </>
         )
     }
