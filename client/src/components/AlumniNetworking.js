@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Image, Grid, Label} from 'semantic-ui-react'
+import { Card, Image, Grid, Label, Message } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import Conversation from './ConversationModal'
 /*
@@ -133,7 +133,6 @@ export default class AlumniNetworking extends Component {
                 }
                 </Message>
             }
-            {this.state.display}
             </>
         )
     }
