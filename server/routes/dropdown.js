@@ -2,6 +2,8 @@ var express = require('express');
 var passport = require("passport");
 var router = express.Router();
 var schoolSchema = require('../models/schoolSchema');
+var alumniSchema = require('../models/alumniSchema');
+var studentSchema = require('../models/studentSchema');
 var collegeSchema = require('../models/collegeSchema');
 var jobTitleSchema = require('../models/jobTitleSchema');
 var companySchema = require('../models/companySchema');
@@ -11,21 +13,41 @@ var COUNTRIES = require("../countries").COUNTRIES
 var actionItemSchema = require("../models/actionItemSchema");
 require('mongoose').Promise = global.Promise
 
-router.get('/countries/', async (req, res, next) => {
+router.get('/coveredCountries/', async (req, res, next) => {
     try {
-        const options = COUNTRIES.map(country => {
-            return {
-                key: country,
-                value: country,
-                text: country
-            }
+        const allAlumniCountries = await alumniSchema.distinct('country')
+        const allStudentCountries = await studentSchema.distinct('country')
+        const coveredCountryOptions = [...new Set([...allAlumniCountries, ...allStudentCountries])].map(country => {
+          return {
+            key: country,
+            value: country,
+            text: country
+          }
         })
-        res.status(200).send({options: options})
+        res.status(200).send({options: coveredCountryOptions})
     } catch (e) {
         res.status(500).send({
-            message: 'Failed fetching countries: ' + e
+            message: 'Failed fetching covered countries: ' + e
         });
     }
+});
+
+router.get('/countries/', async (req, res, next) => {
+  try {
+
+      const options = COUNTRIES.map(country => {
+          return {
+              key: country,
+              value: country,
+              text: country
+          }
+      })
+      res.status(200).send({options: options})
+  } catch (e) {
+      res.status(500).send({
+          message: 'Failed fetching countries: ' + e
+      });
+  }
 });
 
 router.get('/schoolsOptions', async (req, res) => {

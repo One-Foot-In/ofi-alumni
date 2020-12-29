@@ -331,7 +331,6 @@ router.post('/addCollege/:adminid', passport.authenticate('jwt', {session: false
     let adminId = req.params.adminId
     let country = req.body.country
     let name = req.body.name
-
     try {
         if (!isAdmin(adminId)) {
             res.status(400).send('Invalid Admin ID');
@@ -348,5 +347,98 @@ router.post('/addCollege/:adminid', passport.authenticate('jwt', {session: false
         res.status(500).send({'error' : 'Add College Error' + e})
     }
 });
+
+async function queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, pollModel) {
+    // by country
+    let usersToQueuePollsFor = []
+    let studentUsers = []
+    let alumniUsers = []
+    if (countriesTargetted.length) {
+        if (rolesTargetted === 'STUDENTS') {
+            studentUsers = await studentSchema.find().where('country').in(countriesTargetted).exec()
+        } else if (rolesTargetted === 'STUDENTS') {
+            alumniUsers = await alumniSchema.find().where('country').in(countriesTargetted).exec()
+        } else {
+            // BOTH alumni and students
+            studentUsers = await studentSchema.find().where('country').in(countriesTargetted).exec()
+            alumniUsers = await alumniSchema.find().where('country').in(countriesTargetted).exec()
+        }
+    }
+    // by school
+    else if (schoolsTargetted.length) {
+        if (rolesTargetted === 'STUDENTS') {
+            studentUsers = await studentSchema.find().where('school').in(schoolsTargetted).exec()
+        } else if (rolesTargetted === 'STUDENTS') {
+            alumniUsers = await alumniSchema.find().where('school').in(schoolsTargetted).exec()
+        } else {
+            // BOTH alumni and students
+            studentUsers = await studentSchema.find().where('school').in(schoolsTargetted).exec()
+            alumniUsers = await alumniSchema.find().where('school').in(schoolsTargetted).exec()
+        }
+    } else {
+        studentUsers = await studentSchema.find()
+        alumniUsers = await alumniSchema.find()
+    }
+    // globally
+    for (let model in [...studentUsers, ...alumniUsers]) {
+        usersToQueuePollsFor.push(model.user)
+    }
+    for (let user of usersToQueuePollsFor) {
+        let userModel = await userSchema.findById(user)
+        userModel.pollsQueued.push(newPoll)
+    }
+}
+
+router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        let rolesTargetted = req.body.rolesTargetted
+        let countriesTargetted = req.body.countriesTargetted
+        let schoolsTargetted = req.body.schoolsTargetted
+        let type = req.body.type
+        let prompt = req.body.prompt
+        let pollOptions = req.body.pollOptions
+        let optionsCreatedForPoll = []
+        if (['CUSTOM_POLL', 'NO_CUSTOM_POLL'].includes(type)) {
+            if (!(pollOptions.length)) {
+                res.status(400).send('No poll options provided');
+                return;
+            } else {
+                // create pollOptions objects
+                for (let option of pollOptions) {
+                    let newOption = await pollOptionSchema({
+                        optionText: option,
+                        isCustom: false
+                    })
+                    newOption.save()
+                    optionsCreatedForPoll.push(newOption)
+                }
+            }
+        }
+        // create the poll
+        let schoolsToAdd = []
+        if (schoolsTargetted.length) {
+            schoolsToAdd = await (await schoolSchema.find().where('_id')).in(schoolsTargetted).exec()
+        }
+        let newPoll = await newPollSchema({
+            prompt: prompt,
+            countriesTargetted: countriesTargetted,
+            schoolsTargetted: schoolsToAdd,
+            roleTargetted: rolesTargetted,
+            allowInput: type === 'CUSTOM_POLL',
+            options: optionsCreatedForPoll
+        })
+        newPoll.save()
+        await queuePolls(schoolsTargetted, countriesTargetted, newPoll)
+    } catch (e) {
+        console.log('/addPoll error:' + e);
+        res.status(500).send({'error' : 'Add Poll Error' + e})
+    }
+});
+
 
 module.exports = router;

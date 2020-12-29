@@ -23,6 +23,7 @@ import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
 
 import * as actions from './redux/actions'
+import Polls from './components/admin_dashboard/Polls';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -158,7 +159,12 @@ var adminNavBarItems = () => {
         id: 'schools',
         name: 'Schools',
         navLink: '/schools'
-    }
+    },
+    {
+      id: 'polls',
+      name: 'Polls',
+      navLink: '/polls'
+  }
   ]
   return navBarItems;
 }
@@ -663,6 +669,23 @@ class App extends Component {
                       />
                       <SchoolsList
                           userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/polls`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={adminNavBarItems()}
+                          activeItem={'polls'}
+                      />
+                      <Polls
+                        userDetails={this.state.userDetails}
                       />
                   </> :
                   <Redirect to={"/login"}/>
