@@ -11,8 +11,8 @@ var requestSchema = require('../models/requestSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
 var getUniqueInterests = require("./alumni").getUniqueInterests
-var generateNewAndExistingColleges = require("./alumni").generateNewAndExistingColleges;
-var getUniqueColleges = require("./alumni").getUniqueColleges
+var generateNewAndExistingCollege = require("./alumni").generateNewAndExistingCollege
+var getUniqueCollege = require("./alumni").getUniqueCollege
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -144,7 +144,6 @@ router.patch('/interests/add/:id', async (req, res, next) => {
         const existingInterests = req.body.existingInterests
         const newInterests = req.body.newInterests || []
         let interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
-
         student.interests = getUniqueInterests([...student.interests, ...interestsToAdd])
         await student.save()
         res.status(200).send({message: "Successfully added student's interests"})
@@ -176,12 +175,14 @@ router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {sessio
         const newColleges = req.body.newColleges || [];
         console.log(existingColleges)
         console.log(newColleges)
-        let collegesToAdd = await generateNewAndExistingColleges(existingColleges, newColleges);
-        student.interests = getUniqueColleges([...student.collegeShortList, ...collegesToAdd]);
+        let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
+        student.interests = getUniqueCollege([...student.collegeShortList, ...collegesToAdd]);
         await student.save();
-        res.status(200).json({message: `you have added ${collegeInQuestion} to you short list`})
+        console.log(student.collegeShortList)
+        res.status(200).json({message: `you have successfully added the colleges to your short list`})
     } catch(e){
         console.log('Error: cannot add college');
+        console.log(e)
         res.status(500).json({'error': e})
     }
 })

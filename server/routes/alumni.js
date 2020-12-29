@@ -64,7 +64,7 @@ const generateNewAndExistingInterests = async (existingInterests, newInterests) 
 const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
     const existingCollegeIds = existingColleges.map(school => school.value).flat();
     let existingCollegeRecords = await collegeSchema.find().where('_id').in(existingCollegeIds).exec();
-    if(newCollege.length > 0){
+    if(newCollege.length){
         for (let i = 0; i < newCollege.length; i++){
             let collegeExists = await collegeSchema.find({name: newCollege[i].value});
             if(!collegeExists.length){
@@ -554,6 +554,7 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
     }
 })
 
+
 router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {session: false}, */ async (req, res, next) => {
     try{
         let alumni = await alumniSchema.findOne({_id: req.params.id});
@@ -590,3 +591,5 @@ router.patch('/collegesAcceptedInto/delete/:id', /*passport.authenticate('jwt', 
 module.exports = router;
 module.exports.generateNewAndExistingInterests = generateNewAndExistingInterests
 module.exports.getUniqueInterests = getUniqueInterests
+module.exports.generateNewAndExistingCollege = generateNewAndExistingCollege
+module.exports.getUniqueCollege = getUniqueCollege
