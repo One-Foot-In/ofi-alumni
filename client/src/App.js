@@ -21,7 +21,7 @@ import SchoolsList from './components/admin_dashboard/SchoolsList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
 import AlumniWorkspace from './components/AlumniWorkspace';
-import StudentWorkspaces from './components/StudentWorkspaces';
+import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
 
 export const ALUMNI = "ALUMNI"
@@ -457,7 +457,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                       />
                   </> :
-                  <Redirect to={"/workspaces"}/>
+                  <Redirect to={"/login"}/>
               }
           />
 
@@ -572,11 +572,11 @@ class App extends Component {
                           navItems={studentNavBarItems(this.state.approved)}
                           activeItem={'workspaces'}
                       />
-                      <StudentWorkspaces 
+                      <StudentWorkspace 
                           userDetails={this.state.userDetails}
                       />
                   </> :
-                  <Redirect to={"/workspaces"}/>
+                  <Redirect to={"/login"}/>
               }
           />
           <Route exact path={`/verify`} render={(props) => 

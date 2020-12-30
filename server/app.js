@@ -129,7 +129,7 @@ async function main() {
 
     app.use('/news/', newsRouter);
 
-    app.use('/image/', imageRouter);
+    //app.use('/image/', imageRouter);
 
     app.use('/conversations/', conversationsRouter);
 
@@ -160,6 +160,5 @@ async function main() {
 }
 
 main().catch(console.err);
-
 
 module.exports = app;

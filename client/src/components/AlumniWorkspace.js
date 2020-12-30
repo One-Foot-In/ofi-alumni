@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Message, Form, Modal, Menu, Label, Card, Grid, Image, List, Button, Header, Segment } from 'semantic-ui-react';
-import { makeCall } from "../apis";
+import { Message, Menu} from 'semantic-ui-react';
 
 const ALUMNI = "ALUMNI"
 
@@ -40,11 +39,10 @@ export default class AlumniWorkspace extends Component {
             <Message info>
             <Message.Header>No colleges in accepted college list.</Message.Header>
             {
-                <Message.Content>Add some colleges and check back!</Message.Content>
+                <Message.Content>Please add any colleges you have been offered an admission into. </Message.Content>
             }
             </Message>
             }
-            {this.state.display}
             </>
         )
     }
