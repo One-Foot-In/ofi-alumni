@@ -39,20 +39,28 @@ export default class NewsFeed extends Component {
         for (let feedItem of this.state.newsItems) {
             switch (feedItem.event) {
                 case 'New Alumni':
-                    display.push(<Divider key={i}/>)
-                    display.push(this.createNewAlumniPost(feedItem))
+                    if (feedItem.alumni[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createNewAlumniPost(feedItem))
+                    }
                     break;
                 case 'New Student':
-                    display.push(<Divider key={i}/>)
-                    display.push(this.createNewStudentPost(feedItem))
+                    if (feedItem.students[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createNewStudentPost(feedItem))
+                    }
                     break;
                 case 'Confirmed Meeting':
-                    display.push(<Divider key={i}/>)
-                    display.push(this.createCallConfirmedPost(feedItem))
+                    if (feedItem.students[0] && feedItem.alumni[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createCallConfirmedPost(feedItem))
+                    }
                     break;
                 case 'New Topics':
-                    display.push(<Divider key={i}/>)
-                    display.push(this.createNewTopicsPost(feedItem))
+                    if (feedItem.alumni[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createNewTopicsPost(feedItem))
+                    }
                     break;
                 default:
                     break;
@@ -70,7 +78,6 @@ export default class NewsFeed extends Component {
      */
     createNewAlumniPost(feedItem) {
         let alumniDetails = feedItem.alumni[0];
-
         return(
             <Feed.Event key={feedItem._id}>
                 <Feed.Label>
