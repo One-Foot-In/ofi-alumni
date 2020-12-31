@@ -36,24 +36,31 @@ export default class NewsFeed extends Component {
     constructDisplay() {
         let display = []
         let i = 0
-        console.log("newsItems being set are", this.state.newsItems)
         for (let feedItem of this.state.newsItems) {
             switch (feedItem.event) {
                 case 'New Alumni':
-                    display.push(<Divider key={i}/>)
-                    display.push(this.createNewAlumniPost(feedItem))
+                    if (feedItem.alumni[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createNewAlumniPost(feedItem))
+                    }
                     break;
                 case 'New Student':
-                    display.push(<Divider key={i}/>)
-                    display.push(this.createNewStudentPost(feedItem))
+                    if (feedItem.students[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createNewStudentPost(feedItem))
+                    }
                     break;
                 case 'Confirmed Meeting':
-                    display.push(<Divider key={i}/>)
-                    display.push(this.createCallConfirmedPost(feedItem))
+                    if (feedItem.students[0] && feedItem.alumni[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createCallConfirmedPost(feedItem))
+                    }
                     break;
                 case 'New Topics':
-                    display.push(<Divider key={i}/>)
-                    display.push(this.createNewTopicsPost(feedItem))
+                    if (feedItem.alumni[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createNewTopicsPost(feedItem))
+                    }
                     break;
                 default:
                     break;
@@ -71,7 +78,6 @@ export default class NewsFeed extends Component {
      */
     createNewAlumniPost(feedItem) {
         let alumniDetails = feedItem.alumni[0];
-        console.log('creating new alumni post with', alumniDetails)
         return(
             <Feed.Event key={feedItem._id}>
                 <Feed.Label>
@@ -243,7 +249,6 @@ export default class NewsFeed extends Component {
     }
     
     render() {
-        console.log('display length is', this.state.display.length)
         return(
             <Segment style={{'marginBottom': '1em'}}>
                 <Header>
