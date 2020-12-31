@@ -16,6 +16,9 @@ export default function Polls(props) {
     const [countryOptions, setCountryOptions] = useState([])
     const [schoolOptions, setSchoolOptions] = useState([])
 
+    // form control
+    const [sendingRequest, setSendingRequest] = useState(false)
+
     //Mounting
     useEffect(() => {
         makeCall({}, '/admin/polls/' + props.userDetails._id, 'get')
@@ -97,11 +100,38 @@ export default function Polls(props) {
     }
 
     const submitPoll = (e, { value}) => {
-        console.log("role is ", roleSelection)
-        console.log("context is ", contextSelection)
-        console.log("prompt is ", prompt)
-        console.log("school is ", schoolSelection)
-        console.log("country is ", countrySelection)
+        setSendingRequest(true)
+        makeCall({
+            rolesTargetted: roleSelection,
+            countriesTargetted: countrySelection,
+            schoolsTargetted: schoolSelection,
+            type: typeSelection,
+            prompt: prompt,
+            pollOptions: pollOptions
+        },
+        '/admin/addPoll/' + props.userDetails._id,
+        'post'
+        ).then((res) => {
+            if (res.error) {
+                // error
+                // TODO: Add error toast
+                setSendingRequest(false)
+            } else {
+                // successfully added a new poll
+                setSendingRequest(false)
+                // reset state of new poll form
+                setNewPollOption("")
+                setPollOptions([])
+                setRoleSelection("")
+                setTypeSelection("")
+                setContextSelection("")
+                setCountrySelection([])
+                setSchoolSelection([])
+                setPrompt("")
+                setCountryOptions([])
+                setSchoolOptions([])
+            }
+        })
     }
 
     const pollOptionsList = () => {
@@ -281,7 +311,9 @@ export default function Polls(props) {
 
     return (
         <Segment.Group>
-            <Segment>
+            <Segment
+                disabled={sendingRequest}
+            >
                 <Form>
                     {targetRadioGroup()}
                     {
@@ -314,6 +346,7 @@ export default function Polls(props) {
                         control={Button}
                         onClick={submitPoll.bind(this)}
                         disabled={!isSubmitReady()}
+                        loading={sendingRequest}
                     >
                         Submit
                     </Form.Field>

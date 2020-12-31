@@ -8,6 +8,8 @@ var adminSchema = require('../models/adminSchema');
 var studentSchema = require('../models/studentSchema');
 var requestSchema = require('../models/requestSchema');
 var userSchema = require('../models/userSchema');
+var pollSchema = require('../models/polls/pollSchema');
+var pollOptionSchema = require('../models/polls/pollOptionSchema');
 require('mongoose').Promise = global.Promise
 
 async function isAdmin(id) {
@@ -354,38 +356,40 @@ async function queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, 
     let studentUsers = []
     let alumniUsers = []
     if (countriesTargetted.length) {
-        if (rolesTargetted === 'STUDENTS') {
-            studentUsers = await studentSchema.find().where('country').in(countriesTargetted).exec()
-        } else if (rolesTargetted === 'STUDENTS') {
-            alumniUsers = await alumniSchema.find().where('country').in(countriesTargetted).exec()
-        } else {
-            // BOTH alumni and students
+        // BOTH alumni and students
+        if (rolesTargetted.includes('STUDENTS') && rolesTargetted.includes('ALUMNI')) {
             studentUsers = await studentSchema.find().where('country').in(countriesTargetted).exec()
             alumniUsers = await alumniSchema.find().where('country').in(countriesTargetted).exec()
+        } else if (rolesTargetted.includes('ALUMNI')) {
+            alumniUsers = await alumniSchema.find().where('country').in(countriesTargetted).exec()
+        } else if (rolesTargetted.includes('STUDENTS')) {
+            studentUsers = await studentSchema.find().where('country').in(countriesTargetted).exec()
         }
     }
     // by school
     else if (schoolsTargetted.length) {
-        if (rolesTargetted === 'STUDENTS') {
-            studentUsers = await studentSchema.find().where('school').in(schoolsTargetted).exec()
-        } else if (rolesTargetted === 'STUDENTS') {
-            alumniUsers = await alumniSchema.find().where('school').in(schoolsTargetted).exec()
-        } else {
-            // BOTH alumni and students
+        // BOTH alumni and students
+        if (rolesTargetted.includes('STUDENTS') && rolesTargetted.includes('ALUMNI')) {
             studentUsers = await studentSchema.find().where('school').in(schoolsTargetted).exec()
             alumniUsers = await alumniSchema.find().where('school').in(schoolsTargetted).exec()
+        } else if (rolesTargetted.includes('ALUMNI')) {
+            alumniUsers = await alumniSchema.find().where('school').in(schoolsTargetted).exec()
+        } else if (rolesTargetted.includes('STUDENTS')) {
+            studentUsers = await studentSchema.find().where('school').in(schoolsTargetted).exec()
         }
-    } else {
+    }
+    // globally
+    else {
         studentUsers = await studentSchema.find()
         alumniUsers = await alumniSchema.find()
     }
-    // globally
-    for (let model in [...studentUsers, ...alumniUsers]) {
+    for (let model of [...studentUsers, ...alumniUsers]) {
         usersToQueuePollsFor.push(model.user)
     }
     for (let user of usersToQueuePollsFor) {
         let userModel = await userSchema.findById(user)
-        userModel.pollsQueued.push(newPoll)
+        userModel.pollsQueued.push(pollModel)
+        userModel.save()
     }
 }
 
@@ -396,7 +400,12 @@ router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}),
             res.status(400).send('Invalid Admin ID');
             return;
         }
-        let rolesTargetted = req.body.rolesTargetted
+        let rolesTargetted = []
+        if (req.body.rolesTargetted === 'BOTH') {
+            rolesTargetted = ['ALUMNI', 'STUDENTS']
+        } else {
+            rolesTargetted = [req.body.rolesTargetted]
+        }
         let countriesTargetted = req.body.countriesTargetted
         let schoolsTargetted = req.body.schoolsTargetted
         let type = req.body.type
@@ -422,21 +431,47 @@ router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}),
         // create the poll
         let schoolsToAdd = []
         if (schoolsTargetted.length) {
-            schoolsToAdd = await (await schoolSchema.find().where('_id')).in(schoolsTargetted).exec()
+            schoolsToAdd = await schoolSchema.find().where('_id').in(schoolsTargetted).exec()
         }
-        let newPoll = await newPollSchema({
+        let newPoll = await pollSchema({
             prompt: prompt,
             countriesTargetted: countriesTargetted,
             schoolsTargetted: schoolsToAdd,
-            roleTargetted: rolesTargetted,
+            rolesTargetted: rolesTargetted,
             allowInput: type === 'CUSTOM_POLL',
             options: optionsCreatedForPoll
         })
         newPoll.save()
-        await queuePolls(schoolsTargetted, countriesTargetted, newPoll)
+        await queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, newPoll)
+        res.status(200).json({
+            message: 'Successfully added poll!'
+        })
     } catch (e) {
         console.log('/addPoll error:' + e);
         res.status(500).send({'error' : 'Add Poll Error' + e})
+    }
+});
+
+router.delete('/poll/:adminId/:pollId',
+    // passport.authenticate('jwt', {session: false}),
+    async (req, res) => {
+    let adminId = req.params.adminId
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        // TODO: add mongoose schema pre-findOneAndRemove hook to delete poll options and pull from user records
+        let poll = await pollSchema.findById(req.params.pollId)
+        for (let option of poll.options) {
+            await pollOptionSchema.deleteOne({_id: option})
+        }
+        await userSchema.updateMany({}, {$pull: {pollsQueued: poll._id}})
+        await pollSchema.deleteOne({_id: req.params.pollId})
+        res.status(200).json({message: 'Successfully deleted poll'})
+    } catch (e) {
+        console.log('/delete poll error:' + e);
+        res.status(500).send({'error' : 'Delete Poll Error' + e})
     }
 });
 
