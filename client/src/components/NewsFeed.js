@@ -36,6 +36,7 @@ export default class NewsFeed extends Component {
     constructDisplay() {
         let display = []
         let i = 0
+        console.log("newsItems being set are", this.state.newsItems)
         for (let feedItem of this.state.newsItems) {
             switch (feedItem.event) {
                 case 'New Alumni':
@@ -70,7 +71,7 @@ export default class NewsFeed extends Component {
      */
     createNewAlumniPost(feedItem) {
         let alumniDetails = feedItem.alumni[0];
-
+        console.log('creating new alumni post with', alumniDetails)
         return(
             <Feed.Event key={feedItem._id}>
                 <Feed.Label>
@@ -242,6 +243,7 @@ export default class NewsFeed extends Component {
     }
     
     render() {
+        console.log('display length is', this.state.display.length)
         return(
             <Segment style={{'marginBottom': '1em'}}>
                 <Header>
