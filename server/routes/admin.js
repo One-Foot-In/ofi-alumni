@@ -350,6 +350,23 @@ router.post('/addCollege/:adminid', passport.authenticate('jwt', {session: false
     }
 });
 
+router.get('/polls/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let adminId = req.params.adminId
+    try {
+        if (!isAdmin(adminId)) {
+            res.status(400).send('Invalid Admin ID');
+            return;
+        }
+        let polls = await pollSchema.find().populate('options')
+        res.status(200).json({
+            polls: polls
+        })
+    } catch (e) {
+        console.log('/polls error:' + e);
+        res.status(500).send({'error' : 'Fetching Polls' + e})
+    }
+});
+
 async function queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, pollModel) {
     // by country
     let usersToQueuePollsFor = []

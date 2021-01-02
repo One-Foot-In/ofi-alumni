@@ -9,7 +9,7 @@ var studentSchema = require('../models/studentSchema');
 var adminSchema = require('../models/adminSchema');
 var collegeRepSchema = require('../models/collegeRepSchema');
 var userSchema = require('../models/userSchema');
-var timezoneHelpers = require("../helpers/timezoneHelpers")
+var pollOptionSchema = require('../models/polls/pollOptionSchema');
 var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
 require('dotenv').config();
 var path = require('path');
@@ -213,6 +213,78 @@ router.get('/unsubscribe/:to/:token', async (req, res, next) => {
 
 router.get('/isLoggedIn', passport.authenticate('jwt', {session: false}), (req, res, next) => {
   res.json({message: "You have a fresh cookie!"});
+});
+
+router.get('/polls/:id', 
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+  try {
+    let id = req.params.id
+    let userRecord = await userSchema.findById(id)
+    await userRecord.populate('pollsQueued').execPopulate()
+    for (let poll of userRecord.pollsQueued) {
+      await poll.populate('options').execPopulate()
+    }
+    // send most recent 10 polls
+    let mostRecentTenPolls = userRecord.pollsQueued.slice(-10)
+    res.status(200).json({polls: mostRecentTenPolls})
+  } catch (e) {
+    console.log("poll fetch error" + e)
+    res.status(500).send({message: "polls fetch error" + e})
+  }
+});
+
+router.patch('/answerPoll/:pollId/:pollOptionId/:userId',
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+    let pollId = req.params.pollId
+    let pollOptionId = req.params.pollOptionId
+    let userId = req.params.userId
+    try {
+      let pollOption = await pollOptionSchema.findById(pollOptionId)
+      pollOption.responders.push(userId)
+      // remove user from poll queue
+      pollOption.save()
+      let user = await userSchema.findById(userId)
+      if (!(user.pollsQueued.includes(pollId))) {
+        res.status(500).json({
+          error: 'This poll is not queued for this user'
+        })
+        return
+      }
+      user.pollsQueued.splice(user.pollsQueued.indexOf(pollId), 1)
+      user.save()
+      res.status(200).json({
+        message: 'User\'s poll response was submitted'
+      })
+    } catch (e) {
+      console.log("poll answer error" + e)
+      res.status(500).send({message: "polls answer error" + e})
+    }
+});
+
+router.patch('/acknowledgePoll/:pollId/:userId',
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+    let pollId = req.params.pollId
+    let userId = req.params.userId
+    try {
+      let user = await userSchema.findById(userId)
+      if (!(user.pollsQueued.includes(pollId))) {
+        res.status(500).json({
+          error: 'This poll is not queued for this user'
+        })
+        return
+      }
+      user.pollsQueued.splice(user.pollsQueued.indexOf(pollId), 1)
+      user.save()
+      res.status(200).json({
+        message: 'User\'s poll response was submitted'
+      })
+    } catch (e) {
+      console.log("poll answer error" + e)
+      res.status(500).send({message: "polls answer error" + e})
+    }
 });
 
 router.patch('/changeTimeZone/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {

@@ -3,6 +3,7 @@ import { Message, Segment, Feed, Image, Header, Icon, Divider, Modal, Grid} from
 import { makeCall } from '../apis';
 import AlumniProfile from './AlumniProfile';
 import StudentProfile from './StudentProfile';
+import PollCarousel from './carousels/PollCarousel';
 
 /*
  * DETAILS:
@@ -251,6 +252,9 @@ export default class NewsFeed extends Component {
     render() {
         return(
             <Segment style={{'marginBottom': '1em'}}>
+                <PollCarousel
+                    userId={this.props.userDetails.user}
+                />
                 <Header>
                     <Icon name={'newspaper outline'}/>
                     <Header.Content>News</Header.Content>

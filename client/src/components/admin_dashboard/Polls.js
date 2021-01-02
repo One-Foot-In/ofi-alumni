@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Segment, Form, Radio, Button, TextArea, Dropdown, List, Input, Header, Grid } from 'semantic-ui-react'
+import { Segment, Form, Radio, Button, TextArea, Dropdown, List, Input, Header, Grid, Table, Label } from 'semantic-ui-react'
 import { makeCall } from '../../apis';
 
 export default function Polls(props) {
@@ -19,16 +19,19 @@ export default function Polls(props) {
     // form control
     const [sendingRequest, setSendingRequest] = useState(false)
 
-    //Mounting
-    useEffect(() => {
-        makeCall({}, '/admin/polls/' + props.userDetails._id, 'get')
+    const fetchPolls = () => {
+        return makeCall({}, '/admin/polls/' + props.userDetails._id, 'get')
         .then((res) => {
             // null check to ensure server-side error does not return a non-iterable
             if (res.polls) {
                 setPolls(res.polls)
             }
         })
-        .then(() => {
+    }
+
+    //Mounting
+    useEffect(() => {
+        fetchPolls().then(() => {
             // get all country options
             makeCall({}, '/drop/coveredCountries/', 'get')
             .then((res) => {
@@ -128,8 +131,25 @@ export default function Polls(props) {
                 setCountrySelection([])
                 setSchoolSelection([])
                 setPrompt("")
-                setCountryOptions([])
-                setSchoolOptions([])
+            }
+        })
+    }
+
+    const handleDeletePoll = (e, {pollId}) => {
+        setSendingRequest(true)
+        makeCall({},
+        `/admin/poll/${props.userDetails._id}/${pollId}`,
+        'delete'
+        ).then((res) => {
+            if (res.error) {
+                // error
+                // TODO: Add error toast
+                setSendingRequest(false)
+            } else {
+                // successfully deleted poll
+                fetchPolls().then(() => {
+                    setSendingRequest(false)
+                })
             }
         })
     }
@@ -309,6 +329,69 @@ export default function Polls(props) {
         )
     }
 
+    const listPollOptions = (options) => {
+        return options.map(option => {
+            return (
+                <List.Item>
+                    {option.optionText}
+                    {option.responders.length ?
+                        <Label
+                            color='orange'
+                            horizontal
+                            style={{
+                                margin: '5px'
+                            }}
+                        >
+                            {option.responders.length}
+                        </Label>
+                        : null
+                    }
+                </List.Item>
+            )
+        })
+    }
+
+    const existingPolls = () => {
+        return polls.map(poll => {
+            return (
+                <Table.Row>
+                    <Table.Cell>
+                        <Header.Subheader>{poll.prompt}</Header.Subheader>
+                    </Table.Cell>
+                    <Table.Cell>
+                        {listPollOptions(poll.options)}
+                    </Table.Cell>
+                    <Table.Cell>
+                        <Button
+                            color="red"
+                            pollId={poll._id}
+                            onClick={handleDeletePoll.bind(this)}    
+                        >
+                            Delete
+                        </Button>
+                    </Table.Cell>
+                </Table.Row>
+            )
+        })
+    }
+
+    const constructTable = () => {
+        return (
+            <Table basic='very' celled collapsing>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell>Prompt</Table.HeaderCell>
+                        <Table.HeaderCell>Responses</Table.HeaderCell>
+                        <Table.HeaderCell>Action</Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {existingPolls()}
+                </Table.Body>
+            </Table>
+        )
+    }
+
     return (
         <Segment.Group>
             <Segment
@@ -352,7 +435,9 @@ export default function Polls(props) {
                     </Form.Field>
                 </Form>
             </Segment>
-            <Segment>Existing polls go here</Segment>
+            <Segment>
+                {constructTable()}
+            </Segment>
       </Segment.Group>
     )
 }
