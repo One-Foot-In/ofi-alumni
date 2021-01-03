@@ -358,7 +358,7 @@ router.get('/polls/:adminId', passport.authenticate('jwt', {session: false}), as
             res.status(400).send('Invalid Admin ID');
             return;
         }
-        let polls = await pollSchema.find().populate('options')
+        let polls = await pollSchema.find().populate('options schoolsTargetted')
         res.status(200).json({
             polls: polls
         })

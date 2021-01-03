@@ -362,6 +362,15 @@ export default function Polls(props) {
                         {listPollOptions(poll.options)}
                     </Table.Cell>
                     <Table.Cell>
+                        {poll.rolesTargetted.join(", ")}
+                    </Table.Cell>
+                    <Table.Cell>
+                        {poll.countriesTargetted.join(", ")}
+                    </Table.Cell>
+                    <Table.Cell>
+                        {poll.schoolsTargetted.map(school => school.name).join(", ")}
+                    </Table.Cell>
+                    <Table.Cell>
                         <Button
                             color="red"
                             pollId={poll._id}
@@ -382,6 +391,9 @@ export default function Polls(props) {
                     <Table.Row>
                         <Table.HeaderCell>Prompt</Table.HeaderCell>
                         <Table.HeaderCell>Responses</Table.HeaderCell>
+                        <Table.HeaderCell>Roles Targetted</Table.HeaderCell>
+                        <Table.HeaderCell>Countries Targetted</Table.HeaderCell>
+                        <Table.HeaderCell>Schools Targetted</Table.HeaderCell>
                         <Table.HeaderCell>Action</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
