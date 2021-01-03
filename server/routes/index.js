@@ -61,7 +61,7 @@ router.post('/login', (req, res, next) => {
               return role.toUpperCase()
             })
             if (!user.emailVerified) {
-              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email.` });
+              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email. Sometimes this email may end up in your spam/junk/promotions folder.` });
               return;
             }
             let cookie = null

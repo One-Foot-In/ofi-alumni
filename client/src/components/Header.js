@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Grid, Button, Modal, Form, Image, Label, Dropdown, Header, Segment} from 'semantic-ui-react';
+import {Grid, Button, Modal, Form, Image, Label, Dropdown, Header} from 'semantic-ui-react';
 import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
 import swal from "sweetalert";
@@ -224,7 +224,7 @@ export default class HeaderComponent extends Component {
             this.props.school.logoURL : require('./logo.png');
         return (
                 <>
-                <Image centered src={imageLink} size='small'/>  
+                <Image centered src={imageLink} size='small'/>
                 </>         
         )
     }
@@ -303,7 +303,16 @@ export default class HeaderComponent extends Component {
                 <Grid.Row columns={"equal"}>
                     <Grid.Column textAlign='center'>
                         {this.props.school && this.props.loggedIn &&
-                            <Header as='h4'>{this.props.school.name}</Header>
+                            <Header as='h4'>
+                                {this.props.school.name}
+                                {
+                                    (process.env.REACT_APP_IS_BETA && process.env.REACT_APP_IS_BETA.toLowerCase() === 'true') ? 
+                                    <Label color='yellow'>
+                                        beta
+                                    </Label>
+                                    : null
+                                }
+                            </Header>
                         }  
                     </Grid.Column>
                 </Grid.Row>
