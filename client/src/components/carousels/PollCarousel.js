@@ -246,18 +246,28 @@ export default function PollCarousel(props) {
                     >
                         {
                             polls.length > 1 ?
-                            <>                
-                                <ButtonBack
-                                    style={{marginRight: '2px'}}
+                            <Button.Group>                
+                                <Button 
+                                    as={ButtonBack}
+                                    style={{
+                                        marginRight: '2px',
+                                    }}
+                                    tiny
+                                    basic
+                                    color="blue"
                                 >
                                     Back
-                                </ButtonBack>
-                                <ButtonNext
+                                </Button>
+                                <Button
+                                    as={ButtonNext}
                                     style={{marginLeft: '2px'}}
+                                    tiny
+                                    basic
+                                    color="blue"
                                 >
                                     Next
-                                </ButtonNext>
-                            </>
+                                </Button>
+                            </Button.Group>
                             : null
                         }
                     </Grid.Row>
