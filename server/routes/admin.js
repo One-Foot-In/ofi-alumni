@@ -10,6 +10,7 @@ var requestSchema = require('../models/requestSchema');
 var userSchema = require('../models/userSchema');
 var pollSchema = require('../models/polls/pollSchema');
 var pollOptionSchema = require('../models/polls/pollOptionSchema');
+const { sendPollAlert } = require('./helpers/emailHelpers');
 require('mongoose').Promise = global.Promise
 
 async function isAdmin(id) {
@@ -407,6 +408,8 @@ async function queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, 
         let userModel = await userSchema.findById(user)
         userModel.pollsQueued.push(pollModel)
         userModel.save()
+        // alert user
+        await sendPollAlert(userModel.email, (!pollModel.allowInput && !pollModel.options.length), pollModel.prompt)
     }
 }
 
