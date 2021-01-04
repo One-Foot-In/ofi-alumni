@@ -173,13 +173,13 @@ router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {sessio
         let student = await studentSchema.findOne({_id: req.params.id});
         const existingColleges = req.body.existingColleges;
         const newColleges = req.body.newColleges || [];
-        console.log(existingColleges)
-        console.log(newColleges)
+        console.log(existingColleges);
+        console.log(newColleges);
         let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
-        student.interests = getUniqueCollege([...student.collegeShortList, ...collegesToAdd]);
+        student.collegeShortList = getUniqueCollege([...student.collegeShortList, ...collegesToAdd]);
         await student.save();
-        console.log(student.collegeShortList)
-        res.status(200).json({message: `you have successfully added the colleges to your short list`})
+        console.log(student.collegeShortList);
+        res.status(200).json({message: `you have successfully added the colleges to your short list`});
     } catch(e){
         console.log('Error: cannot add college');
         console.log(e)
@@ -187,28 +187,16 @@ router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {sessio
     }
 })
 
-/*
-router.patch('/interests/remove/:id', async (req, res, next) => {
-    try {
-        const student = await studentSchema.findOne({_id: req.params.id})
-        student.interests = student.interests.filter(interest => interest._id.toString() !== req.body.interestIdToRemove)
-        await student.save()
-        res.status(200).send({message: "Successfully removed student's interest"})
-    } catch (e) {
-        console.log("Error: student#interests/remove", e);
-        res.status(500).send({'error' : e});
-    }
-})
-*/
-
 router.patch('/collegeShortList/remove/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         const student = await studentSchema.findOne({_id: req.params.id});
-        student.interests = student.interests.filter(college => college.name.toString !== req.body.collegeToRemove);
+        const theCollege = req.body.collegeToRemove[0].name;
+        student.collegeShortList = student.collegeShortList.filter(college => college.name !== theCollege);
         await student.save()
         res.status(200).json({message: 'Successfully removed college from list'})
     } catch(e){
         console.log("Error: College can't be removed at this time")
+        console.log(e)
         res.status(500).json({"error": e})
     }
 })

@@ -62,11 +62,32 @@ const generateNewAndExistingInterests = async (existingInterests, newInterests) 
 }
 
 const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
-    const existingCollegeIds = existingColleges.map(school => school.value).flat();
-    let existingCollegeRecords = await collegeSchema.find().where('_id').in(existingCollegeIds).exec();
-    if(newCollege.length){
-        for (let i = 0; i < newCollege.length; i++){
-            let collegeExists = await collegeSchema.find({name: newCollege[i].value});
+    console.log('the existing colleges are ' + existingColleges)
+    let existingCollegeNames = [];
+    let newCollegeNames = [];
+    //loop to extract the names from the array of objects (gotta seperate names from everything else)
+    for (let i = 0; i < existingColleges.length; i++){
+        //console.log('the thing form the for loop ' + existingColleges[i].name)
+        let collegeName = existingColleges[i].name;
+        existingCollegeNames.push(collegeName)
+    }
+    for (let i = 0; i < newCollege.length; i++){
+        let collegeName = newCollege[i].name;
+        newCollegeNames.push(collegeName)
+    }
+    console.log(existingCollegeNames)
+    console.log(newCollegeNames)
+    const existingCollegeIds = existingCollegeNames.map(uni => uni.value).flat();
+    //is there a way to get the id out of this?
+
+    let existingCollegeRecords = await collegeSchema.find().where('name').in(existingCollegeNames).exec();
+    //^^^aaaaahhhhh we got it!
+    //console.log('the existing college record is ' + existingCollegeRecords);
+    console.log(existingCollegeRecords)
+    if(newCollegeNames.length){
+        console.log('if statement has activated')
+        for (let i = 0; i < newCollegeNames.length; i++){
+            let collegeExists = await collegeSchema.find({name: newCollegeNames[i]});
             if(!collegeExists.length){
                 var newCollegeMade = new collegeSchema({
                     name: newCollege[i].value,
@@ -559,11 +580,12 @@ router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {ses
     try{
         let alumni = await alumniSchema.findOne({_id: req.params.id});
         //let alumniCollegeList = alumni.collegesAcceptedInto;
-        const existingColleges = req.body.existingColleges;
-        //ok so i'm existingColleges.map() isn't a thing, so i'm a bit confused
-        const newColleges = req.body.newColleges;
-        console.log(existingColleges)
-        console.log(newColleges)
+        const existingColleges = Object.values(req.body.existingColleges) || [];
+        const newColleges = Object.values(req.body.newColleges);
+        //console.log('the existing colleges are '+existingColleges)
+        //console.log('the new colleges are '+newColleges)
+        console.log(existingColleges);
+        console.log(newColleges);
         let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges)
         alumni.collegesAcceptedInto = getUniqueCollege([...alumni.collegesAcceptedInto, ...collegesToAdd])
         await alumni.save(); 
@@ -578,12 +600,23 @@ router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {ses
 router.patch('/collegesAcceptedInto/delete/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         const alumni = await alumniSchema.findOne({_id: req.params.id});
-        console.log(req.body.collegesToRemove)
-        alumni.collegesAcceptedInto = alumni.collegesAcceptedInto.filter(college => college.name.toString() !== req.body.collegesToRemove)
+        //const theColleges = req.body.collegesToRemove[0].name;
+        //console.log(theColleges)
+        let theColleges = [];
+        const theReq = req.body.collegesToRemove;
+        for (let i = 0; i < theReq.length; i++){
+            let collegeName = theReq[i].name;
+            theColleges.push(collegeName);
+        }
+        console.log(theColleges);
+        //alumni.collegesAcceptedInto = alumni.collegesAcceptedInto.filter(college => college.name !== theColleges);
+        alumni.collegesAcceptedInto = alumni.collegesAcceptedInto
         await alumni.save()
+        console.log(alumni.collegesAcceptedInto);
         res.status(200).json({message: "Successfully removed college from list!"});
     }catch(e){
         console.log("error: alumni college removal error")
+        console.log(e)
         res.status(500).json({'error': e})
     }
 })
