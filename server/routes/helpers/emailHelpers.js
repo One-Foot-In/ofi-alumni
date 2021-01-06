@@ -276,6 +276,24 @@ const sendPollAlert = async (to, isAnnouncement, prompt) => {
   }
 }
 
+const sendApprovalAlert = async (to, name) => {
+  let emailObject = createPersonalization(
+    to,
+    `You have been approved!!`,
+    htmlBuilder(
+      `Your account has been approved after review by an admin. Welcome aboard ${name}!`,
+      `You can now use the app!`,
+      'Go To App',
+      APP
+    )
+  )
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
+}
+
 exports.sendTestEmail = sendTestEmail
 exports.sendAlumniVerificationEmail = sendAlumniVerificationEmail
 exports.sendStudentVerificationEmail = sendStudentVerificationEmail
@@ -288,3 +306,4 @@ exports.getWeeklyMessagesSummaryForAlumni = getWeeklyMessagesSummaryForAlumni
 exports.getNewMessagesForAlumniString = getNewMessagesForAlumniString
 exports.sendNewMessageAlert = sendNewMessageAlert
 exports.sendPollAlert = sendPollAlert
+exports.sendApprovalAlert = sendApprovalAlert
