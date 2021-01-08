@@ -81,7 +81,8 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             passwordHash: passwordHash,
             verificationToken: verificationToken,
             role: role,
-            emailVerified: emailVerified
+            emailVerified: emailVerified,
+            emailSubscribed: true
         }
     );
     
@@ -131,7 +132,8 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
           passwordHash: passwordHash,
           verificationToken: verificationToken,
           role: role,
-          emailVerified: emailVerified
+          emailVerified: emailVerified,
+          emailSubscribed: true
         }
     );
     await user_instance.save();
@@ -303,7 +305,7 @@ router.post('/addAlumni/', async (req, res, next) => {
         const zoomLink = req.body.zoomLink;
         const password = req.body.password;
 
-        const role = "ALUMNI"
+        const role = ["ALUMNI"]
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
@@ -315,7 +317,8 @@ router.post('/addAlumni/', async (req, res, next) => {
               verificationToken: verificationToken,
               role: role,
               emailVerified: emailVerified,
-              approved: approved
+              approved: approved,
+              emailSubscribed: true
             }
         );
         await user_instance.save();
@@ -389,7 +392,7 @@ router.post('/addStudent/', async (req, res, next) => {
         const timeZone = req.body.timeZone;
         const password = req.body.password;
 
-        const role = "STUDENT"
+        const role = ["STUDENT"]
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
@@ -401,6 +404,7 @@ router.post('/addStudent/', async (req, res, next) => {
               verificationToken: verificationToken,
               role: role,
               emailVerified: emailVerified,
+              emailSubscribed: true,
               approved: approved
             }
         );
@@ -635,6 +639,7 @@ router.post('/newAdmin/', async (req, res) => {
               verificationToken: verificationToken,
               role: role,
               emailVerified: emailVerified,
+              emailSubscribed: true
             }
         );
         await user_instance.save();
@@ -721,6 +726,7 @@ router.get('/newCollegeRep/', async (req, res) => {
               verificationToken: verificationToken,
               role: role,
               emailVerified: emailVerified,
+              emailSubscribed: true
             }
         );
         await user_instance.save();
@@ -770,6 +776,26 @@ router.get('/data/clear/all', async (req, res, next) => {
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});
+    }
+});
+
+router.post('/addActionItems/', async (req, res, next) => {
+    try {
+        const name = req.body.name;
+        const actionitem_instance = new actionItemSchema(
+            {
+                name: name
+            }
+        );
+        await actionitem_instance.save();
+        res.status(200).send({
+            message: 'Successfully added action items',
+            actionitem: actionitem_instance
+        });
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failed adding action item: ' + e
+        });
     }
 });
 

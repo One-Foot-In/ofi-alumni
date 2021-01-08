@@ -2,7 +2,10 @@ var express = require('express');
 var passport = require("passport");
 var router = express.Router();
 var conversationSchema = require('../models/conversationSchema');
+var alumniSchema = require('../models/alumniSchema');
 var moment = require('moment');
+const { sendNewMessageAlert } = require('./helpers/emailHelpers');
+const userSchema = require('../models/userSchema');
 require('mongoose').Promise = global.Promise
 
 router.get('/', async (req, res, next) => {
@@ -35,7 +38,12 @@ router.post('/add/', passport.authenticate('jwt', {session: false}), async (req,
         seen[conversation_instance.alumni.indexOf(senderId)] = true;
         conversation_instance.seen = seen
         
-        let insert = await conversation_instance.save();
+        await conversation_instance.save();
+        let recipientAlumni = await alumniSchema.findById(recipientId).populate('user', 'email')
+        let recipientUser = await userSchema.findById(recipientAlumni.user)
+        let senderAlumnus = await alumniSchema.findById(senderId)
+        let senderName = senderAlumnus.name
+        await sendNewMessageAlert(recipientUser.email, senderName, message)
         res.status(200).send({
             message: 'Successfully added message to conversation',
             request: conversation_instance
@@ -111,10 +119,18 @@ router.patch('/sendMessage/:id', passport.authenticate('jwt', {session: false}),
         
         await conversation.save()
         
-        await conversation.populate('alumni', 'name imageURL').execPopulate();
+        await conversation.populate('alumni', '_id name imageURL user').execPopulate();
         for (let message of conversation.messages) {
             let dateSent = moment.utc(message.dateSent).add(timezone, 'h');
             message.dateString = dateSent.format('MMM D YYYY, h:mm a')
+        }
+        let senderAlumnus = await alumniSchema.findById(senderId)
+        let senderName = senderAlumnus.name
+        let recipientAlumni = conversation.alumni.filter(alumnus => {return alumnus._id.toString() !== senderId })
+        // conversation can occur between multiple users
+        let recipientUsers = await userSchema.find().where('_id').in(recipientAlumni.map(alumnus => alumnus.user))
+        for (let recipient of recipientUsers) {
+            await sendNewMessageAlert(recipient.email, senderName, message)
         }
         res.status(200).send({
             'conversation': conversation

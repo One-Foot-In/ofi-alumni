@@ -125,7 +125,7 @@ export default class AlumniContactModal extends Component {
                         disabled={this.state.message === '' || this.state.submitting}
                         loading={this.state.submitting}
                     >
-                        Submit Request
+                        Send Message
                     </Button>
                     <Button onClick={this.props.closeModal}>
                         Close

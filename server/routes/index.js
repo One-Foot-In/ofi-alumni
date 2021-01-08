@@ -9,7 +9,7 @@ var studentSchema = require('../models/studentSchema');
 var adminSchema = require('../models/adminSchema');
 var collegeRepSchema = require('../models/collegeRepSchema');
 var userSchema = require('../models/userSchema');
-var timezoneHelpers = require("../helpers/timezoneHelpers")
+var pollOptionSchema = require('../models/polls/pollOptionSchema');
 var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
 require('dotenv').config();
 var path = require('path');
@@ -61,27 +61,18 @@ router.post('/login', (req, res, next) => {
               return role.toUpperCase()
             })
             if (!user.emailVerified) {
-              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email.` });
+              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email. Sometimes this email may end up in your spam/junk/promotions folder.` });
               return;
             }
+            let cookie = null
             if (userRole.includes("ALUMNI")) {
               const alumni = await alumniSchema.findOne({user: user._id})
-              // TODO: bar login when unapproved when users reach critical mass
-              // if (!alumni.approved) {
-              //   res.status(404).send({ error: `Your account is currently pending approval.` });
-              //   return;
-              // }
+              if (!alumni.approved) {
+                res.status(404).send({ error: `Your account is currently pending approval.` });
+                return;
+              }
               payload.id = alumni._id
-              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
-              // set jwt-signed cookie on response
-              alumni.availabilities = timezoneHelpers.applyTimezone(alumni.availabilities, alumni.timeZone)
-              res.cookie('jwt', cookie);
-              res.status(200).send(
-                {
-                  role: userRole,
-                  details: alumni
-                }
-              );
+              cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
             } else if (userRole.includes("STUDENT")) {
               const student = await studentSchema.findOne({user: user._id});
               // TODO: bar login when unapproved when users reach critical mass
@@ -90,15 +81,9 @@ router.post('/login', (req, res, next) => {
               //   return;
               // }
               payload.id = student._id
-              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
+              cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
               // set jwt-signed cookie on response
               res.cookie('jwt', cookie);
-              res.status(200).send(
-                {
-                  role: userRole,
-                  details: student
-                }
-              );
             } else if (userRole.includes("ADMIN")) {
               const admin = await adminSchema.findOne({user: user._id});
               if (!admin.approved) {
@@ -106,14 +91,7 @@ router.post('/login', (req, res, next) => {
                 return;
               }
               payload.id = admin._id
-              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
-              res.cookie('jwt', cookie);
-              res.status(200).send(
-                {
-                  role: userRole,
-                  details: admin
-                }
-              )
+              cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
             } else if (userRole.includes("COLLEGE_REP")) {
               const collegeRep = await collegeRepSchema.findOne({user: user._id});
               if (!collegeRep.approved) {
@@ -121,17 +99,12 @@ router.post('/login', (req, res, next) => {
                 return;
               }
               payload.id = collegeRep._id
-              const cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
-              res.cookie('jwt', cookie);
-              res.status(200).send(
-                {
-                  role: userRole,
-                  details: collegeRep
-                }
-              )
+              cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
             } else {
               res.status(500).send({error: true, message: 'Could not determine role.'});
             }
+            res.cookie('jwt', cookie);
+            res.status(200).json({message: 'Login successful!'})
           } catch (e) {
             console.log("Error: error fetching user after authentication", e);
             res.status(500).send({ error: e });
@@ -215,8 +188,103 @@ router.get('/tempPassword/:to/:token', async (req, res, next) => {
   }
 });
 
+router.get('/unsubscribe/:to/:token', async (req, res, next) => {
+  try {
+    let email = req.params.to
+    let unsubscribeToken = req.params.token
+    var user = await userSchema.findOne({'email': email});
+    if (!user) {
+      res.status(404).send({message: 'Could not find a user with given email!'})
+    }
+    if (unsubscribeToken === user.emailSubscriptionToken) {
+      user.emailSubscribed = false
+      // refresh subscription token
+      user.emailSubscriptionToken = crypto({length: 16})
+      await user.save()
+      res.status(200).send(htmlBuilder('Unsubscribed!', 'You have sucessfully unsubscribed from all daily digests! You will find the option to resubscribe to these weekly digests on your Profile', 'Go To App', APP_LINK))
+    } else {
+      res.status(500).send(htmlBuilder('Whoops!', 'Something went wrong! Please contact support at onefootincollege@gmail.com', 'Go To App', APP_LINK))
+    }
+  } catch(e) {
+    console.log("Error index.js#unsubscribe", e)
+    res.status(500).json(e)
+  }
+});
+
 router.get('/isLoggedIn', passport.authenticate('jwt', {session: false}), (req, res, next) => {
   res.json({message: "You have a fresh cookie!"});
+});
+
+router.get('/polls/:id', 
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+  try {
+    let id = req.params.id
+    let userRecord = await userSchema.findById(id)
+    await userRecord.populate('pollsQueued').execPopulate()
+    for (let poll of userRecord.pollsQueued) {
+      await poll.populate('options').execPopulate()
+    }
+    // send most recent 10 polls
+    let mostRecentTenPolls = userRecord.pollsQueued.slice(-10)
+    res.status(200).json({polls: mostRecentTenPolls})
+  } catch (e) {
+    console.log("poll fetch error" + e)
+    res.status(500).send({message: "polls fetch error" + e})
+  }
+});
+
+router.patch('/answerPoll/:pollId/:pollOptionId/:userId',
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+    let pollId = req.params.pollId
+    let pollOptionId = req.params.pollOptionId
+    let userId = req.params.userId
+    try {
+      let pollOption = await pollOptionSchema.findById(pollOptionId)
+      pollOption.responders.push(userId)
+      // remove user from poll queue
+      pollOption.save()
+      let user = await userSchema.findById(userId)
+      if (!(user.pollsQueued.includes(pollId))) {
+        res.status(500).json({
+          error: 'This poll is not queued for this user'
+        })
+        return
+      }
+      user.pollsQueued.splice(user.pollsQueued.indexOf(pollId), 1)
+      user.save()
+      res.status(200).json({
+        message: 'User\'s poll response was submitted'
+      })
+    } catch (e) {
+      console.log("poll answer error" + e)
+      res.status(500).send({message: "polls answer error" + e})
+    }
+});
+
+router.patch('/acknowledgePoll/:pollId/:userId',
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+    let pollId = req.params.pollId
+    let userId = req.params.userId
+    try {
+      let user = await userSchema.findById(userId)
+      if (!(user.pollsQueued.includes(pollId))) {
+        res.status(500).json({
+          error: 'This poll is not queued for this user'
+        })
+        return
+      }
+      user.pollsQueued.splice(user.pollsQueued.indexOf(pollId), 1)
+      user.save()
+      res.status(200).json({
+        message: 'User\'s poll response was submitted'
+      })
+    } catch (e) {
+      console.log("poll answer error" + e)
+      res.status(500).send({message: "polls answer error" + e})
+    }
 });
 
 router.patch('/changeTimeZone/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
