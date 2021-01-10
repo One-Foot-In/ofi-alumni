@@ -78,7 +78,8 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
 
         let insert = await request_instance.save();
         let mentor = await alumniSchema.findOne({_id: mentorId}).populate('user')
-        await sendNewRequestEmail(mentor.user.email)
+        // do not wait on sending email
+        sendNewRequestEmail(mentor.user.email)
         res.status(200).send({
             message: 'Successfully added request',
             request: request_instance
@@ -133,8 +134,8 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
                 }
             })
             await news_instance.save();
-
-            await sendRequestConfirmedEmail(
+            // do not wait on sending email
+            sendRequestConfirmedEmail(
                 mentee.user.email,
                 mentee.name, 
                 menteeTimeString ? menteeTimeString : 'an undeclared time',

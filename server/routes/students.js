@@ -77,7 +77,8 @@ router.post('/', async (req, res, next) => {
             }
         )
         await news_instance.save();
-        await sendStudentVerificationEmail(email, verificationToken, school.name)
+        // do not wait on sending verification email
+        sendStudentVerificationEmail(email, verificationToken, school.name)
         res.status(200).send({
             message: 'Successfully added student',
             student: student_instance

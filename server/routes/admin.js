@@ -408,7 +408,6 @@ async function queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, 
         let userModel = await userSchema.findById(user)
         userModel.pollsQueued.push(pollModel)
         await userModel.save()
-        // alert user
         await sendPollAlert(userModel.email, (!pollModel.allowInput && !pollModel.options.length), pollModel.prompt)
     }
 }
@@ -462,7 +461,8 @@ router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}),
             options: optionsCreatedForPoll
         })
         await newPoll.save()
-        await queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, newPoll)
+        // do not wait on queueing polls
+        queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, newPoll)
         res.status(200).json({
             message: 'Successfully added poll!'
         })
