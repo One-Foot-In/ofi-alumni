@@ -43,7 +43,8 @@ router.post('/add/', passport.authenticate('jwt', {session: false}), async (req,
         let recipientUser = await userSchema.findById(recipientAlumni.user)
         let senderAlumnus = await alumniSchema.findById(senderId)
         let senderName = senderAlumnus.name
-        await sendNewMessageAlert(recipientUser.email, senderName, message)
+        // do not wait on sending email
+        sendNewMessageAlert(recipientUser.email, senderName, message)
         res.status(200).send({
             message: 'Successfully added message to conversation',
             request: conversation_instance
@@ -130,7 +131,8 @@ router.patch('/sendMessage/:id', passport.authenticate('jwt', {session: false}),
         // conversation can occur between multiple users
         let recipientUsers = await userSchema.find().where('_id').in(recipientAlumni.map(alumnus => alumnus.user))
         for (let recipient of recipientUsers) {
-            await sendNewMessageAlert(recipient.email, senderName, message)
+            // do not wait on sending email
+            sendNewMessageAlert(recipient.email, senderName, message)
         }
         res.status(200).send({
             'conversation': conversation
