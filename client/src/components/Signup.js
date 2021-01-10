@@ -689,6 +689,7 @@ export default class Signup extends React.Component {
                             getInput={this.getInterestsInput}
                             modalOpen={this.state.interestsModalOpen}
                             closeModal={this.handleInterestsModal}
+                            title={'Select your extra-curricular interests, your passions, and your hobbies'}
                         />
                     </>
                 </Form.Field>

@@ -188,7 +188,7 @@ router.patch('/changeAccess/:adminId', passport.authenticate('jwt', {session: fa
                 newAccessContexts = user.accessContexts
             }
         }
-        user.save()
+        await user.save()
         let dbData = []
         if (type === 'ALUMNI') {
             let alumniData = await alumniSchema.find({}).populate('school')
@@ -407,7 +407,7 @@ async function queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, 
     for (let user of usersToQueuePollsFor) {
         let userModel = await userSchema.findById(user)
         userModel.pollsQueued.push(pollModel)
-        userModel.save()
+        await userModel.save()
         // alert user
         await sendPollAlert(userModel.email, (!pollModel.allowInput && !pollModel.options.length), pollModel.prompt)
     }
@@ -443,7 +443,7 @@ router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}),
                         optionText: option,
                         isCustom: false
                     })
-                    newOption.save()
+                    await newOption.save()
                     optionsCreatedForPoll.push(newOption)
                 }
             }
@@ -461,7 +461,7 @@ router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}),
             allowInput: type === 'CUSTOM_POLL',
             options: optionsCreatedForPoll
         })
-        newPoll.save()
+        await newPoll.save()
         await queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, newPoll)
         res.status(200).json({
             message: 'Successfully added poll!'

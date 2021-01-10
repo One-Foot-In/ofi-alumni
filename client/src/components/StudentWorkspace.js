@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { Message, Menu} from 'semantic-ui-react';
 
-const ALUMNI = "ALUMNI"
-
 /*
 props:
 

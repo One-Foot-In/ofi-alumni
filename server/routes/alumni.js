@@ -14,7 +14,8 @@ var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
 var majorSchema = require('../models/majorSchema');
 var requestSchema = require('../models/requestSchema');
-var timezoneHelpers = require("../helpers/timezoneHelpers")
+var timezoneHelpers = require("../helpers/timezoneHelpers");
+const opportunitySchema = require('../models/opportunitySchema');
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
 require('mongoose').Promise = global.Promise
 
@@ -557,6 +558,115 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
         res.status(500).send({'error' : e});
     }
 })
+
+async function queueOpportunities(alumnusModel, opportunityModel) {
+    let studentsToQueueOpportunitiesFor = await studentSchema.find({
+        school: {$in: alumnusModel.school}
+    })
+    let userRecordForAlumnus = await userSchema.findById(alumnusModel.user)
+    let userRecordsForStudentsToQueueOpportunitiesFor = []
+    if (userRecordForAlumnus.accessContexts.includes("INTERSCHOOL") && !userRecordForAlumnus.accessContexts.includes("GLOBAL")) {
+        userRecordsForStudentsToQueueOpportunitiesFor = await userSchema.find({
+            role: {$in : ["STUDENT"]},
+            accessContexts: {$in: ["INTERSCHOOL"]}
+        })
+    } else if (userRecordForAlumnus.accessContexts.includes("GLOBAL")) {
+        userRecordsForStudentsToQueueOpportunitiesFor = await userSchema.find({
+            role: {$in : ["STUDENT"]},
+            accessContexts: {$in: ["GLOBAL"]}
+        })
+    }
+    let contextBasedStudentAdditions = await studentSchema.find({
+        user: {$in: userRecordsForStudentsToQueueOpportunitiesFor.map(user => user._id)}
+    })
+    studentsToQueueOpportunitiesFor = [...studentsToQueueOpportunitiesFor, ...contextBasedStudentAdditions]
+    for (let student of studentsToQueueOpportunitiesFor) {
+        student.opportunitiesQueued.push(opportunityModel)
+        student.save()
+    }
+}
+
+router.post('/opportunity/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        let description = req.body.description
+        let existingInterests = req.body.existingInterests || []
+        let newInterests = req.body.newInterests || []
+        let interestsToAdd = []
+        if (newInterests.length || existingInterests.length) {
+            interestsToAdd = await generateNewAndExistingInterests(newInterests, existingInterests)
+        }
+        let deadline = req.body.deadline
+        let link = req.body.link
+        let newOpportunity = new opportunitySchema({
+            owner: alumni,
+            description: description,
+            interests: interestsToAdd,
+            deadline: deadline,
+            link: link
+        })
+        await newOpportunity.save()
+        alumni.opportunities.push(newOpportunity)
+        await alumni.save()
+        // do not wait on finishing request
+        queueOpportunities(alumni, newOpportunity)
+        res.status(200).send({message: "Successfully added new opportunity"})
+    } catch (e) {
+        console.log("Error: alumni#addOpportunity", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.delete('/opportunity/:alumniId/:oppId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        await alumniSchema.update({_id: req.params.alumniId}, {$pull:{opportunities: req.params.oppId}})
+        await studentSchema.updateMany({}, {$pull: {opportunitiesQueued: req.params.oppId, opportunitiesBookmarked: req.params.oppId}})
+        await opportunitySchema.remove({_id: req.params.oppId})
+        res.status(200).send({message: "Successfully removed opportunity"})
+    } catch (e) {
+        console.log("Error: alumni#removeOpportunity", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/opportunity/:oppId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let description = req.body.description
+        let existingInterests = req.body.existingInterests
+        let newInterests = req.body.newInterests || []
+        let interestsToAdd = []
+        if (newInterests.length && existingInterests.length) {
+            interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
+        }
+        let deadline = req.body.deadline
+        let link = req.body.link
+        let opportunityToUpdate = await opportunitySchema.findById(req.params.oppId)
+        opportunityToUpdate.description = description ? description : opportunityToUpdate.description
+        // only update interest if there is a difference in any existing interest
+        opportunityToUpdate.interests = (opportunityToUpdate.interests.every(int1 => {
+            interestsToAdd.some(int2 => int2._id === int1._id)
+        })) ? opportunityToUpdate.interests : interestsToAdd
+        opportunityToUpdate.link = link ? link : opportunityToUpdate.link
+        opportunityToUpdate.deadline = deadline ? deadline : opportunityToUpdate.deadline
+        opportunityToUpdate.save()
+        res.status(200).send({message: "Successfully updated opportunity"})
+    } catch (e) {
+        console.log("Error: alumni#updateOpportunity", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.get('/opportunities/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.alumniId})
+        await alumni.populate('opportunities').execPopulate()
+        res.status(200).send({opportunities: alumni.opportunities})
+    } catch (e) {
+        console.log("Error: alumni#opportunities", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 
 module.exports = router;
 module.exports.generateNewAndExistingInterests = generateNewAndExistingInterests
