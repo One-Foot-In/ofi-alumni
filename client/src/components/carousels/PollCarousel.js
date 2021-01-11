@@ -2,7 +2,7 @@ import { CarouselProvider, Slider, Slide, ButtonBack, ButtonNext } from "pure-re
 import "pure-react-carousel/dist/react-carousel.es.css";
 
 import React, { useState, useEffect } from "react";
-import { Message, Grid, Segment, List, Label, Button, Feed, Image } from "semantic-ui-react";
+import { Message, Grid, Segment, List, Label, Button, Feed, Image, Card } from "semantic-ui-react";
 import { makeCall } from "../../apis";
 
 /*
@@ -131,10 +131,11 @@ export default function PollCarousel(props) {
         })
     }
 
-    const handleOpportunityBookmarkSelect = (e, {bookmarked}) => {
+    const handleOpportunityBookmarkSelect = (e, {bookmarked, opportunityId}) => {
         setSendingRequest(true)
         makeCall({
-            bookmarked: bookmarked
+            bookmarked: bookmarked,
+            opportunityId: opportunityId
         },
         `/student/opportunity/interact/${props.alumniOrStudentId}`,
         'patch'
@@ -261,67 +262,75 @@ export default function PollCarousel(props) {
                     margin: '2px'
                 }}
             >
-                <Feed.Event key={opportunity._id}>
-                    <Feed.Label>
-                        <Image src={opportunity.owner.imageURL} />
-                    </Feed.Label>
-                    <Feed.Content>
-                        <Feed.Summary>
-                            {opportunity.owner.name} has posted an opportunity relevant to you!
-                        </Feed.Summary>
-                        <Feed.Extra>
-                            {opportunity.description}
-                        </Feed.Extra>
+                <Card
+                    centered
+                >
+                    <Card.Content>
+                    <Image avatar circular src={opportunity.owner.imageURL} />
+                    <Card.Meta>
+                        <b>{opportunity.owner.name}</b> has posted an opportunity relevant to you!
+                    </Card.Meta>
+                    <Card.Description>
+                        {opportunity.description}
+                    </Card.Description>
+                    </Card.Content>
+                    {
+                        (opportunity.deadline || opportunity.link) ?
+                        <Card.Content extra>
                         {
-                            opportunity.deadline ?
-                            <Feed.Extra>
-                                Deadline: {opportunity.deadline}
-                            </Feed.Extra>
-                            : null
-                        }
-                        {
-                            opportunity.link ?
-                            <Feed.Like>
-                                <a href={opportunity.link}> Click here for details </a>
-                            </Feed.Like>
-                            : null
-                        }
-                    </Feed.Content>
-                </Feed.Event>
-                <Button.Group>                
-                    <Button 
-                        style={{
-                            marginRight: '2px',
-                        }}
-                        tiny
-                        green
-                        color="blue"
-                        bookmarked={true}
-                        onClick={handleOpportunityBookmarkSelect.bind(this)}
-                    >
-                        Bookmark!
-                    </Button>
-                    <Button
-                        style={{marginLeft: '2px'}}
-                        tiny
-                        basic
-                        red
-                        bookmarked={false}
-                        onClick={handleOpportunityBookmarkSelect.bind(this)}
-                    >
-                        Pass!
-                    </Button>
-                </Button.Group>
+                                opportunity.deadline ?
+                                <Feed.Extra>
+                                    Deadline: {opportunity.deadline}
+                                </Feed.Extra>
+                                : null
+                            }
+                            {
+                                opportunity.link ?
+                                <Feed.Like>
+                                    <a href={opportunity.link}> Click here for details </a>
+                                </Feed.Like>
+                                : null
+                            }
+                        </Card.Content>
+                        :
+                        null
+                    }
+                    <Card.Content extra>    
+                        <Button.Group>                
+                            <Button 
+                                tiny
+                                basic
+                                green
+                                color="blue"
+                                bookmarked={true}
+                                opportunityId={opportunity._id}
+                                onClick={handleOpportunityBookmarkSelect.bind(this)}
+                            >
+                                Bookmark!
+                            </Button>
+                            <Button
+                                tiny
+                                basic
+                                color="red"
+                                bookmarked={false}
+                                opportunityId={opportunity._id}
+                                onClick={handleOpportunityBookmarkSelect.bind(this)}
+                            >
+                                Pass!
+                            </Button>
+                        </Button.Group>
+                    </Card.Content>
+                </Card>
             </Segment>
         )
     }
 
     return (
-        (polls.length + opportunities.length) ? 
+        (polls.length || opportunities.length) ? 
         <CarouselProvider
             naturalSlideWidth={100}
             naturalSlideHeight={125}
-            totalSlides={polls.length}
+            totalSlides={polls.length + opportunities.length}
         >
             <Segment
                 loading={sendingRequest}
@@ -346,7 +355,7 @@ export default function PollCarousel(props) {
                         <Slider
                             style={{
                                 width: '50%',
-                                maxHeight: '250px',
+                                maxHeight: '300px',
                             }}
                         >
                             {display}

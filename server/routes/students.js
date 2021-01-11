@@ -212,13 +212,14 @@ router.patch('/opportunity/interact/:studentId', passport.authenticate('jwt', {s
     try {
         let bookmarked = req.body.bookmarked
         let opportunityId = req.body.opportunityId
+        let studentId = req.params.studentId
         if (bookmarked) {
-            await studentSchema.update({_id: req.params.studentId}, {
+            await studentSchema.update({_id: studentId}, {
                 $push: {opportunitiesBookmarked: opportunityId},
                 $pull: { opportunitiesQueued: opportunityId}
             })
         } else {
-            await student.update({_id: req.params.studentId}, {
+            await studentSchema.update({_id: studentId}, {
                 $pull: { opportunitiesQueued: opportunityId}
             })
         }
