@@ -146,7 +146,7 @@ export default function StudentOpportunities(props) {
             loading={sendingRequest}
         >
             {
-                existingOpportunitiesDisplay.length ? 
+                opportunities.length ? 
                     existingOpportunitiesDisplay
                  :
                 <Message info>
@@ -159,7 +159,7 @@ export default function StudentOpportunities(props) {
                 </Message>
             }
             {
-                existingOpportunitiesDisplay.length ? 
+                opportunities.length ? 
                 <Pagination
                     activePage={currPage}
                     totalPages={pages}

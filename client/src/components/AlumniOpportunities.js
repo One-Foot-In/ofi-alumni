@@ -310,7 +310,7 @@ export default function AlumniOpportunities(props) {
             loading={sendingRequest}
         >
             {
-                existingOpportunitiesDisplay.length ? 
+                opportunities.length ? 
                     existingOpportunitiesDisplay
                  :
                 <Message info>
@@ -330,7 +330,7 @@ export default function AlumniOpportunities(props) {
                 title={'Tag interests relevant to this opportunity'}
             />
             {
-                existingOpportunitiesDisplay.length ? 
+                opportunities.length ? 
                 <Pagination
                     activePage={currPage}
                     totalPages={pages}
