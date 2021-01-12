@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Message, Menu} from 'semantic-ui-react';
+import { Menu} from 'semantic-ui-react';
+import StudentOpportunities from './StudentOpportunities'
 
 /*
 props:
@@ -9,8 +10,7 @@ export default class StudentWorkspace extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            activeItem: 'collegeShortlist',
-            collegeShortlist: []
+            activeItem: 'opportunities'
         }
         
     }
@@ -22,24 +22,22 @@ export default class StudentWorkspace extends Component {
             <>
             <div>
                 <Menu secondary stackable>
-                <Menu.Item
-                    id=''
-                    name='College Shortlist'
-                    active={this.state.activeItem === 'collegeShortlist'}
-                    onClick={this.handleMenuClick}
-                >
-                    College Shortlist            
-                </Menu.Item>
+                    <Menu.Item
+                        id='opportunities'
+                        name='Opportunities'
+                        active={this.state.activeItem === 'opportunities'}
+                        onClick={this.handleMenuClick}
+                    >
+                        Opportunities             
+                    </Menu.Item>
                 </Menu>
             </div>
-            {!this.state.collegeShortlist.length &&
-            <Message info>
-            <Message.Header>No colleges in your shortlist.</Message.Header>
-            {
-                <Message.Content>Add some colleges and check back!</Message.Content>
-            }
-            </Message>
-            }
+                {
+                    this.state.activeItem === 'opportunities' &&
+                    <StudentOpportunities
+                        studentId={this.props.userDetails._id}
+                    />
+                }
             </>
         )
     }

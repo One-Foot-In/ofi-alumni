@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Segment, Pagination, Card, Form, Button, TextArea, Label, Icon, Input } from "semantic-ui-react";
+import { Message, Segment, Pagination, Card, Form, Button, TextArea, Label, Icon, Input } from "semantic-ui-react";
 import { makeCall } from "../apis";
 import AddInterestsModal from './AddInterestsModal'
 
@@ -25,7 +25,6 @@ export default function AlumniOpportunities(props) {
             .then(opportunitiesResponse => {
                 if (opportunitiesResponse && opportunitiesResponse.opportunities) {
                     setOpportunities(opportunitiesResponse.opportunities)
-                    constructDisplay()
                     setSendingRequest(false)
                 } else {
                     // TODO: error
@@ -108,6 +107,18 @@ export default function AlumniOpportunities(props) {
                         opportunity.interests.length ? 
                         getInterestsForExistingOpportunities(opportunity.interests)
                         : null
+                    }
+                    {
+                        opportunity.timesBookmarked ? 
+                        <Label
+                            style={{ marginRight: '5px'}}
+                        >
+                            <Icon 
+                                color="yellow"
+                                name='star'
+                            /> {opportunity.timesBookmarked}
+                      </Label>
+                      : null
                     }
                     <Icon
                         circular
@@ -298,7 +309,19 @@ export default function AlumniOpportunities(props) {
             textAlign="center"
             loading={sendingRequest}
         >
-            {existingOpportunitiesDisplay}
+            {
+                existingOpportunitiesDisplay.length ? 
+                    existingOpportunitiesDisplay
+                 :
+                <Message info>
+                    <Message.Header>
+                        Describe an opportunity that may benefit students! 
+                    </Message.Header>
+                    <Message.Content>
+                        These may be scholarships, study-abroad programs, competitions, internships, or any experience that you know of, or has personally benefitted you.
+                    </Message.Content>
+                </Message>
+            }
             {inputOpportunityFormCard()}
             <AddInterestsModal
                 getInput={getInterestsInput.bind(this)}
@@ -306,11 +329,15 @@ export default function AlumniOpportunities(props) {
                 closeModal={handleInterestsModal.bind(this)}
                 title={'Tag interests relevant to this opportunity'}
             />
-            <Pagination
-                activePage={currPage}
-                totalPages={pages}
-                onPageChange={handlePaginationChange}
-            />
+            {
+                existingOpportunitiesDisplay.length ? 
+                <Pagination
+                    activePage={currPage}
+                    totalPages={pages}
+                    onPageChange={handlePaginationChange}
+                />
+                : null
+            }
         </Segment>
     )
 }

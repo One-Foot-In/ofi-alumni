@@ -583,8 +583,6 @@ class App extends Component {
                       />
                         <StudentWorkspace 
                             userDetails={this.state.userDetails}
-                            navItems={studentNavBarItems(this.state.userDetails.isModerator)}
-                            activeItem={'workspaces'}
                         />
                   </> :
                   <Redirect to={"/login"}/>
@@ -592,7 +590,7 @@ class App extends Component {
           />
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
-                    this.state.userDetails.isModerator ?
+                    (this.state.userDetails.isModerator ?
                       <>
                         <Navbar
                           navItems={studentNavBarItems(this.state.userDetails.isModerator)}
@@ -604,8 +602,8 @@ class App extends Component {
                           studentId={this.state.userDetails._id}
                         />
                       </>
-                      : <Redirect to={"/"}/>
-                  :<Redirect to={"/login"}/>
+                      : <Redirect to={"/"}/>)
+                  : <Redirect to={"/login"}/>
               }
           />
           </>

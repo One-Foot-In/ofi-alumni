@@ -661,7 +661,11 @@ router.get('/opportunities/:alumniId', passport.authenticate('jwt', {session: fa
     try {
         let alumni = await alumniSchema.findOne({_id: req.params.alumniId})
         await alumni.populate('opportunities').execPopulate()
-        res.status(200).send({opportunities: alumni.opportunities})
+        let opportunitiesArray = alumni.toObject().opportunities
+        for (let opportunityObj of opportunitiesArray) {
+            opportunityObj.timesBookmarked = await studentSchema.count({opportunitiesBookmarked: { $in: opportunityObj._id }})
+        }
+        res.status(200).send({opportunities: opportunitiesArray})
     } catch (e) {
         console.log("Error: alumni#opportunities", e);
         res.status(500).send({'error' : e});

@@ -255,6 +255,37 @@ export default function PollCarousel(props) {
         )
     }
 
+    const getInterestsForOpportunities = (allInterests, displayLimit = 2) => {
+        return (
+            <div
+                style={{
+                    margin: '5px'
+                }}
+            >
+            {
+                allInterests.slice(0, displayLimit).map(interest => {
+                    return (
+                        <Label
+                            key={interest._id}
+                            style={{
+                                'margin': '3px'
+                            }}
+                            color='teal'
+                        >
+                            {interest.name}
+                        </Label>
+                    )
+                })
+            }
+            {
+                allInterests.length > displayLimit ?
+                `+ ${allInterests.length - displayLimit} more...`
+                : null
+            }
+            </div>
+        )
+    }
+
     const constructOpportunityCard = (opportunity) => {
         return (
             <Segment
@@ -294,6 +325,13 @@ export default function PollCarousel(props) {
                         </Card.Content>
                         :
                         null
+                    }
+                    {
+                        opportunity.interests.length ? 
+                        <Card.Content>
+                            {getInterestsForOpportunities(opportunity.interests)}
+                        </Card.Content>
+                        : null
                     }
                     <Card.Content extra>    
                         <Button.Group>                

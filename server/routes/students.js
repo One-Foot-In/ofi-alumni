@@ -208,6 +208,22 @@ router.get('/opportunities/:studentId', passport.authenticate('jwt', {session: f
     }
 })
 
+router.get('/bookmarkedOpportunities/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.studentId})
+        await student.populate('opportunitiesBookmarked').execPopulate()
+        for (let opportunity of student.opportunitiesBookmarked) {
+            await opportunity.populate('owner', 'name imageURL').execPopulate()
+        }
+        res.status(200).json({
+            opportunities: student.opportunitiesBookmarked
+        })
+    } catch (e) {
+        console.log("Error: student#opportunitiesBookmarked", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 router.patch('/opportunity/interact/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let bookmarked = req.body.bookmarked
@@ -228,6 +244,22 @@ router.patch('/opportunity/interact/:studentId', passport.authenticate('jwt', {s
         })
     } catch (e) {
         console.log("Error: student#opportunities", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/unbookmarkOpportunity/:studentId/:opportunityId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let opportunityId = req.params.opportunityId
+        let studentId = req.params.studentId
+        await studentSchema.update({_id: studentId}, {
+            $pull: {opportunitiesBookmarked: opportunityId},
+        })
+        res.status(200).json({
+            message: 'Opportunity is unbookmarked!'
+        })
+    } catch (e) {
+        console.log("Error: student#unbookmarkOpportunity", e);
         res.status(500).send({'error' : e});
     }
 })
