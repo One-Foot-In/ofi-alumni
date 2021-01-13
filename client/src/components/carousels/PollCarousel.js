@@ -393,7 +393,7 @@ export default function PollCarousel(props) {
                         <Slider
                             style={{
                                 width: '50%',
-                                maxHeight: '300px',
+                                maxHeight: '400px',
                             }}
                         >
                             {display}
@@ -404,7 +404,7 @@ export default function PollCarousel(props) {
                         padded
                     >
                         {
-                            polls.length > 1 ?
+                            (polls.length + opportunities.length) > 1 ?
                             <Button.Group>                
                                 <Button 
                                     as={ButtonBack}
