@@ -779,24 +779,4 @@ router.get('/data/clear/all', async (req, res, next) => {
     }
 });
 
-router.post('/addActionItems/', async (req, res, next) => {
-    try {
-        const name = req.body.name;
-        const actionitem_instance = new actionItemSchema(
-            {
-                name: name
-            }
-        );
-        await actionitem_instance.save();
-        res.status(200).send({
-            message: 'Successfully added action items',
-            actionitem: actionitem_instance
-        });
-    } catch (e) {
-        res.status(500).send({
-            message: 'Failed adding action item: ' + e
-        });
-    }
-});
-
 module.exports = router;
