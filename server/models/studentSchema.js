@@ -16,7 +16,6 @@ const studentSchema = new Schema(
     schoolLogo: {type: String, default:'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'},
     isModerator: {type: Boolean, default: false},
     interests: {type: Array, required: false},
-    collegeShortlist: [{type: Schema.Types.ObjectId, ref: 'College'}],
     opportunitiesQueued: [{type: Schema.Types.ObjectId, ref: 'Opportunity'}],
     opportunitiesBookmarked: [{type: Schema.Types.ObjectId, ref: 'Opportunity'}]
   }
