@@ -76,6 +76,22 @@ const getUniqueInterests = (allInterests) => {
 router.post('/', async (req, res, next) => {
     try {
         const email = req.body.email;
+
+        if (!email) {
+            res.status(500).json({
+                error: 'No email was provided!'
+            })
+            return
+        }
+
+        let userRecord = await userSchema.findOne({email: email})
+        if (userRecord) {
+            res.status(500).json({
+                error: "There is already an existing account with this email!"
+            })
+            return
+        }
+
         const name = req.body.name;
         const gradYear = parseInt(req.body.graduationYear);
         const country = req.body.country;

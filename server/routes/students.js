@@ -23,6 +23,22 @@ async function isModerator(studentId) {
 router.post('/', async (req, res, next) => {
     try {
         const email = req.body.email;
+
+        if (!email) {
+            res.status(500).json({
+                error: 'No email was provided!'
+            })
+            return
+        }
+
+        let userRecord = await userSchema.findOne({email: email})
+        if (userRecord) {
+            res.status(500).json({
+                error: "There is already an existing account with this email!"
+            })
+            return
+        }
+
         const name = req.body.name;
         const grade = parseInt(req.body.grade);
         const password = req.body.password;

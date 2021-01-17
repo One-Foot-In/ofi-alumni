@@ -95,8 +95,8 @@ export default class Signup extends React.Component {
             jobTitleModalOpen: false,
             imageModalOpen: false,
             termsModalOpen: false,
-            // terms of agreement checkbox
             userAgreedTerms: false,
+            error: ''
         }
 
         this.handleChange = this.handleChange.bind(this);
@@ -759,11 +759,12 @@ export default class Signup extends React.Component {
                 const result = await makeCall(payload, endPoint, 'post')
                 if (!result || result.error) {
                     this.setState({
-                        submitting: false
+                        submitting: false,
+                        error: result.error
                     }, () => {
                         swal({
                             title: "Error!",
-                            text: "There was an error completing your request, please try again.",
+                            text: this.state.error || "There was an error completing your request, please try again.",
                             icon: "error",
                         });
                     })
