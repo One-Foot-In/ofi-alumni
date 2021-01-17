@@ -2,10 +2,10 @@
 
 const config = {
   mongodb: {
-    // TODO Change (or review) the url to your MongoDB:
+    // TODO: Update this with prod config
     url: "mongodb://localhost:27017",
 
-    // TODO Change this to your database name:
+    // TODO: Update this with prod db name
     databaseName: "ofi-testdata",
 
     options: {
