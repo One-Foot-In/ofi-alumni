@@ -5,11 +5,12 @@ export default function Footer () {
     return (
         <Grid
             centered
+            padded
         >
             <Grid.Row>
                 Please contact us &nbsp;<b>
                     <a href="mailto:onefootincollege@gmail.com"> here </a>
-                </b>&nbsp; for any issues, concerns, and comments!
+                </b>&nbsp; for any issues, concerns, or comments!
             </Grid.Row>
             <Grid.Row>
                 <Icon
