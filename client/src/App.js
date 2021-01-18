@@ -24,6 +24,7 @@ import AlumniWorkspace from './components/AlumniWorkspace';
 import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
 import Polls from './components/admin_dashboard/Polls';
+import Footer from './components/Footer'
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -892,6 +893,7 @@ class App extends Component {
             <Container>
               {this.renderScreens(this.state.role)}
             </Container>
+            <Footer/>
             </>
           }
           {this.state.roleChanged && 
