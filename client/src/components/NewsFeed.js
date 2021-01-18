@@ -194,10 +194,14 @@ export default class NewsFeed extends Component {
                                 </Modal>
                                 ):
                                     <>
-                                    {'a student in your grade '}
+                                    {'a student in your grade'}
                                     </>
                             }
-                            {' to discuss' } {feedItem.supportData && feedItem.supportData.topic}!
+                            {
+                                (feedItem.supportData && feedItem.supportData.topic) ?
+                                ` to discuss ${feedItem.supportData.topic}!`
+                                : null
+                            }
                                 <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
                         </Feed.Summary>
                     </Feed.Content>
