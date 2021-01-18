@@ -240,7 +240,10 @@ export default class RequestModal extends Component {
                     >
                         Submit Request
                     </Button>
-                    <Button onClick={this.props.closeModal}>
+                    <Button
+                        onClick={this.props.closeModal}
+                        disabled={this.state.submitting}
+                    >
                         Close
                     </Button>
                 </Modal.Actions>

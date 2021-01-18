@@ -174,7 +174,8 @@ class SchedulingCards extends Component {
         publicFeedback: '',
         privateFeedback: '',
         testimonial: '',
-        showFeedbackModal: false
+        showFeedbackModal: false,
+        submitting: false
     }
     // This allows the component to update its state should a prop value change
     async UNSAFE_componentWillReceiveProps({schedulings}) {
@@ -331,14 +332,21 @@ class SchedulingCards extends Component {
     }
 
     async submitFinalNote(e) {
-        let requests = await makeCall({
-            requestId: this.state.schedulingDetails._id,
-            publicFeedback: this.state.publicFeedback,
-            privateFeedback: this.state.privateFeedback,
-            testimonial: this.state.testimonial
-        }, `/request/leaveFeedback/${this.props.userId}/${this.props.timeOffset}`, 'patch')
-        this.setState({showFeedbackModal: !this.state.showFeedbackModal})
-        this.props.liftSchedulings(requests)
+        this.setState({
+            submitting: true
+        }, async () => {
+            let requests = await makeCall({
+                requestId: this.state.schedulingDetails._id,
+                publicFeedback: this.state.publicFeedback,
+                privateFeedback: this.state.privateFeedback,
+                testimonial: this.state.testimonial
+            }, `/request/leaveFeedback/${this.props.userId}/${this.props.timeOffset}`, 'patch')
+            this.setState({
+                showFeedbackModal: !this.state.showFeedbackModal,
+                submitting: false
+            })
+            this.props.liftSchedulings(requests)
+        })
     }
 
     handleValueChange(e, {name, value}) {
@@ -374,7 +382,9 @@ class SchedulingCards extends Component {
                                 />
                             </Grid.Column>
                             <Grid.Column>
-                                <Form>
+                                <Form
+                                    disabled={this.state.submitting}
+                                >
                                     <Form.TextArea 
                                         label={'Leave a note for ' + this.state.schedulingDetails.mentor.name + ':'}
                                         placeholder={`How was your mentor able to help you? Is there something the mentor could do to be more helpful? (${this.state.schedulingDetails.mentor.name} will be able to see this)`}
@@ -402,10 +412,17 @@ class SchedulingCards extends Component {
                     </Grid>
                 </Modal.Content>
                     <Modal.Actions>
-                        <Button onClick={this.toggleFeedbackModal.bind(this)}>
+                        <Button 
+                            onClick={this.toggleFeedbackModal.bind(this)}
+                            disabled={this.state.submitting}
+                        >
                             Done
                         </Button>
-                        <Button onClick={this.submitFinalNote.bind(this)} primary disabled={!this.state.publicFeedback && !this.state.privateFeedback}>
+                        <Button
+                            onClick={this.submitFinalNote.bind(this)}
+                            primary
+                            disabled={(!this.state.publicFeedback && !this.state.privateFeedback) || this.state.submitting}
+                        >
                             Submit
                         </Button>
                     </Modal.Actions>

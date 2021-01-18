@@ -18,7 +18,8 @@ export default class Conversation extends Component {
         this.state={
             conversation: null,
             display: [],
-            message: ''
+            message: '',
+            sendingMessage: false
         }
         this.handleValueChange = this.handleValueChange.bind(this)
         this.sendMessage = this.sendMessage.bind(this)
@@ -29,19 +30,26 @@ export default class Conversation extends Component {
     }
 
     async sendMessage() {
-        let result = await makeCall(
+        this.setState({
+            sendingMessage: true
+        }, async () => {
+            let result = await makeCall(
             {
                 id: this.state.conversation._id,
                 timezone: parseInt(this.props.userDetails.timeZone/100),
                 message: this.state.message
             }, '/conversations/sendMessage/' + this.props.userDetails._id, 'patch')
-        if (result.conversation) {
-            this.createDisplay(result.conversation)
+            if (result.conversation) {
+                this.createDisplay(result.conversation)
+                this.setState({
+                    conversation: result.conversation,
+                    message: ''
+                })
+            }
             this.setState({
-                conversation: result.conversation,
-                message: ''
+                sendingMessage: false
             })
-        }
+        })
     }
 
     createDisplay(conversation) {
@@ -110,6 +118,7 @@ export default class Conversation extends Component {
                                         label={'Send a message to ' + this.state.conversation.alumni[recipientIndex].name + ':'}
                                         onChange={this.handleValueChange}
                                         value={this.state.message}
+                                        disabled={this.state.sendingMessage}
                                         name='message'
                                     /> 
                                 </Form>
@@ -119,7 +128,7 @@ export default class Conversation extends Component {
                                     inverted 
                                     floated='left' 
                                     onClick={this.sendMessage}
-                                    disabled={!this.state.message}
+                                    disabled={!this.state.message || this.state.sendingMessage}
                                 >
                                     <Icon size='large' color='blue' name='paper plane'/>
                                 </Button>

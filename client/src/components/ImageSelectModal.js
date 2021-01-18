@@ -103,7 +103,10 @@ export default class ImageSelectModal extends Component {
                     >
                         Upload
                     </Button>
-                    <Button onClick={this.props.close}>
+                    <Button
+                        onClick={this.props.close}
+                        disabled={this.state.loading}
+                    >
                         Close
                     </Button>
                 </Modal.Actions>

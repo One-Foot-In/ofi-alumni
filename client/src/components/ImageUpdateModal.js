@@ -117,7 +117,10 @@ export default class ImageUpdateModal extends Component {
                     >
                         Upload
                     </Button>
-                    <Button onClick={this.props.closeModal}>
+                    <Button
+                        onClick={this.props.closeModal}
+                        disabled={this.state.submitting}
+                    >
                         Close
                     </Button>
                 </Modal.Actions>

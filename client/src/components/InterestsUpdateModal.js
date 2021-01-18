@@ -126,10 +126,13 @@ export default class InterestsUpdateModal extends Component {
                     >
                         Submit
                     </Button>
-                    <Button onClick={() => {
+                    <Button
+                        onClick={() => {
                             this.clearState();
                             this.props.closeModal()
-                        }}>
+                        }}
+                        disabled={this.state.submitting}
+                    >
                         Close
                     </Button>
                 </Modal.Actions>
