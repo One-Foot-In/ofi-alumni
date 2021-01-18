@@ -14,9 +14,11 @@ var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
 var majorSchema = require('../models/majorSchema');
 var requestSchema = require('../models/requestSchema');
+var conversationSchema = require('../models/conversationSchema');
 var timezoneHelpers = require("../helpers/timezoneHelpers");
 const opportunitySchema = require('../models/opportunitySchema');
-var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
+var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail;
+const { ObjectId } = require('mongodb');
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -684,6 +686,34 @@ router.get('/opportunities/:alumniId', passport.authenticate('jwt', {session: fa
         res.status(200).send({opportunities: opportunitiesArray})
     } catch (e) {
         console.log("Error: alumni#opportunities", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.get('/unseenMessagesCount/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        // get all conversations alumni have participated in
+        let relevantConversations = await conversationSchema.find({alumni: {$in: ObjectId(req.params.alumniId)}})
+        let unseenMessagesCount = 0
+        for (let convo of relevantConversations) {
+            if (!convo.seen[convo.alumni.indexOf(ObjectId(req.params.alumniId))]) {
+                unseenMessagesCount++
+            }
+        } 
+        res.status(200).send({unseenMessagesCount: unseenMessagesCount})
+    } catch (e) {
+        console.log("Error: alumni#unseenMessagesCount", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.get('/newRequestsCount/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.alumniId})
+        let newRequestsCount = await requestSchema.count({mentor: alumni, status: 'Awaiting Confirmation'})
+        res.status(200).send({newRequestsCount: newRequestsCount})
+    } catch (e) {
+        console.log("Error: alumni#newRequestsCount", e);
         res.status(500).send({'error' : e});
     }
 })

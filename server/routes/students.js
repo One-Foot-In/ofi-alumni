@@ -263,4 +263,16 @@ router.patch('/unbookmarkOpportunity/:studentId/:opportunityId', passport.authen
         res.status(500).send({'error' : e});
     }
 })
+
+router.get('/approvedRequestsCount/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.studentId})
+        let approvedRequestsCount = await requestSchema.count({student: student, status: 'Confirmed'})
+        res.status(200).send({approvedRequestsCount: approvedRequestsCount})
+    } catch (e) {
+        console.log("Error: student#approvedRequestsCount", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 module.exports = router;

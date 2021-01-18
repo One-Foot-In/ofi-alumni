@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Modal, Form, Menu, Label, Card, Grid, Image, Button, Message } from 'semantic-ui-react';
 import { makeCall } from '../apis'
 import swal from 'sweetalert'
+import { STUDENT } from '../App';
 
 export const timeSlotOptions = [
     '12am - 1am',
@@ -116,6 +117,7 @@ export default class StudentMentorship extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
+                        refreshMenuPopupCounters={this.props.refreshMenuPopupCounters}
                     />
                 </div>
             }
@@ -127,6 +129,7 @@ export default class StudentMentorship extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
+                        refreshMenuPopupCounters={this.props.refreshMenuPopupCounters}
                     />
                 </div>
             }
@@ -138,6 +141,7 @@ export default class StudentMentorship extends Component {
                         liftSchedulings={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
+                        refreshMenuPopupCounters={this.props.refreshMenuPopupCounters}
                     />
                 </div>
             }
@@ -302,6 +306,7 @@ class SchedulingCards extends Component {
                 icon: "success"
             }).then(() => {
                 this.props.liftSchedulings(schedulings)
+                this.props.refreshMenuPopupCounters(STUDENT, this.props.userId)
             })
         }
     }
