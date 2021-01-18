@@ -382,14 +382,6 @@ export default function PollCarousel(props) {
                         centered
                         padded
                     >
-                        <Message info>
-                            We have announcements for you, and we'd love your input!
-                        </Message>
-                    </Grid.Row>
-                    <Grid.Row
-                        centered
-                        padded
-                    >
                         <Slider
                             style={{
                                 width: '50%',
@@ -433,6 +425,14 @@ export default function PollCarousel(props) {
                 </Grid>
             </Segment>
         </CarouselProvider>
-        : null
+        :
+        <Message info>
+            <Message.Header>
+                There are no polls or announcements to display
+            </Message.Header>
+            <Message.Content>
+                When an admin sends out a poll that you could add input to, or when a mentor adds an opportunity that would be relevant to you, it will show up here!
+            </Message.Content>
+        </Message>
     )
 }

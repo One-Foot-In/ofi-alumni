@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Message, Segment, Feed, Image, Header, Icon, Divider, Modal, Grid} from 'semantic-ui-react'
+import { Message, Segment, Feed, Image, Header, Icon, Divider, Modal, Grid, Menu} from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import AlumniProfile from './AlumniProfile';
 import StudentProfile from './StudentProfile';
@@ -17,7 +17,8 @@ import PollCarousel from './carousels/PollCarousel';
 export default class NewsFeed extends Component {
     state={
         newsItems: [],
-        display: []
+        display: [],
+        activeItem: 'newsfeed'
     }
 
     async UNSAFE_componentWillMount() {
@@ -33,6 +34,8 @@ export default class NewsFeed extends Component {
     getNews(role) {
         return makeCall({}, '/news/getNews/'+role+'/'+this.props.userDetails._id, 'get')
     }
+
+    handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
 
     constructDisplay() {
         let display = []
@@ -255,31 +258,55 @@ export default class NewsFeed extends Component {
     
     render() {
         return(
-            <Segment style={{'marginBottom': '1em'}}>
+            <>
+            <Menu secondary stackable>
+                <Menu.Item
+                    id='newsfeed'
+                    name='newsfeed'
+                    active={this.state.activeItem === 'newsfeed'}
+                    onClick={this.handleMenuClick}
+                >
+                    News Feed
+                </Menu.Item>
+                <Menu.Item
+                    id='pollsAndAnnouncements'
+                    name='Polls and Announcements'
+                    active={this.state.activeItem === 'pollsAndAnnouncements'}
+                    onClick={this.handleMenuClick}
+                >
+                    Polls and Announcements
+                </Menu.Item>
+            </Menu>
+
+            {this.state.activeItem === 'pollsAndAnnouncements' &&
                 <PollCarousel
                     userId={this.props.userDetails.user}
                     isAlumni={this.props.userRole === 'ALUMNI'}
                     alumniOrStudentId={this.props.userDetails._id}
                 />
-                <Header>
-                    <Icon name={'newspaper outline'}/>
-                    <Header.Content>News</Header.Content>
-                </Header>
-                <Feed>
-                    {
-                        !this.state.display.length &&
-                        <>
-                        <Divider/>
-                        <Message info>
-                            <Message.Header>No news to display</Message.Header>
-                            <Message.Content>Check back later!</Message.Content>
-                        </Message>
-                        </>
-                    }
-                    {this.state.display}
-                </Feed>
-            </Segment>
-            
+            }
+            {this.state.activeItem === 'newsfeed' &&
+                <Segment style={{'marginBottom': '1em'}}>
+                    <Header>
+                        <Icon name={'newspaper outline'}/>
+                        <Header.Content>News</Header.Content>
+                    </Header>
+                    <Feed>
+                        {
+                            !this.state.display.length &&
+                            <>
+                            <Divider/>
+                            <Message info>
+                                <Message.Header>No news to display</Message.Header>
+                                <Message.Content>Check back later!</Message.Content>
+                            </Message>
+                            </>
+                        }
+                        {this.state.display}
+                    </Feed>
+                </Segment>
+            }
+            </>
         )
     }
 }
