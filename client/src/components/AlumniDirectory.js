@@ -41,6 +41,11 @@ const searchOptions = [
         key: 'Graduation Year',
         text: 'Graduation Year',
         value: 'gradYear'
+    },
+    {
+        key: 'Interests',
+        text: 'Interests',
+        value: 'interests'
     }
 ]
 
@@ -66,6 +71,7 @@ export default class AlumniDirectory extends Component {
             gradYears: [],
             allText: [],
             display: [],
+            interestOptions: [],
             numResults: 0,
             filter: 'all',
             requestModalOpen: false,
@@ -77,6 +83,7 @@ export default class AlumniDirectory extends Component {
         this.toggleAlumniContactModal = this.toggleAlumniContactModal.bind(this)
         this.liftAccessContext = this.liftAccessContext.bind(this)
         this.setAlumniDirectory = this.setAlumniDirectory.bind(this)
+        this.getSearchInputField = this.getSearchInputField.bind(this)
     }
 
     liftAccessContext(newAccessControl) {
@@ -121,7 +128,27 @@ export default class AlumniDirectory extends Component {
         if (!result || result.error) {
             // TECH DEBT: Error toast
         } else {
-            this.setAlumniDirectory(result)
+            let interestsByCount = result.alumni.reduce(
+                (interestByCountMap, alumnus) => {
+                    for (let interest of alumnus.interests) {
+                        interestByCountMap[interest.name] = (interestByCountMap[interest.name] || 0) + 1
+                    }
+                    return interestByCountMap
+                },
+            {})
+            let interestOptions = []
+            for (let [interest, count] of Object.entries(interestsByCount)) {
+                interestOptions.push({
+                    key: interest,
+                    value: interest,
+                    text: `${interest} (${count})`,
+                })
+            }
+            this.setState({
+                interestOptions
+            }, () => {
+                this.setAlumniDirectory(result)
+            })
         }
     }
 
@@ -144,7 +171,9 @@ export default class AlumniDirectory extends Component {
                          + post.jobTitleName + ' '
                          + post.companyName + ' '
                          + post.name + ' '
-                         + post.gradYear);
+                         + post.gradYear
+                         + post.interests.map(interest => interest.name).join(' ')
+                         );
             display.push(this.constructProfile(post, i));
             i++;
         }
@@ -261,7 +290,16 @@ export default class AlumniDirectory extends Component {
         let i = 0;
         for (let post of this.state.entries) {
             if (this.state.filter !== 'all' && post[this.state.filter]) {
-                if (post[this.state.filter].toString().match(searchPattern) !== null) {
+                let isMatch = false
+                if (this.state.filter === 'interests') {
+                    for (let interest of post.interests) {
+                        isMatch = interest.name.toString().match(searchPattern) !== null
+                        if (isMatch) break
+                    }
+                } else {
+                    isMatch = post[this.state.filter].toString().match(searchPattern) !== null
+                }
+                if (isMatch) {
                     numResults += 1
                     display.push(this.constructProfile(post));
                 }
@@ -286,12 +324,18 @@ export default class AlumniDirectory extends Component {
     handleSearchChange = (e, { value }) => {
         this.search(value)
     }
-    handleDropdownChange = (e, { name, value }) => {
+
+    handleFilterOrYearSelectionChange = (e, { name, value }) => {
         if (name === 'year') {
             this.search(value)
         }
-        this.setState({ [name]: value })
+        this.setState({ filter: value })
     }
+
+    handleInterestSelectionChange = (e, {value}) => {
+        this.search(value)
+    }
+
     handleRequestButton(e) {
         this.setState({alumniDetails: this.state.entries[e.currentTarget.dataset.id]})
         this.toggleRequestModal()
@@ -301,13 +345,52 @@ export default class AlumniDirectory extends Component {
         this.toggleAlumniContactModal()
     }
 
-    render(){
+    getSearchInputField(filter) {
+        switch(filter) {
+            case 'gradYear':
+                return (
+                    <Dropdown 
+                        placeholder='Year:'
+                        fluid
+                        floating
+                        selection
+                        name='year'
+                        options={this.state.gradYears}
+                        onChange={this.handleFilterOrYearSelectionChange}
+                    />
+                )
+            case 'interests':
+                return (
+                    <Dropdown 
+                        placeholder='Interest'
+                        fluid
+                        floating
+                        selection
+                        search
+                        name='interest'
+                        options={this.state.interestOptions}
+                        onChange={this.handleInterestSelectionChange}
+                    />
+                )
+            default:
+                return (
+                    <Search
+                        open={false}
+                        showNoResults={false}
+                        onSearchChange={this.handleSearchChange}
+                        input={{fluid: true}}
+                        placeholder={"Search"}
+                    />
+                )
+        }
+    }
+
+    render() {
         const {
             totalPages,
             activePage,
             filter,
             numResults,
-            gradYears,
             display,
             value,
         } = this.state
@@ -327,68 +410,35 @@ export default class AlumniDirectory extends Component {
         /* Search Area */
         let searchRow;
         let hasMoreThanOneAccessContext = this.props.accessContexts && this.props.accessContexts.length > 1
-        if (filter !== 'gradYear') {
-            searchRow = (
-                <Grid.Row columns={hasMoreThanOneAccessContext ? 3 : 2}>
-                {
-                    hasMoreThanOneAccessContext ?
-                    <Grid.Column width={4}>
-                        <AccessControlDropdown
-                            liftAccessContext={this.liftAccessContext}
-                            accessContexts={this.props.accessContexts}
-                            accessContext={this.state.accessContext}
-                        />
-                    </Grid.Column>
-                    : null
-                }
-                <Grid.Column width={hasMoreThanOneAccessContext ? 8 : 10}>
-                        <Search
-                            open={false}
-                            showNoResults={false}
-                            onSearchChange={this.handleSearchChange}
-                            input={{fluid: true}}
-                            placeholder={"Search"}
-                        />
-                </Grid.Column>
-                <Grid.Column width={hasMoreThanOneAccessContext ? 4 : 6}>
-                    <Dropdown
-                        placeholder='Search By:'
-                        floating
-                        selection
-                        options={searchOptions}
-                        name='filter'
-                        onChange={this.handleDropdownChange}
-                    />
-                </Grid.Column>
-                </Grid.Row>
-            )
-        } else {
-            searchRow = (
-                <Grid.Row columns={2}>
-                <Grid.Column>
-                        <Dropdown 
-                            placeholder='Year:'
-                            fluid
-                            floating
-                            selection
-                            name='year'
-                            options={gradYears}
-                            onChange={this.handleDropdownChange}
-                        />
-                </Grid.Column>
-                <Grid.Column>
-                    <Dropdown
-                        placeholder='Search By:'
-                        floating
-                        selection
-                        name='filter'
-                        options={searchOptions}
-                        onChange={this.handleDropdownChange}
-                    />
-                </Grid.Column>
-                </Grid.Row>
-            )
-        }
+        let accessContextDropdown = (
+            hasMoreThanOneAccessContext ?
+            <Grid.Column width={4}>
+                <AccessControlDropdown
+                    liftAccessContext={this.liftAccessContext}
+                    accessContexts={this.props.accessContexts}
+                    accessContext={this.state.accessContext}
+                />
+            </Grid.Column>
+            : null
+        )
+        searchRow = (
+            <Grid.Row columns={hasMoreThanOneAccessContext ? 3 : 2}>
+                { accessContextDropdown }
+            <Grid.Column width={hasMoreThanOneAccessContext ? 8 : 10}>
+                {this.getSearchInputField(filter)}
+            </Grid.Column>
+            <Grid.Column width={hasMoreThanOneAccessContext ? 4 : 6}>
+                <Dropdown
+                    placeholder='Search By:'
+                    floating
+                    selection
+                    options={searchOptions}
+                    name='filter'
+                    onChange={this.handleFilterOrYearSelectionChange}
+                />
+            </Grid.Column>
+            </Grid.Row>
+        )
         /* Search Area */
 
         return ( 
