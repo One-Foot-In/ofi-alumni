@@ -6,8 +6,6 @@ var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt');
 const cors = require('cors');
 var CronJob = require('cron').CronJob;
-const winston = require('winston');
-
 var { sendWeeklyEmailDigest } = require('./routes/helpers/emailHelpers');
 // passport for authentication by local strategy
 var passport = require("passport");
@@ -37,27 +35,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'build')));
-
-/*
- * Set up logging
- */
-
-const logFormat = winston.format.printf(info => {
-  return `${info.timestamp} ${info.level}: ${info.message}`
-})
-
-const logger = winston.createLogger({
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.colorize(),
-    logFormat
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' }),
-  ]
-})
 
 /* 
  * If testDB is true, uses a locally hosted mongoDB
