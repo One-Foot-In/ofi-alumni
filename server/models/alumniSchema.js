@@ -44,7 +44,7 @@ const alumniSchema = new Schema(
     schoolLogo: {type: String, default:'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'},
     major: {type: Schema.Types.ObjectId, ref: 'Major', required: true},
     majorName: {type: String, required: true}, // to avoid lookup for display purposes
-    collegesAcceptedInto: {type: Array, required: false},
+    collegesAcceptedInto: [{type: Schema.Types.ObjectId, ref: 'College', required: false}]
   }
 );
 

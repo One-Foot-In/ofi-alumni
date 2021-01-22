@@ -61,20 +61,6 @@ const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-const collegesAcceptedInto = [
-    "Hogwarts School of WitchCraft and Wizardry", "Elephants on the Hill", "Larvard", "Pepsodent", "Boston Institute of Technology", "Ben and Jerry's", "Lannister University",
-    "Get Rich Quick College", "Gary Vee's School of Wisdom", "Tik Tok Fine Arts Institute", "Where Science Comes to Die",
-    "5th best on the Red Line", "Lemmings and Family Home Schooling", "Grand Theft Auto - School of Life", "La Casa de Papel",
-    "Training Academy for Hourses", "Two-way petting Zoo"
-]
-
-const collegeShortList = [
-    "Hogwarts School of WitchCraft and Wizardry", "Elephants on the Hill", "Larvard", "Pepsodent", "Boston Institute of Technology", "Ben and Jerry's", "Lannister University",
-    "Get Rich Quick College", "Gary Vee's School of Wisdom", "Tik Tok Fine Arts Institute", "Where Science Comes to Die",
-    "5th best on the Red Line", "Lemmings and Family Home Schooling", "Grand Theft Auto - School of Life", "La Casa de Papel",
-    "Training Academy for Hourses", "Two-way petting Zoo"
-]
-
 const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _schoolLogo, _interests, _major, _collegesAcceptedInto) => {
     const email = _email;
     const gradYear = Math.floor((Math.random() * 1000) + 2000);

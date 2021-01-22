@@ -62,12 +62,9 @@ const generateNewAndExistingInterests = async (existingInterests, newInterests) 
 }
 
 const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
-    console.log('the existing colleges are ' + existingColleges)
     let existingCollegeNames = [];
     let newCollegeNames = [];
-    //loop to extract the names from the array of objects (gotta seperate names from everything else)
     for (let i = 0; i < existingColleges.length; i++){
-        //console.log('the thing form the for loop ' + existingColleges[i].name)
         let collegeName = existingColleges[i].name;
         existingCollegeNames.push(collegeName)
     }
@@ -75,17 +72,8 @@ const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
         let collegeName = newCollege[i].name;
         newCollegeNames.push(collegeName)
     }
-    console.log(existingCollegeNames)
-    console.log(newCollegeNames)
-    const existingCollegeIds = existingCollegeNames.map(uni => uni.value).flat();
-    //is there a way to get the id out of this?
-
     let existingCollegeRecords = await collegeSchema.find().where('name').in(existingCollegeNames).exec();
-    //^^^aaaaahhhhh we got it!
-    //console.log('the existing college record is ' + existingCollegeRecords);
-    console.log(existingCollegeRecords)
     if(newCollegeNames.length){
-        console.log('if statement has activated')
         for (let i = 0; i < newCollegeNames.length; i++){
             let collegeExists = await collegeSchema.find({name: newCollegeNames[i]});
             if(!collegeExists.length){
@@ -95,7 +83,7 @@ const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
                 })
                 await newCollegeMade.save()
                 existingCollegeRecords.push(newCollegeMade)
-            }else{
+            } else {
                 existingCollegeRecords.push(collegeExists[0])
             }
         }
@@ -376,7 +364,6 @@ router.patch('/interests/add/:id', passport.authenticate('jwt', {session: false}
         const existingInterests = req.body.existingInterests
         const newInterests = req.body.newInterests || []
         let interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
-
         alumni.interests = getUniqueInterests([...alumni.interests, ...interestsToAdd])
         await alumni.save()
         res.status(200).send({message: "Successfully added alumni's interests"})
@@ -579,19 +566,13 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
 router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {session: false}, */ async (req, res, next) => {
     try{
         let alumni = await alumniSchema.findOne({_id: req.params.id});
-        //let alumniCollegeList = alumni.collegesAcceptedInto;
-        const existingColleges = Object.values(req.body.existingColleges) || [];
-        const newColleges = Object.values(req.body.newColleges);
-        //console.log('the existing colleges are '+existingColleges)
-        //console.log('the new colleges are '+newColleges)
-        console.log(existingColleges);
-        console.log(newColleges);
-        let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges)
-        alumni.collegesAcceptedInto = getUniqueCollege([...alumni.collegesAcceptedInto, ...collegesToAdd])
+        const existingColleges = req.body.existingColleges || [];
+        const newColleges = req.body.newColleges;
+        let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
+        alumni.collegesAcceptedInto = getUniqueCollege([...alumni.collegesAcceptedInto, ...collegesToAdd]);
         await alumni.save(); 
-        console.log(alumni.collegesAcceptedInto)
         res.status(200).json({message: `your colleges have been added successfully!`});
-    }catch(e){
+    } catch(e) {
         console.log("Error: cannot add college", e);
         res.status(500).json({'error': e});
     };
@@ -600,23 +581,32 @@ router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {ses
 router.patch('/collegesAcceptedInto/delete/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         const alumni = await alumniSchema.findOne({_id: req.params.id});
-        //const theColleges = req.body.collegesToRemove[0].name;
-        //console.log(theColleges)
-        let theColleges = [];
-        const theReq = req.body.collegesToRemove;
-        for (let i = 0; i < theReq.length; i++){
-            let collegeName = theReq[i].name;
-            theColleges.push(collegeName);
-        }
-        console.log(theColleges);
-        //alumni.collegesAcceptedInto = alumni.collegesAcceptedInto.filter(college => college.name !== theColleges);
-        alumni.collegesAcceptedInto = alumni.collegesAcceptedInto
-        await alumni.save()
-        console.log(alumni.collegesAcceptedInto);
+        const collegeName = req.body.collegeToRemove.name;
+        const collegesInfoForFilter = await collegeSchema.findOne().where('name').in(collegeName).exec();
+        const theCollegeId = collegesInfoForFilter.id;
+        let newCollegeList = [];
+        for (let i = 0; i < alumni.collegesAcceptedInto.length; i++){
+            if (alumni.collegesAcceptedInto[i].toString() !== theCollegeId.toString()){
+                newCollegeList.push(alumni.collegesAcceptedInto[i])
+            }
+        };
+        alumni.collegesAcceptedInto = newCollegeList;
+        await alumni.save();
         res.status(200).json({message: "Successfully removed college from list!"});
     }catch(e){
-        console.log("error: alumni college removal error")
-        console.log(e)
+        console.log("error: alumni college removal error", e);
+        res.status(500).json({'error': e});
+    }
+})
+
+router.get('/collegesAcceptedInto/all/:id', /*passport.authenticate('jwt', {session: false})*/ async (req, res, next) =>{
+    try{
+        const alumni = await alumniSchema.findOne({_id: req.params.id});
+        let collegesAcceptedInto = alumni.collegesAcceptedInto;
+        res.status(200).json(collegesAcceptedInto)
+    }
+    catch (e){
+        console.log('Unable to get collegesAcceptedInto at this time')
         res.status(500).json({'error': e})
     }
 })

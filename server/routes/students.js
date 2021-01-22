@@ -8,6 +8,7 @@ var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
 var requestSchema = require('../models/requestSchema');
+var collegeSchema = require('../models/collegeSchema')
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
 var getUniqueInterests = require("./alumni").getUniqueInterests
@@ -173,31 +174,34 @@ router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {sessio
         let student = await studentSchema.findOne({_id: req.params.id});
         const existingColleges = req.body.existingColleges;
         const newColleges = req.body.newColleges || [];
-        console.log(existingColleges);
-        console.log(newColleges);
         let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
         student.collegeShortList = getUniqueCollege([...student.collegeShortList, ...collegesToAdd]);
         await student.save();
-        console.log(student.collegeShortList);
         res.status(200).json({message: `you have successfully added the colleges to your short list`});
     } catch(e){
-        console.log('Error: cannot add college');
-        console.log(e)
-        res.status(500).json({'error': e})
+        console.log('Error: cannot add college', e);
+        res.status(500).json({'error': e});
     }
 })
 
 router.patch('/collegeShortList/remove/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         const student = await studentSchema.findOne({_id: req.params.id});
-        const theCollege = req.body.collegeToRemove[0].name;
-        student.collegeShortList = student.collegeShortList.filter(college => college.name !== theCollege);
-        await student.save()
-        res.status(200).json({message: 'Successfully removed college from list'})
+        const collegeName = req.body.collegeToRemove.name;
+        const collegeToRemove = await collegeSchema.findOne().where('name').in(collegeName).exec();
+        const theCollegeId = collegeToRemove._id;
+        let newCollegeList = [];
+        for (let i = 0; i < student.collegeShortList.length; i++){
+            if (student.collegeShortList[i].toString() !== theCollegeId.toString()){
+                newCollegeList.push(student.collegeShortList[i]);
+            };
+        };
+        student.collegeShortList = newCollegeList;
+        await student.save();
+        res.status(200).json({message: 'Successfully removed college from list'});
     } catch(e){
-        console.log("Error: College can't be removed at this time")
-        console.log(e)
-        res.status(500).json({"error": e})
+        console.log("Error: College can't be removed at this time", e);
+        res.status(500).json({"error": e});
     }
 })
 
