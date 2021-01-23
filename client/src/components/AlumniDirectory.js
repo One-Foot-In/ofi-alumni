@@ -77,7 +77,7 @@ export default class AlumniDirectory extends Component {
             allText: [],
             display: [],
             interestOptions: [],
-            topicOption: [],
+            topicOptions: [],
             numResults: 0,
             filter: 'all',
             requestModalOpen: false,
@@ -387,6 +387,11 @@ export default class AlumniDirectory extends Component {
                 if (this.state.filter === 'interests') {
                     for (let interest of post.interests) {
                         isMatch = interest.name.toString().match(searchPattern) !== null
+                        if (isMatch) break
+                    }
+                } else if (this.state.filter === 'topics') {
+                    for (let topic of post.topics) {
+                        isMatch = topic.toString().match(searchPattern) !== null
                         if (isMatch) break
                     }
                 } else {
