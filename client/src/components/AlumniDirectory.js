@@ -418,7 +418,9 @@ export default class AlumniDirectory extends Component {
 
                 <Grid.Row stretched>
                     <Grid.Column>
-                        <Segment>
+                        <Segment
+                            textAlign='center'
+                        >
                             <Responsive as={Pagination} minWidth={726}
                                 activePage={activePage}
                                 totalPages={totalPages}

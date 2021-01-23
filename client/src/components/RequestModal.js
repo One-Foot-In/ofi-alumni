@@ -205,7 +205,7 @@ export default class RequestModal extends Component {
                                         options={this.state.availabilityOptions} 
                                         onChange={this.handleValueChange}
                                         value={this.state.availabilityValue}
-                                        noResultsMessage='No Times Found'
+                                        noResultsMessage='No availabilities posted. You can still request a call!'
                                         name='availabilityValue'
                                     />
                                     <Form.Dropdown
@@ -213,10 +213,11 @@ export default class RequestModal extends Component {
                                         placeholder='Topic'
                                         fluid
                                         selection
+                                        search
                                         options={this.state.topicOptions} 
                                         onChange={this.handleValueChange}
                                         value={this.state.topicValue}
-                                        noResultsMessage='No Topics Found'
+                                        noResultsMessage='No topics posted. You can still request a call!'
                                         name='topicValue'
                                     />
                                     <Form.TextArea 
