@@ -20,8 +20,10 @@ import CollegesList from './components/admin_dashboard/CollegesList';
 import SchoolsList from './components/admin_dashboard/SchoolsList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
-
+import AlumniWorkspace from './components/AlumniWorkspace';
+import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
+import Polls from './components/admin_dashboard/Polls';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -119,6 +121,11 @@ var alumniNavBarItems = (approved) => {
         id: 'networking',
         name: 'Networking',
         navLink: '/networking'
+    },
+    {
+        id: 'workspaces',
+        name: 'Workspaces',
+        navLink: '/workspaces'
     }
   ]
   if (approved) {
@@ -157,7 +164,12 @@ var adminNavBarItems = () => {
         id: 'schools',
         name: 'Schools',
         navLink: '/schools'
-    }
+    },
+    {
+      id: 'polls',
+      name: 'Polls',
+      navLink: '/polls'
+  }
   ]
   return navBarItems;
 }
@@ -183,6 +195,11 @@ const studentNavBarItems = (isModerator) => {
         id: 'mentorship',
         name: 'Mentorship',
         navLink: '/mentorship'
+    },
+    {
+      id: 'workspaces',
+      name: 'Workspaces',
+      navLink: '/workspaces'
     }
   ]
   if (isModerator) {
@@ -225,19 +242,18 @@ class App extends Component {
       approved: false,
       role: null,
       roleChanged: false,
-      schoolId: '',
       userDetails: {}
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
-    this.liftPayload = this.liftPayload.bind(this);
+    this.completeLogin = this.completeLogin.bind(this);
     this.renderScreens = this.renderScreens.bind(this);
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
     this.refreshProfile = this.refreshProfile.bind(this);
     this.liftRole = this.liftRole.bind(this);
   }
 
-  async componentWillMount() {
+  async UNSAFE_componentWillMount() {
     var role;
     var profile;
     var id;
@@ -254,8 +270,10 @@ class App extends Component {
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
         role = parsedJWT.role;
         id = parsedJWT.id;
-        profile = await this.fetchProfile(role[0], id);
+        let result = await this.fetchProfile(role[0], id);
+        profile = result.result
         this.setState({
+          accessContexts: result.accessContexts,
           role: role[0],
           userDetails: profile,
           approved: profile.approved,
@@ -277,9 +295,10 @@ class App extends Component {
   }
 
   async refreshProfile(role, id) {
-    let userDetails = await this.fetchProfile(role, id)
+    let result = await this.fetchProfile(role, id)
     this.setState({
-      userDetails: userDetails
+      userDetails: result.result,
+      accessContexts: result.accessContexts
     })
   }
 
@@ -299,7 +318,7 @@ class App extends Component {
         result = await makeCall({}, ('/collegeRep/one/'+id), 'get')
         break;
     }
-    return result.result
+    return result
   }
 
   login() {
@@ -311,16 +330,16 @@ class App extends Component {
   async logout() {
     await makeCall({}, '/logout', 'get');
     this.setState({
-      loggedIn: false
+      loggedIn: false,
+      userDetails: {},
+      role: null
     });
   }
 
-  liftPayload(details) {
-      this.setState({
-        role : details.userRole,
-        userDetails: details.userToSend
-      });
-      window.location.reload()
+
+  completeLogin() {
+    // TECH DEBT: Without window reload, there is an infinite loop of redirects to '/'
+    window.location.reload();
   }
 
   liftRole(role) {
@@ -371,6 +390,7 @@ class App extends Component {
                         isViewOnly={false}
                         details={this.state.userDetails}
                         refreshProfile={this.refreshProfile}
+                        logout={this.logout}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -387,8 +407,9 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
                       <AlumniDirectory
-                        schoolId={this.state.userDetails.school}
+                        schoolId={this.state.userDetails.school._id}
                         userDetails={this.state.userDetails}
+                        accessContexts={this.state.accessContexts}
                         role={role}
                       />
                   </> :
@@ -430,6 +451,24 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          <Route exact path = {`/workspaces`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+
           { this.state.userDetails.approved &&
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
@@ -444,7 +483,7 @@ class App extends Component {
                       />
                         <AlumniVerification
                           gradYear={this.state.userDetails.gradYear}
-                          schoolId={this.state.userDetails.school}
+                          schoolId={this.state.userDetails.school._id}
                         />
                       </> 
                     :<Redirect to={'/'}/> )
@@ -488,6 +527,7 @@ class App extends Component {
                       <StudentProfile
                         isViewOnly={false}
                         details={this.state.userDetails}
+                        logout={this.logout}
                         refreshProfile={this.refreshProfile}
                       />
                   </> :
@@ -505,8 +545,9 @@ class App extends Component {
                           activeItem={'alumniDirectory'}
                       />
                       <AlumniDirectory
-                        schoolId={this.state.userDetails.school}
+                        schoolId={this.state.userDetails.school._id}
                         userDetails={this.state.userDetails}
+                        accessContexts={this.state.accessContexts}
                         role={role}
                       />
                   </> :
@@ -530,9 +571,26 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          <Route exact path={`/workspaces`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={studentNavBarItems(this.state.approved)}
+                          activeItem={'workspaces'}
+                      />
+                        <StudentWorkspace 
+                            userDetails={this.state.userDetails}
+                        />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
-                    this.state.userDetails.isModerator ?
+                    (this.state.userDetails.isModerator ?
                       <>
                         <Navbar
                           navItems={studentNavBarItems(this.state.userDetails.isModerator)}
@@ -540,12 +598,12 @@ class App extends Component {
                         />
                         <StudentVerification
                           grade={this.state.userDetails.grade}
-                          schoolId={this.state.userDetails.school}
+                          schoolId={this.state.userDetails.school._id}
                           studentId={this.state.userDetails._id}
                         />
                       </>
-                      : <Redirect to={"/"}/>
-                  :<Redirect to={"/login"}/>
+                      : <Redirect to={"/"}/>)
+                  : <Redirect to={"/login"}/>
               }
           />
           </>
@@ -638,6 +696,23 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          <Route exact path={`/polls`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={adminNavBarItems()}
+                          activeItem={'polls'}
+                      />
+                      <Polls
+                        userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
         </>
         )
       case COLLEGE_REP:
@@ -692,17 +767,7 @@ class App extends Component {
         )
       default:
         return (
-          <Route exact path={`/`} render={(props) => 
-            this.state.loggedIn ?
-            <>
-                <Navbar
-                    navItems={studentNavBarItems(this.state.userDetails.isModerator)}
-                    activeItem={'home'}
-                />
-            </> :
-            <Redirect to={"/login"}/>
-            }
-          />
+          <Redirect to={"/login"}/>
         )
     }
   }
@@ -735,7 +800,7 @@ class App extends Component {
           <Route exact path={"/login"} render={(props) => 
               <LoginForm
                 isLoggedIn={this.state.loggedIn}
-                liftPayload={this.liftPayload}
+                completeLogin={this.completeLogin}
                 login={this.login}
               />
             }
@@ -776,8 +841,7 @@ class App extends Component {
             <Header
               loggedIn={this.state.loggedIn}
               logout={this.logout}
-              email={this.state.userDetails && this.state.userDetails.email}
-              schoolLogo={this.state.userDetails && this.state.userDetails.schoolLogo}
+              school={this.state.userDetails && this.state.userDetails.school}
               userId={this.state.userDetails && this.state.userDetails.user}
               role={this.state.role}
               liftRole={this.liftRole}

@@ -23,7 +23,7 @@ export default class Conversation extends Component {
         this.handleValueChange = this.handleValueChange.bind(this)
         this.sendMessage = this.sendMessage.bind(this)
     }
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.createDisplay(this.props.conversation)
         this.setState({conversation: this.props.conversation})
     }
@@ -35,11 +35,13 @@ export default class Conversation extends Component {
                 timezone: parseInt(this.props.userDetails.timeZone/100),
                 message: this.state.message
             }, '/conversations/sendMessage/' + this.props.userDetails._id, 'patch')
-        this.createDisplay(result.conversation)
-        this.setState({
-            conversation: result.conversation,
-            message: ''
-        })
+        if (result.conversation) {
+            this.createDisplay(result.conversation)
+            this.setState({
+                conversation: result.conversation,
+                message: ''
+            })
+        }
     }
 
     createDisplay(conversation) {

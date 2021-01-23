@@ -59,7 +59,7 @@ export default class StudentMentorship extends Component {
         })
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let timeOffset = this.props.userDetails.timeZone
         let schedulings = await this.getSchedulings(timeOffset)
         this.setState({
@@ -173,16 +173,18 @@ class SchedulingCards extends Component {
         showFeedbackModal: false
     }
     // This allows the component to update its state should a prop value change
-    async componentWillReceiveProps({schedulings}) {
+    async UNSAFE_componentWillReceiveProps({schedulings}) {
         await this.setState({schedulings: schedulings})
         this.constructDisplay(this.state.schedulings)
     }
     // This ensures that the component doesn't use an old prop on menu change
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.constructDisplay(this.props.schedulings)
     }
 
     constructRequest(scheduling) {
+        let schedulingTime = (scheduling.time && scheduling.time.length) ? `${scheduling.time[0].day} from ${timeSlotOptions[scheduling.time[0].time/100]}` : "A time has not been set for this meeting."
+        let schedulingTopic = scheduling.topic ? scheduling.topic : "A topic has not been selected for this meeting."
         const cardHeader = (this.props.activeSet !== 'completed'? 'Meeting with: ' : 'Completed call with: ')
         return (
             <Grid key={scheduling._id} columns={'equal'}>
@@ -202,8 +204,8 @@ class SchedulingCards extends Component {
                                 {cardHeader} {scheduling.mentor.name}
                             </Card.Header>           
                             <Card.Meta>{scheduling.status}</Card.Meta>
-                            <Card.Description><b>Topic:</b> {scheduling.topic}</Card.Description>
-                            <Card.Description><b>Time:</b> {scheduling.time[0].day} from {timeSlotOptions[scheduling.time[0].time/100]}</Card.Description>
+                            <Card.Description><b>Topic:</b> {schedulingTopic}</Card.Description>
+                            <Card.Description><b>Time:</b> {schedulingTime}</Card.Description>
                             {scheduling.studentNote &&
                                 <Card.Description><b>Your Note:</b> {scheduling.studentNote}</Card.Description>
                             }

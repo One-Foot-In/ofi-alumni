@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Image, Grid, Label} from 'semantic-ui-react'
+import { Card, Image, Grid, Label, Message } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import Conversation from './ConversationModal'
 /*
@@ -21,7 +21,7 @@ export default class AlumniNetworking extends Component {
         this.openConversation = this.openConversation.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let timeOffsetHours = (parseInt(this.props.userDetails.timeZone) / 100)
         let conversations = await this.getConversations()
         this.setState({
@@ -85,7 +85,7 @@ export default class AlumniNetworking extends Component {
                             size='tiny'
                             circular
                             centered
-                            src={conversation.alumni[recipientIndex].imageURL}
+                            src={conversation.alumni[recipientIndex] && conversation.alumni[recipientIndex].imageURL}
                         />
                     </Grid.Column>
                     <Grid.Column>
@@ -95,7 +95,7 @@ export default class AlumniNetworking extends Component {
                                 <Label color='teal' corner='right' icon='envelope' />
                             }
                                 <Card.Header>
-                                    Conversation with {conversation.alumni[recipientIndex].name}
+                                    Conversation with {conversation.alumni[recipientIndex] && conversation.alumni[recipientIndex].name}
                                 </Card.Header>
                                 <Card.Meta>{conversation.timeFromMessage}</Card.Meta>
                                 <Card.Description>Most recent message: <br/>{formattedMessage}</Card.Description>
@@ -120,6 +120,19 @@ export default class AlumniNetworking extends Component {
                 />
             }
             {this.state.display}
+            {!this.state.display.length &&
+                <Message info>
+                <Message.Header>No {this.props.activeSet} Conversations!</Message.Header>
+                {
+                    this.props.activeSet === 'unconfirmed' &&
+                    <Message.Content>Begin a conversation by connecting with an alumni!</Message.Content>
+                }
+                {
+                    this.props.activeSet === 'confirmed' &&
+                    <Message.Content>Check back later!</Message.Content>
+                }
+                </Message>
+            }
             </>
         )
     }

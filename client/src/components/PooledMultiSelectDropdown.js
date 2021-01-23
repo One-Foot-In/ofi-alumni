@@ -27,7 +27,7 @@ export default class PooledMultiSelectDropdown extends Component {
         this.customValueAlreadyAdded = this.customValueAlreadyAdded.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, this.props.endpoint, 'get')
         this.setState({
             options: result.options,
@@ -72,7 +72,7 @@ export default class PooledMultiSelectDropdown extends Component {
             customValue: e.target.value 
         })
     }
-
+    
     handleSelection(e, {value}) {
         e.preventDefault()
         this.setState({

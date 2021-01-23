@@ -25,7 +25,7 @@ export default class AlumniContactModal extends Component {
         this.submitRequest = this.submitRequest.bind(this)
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.setState({
             alumni: this.props.alumni, 
         })
@@ -122,9 +122,10 @@ export default class AlumniContactModal extends Component {
                     <Button
                         primary
                         onClick={this.submitRequest}
-                        disabled={this.state.message === ''}
+                        disabled={this.state.message === '' || this.state.submitting}
+                        loading={this.state.submitting}
                     >
-                        Submit Request
+                        Send Message
                     </Button>
                     <Button onClick={this.props.closeModal}>
                         Close

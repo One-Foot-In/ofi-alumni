@@ -30,7 +30,7 @@ export default class CollegeUpdateModal extends Component {
         this.clearState = this.clearState.bind(this)
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await makeCall(null, '/drop/countries', 'get')
         this.setState({countryOptions: result.options})
     }
@@ -178,8 +178,9 @@ export default class CollegeUpdateModal extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
-                        disabled={!this.state.newCollege && !this.state.existingCollegeId}
+                        disabled={!this.state.newCollege && !this.state.existingCollegeId || this.state.submitting}
                         onClick={this.submit}>
+                        loading={this.state.submitting}
                         Submit
                     </Button>
                     <Button onClick={() => {

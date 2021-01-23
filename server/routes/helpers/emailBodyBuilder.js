@@ -1,8 +1,23 @@
-const buildBody = (body, title, clickMe, link) => {
+const faviconLink = 'https://ofi-alumni-test.s3.us-east-2.amazonaws.com/favicon.ico'
+const facebookLink ='https://www.facebook.com/onefootinorg'
+const bannerImageLink = 'https://onefootin-dev.s3.us-east-2.amazonaws.com/achievement-3408115_1920.jpg'
+const ofiLogoLink = 'https://ofi-alumni-test.s3.us-east-2.amazonaws.com/%242b%2404%245OsMxDeei1LoP.ObG35lgupvDvnoJTym6rJxRltUg8kufXo8ZRJC-09-14-2020'
+
+const buildBody = (body, title, clickMe, link, footerLink = null, footerButtonText = null) => {
+    let footerRegion = footerButtonText && footerLink ? `
+    <tr>
+        <td class="bmeButtonText" style="border-radius: 0px; border: 0px none transparent; text-align: center; padding: 5px 5px; font-weight: normal; font-family: Arial, Helvetica, sans-serif; font-size: 12px; background-color: rgb(166, 209, 227);">
+            <span style="font-family: 'Arial Narrow', 'Arial MT Condensed Light', sans-serif; font-size: 12px; color: rgb(255, 255, 255);">    
+                <a href=${footerLink} target="_blank" style="color:#FFFFFF;text-decoration:none;">${footerButtonText}</a>
+            </span>
+        </td>
+    </tr>
+    ` : ''
     return `
-    <html><head>
+<html>
+<head>
 <title>One Foot In</title>
-<link rel="shortcut icon" href="https://ofi-alumni-test.s3.us-east-2.amazonaws.com/favicon.ico">
+<link rel="shortcut icon" href="${faviconLink}">
 <style type="text/css">
 table[name="blk_permission"], table[name="blk_footer"] {display:none;} 
 </style>
@@ -105,71 +120,313 @@ table[name="bmeMainBody"], body {background-color:#ffffff;}
      
 </style>    
 </head>    
-<body marginheight="0" marginwidth="0" topmargin="0" leftmargin="0" style="height: 100% !important; margin: 0; padding: 0; width: 100% !important;min-width: 100%;">    
-    
-<table width="100%" cellspacing="0" cellpadding="0" border="0" name="bmeMainBody" style="background-color: rgb(255, 255, 255);" bgcolor="#ffffff"><tbody><tr><td width="100%" valign="top" align="center">    
-<table cellspacing="0" cellpadding="0" border="0" name="bmeMainColumnParentTable" width="100%"><tbody><tr><td name="bmeMainColumnParent" style="border: 0px none transparent; border-radius: 0px; border-collapse: separate; border-spacing: 0px; overflow: visible;">     
-<table name="bmeMainColumn" class="bmeMainColumn" style="max-width: 100%; overflow: visible;" cellspacing="0" cellpadding="0" border="0" align="center" width="100%">    <tbody><tr><td width="100%" class="blk_container bmeHolder" name="bmePreHeader" valign="top" align="center" style="color: rgb(102, 102, 102); border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#ffffff"></td></tr> <tr><td width="100%" class="bmeHolder" valign="top" align="center" name="bmeMainContentParent" style="border: 0px none transparent; border-radius: 0px; border-collapse: separate; border-spacing: 0px; overflow: hidden;">     
-<table name="bmeMainContent" style="border-radius: 0px; border-collapse: separate; border-spacing: 0px; border: 0px none transparent; overflow: visible;" width="100%" cellspacing="0" cellpadding="0" border="0" align="center"> <tbody><tr><td width="100%" class="blk_container bmeHolder" name="bmeHeader" valign="top" align="center" style="border: 0px none transparent; background-color: rgb(245, 242, 208);" bgcolor="#f5f2d0"><div id="dv_9" class="blk_wrapper">    
-<table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style=""><tbody><tr><td class="tblCellMain" style="padding: 10px 20px;">    
-<table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;"><tbody><tr><td><span></span></td></tr></tbody>    
-</table></td></tr></tbody>    
-</table></div><div id="dv_3" class="blk_wrapper">    
-<table class="blk" name="blk_image" width="600" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td>    
-<table width="100%" cellspacing="0" cellpadding="0" border="0"><tbody></tbody>    
-</table></td></tr></tbody>    
-</table></div><div id="dv_1" class="blk_wrapper">    
-<table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_image"><tbody><tr><td>    
-<table width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td align="center" class="bmeImage" style="border-collapse: collapse; padding: 10px 0px;"><img src="https://onefootin-dev.s3.us-east-2.amazonaws.com/achievement-3408115_1920.jpg" width="600" style="max-width: 1200px; display: block; width: 600px;" alt="" border="0"></td></tr></tbody>    
-</table></td></tr></tbody>    
-</table></div><div id="dv_11" class="blk_wrapper">    
-<table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style=""><tbody><tr><td class="tblCellMain" style="padding: 20px;">    
-<table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;"><tbody><tr><td><span></span></td></tr></tbody>    
-</table></td></tr></tbody>    
-</table></div>
-</td></tr> <tr><td width="100%" class="blk_container bmeHolder bmeBody" name="bmeBody" valign="top" align="center" style="color: rgb(56, 56, 56); border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#ffffff"><div id="dv_13" class="blk_wrapper">    
-<table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style=""><tbody><tr><td class="tblCellMain" style="padding: 15px 20px;">    
-<table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;"><tbody><tr><td><span></span></td></tr></tbody>    
-</table></td></tr></tbody>    
-</table></div><div id="dv_12" class="blk_wrapper">    
-<table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_button" style=""><tbody><tr><td width="20"></td><td align="center">    
-<table class="tblContainer" cellspacing="0" cellpadding="0" border="0" width="100%"><tbody><tr><td height="20"></td></tr><tr><td align="center">    
-<table cellspacing="0" cellpadding="0" border="0" class="bmeButton" align="center" style="border-collapse: separate;"><tbody><tr><td style="border-radius: 0px;border: 1px solid rgb(69, 153, 232);text-align: center;font-family: Arial, Helvetica, sans-serif;font-size: 14px;padding: 15px 40px;font-weight: normal;border-collapse: separate;background: #FBFBFB;" class="bmeButtonText"><span style="font-family: 'Arial Narrow', 'Arial MT Condensed Light', sans-serif; font-size: 24px; color: rgb(236, 127, 232);">    
-<a style="color: #FFC300;text-decoration: none;" target="_blank">${title}</a></span></td></tr></tbody>    
-</table></td></tr><tr><td height="20"></td></tr></tbody>    
-</table></td><td width="20"></td></tr></tbody>    
-</table></div><div id="dv_14" class="blk_wrapper">    
-<table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_text"><tbody><tr><td>    
-<table cellpadding="0" cellspacing="0" border="0" width="100%" class="bmeContainerRow"><tbody><tr><td class="tdPart" valign="top" align="center">    
-<table cellspacing="0" cellpadding="0" border="0" width="600" name="tblText" style="float:left; background-color:transparent;" align="left" class="tblText"><tbody><tr><td valign="top" align="left" name="tblCell" style="padding: 10px 20px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 400; color: rgb(56, 56, 56); text-align: left;" class="tblCell"><div style="line-height: 200%; text-align: center;"><span style="font-size: 14px; font-family: Arial, Helvetica, sans-serif; color: #000000; line-height: 200%;">${body}</span></div></td></tr></tbody>    
-</table></td></tr></tbody>    
-</table></td></tr></tbody>    
-</table></div>
-<div id="dv_6" class="blk_wrapper">    
-<table class="blk" name="blk_button" width="600" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td width="20"></td><td align="center">    
-<table width="100%" cellspacing="0" cellpadding="0" border="0" class="tblContainer"><tbody><tr><td height="20"></td></tr><tr><td align="center">    
-<table cellspacing="0" cellpadding="0" border="0" align="center" class="bmeButton" style="border-collapse: separate;"><tbody><tr><td class="bmeButtonText" style="border-radius: 0px; border: 0px none transparent; text-align: center; padding: 20px 40px; font-weight: normal; font-family: Arial, Helvetica, sans-serif; font-size: 14px; background-color: rgb(69, 153, 232);"><span style="font-family: 'Arial Narrow', 'Arial MT Condensed Light', sans-serif; font-size: 20px; color: rgb(255, 255, 255);">    
-<a href=${link} target="_blank" style="color:#FFFFFF;text-decoration:none;">${clickMe}</a></span></td></tr></tbody>    
-</table></td></tr><tr><td height="20"></td></tr></tbody>    
-</table></td><td width="20"></td></tr></tbody>    
-</table></div>
-</td></tr> <tr><td width="100%" class="blk_container bmeHolder" name="bmePreFooter" valign="top" align="center" style="border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#ffffff">
-<div id="dv_4" class="blk_wrapper">    
-<table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style=""><tbody><tr><td class="tblCellMain" style="padding: 30px 20px;">    
-<table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;"><tbody><tr><td><span></span></td></tr></tbody>    
-</table></td></tr></tbody>    
-</table></div><div id="dv_8" class="blk_wrapper">    
-<table cellspacing="0" cellpadding="0" border="0" style="" name="blk_social_follow" width="600" class="blk"><tbody><tr><td class="tblCellMain" align="center" style="padding-top:10px; padding-bottom:10px; padding-left:20px; padding-right:20px;">    
-<table class="tblContainer mblSocialContain" cellspacing="0" cellpadding="0" border="0" align="center" style="text-align:center;"><tbody><tr><td class="tdItemContainer" style="">    
-<table cellspacing="0" cellpadding="0" border="0" class="mblSocialContain" style="table-layout: auto;"><tbody><tr><td valign="top" name="bmeSocialTD" class="bmeSocialTD"><!--[if gte mso 6]></td><td align="left" valign="top"><![endif]-->    
-<table cellspacing="0" cellpadding="0" border="0" class="bmeFollowItem" type="facebook" style="float: left; display: block;" align="left"><tbody><tr><td align="left" class="bmeFollowItemIcon" gutter="10" width="24" style="padding-right:10px;height:20px;">    
-<a href="https://www.facebook.com/onefootinorg" target="_blank" style="display: inline-block;background-color: rgb(53, 91, 161);border-radius: 4px;border-style: none; border-width: 0px; border-color: rgba(0, 0, 0, 0);"><img src="https://ui.benchmarkemail.com/images/editor/socialicons/fb_btn.png" alt="Facebook" style="display: block; max-width: 114px;" border="0" width="24" height="24"></a></td></tr></tbody>    
-</table><!--[if gte mso 6]></td><td align="left" valign="top"><![endif]-->    
-<table cellspacing="0" cellpadding="0" border="0" class="bmeFollowItem" type="twitter" style="float: left; display: block;" align="left"><tbody><tr></tr></tbody>    
-</table><!--[if gte mso 6]></td><td align="left" valign="top"><![endif]-->    
-<!--[if gte mso 6]></td><td align="left" valign="top"><![endif]-->    
-</td></tr></tbody>
-</body></html>
+    <body marginheight="0" marginwidth="0" topmargin="0" leftmargin="0" style="height: 100% !important; margin: 0; padding: 0; width: 100% !important;min-width: 100%;">    
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" name="bmeMainBody" style="background-color: rgb(255, 255, 255);" bgcolor="#ffffff">
+            <tbody>
+                <tr>
+                    <td width="100%" valign="top" align="center">    
+                        <table cellspacing="0" cellpadding="0" border="0" name="bmeMainColumnParentTable" width="100%">
+                            <tbody>
+                                <tr>
+                                    <td name="bmeMainColumnParent" style="border: 0px none transparent; border-radius: 0px; border-collapse: separate; border-spacing: 0px; overflow: visible;">     
+                                        <table name="bmeMainColumn" class="bmeMainColumn" style="max-width: 100%; overflow: visible;" cellspacing="0" cellpadding="0" border="0" align="center" width="100%">
+                                            <tbody>
+                                                <tr>
+                                                    <td width="100%" class="blk_container bmeHolder" name="bmePreHeader" valign="top" align="center" style="color: rgb(102, 102, 102); border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#ffffff"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="100%" class="bmeHolder" valign="top" align="center" name="bmeMainContentParent" style="border: 0px none transparent; border-radius: 0px; border-collapse: separate; border-spacing: 0px; overflow: hidden;">     
+                                                        <table name="bmeMainContent" style="border-radius: 0px; border-collapse: separate; border-spacing: 0px; border: 0px none transparent; overflow: visible;" width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td width="100%" class="blk_container bmeHolder" name="bmeHeader" valign="top" align="center" style="border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#f5f2d0">
+                                                                        <div id="dv_9" class="blk_wrapper">    
+                                                                            <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style="">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td class="tblCellMain" style="padding: 10px 20px;">    
+                                                                                            <table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;">
+                                                                                                <tbody>
+                                                                                                    <tr>
+                                                                                                        <td><span></span></td>
+                                                                                                    </tr>
+                                                                                                </tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                        <div id="dv_3" class="blk_wrapper">  
+                                                                            <table class="blk" name="blk_image" width="600" border="0" cellpadding="0" cellspacing="0">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td>    
+                                                                                            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                                                <tbody></tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                        <div id="dv_1" class="blk_wrapper">    
+                                                                            <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_image">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td>    
+                                                                                            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                                                <tbody>
+                                                                                                    <tr>
+                                                                                                        <td align="center" class="bmeImage" style="border-collapse: collapse; padding: 10px 0px;">
+                                                                                                            <img src="${ofiLogoLink}" style=" max-height: 150px; max-width: 150px; display: block;" alt="" border="0">
+                                                                                                        </td>
+                                                                                                        <tr>
+                                                                                                            <td align="center" class="bmeImage" style="border-collapse: collapse; padding: 10px 0px;">
+                                                                                                                <img src="${bannerImageLink}" width="600" style="max-width: 1200px; display: block; width: 600px;" alt="" border="0">
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </tr>
+                                                                                                </tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                        <div id="dv_11" class="blk_wrapper">    
+                                                                            <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style="">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td class="tblCellMain" style="padding: 20px;">    
+                                                                                            <table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;">
+                                                                                                <tbody>
+                                                                                                    <tr>
+                                                                                                        <td>
+                                                                                                            <span></span>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                </tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td width="100%" class="blk_container bmeHolder bmeBody" name="bmeBody" valign="top" align="center" style="color: rgb(56, 56, 56); border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#ffffff">
+                                                                        <div id="dv_13" class="blk_wrapper">    
+                                                                            <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style="">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td class="tblCellMain" style="padding: 15px 20px;">  
+                                                                                            <table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;">
+                                                                                                <tbody>
+                                                                                                    <tr>
+                                                                                                        <td>
+                                                                                                            <span></span>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                </tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                        <div id="dv_12" class="blk_wrapper">    
+                                                                            <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_button" style="">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td width="20"></td>
+                                                                                        <td align="center">    
+                                                                                            <table class="tblContainer" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                                                                <tbody>
+                                                                                                    <tr>
+                                                                                                        <td height="20"></td>
+                                                                                                    </tr>
+                                                                                                    <tr>
+                                                                                                        <td align="center">    
+                                                                                                            <table cellspacing="0" cellpadding="0" border="0" class="bmeButton" align="center" style="border-collapse: separate;">
+                                                                                                                <tbody>
+                                                                                                                    <tr>
+                                                                                                                        <td style="border-radius: 0px;border: 1px solid rgb(69, 153, 232);text-align: center;font-family: Arial, Helvetica, sans-serif;font-size: 14px;padding: 15px 40px;font-weight: normal;border-collapse: separate;background: #FBFBFB;" class="bmeButtonText">
+                                                                                                                            <span style="font-family: 'Arial Narrow', 'Arial MT Condensed Light', sans-serif; font-size: 24px; color: rgb(236, 127, 232);">    
+                                                                                                                                <a style="color: #FFC300;text-decoration: none;" target="_blank">${title}</a>
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </tbody>    
+                                                                                                            </table>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                    <tr>
+                                                                                                        <td height="20"></td>
+                                                                                                    </tr>
+                                                                                                </tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                        <td width="20"></td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                        <div id="dv_14" class="blk_wrapper">    
+                                                                            <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_text">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td>    
+                                                                                            <table cellpadding="0" cellspacing="0" border="0" width="100%" class="bmeContainerRow">
+                                                                                                <tbody>
+                                                                                                    <tr>
+                                                                                                        <td class="tdPart" valign="top" align="center">    
+                                                                                                            <table cellspacing="0" cellpadding="0" border="0" width="600" name="tblText" style="float:left; background-color:transparent;" align="left" class="tblText">
+                                                                                                                <tbody>
+                                                                                                                    <tr>
+                                                                                                                        <td valign="top" align="left" name="tblCell" style="padding: 10px 20px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 400; color: rgb(56, 56, 56); text-align: left;" class="tblCell">
+                                                                                                                            <div style="line-height: 200%; text-align: center;">
+                                                                                                                                <span style="font-size: 14px; font-family: Arial, Helvetica, sans-serif; color: #000000; line-height: 200%;">
+                                                                                                                                    ${body}
+                                                                                                                                </span>
+                                                                                                                            </div>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </tbody>    
+                                                                                                            </table>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                </tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                        <div id="dv_6" class="blk_wrapper">  
+                                                                            <table class="blk" name="blk_button" width="600" border="0" cellpadding="0" cellspacing="0">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td width="20"></td>
+                                                                                        <td align="center">    
+                                                                                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="tblContainer">
+                                                                                                <tbody>
+                                                                                                    <tr>
+                                                                                                        <td height="20"></td></tr><tr><td align="center">    
+                                                                                                            <table cellspacing="0" cellpadding="0" border="0" align="center" class="bmeButton" style="border-collapse: separate;">
+                                                                                                                <tbody>
+                                                                                                                    <tr>
+                                                                                                                        <td class="bmeButtonText" style="border-radius: 0px; border: 0px none transparent; text-align: center; padding: 20px 40px; font-weight: normal; font-family: Arial, Helvetica, sans-serif; font-size: 14px; background-color: rgb(69, 153, 232);">
+                                                                                                                            <span style="font-family: 'Arial Narrow', 'Arial MT Condensed Light', sans-serif; font-size: 20px; color: rgb(255, 255, 255);">    
+                                                                                                                                <a href=${link} target="_blank" style="color:#FFFFFF;text-decoration:none;">${clickMe}</a>
+                                                                                                                            </span>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </tbody>    
+                                                                                                            </table>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                    <tr>
+                                                                                                        <td height="20"></td>
+                                                                                                    </tr>
+                                                                                                </tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                        <td width="20"></td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td width="100%" class="blk_container bmeHolder" name="bmePreFooter" valign="top" align="center" style="border: 0px none transparent; background-color: rgb(255, 255, 255);" bgcolor="#ffffff">
+                                                                        <div id="dv_4" class="blk_wrapper">
+                                                                            <table width="600" cellspacing="0" cellpadding="0" border="0" class="blk" name="blk_divider" style="">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td class="tblCellMain" style="padding: 30px 20px;">    
+                                                                                            <table class="tblLine" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top-width: 0px; border-top-style: none; min-width: 1px;">
+                                                                                                <tbody>
+                                                                                                    <tr>
+                                                                                                        <td>
+                                                                                                            <span></span>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                </tbody>    
+                                                                                            </table>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>    
+                                                                            </table>
+                                                                        </div>
+                                                                        <div id="dv_8" class="blk_wrapper">
+                                                                        <table cellspacing="0" cellpadding="0" border="0" style="" name="blk_social_follow" width="600" class="blk">
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td class="tblCellMain" align="center" style="padding-top:10px; padding-bottom:10px; padding-left:20px; padding-right:20px;">
+                                                                                        <table class="tblContainer mblSocialContain" cellspacing="0" cellpadding="0" border="0" align="center" style="text-align:center;">
+                                                                                            <tbody>
+                                                                                                <tr>
+                                                                                                    <td class="tdItemContainer" style="">    
+                                                                                                        <table cellspacing="0" cellpadding="0" border="0" class="mblSocialContain" style="table-layout: auto;">
+                                                                                                            <tbody>
+                                                                                                                <tr>
+                                                                                                                    <td valign="top" name="bmeSocialTD" class="bmeSocialTD"><!--[if gte mso 6]></td>
+                                                                                                                    <td align="left" valign="top"><![endif]-->    
+                                                                                                                        <table cellspacing="0" cellpadding="0" border="0" class="bmeFollowItem" type="facebook" style="float: left; display: block;" align="left">
+                                                                                                                            <tbody>
+                                                                                                                                <tr>
+                                                                                                                                    <td align="left" class="bmeFollowItemIcon" gutter="10" width="24" style="padding-right:10px;height:20px;">    
+                                                                                                                                        <a href="${facebookLink}" target="_blank" style="display: inline-block;background-color: rgb(53, 91, 161);border-radius: 4px;border-style: none; border-width: 0px; border-color: rgba(0, 0, 0, 0);">
+                                                                                                                                            <img src="https://ui.benchmarkemail.com/images/editor/socialicons/fb_btn.png" alt="Facebook" style="display: block; max-width: 114px;" border="0" width="24" height="24">
+                                                                                                                                        </a>
+                                                                                                                                    </td>
+                                                                                                                                </tr>
+                                                                                                                            </tbody>    
+                                                                                                                        </table>
+                                                                                                                        <!--[if gte mso 6]>
+                                                                                                                    </td>
+                                                                                                                    <td align="left" valign="top"><![endif]-->    
+                                                                                                                        <table cellspacing="0" cellpadding="0" border="0" class="bmeFollowItem" type="twitter" style="float: left; display: block;" align="left">
+                                                                                                                            <tbody>
+                                                                                                                                <tr></tr>
+                                                                                                                            </tbody>    
+                                                                                                                        </table><!--[if gte mso 6]>
+                                                                                                                    </td>
+                                                                                                                    <td align="left" valign="top"><![endif]--><!--[if gte mso 6]></td>
+                                                                                                                    <td align="left" valign="top"><![endif]--></td>
+                                                                                                                </tr>
+                                                                                                            </tbody>
+                                                                                                        </table>
+                                                                                                    </td>
+                                                                                                <tr/>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                ${footerRegion}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>
 `
 }
 

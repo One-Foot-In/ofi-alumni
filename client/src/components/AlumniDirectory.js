@@ -3,6 +3,7 @@ import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, Respo
 import { makeCall } from '../apis';
 import RequestModal from './RequestModal'
 import AlumniContactModal from './AlumniContactModal'
+import AccessControlDropdown from './AccessContextDropdown'
 
 // Filter dropdown options
 const searchOptions = [
@@ -49,6 +50,7 @@ const pageSize = 3;
 props:
 - schoolId: String
 - userDetails: {}
+- accessContexts: []
 - role
 */
 export default class AlumniDirectory extends Component {
@@ -69,9 +71,38 @@ export default class AlumniDirectory extends Component {
             requestModalOpen: false,
             alumniContactModalOpen: false,
             alumniDetails: null,
+            accessContext: "INTRASCHOOL"
         }
         this.toggleRequestModal = this.toggleRequestModal.bind(this)
         this.toggleAlumniContactModal = this.toggleAlumniContactModal.bind(this)
+        this.liftAccessContext = this.liftAccessContext.bind(this)
+        this.setAlumniDirectory = this.setAlumniDirectory.bind(this)
+    }
+
+    liftAccessContext(newAccessControl) {
+        this.setState({
+            accessContext: newAccessControl
+        }, async () => {
+            let result = await this.getEntries()
+            if (!result || result.error) {
+                // TECH DEBT: Error toast
+            } else {
+                this.setAlumniDirectory(result)
+            }
+        })
+    }
+
+    setAlumniDirectory(result) {
+        let totalPages = 0;
+        if (result.alumni !== null) {
+            totalPages = Math.ceil(result.alumni.length/pageSize);
+        }
+        this.setState({
+            entries: result.alumni,
+            totalPages: totalPages,
+            numEntries: result.alumni.length
+        })
+        this.populateSearchDropdownStates(this.state.entries)
     }
 
     toggleRequestModal() {
@@ -85,18 +116,13 @@ export default class AlumniDirectory extends Component {
         })
     }
 
-    async componentWillMount() {
+    async UNSAFE_componentWillMount() {
         let result = await this.getEntries()
-        let totalPages = 0;
-        if (result.alumni !== null) {
-            totalPages = Math.ceil(result.alumni.length/pageSize);
+        if (!result || result.error) {
+            // TECH DEBT: Error toast
+        } else {
+            this.setAlumniDirectory(result)
         }
-        this.setState({
-            entries: result.alumni,
-            totalPages: totalPages,
-            numEntries: result.alumni.length
-        })
-        this.populateSearchDropdownStates(this.state.entries)
     }
 
     populateSearchDropdownStates(entries) {
@@ -132,7 +158,7 @@ export default class AlumniDirectory extends Component {
 
     constructProfile(post, i) {
         return (
-            <Grid.Row columns={2}>
+            <Grid.Row columns={2} key={i}>
                 <Grid.Column width={4}>
                     <Image
                         size='small'
@@ -161,18 +187,43 @@ export default class AlumniDirectory extends Component {
                             <Card.Description>Company: {post.companyName}</Card.Description>
                             <br />
                         </Card.Content>
-                        {this.requestVisible(post, i)}
+                        {this.requestButton(post, i)}
                     </Card>
                 </Grid.Column>
             </Grid.Row>
         )
     }
 
-    requestVisible(post, i) {
+    requestButton(post, i) {
+        if (post._id !== this.props.userDetails._id && (this.props.role === 'STUDENT')) {
+            return (
+                <Button 
+                    primary 
+                    data-id={i}
+                    onClick={this.handleRequestButton.bind(this)}
+                >
+                    Connect with {post.name}!
+                </Button>
+            )
+        } else if (post._id !== this.props.userDetails._id && this.props.role === 'ALUMNI') {
+            return (
+                <Button
+                    primary
+                    data-id={i}
+                    onClick={this.handleConnectButton.bind(this)}
+                >
+                    Connect with {post.name}!
+                </Button>
+            )
+        }
+        return null
+    }
+
+    // Deprecated at early stages when contact is not restricted by missing zoomLink and/or topics
+    requestButtonRestricted(post, i) {
         var requestButton;
             if (post._id !== this.props.userDetails._id && this.props.role === 'STUDENT') {
-                if (('zoomLink' in post && 
-                    (post.zoomLink !== null && post.zoomLink !== '')) && post.topics.length > 0) {
+                if (('zoomLink' in post && post.zoomLink) && post.topics.length > 0) {
                     requestButton = <Button 
                                         primary 
                                         data-id={i}
@@ -198,7 +249,7 @@ export default class AlumniDirectory extends Component {
     }
 
     getEntries() {
-        return makeCall(null, `/alumni/all/${this.props.schoolId}`, 'get').catch(e => console.log(e))
+        return makeCall(null, `/alumni/all/${this.props.schoolId}/${this.state.accessContext}/${this.props.userDetails.user}`, 'get').catch(e => console.log(e))
     }
 
     search(value) {
@@ -275,10 +326,22 @@ export default class AlumniDirectory extends Component {
 
         /* Search Area */
         let searchRow;
+        let hasMoreThanOneAccessContext = this.props.accessContexts && this.props.accessContexts.length > 1
         if (filter !== 'gradYear') {
             searchRow = (
-                <Grid.Row columns={2}>
-                <Grid.Column>
+                <Grid.Row columns={hasMoreThanOneAccessContext ? 3 : 2}>
+                {
+                    hasMoreThanOneAccessContext ?
+                    <Grid.Column width={4}>
+                        <AccessControlDropdown
+                            liftAccessContext={this.liftAccessContext}
+                            accessContexts={this.props.accessContexts}
+                            accessContext={this.state.accessContext}
+                        />
+                    </Grid.Column>
+                    : null
+                }
+                <Grid.Column width={hasMoreThanOneAccessContext ? 8 : 10}>
                         <Search
                             open={false}
                             showNoResults={false}
@@ -287,7 +350,7 @@ export default class AlumniDirectory extends Component {
                             placeholder={"Search"}
                         />
                 </Grid.Column>
-                <Grid.Column>
+                <Grid.Column width={hasMoreThanOneAccessContext ? 4 : 6}>
                     <Dropdown
                         placeholder='Search By:'
                         floating
@@ -330,7 +393,6 @@ export default class AlumniDirectory extends Component {
 
         return ( 
             <Grid stackable divided="vertically">
-                
                 {searchRow}
                 {resultsRow}
                 {this.state.requestModalOpen && 

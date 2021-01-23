@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt');
 const cors = require('cors');
+var CronJob = require('cron').CronJob;
+var { sendWeeklyEmailDigest } = require('./routes/helpers/emailHelpers');
 
 // passport for authentication by local strategy
 var passport = require("passport");
@@ -40,11 +42,15 @@ app.use(express.static(path.join(__dirname, 'build')));
  * Otherwise, it will use a cloud hosted DB set in the .env file
  * MongoDB must be installed
  */
-const testDB = (process.env.DEV_MODE.toLowerCase() === "true");
+const testDB = (process.env.DEV_MODE && process.env.DEV_MODE.toLowerCase() === "true");
 
-/* Mongoose Setup */
+/*
+  Mongoose Setup
+  w=majority specifies that all database replicas acknowledge that the write is completed
+  retryWrites=true retries writing to database if the first attempt fails
+ */
 const mongoose = require('mongoose');
-const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
+const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}?retryWrites=true&w=majority`;
 
 /* Mongoose Models */
 const userSchema = require('./models/userSchema')
@@ -65,6 +71,17 @@ let corsOptions = {
   credentials: true,
 }
 app.use(cors(corsOptions));
+
+// CRON EXPRESSIONS
+/*
+  Seconds: 0-59
+  Minutes: 0-59
+  Hours: 0-23
+  Day of Month: 1-31
+  Months: 0-11 (Jan-Dec)
+  Day of Week: 0-6 (Sun-Sat)
+*/
+const emailDigestCron = process.env.EMAIL_DIGEST_CRON || '0 0 12 * * 6' // Sunday noon
 
 async function main() {
   try {
@@ -105,11 +122,21 @@ async function main() {
       }
     ));
 
+    var emailDigestJob = new CronJob(emailDigestCron, async () => {
+    // do not wait on sending email
+    sendWeeklyEmailDigest();
+    }, null, true, 'America/New_York');
+
+    if (process.env.ACTIVATE_CRON) {
+      emailDigestJob.start()
+    }
+
     app.use('/', indexRouter);
 
     // test Router for testing health, database connection, and post
     app.use('/util-deprecated/', utilRouter);
 
+    // TODO: comment out util-router wire-up in production instance
     app.use('/util/', mongooseUtilRouter);
 
     app.use('/request/', requestRouter);
@@ -159,6 +186,5 @@ async function main() {
 }
 
 main().catch(console.err);
-
 
 module.exports = app;

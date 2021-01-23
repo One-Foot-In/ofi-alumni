@@ -41,13 +41,22 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
         const status = 'Awaiting Confirmation';
         const studentNote = req.body.note;
 
-        // timeSegments = [day, hour]
-        timeSegments = timeId.split('-')
-        let time = [{
-            day: timeSegments[0],
-            time: (parseInt(timeSegments[1]))
-        }]
-        time = timezoneHelpers.stripTimezone(time, parseInt(req.body.timezone))
+        if (!studentNote && !topic) {
+            res.status(500).send({
+                success: false,
+                message: "A request must contain either a student note or a topic of consultancy"
+            })
+        }
+
+        if (timeId) {
+            // timeSegments = [day, hour]
+            timeSegments = timeId.split('-')
+            let time = [{
+                day: timeSegments[0],
+                time: (parseInt(timeSegments[1]))
+            }]
+            time = timezoneHelpers.stripTimezone(time, parseInt(req.body.timezone))
+        }
         var request_instance = new requestSchema(
             {
                 student: studentId,
@@ -58,14 +67,18 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
                 studentNote: studentNote
             }
         )
-        request_instance.time.push({
-            day: time[0].day,
-            time: time[0].time,
-            id: time[0].id
-        })
+        if (timeId) {
+            request_instance.time.push({
+                day: time[0].day,
+                time: time[0].time,
+                id: time[0].id
+            })
+        }
+
         let insert = await request_instance.save();
         let mentor = await alumniSchema.findOne({_id: mentorId}).populate('user')
-        await sendNewRequestEmail(mentor.user.email)
+        // do not wait on sending email
+        sendNewRequestEmail(mentor.user.email)
         res.status(200).send({
             message: 'Successfully added request',
             request: request_instance
@@ -92,12 +105,15 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
         if (newStatus === 'Confirmed') {
             let mentee = await studentSchema.findOne({_id: request.student}).populate('user')
             let mentor = await alumniSchema.findOne({_id: alumniId}).populate('user')
-            let menteeTime = timezoneHelpers.applyTimezone(request.time, mentee.timeZone)
-            let menteeTimeString = `${menteeTime[0].day} ${timezoneHelpers.getSlot(menteeTime[0].time)}`
-            // javascript directory mutates time object, so we need to strip timezone here before using time again again
-            timezoneHelpers.stripTimezone(request.time, mentee.timeZone)
-            let mentorTime = timezoneHelpers.applyTimezone(request.time, mentor.timeZone)
-            let mentorTimeString = `${mentorTime[0].day} ${timezoneHelpers.getSlot(mentorTime[0].time)}`
+            let menteeTimeString = '', mentorTimeString = ''
+            if (request.time && request.time.length) {
+                let menteeTime = timezoneHelpers.applyTimezone(request.time, mentee.timeZone)
+                menteeTimeString = `${menteeTime[0].day} ${timezoneHelpers.getSlot(menteeTime[0].time)}`
+                // javascript directory mutates time object, so we need to strip timezone here before using time again again
+                timezoneHelpers.stripTimezone(request.time, mentee.timeZone)
+                let mentorTime = timezoneHelpers.applyTimezone(request.time, mentor.timeZone)
+                mentorTimeString = `${mentorTime[0].day} ${timezoneHelpers.getSlot(mentorTime[0].time)}`   
+            }
             let studentsSubscribed = [], alumniSubscribed = []
             alumniSubscribed = [mentor._id]
             studentsSubscribed = [mentee._id]
@@ -117,21 +133,21 @@ router.patch('/updateRequest/:id/:timeOffset', passport.authenticate('jwt', {ses
                 }
             })
             await news_instance.save();
-
-            await sendRequestConfirmedEmail(
+            // do not wait on sending email
+            sendRequestConfirmedEmail(
                 mentee.user.email,
                 mentee.name, 
-                menteeTimeString,
+                menteeTimeString ? menteeTimeString : 'an undeclared time',
                 mentor.user.email,
                 mentor.name,
-                mentorTimeString,
+                mentorTimeString ? mentorTimeString : 'an undeclared time',
                 request.topic
             )
         }
         for (let status of conditions) {
             const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
-                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = (request.time && request.time.length) ? await timezoneHelpers.applyTimezone(request.time, timeOffset) : null
                 request.privateFeedback = undefined;
             }
             requests.push(dbData)
@@ -159,7 +175,7 @@ router.patch('/leaveFinalNote/:id/:timeOffset', passport.authenticate('jwt', {se
         for (let status of conditions) {
             const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
-                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = (request.time && request.time.length) ? timezoneHelpers.applyTimezone(request.time, timeOffset) : null
                 request.privateFeedback = undefined;
             }
             requests.push(dbData)
@@ -187,7 +203,7 @@ router.patch('/leaveAlumniNote/:id/:timeOffset', passport.authenticate('jwt', {s
         for (let status of conditions) {
             const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
-                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = (request.time && request.time.length) ? timezoneHelpers.applyTimezone(request.time, timeOffset) : null
                 request.privateFeedback = undefined;
             }
             requests.push(dbData)
@@ -210,7 +226,7 @@ router.get('/getRequests/:id/:timeOffset', passport.authenticate('jwt', {session
         for (let status of conditions) {
             const dbData = await requestSchema.find({mentor: alumniId, status: status}).populate('student')
             for (let request of dbData) {
-                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = (request.time && request.time.length) ? await timezoneHelpers.applyTimezone(request.time, timeOffset) : null
                 request.privateFeedback = undefined;
             }
             requests.push(dbData)
@@ -234,7 +250,7 @@ router.get('/getSchedulings/:id/:timeOffset', passport.authenticate('jwt', {sess
                     status: status
                 }).populate('mentor')
             for (let request of dbData) {
-                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = (request.time && request.time.length) ? await timezoneHelpers.applyTimezone(request.time, timeOffset) : null
             }
             schedulings.push(dbData)
         }
@@ -262,7 +278,7 @@ router.patch('/updateScheduling/:id/:timeOffset', passport.authenticate('jwt', {
                     status: status
                 }).populate('mentor')
             for (let request of dbData) {
-                request.time = timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = (request.time && request.time.length) ? timezoneHelpers.applyTimezone(request.time, timeOffset) : null
             }
             schedulings.push(dbData)
         }
@@ -294,7 +310,7 @@ router.patch('/leaveFeedback/:id/:timeOffset', passport.authenticate('jwt', {ses
                     status: status
                 }).populate('mentor')
             for (let request of dbData) {
-                request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+                request.time = (request.time && request.time.length) ? await timezoneHelpers.applyTimezone(request.time, timeOffset) : null
             }
             schedulings.push(dbData)
         }
@@ -312,7 +328,7 @@ router.get('/getConfirmed/:id/:timeOffset', passport.authenticate('jwt', {sessio
     try {
         const dbData = await requestSchema.find({mentor: alumniId, status: 'Confirmed'})
         for (let request of dbData) {
-            request.time = await timezoneHelpers.applyTimezone(request.time, timeOffset)
+            request.time = (request.time && request.time.length) ? await timezoneHelpers.applyTimezone(request.time, timeOffset) : null
             request.privateFeedback = undefined;
         }
         res.json({'confirmed' : dbData});

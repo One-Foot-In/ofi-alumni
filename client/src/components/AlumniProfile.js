@@ -7,6 +7,7 @@ import JobTitleUpdateModal from './alumni_profile_update_modals/JobTitleUpdateMo
 import CollegeUpdateModal from './alumni_profile_update_modals/CollegeUpdateModal';
 import CompanyUpdateModal from './alumni_profile_update_modals/CompanyUpdateModal';
 import MajorUpdateModal from './alumni_profile_update_modals/MajorUpdateModal';
+import DeleteAccountModal from './DeleteAccountModal';
 import { makeCall } from "../apis";
 
 const ALUMNI = "ALUMNI"
@@ -53,6 +54,7 @@ props:
     - availabilities
 - isViewOnly: bool
 - refreshProfile: (ROLE, id)
+- logout: ()
 */
 export default class AlumniProfile extends Component {
     constructor(props) {
@@ -414,14 +416,29 @@ export default class AlumniProfile extends Component {
                     </Card.Description>
                     
                 </Card.Content>
-                <Card.Content>
-                    <Card.Header>Interests</Card.Header>
-                    <Segment
-                        loading={this.state.removingInterest}
-                    >
-                        {this.getInterests()}
-                    </Segment>
-                </Card.Content>
+                {
+                    isViewOnly && !(details.interests.length) ?
+                        null :
+                        <Card.Content>
+                            <Card.Header>Interests</Card.Header>
+                            <Segment
+                                loading={this.state.removingInterest}
+                            >
+                                {this.getInterests()}
+                            </Segment>
+                        </Card.Content>
+                }
+                {
+                    isViewOnly ?
+                    null :
+                    <Card.Content>
+                        <DeleteAccountModal
+                            logout={this.props.logout}
+                            isAlumni={true}
+                            id={this.props.details._id}
+                        />
+                    </Card.Content>
+                }
             </Card>
             <div padding-top="10px" />
             </div>

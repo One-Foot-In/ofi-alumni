@@ -41,7 +41,7 @@ function getErrorLabel(content) {
 /*
 props:
 -isloggedIn
--liftPayload: ()
+-completeLogin: ()
 -login: ()
 */
 class LoginForm extends React.Component {
@@ -84,9 +84,11 @@ class LoginForm extends React.Component {
             } else {
                 this.setState({
                     loginLoading: false,
-                },() => {
+                }, () => {
+                    // TECH DEBT: result will not contain user profile information upon successful login,
+                    // this will need to be retrieved by refreshProfile when committing this data to store
                     this.props.addUserDetails(result);
-                    this.props.liftPayload(result);
+                    this.props.completeLogin();
                     this.props.login();
                 });
             }
@@ -204,16 +206,16 @@ class LoginForm extends React.Component {
                     <Grid.Row centered>
                     <Form >
                         <Form.Field
-                        type="email"
-                        required="true"
-                        style={fieldStyle}
+                            type="email"
+                            required={true}
+                            style={fieldStyle}
                         >
                             <label>Email</label>
                             <input placeholder='Email' name="email" onChange={this.handleChange} />
                         </Form.Field>
                         <Form.Field
                             type="password"
-                            required="true"
+                            required={true}
                             style={fieldStyle}
                         >
                             <label>Password</label>

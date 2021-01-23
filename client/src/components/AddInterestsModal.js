@@ -3,12 +3,14 @@ import { Button, Modal, Step } from 'semantic-ui-react';
 import PooledMultiSelectDropdown from "./PooledMultiSelectDropdown"
 
 /*
+This Interests Modal lifts the interest selections made by the user, for use by the parent component
 props:
     - modalOpen: boolean
     - closeModal: ()
     - getInput: ()
+    - title: string
 */
-export default class InterestsUpdateModal extends Component {
+export default class AddInterestsModal extends Component {
     constructor(props){
         super(props)
         this.state = {
@@ -59,7 +61,7 @@ export default class InterestsUpdateModal extends Component {
                 <Step.Group>
                 <Step>
                     <Step.Title>
-                        Select your extra-curricular interests, your passions, and your hobbies
+                        {this.props.title}
                     </Step.Title>
                     <Step.Description>
                         (Only add new entries if they don't exist in dropdown!)
@@ -79,7 +81,7 @@ export default class InterestsUpdateModal extends Component {
                         disabled={!this.state.newInterests.length && !this.state.existingInterests.length}
                         onClick={this.submit}
                     >
-                        Submit
+                        Add Interests
                     </Button>
                     <Button onClick={() => {
                             this.clearState();
