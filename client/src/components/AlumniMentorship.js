@@ -303,6 +303,7 @@ export default class AlumniMentorship extends Component {
                         liftRequests={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
+                        refreshMenuPopupCounters={this.props.refreshMenuPopupCounters}
                     />
                 </div>
             }
@@ -314,6 +315,7 @@ export default class AlumniMentorship extends Component {
                         liftRequests={this.handleStatusUpdate}
                         timeOffset={this.state.timeOffset}
                         userId={this.props.userDetails._id}
+                        refreshMenuPopupCounters={this.props.refreshMenuPopupCounters}
                     />
                 </div>
             }
@@ -325,6 +327,7 @@ export default class AlumniMentorship extends Component {
                         timeOffset={this.state.timeOffset}
                         activeSet={this.state.activeItem}
                         requests={this.state.completed}
+                        refreshMenuPopupCounters={this.props.refreshMenuPopupCounters}
                     />
                 </div>
             }
@@ -542,6 +545,7 @@ class RequestCards extends Component {
                 icon: "success"
             }).then(() => {
                 this.props.liftRequests(requests)
+                this.props.refreshMenuPopupCounters(ALUMNI, this.props.userId)
             })
         }
     }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Menu, Responsive, Sidebar, Button } from 'semantic-ui-react'
+import { Menu, Responsive, Sidebar, Button, Icon, Label } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 import  TimeZoneDropdown  from './TimeZoneDropdown'
 
@@ -7,17 +7,19 @@ import  TimeZoneDropdown  from './TimeZoneDropdown'
     props:
     - userDetails - profile object
     - role
-    -timezoneActive (enables/disables timezone dropdown)
+    - timezoneActive (enables/disables timezone dropdown)
     - navItems: [
         {
             id: 'item1',
             name: 'Item 1',
-            navLink: '/link1'
+            navLink: '/link1',
+            icon: 'icon name'
         },
         {
             id: 'item2',
             name: 'Item 2',
-            navLink: '/link2'
+            navLink: '/link2',
+            icon: 'icon name'
         }
     ]
     - activeItem
@@ -40,14 +42,31 @@ export default class Navbar extends Component {
     renderMenuItems(items, activeItem) {
         return items && items.map( item => {
             return (
-                <Menu.Item 
+                <Menu.Item
                     key={item.id}
                     as={Link}
                     to={item.navLink}
                     name={item.name}
                     active={activeItem === item.id}
                 >
-                    {item.name}
+                    <Icon
+                        name={item.icon}
+                    />
+                    {
+                        item.notificationBubbleCounter > 0 ?
+                        <Label
+                            floating
+                            color='orange'
+                            circular
+                            size='small'
+                        >
+                            {item.notificationBubbleCounter}
+                        </Label>
+                    : null
+                    }
+                    <span style={{fontSize:'0.85rem'}}>
+                        {item.name}
+                    </span>
                 </Menu.Item>
             )
         })
