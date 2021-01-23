@@ -124,7 +124,10 @@ export default class TopicPreferencesModal extends Component {
                     >
                         Submit New Preferences
                     </Button>
-                    <Button onClick={this.props.closeModal}>
+                    <Button
+                        onClick={this.props.closeModal}
+                        disabled={this.state.submitting}
+                    >
                         Close
                     </Button>
                 </Modal.Actions>

@@ -6,7 +6,9 @@ import Conversation from './ConversationModal'
  * DETAILS: Parent component, displays available conversations and 
  *          if the most recent message has been seen
  * PROPS: userDetails
- */ 
+ */
+
+const ALUMNI = "ALUMNI"
 export default class AlumniNetworking extends Component {
     constructor(props){
         super(props)
@@ -47,9 +49,11 @@ export default class AlumniNetworking extends Component {
         let conversationTarget = e.currentTarget.getAttribute('conversationid')
         let conversation = await this.fetchConversation(conversationTarget)
         this.setState({
-                activeConversation: conversation.conversation,
-                conversationModalOpen: true
-            })
+            activeConversation: conversation.conversation,
+            conversationModalOpen: true
+        }, () => {
+            this.props.refreshMenuPopupCounters(ALUMNI, this.props.userDetails._id)
+        })
     }
 
     fetchConversation(conversationTarget) {

@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { Message, Grid, Segment, List, Label, Button, Feed, Image, Card } from "semantic-ui-react";
 import { makeCall } from "../../apis";
 
+const mobileWidthThreshold = 500
 /*
     userId
     isAlumni - an alumnus will see a mini-story prompt and an student will see opportunities
@@ -15,6 +16,8 @@ export default function PollCarousel(props) {
     const [polls, setPolls] = useState([])
     const [opportunities, setOpportunities] = useState([])
     const [sendingRequest, setSendingRequest] = useState(false)
+
+    const viewPortWidth = window && window.innerWidth || mobileWidthThreshold
 
     const constructPolls = () => {
         let constructedDisplays = []
@@ -161,6 +164,8 @@ export default function PollCarousel(props) {
         return (
             <Segment
                 style={{
+                    overflow: 'auto',
+                    maxHeight: (viewPortWidth < mobileWidthThreshold) ? 250 : 1000,
                     margin: '2px'
                 }}
             >
@@ -188,6 +193,8 @@ export default function PollCarousel(props) {
         return (
             <Segment
                 style={{
+                    overflow: 'auto',
+                    maxHeight: (viewPortWidth < mobileWidthThreshold) ? 250 : 1000,
                     margin: '2px'
                 }}
             >
@@ -214,6 +221,8 @@ export default function PollCarousel(props) {
         return (
             <Segment
                 style={{
+                    overflow: 'auto',
+                    maxHeight: (viewPortWidth < mobileWidthThreshold) ? 250 : 1000,
                     margin: '2px'
                 }}
             >
@@ -290,6 +299,8 @@ export default function PollCarousel(props) {
         return (
             <Segment
                 style={{
+                    overflow: 'auto',
+                    maxHeight: (viewPortWidth < mobileWidthThreshold) ? 250 : 1000,
                     margin: '2px'
                 }}
             >
@@ -334,7 +345,7 @@ export default function PollCarousel(props) {
                         : null
                     }
                     <Card.Content extra>    
-                        <Button.Group>                
+                        <Button.Group vertical={viewPortWidth < mobileWidthThreshold}>                
                             <Button 
                                 tiny
                                 basic
@@ -382,14 +393,6 @@ export default function PollCarousel(props) {
                         centered
                         padded
                     >
-                        <Message info>
-                            We have announcements for you, and we'd love your input!
-                        </Message>
-                    </Grid.Row>
-                    <Grid.Row
-                        centered
-                        padded
-                    >
                         <Slider
                             style={{
                                 width: '50%',
@@ -433,6 +436,14 @@ export default function PollCarousel(props) {
                 </Grid>
             </Segment>
         </CarouselProvider>
-        : null
+        :
+        <Message info>
+            <Message.Header>
+                There are no polls or announcements to display
+            </Message.Header>
+            <Message.Content>
+                When an admin sends out a poll that you could add input to, or when a mentor adds an opportunity that would be relevant to you, it will show up here!
+            </Message.Content>
+        </Message>
     )
 }

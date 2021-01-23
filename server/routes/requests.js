@@ -40,18 +40,17 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
         const topic = req.body.topic;
         const status = 'Awaiting Confirmation';
         const studentNote = req.body.note;
-
         if (!studentNote && !topic) {
             res.status(500).send({
                 success: false,
-                message: "A request must contain either a student note or a topic of consultancy"
+                error: "A request must contain either a student note or a topic of consultancy"
             })
         }
-
+        let time
         if (timeId) {
             // timeSegments = [day, hour]
             timeSegments = timeId.split('-')
-            let time = [{
+            time = [{
                 day: timeSegments[0],
                 time: (parseInt(timeSegments[1]))
             }]

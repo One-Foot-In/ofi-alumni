@@ -228,6 +228,7 @@ class LoginForm extends React.Component {
                         style={buttonStyle}
                         onClick={this.handleSubmit}
                         loading={this.state.loginLoading}
+                        disabled={this.state.loginLoading}
                     >
                         <Icon name="unlock"/>
                         Login
@@ -263,7 +264,7 @@ class LoginForm extends React.Component {
                             </Modal.Actions>
                         </Modal>
                         <Button
-                            disabled={this.state.sendingRequest}
+                            disabled={this.state.sendingRequest || this.state.loginLoading}
                             style={{'height':'80%', 'margin': '2px 0 2px 0'}}
                             onClick={(e) => this.openPasswordModal(e)}
                         >
