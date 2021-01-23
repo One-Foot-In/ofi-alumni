@@ -61,7 +61,7 @@ router.post('/login', (req, res, next) => {
               return role.toUpperCase()
             })
             if (!user.emailVerified) {
-              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email.` });
+              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email. Sometimes this email may end up in your spam/junk/promotions folder.` });
               return;
             }
             let cookie = null
@@ -155,7 +155,8 @@ router.post('/password/forgot', async (req, res, next) => {
     let passwordChangeToken = crypto({length: 16})
     user.passwordChangeToken = passwordChangeToken;
     await user.save()
-    await sendPasswordChangeEmail(email, passwordChangeToken)
+    // do not wait on sending email
+    sendPasswordChangeEmail(email, passwordChangeToken)
     res.status(200).send({message: 'We have sent you an email with further instructions!'})
   } catch (e) {
     console.log("Error index.js#password/change", e)
@@ -177,7 +178,8 @@ router.get('/tempPassword/:to/:token', async (req, res, next) => {
       user.passwordHash = passwordHash
       user.passwordChangeToken = null // reset token to prevent multiple password changes with stale link
       await user.save()
-      await sendTemporaryPasswordEmail(email, newTempPass)
+      // do not wait on sending email
+      sendTemporaryPasswordEmail(email, newTempPass)
       res.status(200).send(htmlBuilder('Thanks!', 'Thank you for verifying your request for a password change! We will send you an email with a temporary password shortly.', 'Go To App', APP_LINK))
     } else {
       res.status(500).send(htmlBuilder('Whoops!', 'Your password change token could not be verified. Please contact support at onefootincollege@gmail.com', 'Go To App', APP_LINK))
@@ -244,7 +246,7 @@ router.patch('/answerPoll/:pollId/:pollOptionId/:userId',
       let pollOption = await pollOptionSchema.findById(pollOptionId)
       pollOption.responders.push(userId)
       // remove user from poll queue
-      pollOption.save()
+      await pollOption.save()
       let user = await userSchema.findById(userId)
       if (!(user.pollsQueued.includes(pollId))) {
         res.status(500).json({
@@ -253,7 +255,7 @@ router.patch('/answerPoll/:pollId/:pollOptionId/:userId',
         return
       }
       user.pollsQueued.splice(user.pollsQueued.indexOf(pollId), 1)
-      user.save()
+      await user.save()
       res.status(200).json({
         message: 'User\'s poll response was submitted'
       })
@@ -277,7 +279,7 @@ router.patch('/acknowledgePoll/:pollId/:userId',
         return
       }
       user.pollsQueued.splice(user.pollsQueued.indexOf(pollId), 1)
-      user.save()
+      await user.save()
       res.status(200).json({
         message: 'User\'s poll response was submitted'
       })

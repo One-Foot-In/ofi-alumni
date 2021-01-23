@@ -2,24 +2,26 @@ import { CarouselProvider, Slider, Slide, ButtonBack, ButtonNext } from "pure-re
 import "pure-react-carousel/dist/react-carousel.es.css";
 
 import React, { useState, useEffect } from "react";
-import { Message, Grid, Segment, List, Label, Button } from "semantic-ui-react";
+import { Message, Grid, Segment, List, Label, Button, Feed, Image, Card } from "semantic-ui-react";
 import { makeCall } from "../../apis";
 
 /*
-    pollsQueued
     userId
+    isAlumni - an alumnus will see a mini-story prompt and an student will see opportunities
+    alumniOrStudentId
 */
 export default function PollCarousel(props) {
-    const [pollsDisplay, setPollsDisplay] = useState([])
+    const [display, setDisplay] = useState([])
     const [polls, setPolls] = useState([])
-    const [sendingPoll, setSendingPoll] = useState(false)
+    const [opportunities, setOpportunities] = useState([])
+    const [sendingRequest, setSendingRequest] = useState(false)
 
     const constructPolls = () => {
-        let constructedPollDisplays = []
+        let constructedDisplays = []
         for (let poll of polls) {
             if (!poll.options.length && !poll.allowsInput) {
                 // announcement
-                constructedPollDisplays.push(
+                constructedDisplays.push(
                     <Slide
                         index={polls.indexOf(poll)}
                     >
@@ -28,7 +30,7 @@ export default function PollCarousel(props) {
                     )
             } else if (poll.options.length && poll.allowsInput) {
                 // input-enabled poll
-                constructedPollDisplays.push(
+                constructedDisplays.push(
                     <Slide
                         index={polls.indexOf(poll)}
                     >
@@ -37,7 +39,7 @@ export default function PollCarousel(props) {
                     )
             } else {
                 // non-input-enabled poll
-                constructedPollDisplays.push(
+                constructedDisplays.push(
                     <Slide
                         index={polls.indexOf(poll)}
                     >
@@ -46,7 +48,16 @@ export default function PollCarousel(props) {
                     )
             }
         }
-        setPollsDisplay(constructedPollDisplays)
+        for (let opportunity of opportunities) {
+            constructedDisplays.push(
+                <Slide
+                    index={opportunities.indexOf(opportunity) + polls.length}
+                >
+                    {constructOpportunityCard(opportunity)}
+                </Slide>
+            )
+        }
+        setDisplay(constructedDisplays)
     }
 
     // Mounting
@@ -57,14 +68,27 @@ export default function PollCarousel(props) {
                     setPolls(pollsResponse.polls)
                 }
             })
+            .then(() => {
+                if (props.isAlumni) {
+                    // fetch story prompts
+                } else {
+                    // fetch opportunities
+                    makeCall({}, `/student/opportunities/${props.alumniOrStudentId}`, 'get')
+                        .then(opportunitiesResponse => {
+                            if (opportunitiesResponse) {
+                                setOpportunities(opportunitiesResponse.opportunities)
+                            }
+                        })
+                }
+            })
     }, [props])
 
     useEffect(() => {
         constructPolls()
-    }, [polls])
+    }, [polls, opportunities])
 
     const handlePollAcknowledge = (e, {pollId}) => {
-        setSendingPoll(true)
+        setSendingRequest(true)
         makeCall({},
         `/acknowledgePoll/${pollId}/${props.userId}`,
         'patch'
@@ -72,7 +96,7 @@ export default function PollCarousel(props) {
             if (res.error) {
                 // error
                 // TODO: Add error toast
-                setSendingPoll(false)
+                setSendingRequest(false)
             } else {
                 // refetch all polls
                 makeCall({}, '/polls/' + props.userId, 'get').then((pollsResponse) => {
@@ -80,13 +104,13 @@ export default function PollCarousel(props) {
                         setPolls(pollsResponse.polls)
                     }
                 })
-                setSendingPoll(false)
+                setSendingRequest(false)
             }
         })
     }
 
     const handlePollOptionSelect = (e, {optionId, pollId}) => {
-        setSendingPoll(true)
+        setSendingRequest(true)
         makeCall({},
         `/answerPoll/${pollId}/${optionId}/${props.userId}`,
         'patch'
@@ -94,7 +118,7 @@ export default function PollCarousel(props) {
             if (res.error) {
                 // error
                 // TODO: Add error toast
-                setSendingPoll(false)
+                setSendingRequest(false)
             } else {
                 // refetch all polls
                 makeCall({}, '/polls/' + props.userId, 'get').then((pollsResponse) => {
@@ -102,7 +126,33 @@ export default function PollCarousel(props) {
                         setPolls(pollsResponse.polls)
                     }
                 })
-                setSendingPoll(false)
+                setSendingRequest(false)
+            }
+        })
+    }
+
+    const handleOpportunityBookmarkSelect = (e, {bookmarked, opportunityId}) => {
+        setSendingRequest(true)
+        makeCall({
+            bookmarked: bookmarked,
+            opportunityId: opportunityId
+        },
+        `/student/opportunity/interact/${props.alumniOrStudentId}`,
+        'patch'
+        ).then((res) => {
+            if (res.error) {
+                // error
+                // TODO: Add error toast
+                setSendingRequest(false)
+            } else {
+                // refetch all polls
+                makeCall({}, `/student/opportunities/${props.alumniOrStudentId}`, 'get')
+                .then(opportunitiesResponse => {
+                    if (opportunitiesResponse) {
+                        setOpportunities(opportunitiesResponse.opportunities)
+                    }
+                })
+                setSendingRequest(false)
             }
         })
     }
@@ -204,20 +254,129 @@ export default function PollCarousel(props) {
             </Segment>
         )
     }
+
+    const getInterestsForOpportunities = (allInterests, displayLimit = 2) => {
+        return (
+            <div
+                style={{
+                    margin: '5px'
+                }}
+            >
+            {
+                allInterests.slice(0, displayLimit).map(interest => {
+                    return (
+                        <Label
+                            key={interest._id}
+                            style={{
+                                'margin': '3px'
+                            }}
+                            color='teal'
+                        >
+                            {interest.name}
+                        </Label>
+                    )
+                })
+            }
+            {
+                allInterests.length > displayLimit ?
+                `+ ${allInterests.length - displayLimit} more...`
+                : null
+            }
+            </div>
+        )
+    }
+
+    const constructOpportunityCard = (opportunity) => {
+        return (
+            <Segment
+                style={{
+                    margin: '2px'
+                }}
+            >
+                <Card
+                    centered
+                >
+                    <Card.Content>
+                    <Image avatar circular src={opportunity.owner.imageURL} />
+                    <Card.Meta>
+                        <b>{opportunity.owner.name}</b> has posted an opportunity relevant to you!
+                    </Card.Meta>
+                    <Card.Description>
+                        {opportunity.description}
+                    </Card.Description>
+                    </Card.Content>
+                    {
+                        (opportunity.deadline || opportunity.link) ?
+                        <Card.Content extra>
+                        {
+                                opportunity.deadline ?
+                                <Feed.Extra>
+                                    Deadline: {opportunity.deadline}
+                                </Feed.Extra>
+                                : null
+                            }
+                            {
+                                opportunity.link ?
+                                <Feed.Like>
+                                    <a href={opportunity.link}> Click here for details </a>
+                                </Feed.Like>
+                                : null
+                            }
+                        </Card.Content>
+                        :
+                        null
+                    }
+                    {
+                        opportunity.interests.length ? 
+                        <Card.Content>
+                            {getInterestsForOpportunities(opportunity.interests)}
+                        </Card.Content>
+                        : null
+                    }
+                    <Card.Content extra>    
+                        <Button.Group>                
+                            <Button 
+                                tiny
+                                basic
+                                green
+                                color="blue"
+                                bookmarked={true}
+                                opportunityId={opportunity._id}
+                                onClick={handleOpportunityBookmarkSelect.bind(this)}
+                            >
+                                Bookmark!
+                            </Button>
+                            <Button
+                                tiny
+                                basic
+                                color="red"
+                                bookmarked={false}
+                                opportunityId={opportunity._id}
+                                onClick={handleOpportunityBookmarkSelect.bind(this)}
+                            >
+                                Pass!
+                            </Button>
+                        </Button.Group>
+                    </Card.Content>
+                </Card>
+            </Segment>
+        )
+    }
+
     return (
-        polls.length ? 
+        (polls.length || opportunities.length) ? 
         <CarouselProvider
             naturalSlideWidth={100}
             naturalSlideHeight={125}
-            totalSlides={polls.length}
+            totalSlides={polls.length + opportunities.length}
         >
             <Segment
-                loading={sendingPoll}
-                disabled={sendingPoll}
+                loading={sendingRequest}
+                disabled={sendingRequest}
             >
                 <Grid
-                    loading={sendingPoll}
-                    disabled={sendingPoll}
+                    loading={sendingRequest}
+                    disabled={sendingRequest}
                 >
                     <Grid.Row
                         centered
@@ -234,10 +393,10 @@ export default function PollCarousel(props) {
                         <Slider
                             style={{
                                 width: '50%',
-                                maxHeight: '250px',
+                                maxHeight: '400px',
                             }}
                         >
-                            {pollsDisplay}
+                            {display}
                         </Slider>
                     </Grid.Row>
                     <Grid.Row
@@ -245,19 +404,29 @@ export default function PollCarousel(props) {
                         padded
                     >
                         {
-                            polls.length > 1 ?
-                            <>                
-                                <ButtonBack
-                                    style={{marginRight: '2px'}}
+                            (polls.length + opportunities.length) > 1 ?
+                            <Button.Group>                
+                                <Button 
+                                    as={ButtonBack}
+                                    style={{
+                                        marginRight: '2px',
+                                    }}
+                                    tiny
+                                    basic
+                                    color="blue"
                                 >
                                     Back
-                                </ButtonBack>
-                                <ButtonNext
+                                </Button>
+                                <Button
+                                    as={ButtonNext}
                                     style={{marginLeft: '2px'}}
+                                    tiny
+                                    basic
+                                    color="blue"
                                 >
                                     Next
-                                </ButtonNext>
-                            </>
+                                </Button>
+                            </Button.Group>
                             : null
                         }
                     </Grid.Row>
