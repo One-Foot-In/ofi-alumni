@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, Responsive } from 'semantic-ui-react'
+import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, Responsive, Label } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import RequestModal from './RequestModal'
 import AlumniContactModal from './AlumniContactModal'
@@ -13,8 +13,8 @@ const searchOptions = [
         value: 'all'
     },
     {
-        key: 'Location',
-        text: 'Location',
+        key: 'Country',
+        text: 'Country',
         value: 'country'
     },
     {
@@ -213,7 +213,9 @@ export default class AlumniDirectory extends Component {
                             <Card.Meta>{post.profession}</Card.Meta>
                             <Card.Description>College: {post.collegeName}</Card.Description>
                             <Card.Description>Location: {(post.city && post.country) && `${post.city} (${post.country})`}</Card.Description>
-                            <Card.Description>Company: {post.companyName}</Card.Description>
+                            <Card.Description>Profession: {post.jobTitleName || 'Unavailable'}</Card.Description>
+                            <Card.Description>Company: {post.companyName || 'Unavailable'}</Card.Description>
+                            <Card.Description>{this.getInterestsForOpportunities(post.interests)}</Card.Description>
                             <br />
                         </Card.Content>
                         {this.requestButton(post, i)}
@@ -281,10 +283,44 @@ export default class AlumniDirectory extends Component {
         return makeCall(null, `/alumni/all/${this.props.schoolId}/${this.state.accessContext}/${this.props.userDetails.user}`, 'get').catch(e => console.log(e))
     }
 
+    getInterestsForOpportunities(allInterests, displayLimit = 4) {
+        return (
+            <div
+                style={{
+                    margin: '5px'
+                }}
+            >
+            {
+                allInterests.slice(0, displayLimit).map(interest => {
+                    return (
+                        <Label
+                            key={interest._id}
+                            style={{
+                                'margin': '3px'
+                            }}
+                            color='teal'
+                        >
+                            {interest.name}
+                        </Label>
+                    )
+                })
+            }
+            {
+                allInterests.length > displayLimit ?
+                `+ ${allInterests.length - displayLimit} more...`
+                : null
+            }
+            </div>
+        )
+    }
+
     search(value) {
         this.setState({value: value})
         this.setState({results: 0})
         var numResults = 0;
+        if (typeof(value) === 'string') {
+            value = value.replace(/[\W_]+/g," ")
+        }
         let searchPattern = new RegExp(value, 'i');
         let display = [];
         let i = 0;
@@ -327,9 +363,11 @@ export default class AlumniDirectory extends Component {
 
     handleFilterOrYearSelectionChange = (e, { name, value }) => {
         if (name === 'year') {
+            // when called from the graduation year dropdown
             this.search(value)
+        } else {
+            this.setState({ filter: value })
         }
-        this.setState({ filter: value })
     }
 
     handleInterestSelectionChange = (e, {value}) => {
