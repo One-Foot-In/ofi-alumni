@@ -19,6 +19,44 @@ async function isAdmin(id) {
     return (admin !== null || (alumni && alumni.user.role.includes('ADMIN')))
 }
 
+/*
+    Return all alumni with the school and access context information populated
+    @return array of alumni objects
+*/
+async function fetchAllAlumniWithAccessContexts() {
+    let alumniData = await alumniSchema.find({}).populate('school')
+    let alumni = []
+    for (let alumnusModel of alumniData) {
+        let alumnus = alumnusModel.toObject()
+        let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
+        // do not return alumni who do not have an associated user record
+        if (userRecordWithAccessContext) {            
+            alumnus.accessContexts = userRecordWithAccessContext.accessContexts
+            alumni.push(alumnus)
+        }
+    }
+    return alumni
+}
+
+/*
+    Return all students with the school and access context information populated
+    @return array of student objects
+*/
+async function fetchAllStudentsWithAccessContexts() {
+    let studentsData = await studentSchema.find({}).populate('school')
+    let students = []
+    for (let studentModel of studentsData) {
+        let student = studentModel.toObject()
+        let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
+        // do not return alumni who do not have an associated user record
+        if (userRecordWithAccessContext) {
+            student.accessContexts = userRecordWithAccessContext.accessContexts
+            students.push(student)
+        }
+    }
+    return students
+}
+
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const dbData = await adminSchema.findOne({_id: req.params.id})
@@ -40,14 +78,7 @@ router.get('/allAlumni/:adminId', passport.authenticate('jwt', {session: false})
             res.status(400).send('Invalid Admin ID');
             return;
         }
-        let alumniData = await alumniSchema.find({}).populate('school')
-        let alumni = []
-        for (let alumnusModel of alumniData) {
-            let alumnus = alumnusModel.toObject()
-            let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
-            alumnus.accessContexts = userRecordWithAccessContext.accessContexts
-            alumni.push(alumnus)
-        }
+        let alumni = await fetchAllAlumniWithAccessContexts()
         res.status(200).send({'alumni': alumni})
     } catch (e) {
         console.log('admin/allAlumni error: ' + e);
@@ -62,14 +93,7 @@ router.get('/allStudents/:adminId', passport.authenticate('jwt', {session: false
             res.status(400).send('Invalid Admin ID');
             return;
         }
-        let studentsData = await studentSchema.find({}).populate('school')
-        let students = []
-        for (let studentModel of studentsData) {
-            let student = studentModel.toObject()
-            let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
-            student.accessContexts = userRecordWithAccessContext.accessContexts
-            students.push(student)
-        }
+        let students = await fetchAllStudentsWithAccessContexts()
         res.status(200).send({'students': students})
     } catch (e) {
         console.log('admin/allStudents error: ' + e);
@@ -127,13 +151,7 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
             email = userRecordForAlumnus.email
             name = alumni.name
             await alumni.save()
-            let alumniData = await alumniSchema.find({}).populate('school')
-            for (let alumnusModel of alumniData) {
-                let alumnus = alumnusModel.toObject()
-                let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
-                alumnus.accessContexts = userRecordWithAccessContext.accessContexts
-                dbData.push(alumnus)
-            }
+            dbData = await fetchAllAlumniWithAccessContexts()
         } else if (type === 'STUDENT') {
             let student = await studentSchema.findById(profileId);
             newApprovalState = !student.approved
@@ -142,13 +160,7 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
             email = userRecordForStudent.email
             name = student.name
             await student.save()
-            let studentsData = await studentSchema.find({}).populate('school')
-            for (let studentModel of studentsData) {
-                let student = studentModel.toObject()
-                let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
-                student.accessContexts = userRecordWithAccessContext.accessContexts
-                dbData.push(student)
-            }
+            dbData = await fetchAllStudentsWithAccessContexts()
         }
         if (newApprovalState) {
             await sendApprovalAlert(email, name)
@@ -204,21 +216,9 @@ router.patch('/changeAccess/:adminId', passport.authenticate('jwt', {session: fa
         await user.save()
         let dbData = []
         if (type === 'ALUMNI') {
-            let alumniData = await alumniSchema.find({}).populate('school')
-            for (let alumnusModel of alumniData) {
-                let alumnus = alumnusModel.toObject()
-                let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
-                alumnus.accessContexts = userRecordWithAccessContext.accessContexts
-                dbData.push(alumnus)
-            }
+            dbData = await fetchAllAlumniWithAccessContexts()
         } else if (type === 'STUDENT') {
-            let studentsData = await studentSchema.find({}).populate('school')
-            for (let studentModel of studentsData) {
-                let student = studentModel.toObject()
-                let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
-                student.accessContexts = userRecordWithAccessContext.accessContexts
-                dbData.push(student)
-            }
+            dbData = await fetchAllStudentsWithAccessContexts()
         }
         res.status(200).send({profiles: dbData});
         return;

@@ -5,7 +5,6 @@ import swal from 'sweetalert'
 import TopicPreferencesModal from './TopicPreferencesModal'
 import TimePreferencesModal from './TimePreferencesModal'
 import ZoomUpdateModal from './ZoomUpdateModal'
-import PooledMultiSelectDropdown from './PooledMultiSelectDropdown'
 
 export const timeSlotOptions = [
     '12am - 1am',
@@ -393,12 +392,9 @@ class RequestCards extends Component {
         display: [],
         showFeedbackModal: false,
         showAlumniNoteModal: false,
-        showActionItemsModal: false,
         requestDetails: null,
         finalNote: '',
         alumniNote: '',
-        existingActionItems: [],
-        newActionItems: []
     }
     // This allows the component to update its state should a prop value change
     async UNSAFE_componentWillReceiveProps({requests}) {
@@ -517,7 +513,6 @@ class RequestCards extends Component {
             )
         } else if (this.props.activeSet === 'completed' && !request.finalNote) {
             return(
-                <>
                 <Button
                     color='teal'
                     requestId={request._id}
@@ -525,14 +520,6 @@ class RequestCards extends Component {
                 >
                     Leave a note!
                 </Button>
-                <Button
-                    color='teal'
-                    requestId={request._id}
-                    onClick={this.toggleActionItemModal.bind(this)}
-                >
-                    Add action items!
-                </Button>
-                </>
             )
         }
     }
@@ -558,14 +545,6 @@ class RequestCards extends Component {
             })
         }
     }
-
-    toggleActionItemModal(e) {
-        let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
-        this.setState({
-            showActionItemsModal: !this.state.showActionItemsModal,
-            requestDetails: requestDetails
-        });
-    } 
 
     toggleFeedbackModal(e) {
         let requestDetails = this.props.requests.find(request => request._id === e.currentTarget.getAttribute('requestid'))
@@ -625,34 +604,6 @@ class RequestCards extends Component {
         this.setState({display: display})
     }
 
-    async getActionItemsInput(selection) {
-        this.setState({
-            existingActionItems: selection.old,
-            newActionItems: selection.new,
-        });
-    }
-
-    async submitActionItems() {
-        let requests = await makeCall({
-            existingActionItems: this.state.existingActionItems,
-            newActionItems: this.state.newActionItems
-        }, `/request/actionItems/${this.state.requestDetails._id}/`, 'patch')
-        if (!requests || requests.error) {
-            swal({
-                title: "Error!",
-                text: "The action items for " + this.state.requestDetails.student.name +  " were not updated, please try again.",
-                icon: "error",
-            });
-        } else {
-            swal({
-                title: "Done!",
-                text: "Successfully updated action items for " +  this.state.requestDetails.student.name + ".",
-                icon: "success"
-            })
-        }
-        this.setState({showActionItemsModal: false});
-    }
-
     render() {
         return(
             <>
@@ -689,49 +640,6 @@ class RequestCards extends Component {
                             Done
                         </Button>
                         <Button onClick={this.submitFinalNote.bind(this)} disabled={!this.state.finalNote} primary>
-                            Submit
-                        </Button>
-                    </Modal.Actions>
-                </Modal>
-            }
-            {this.state.showActionItemsModal && 
-                <Modal open={this.state.showActionItemsModal}>
-                    <Modal.Header>Add action items for {this.state.requestDetails.student.name}</Modal.Header>
-                    <Modal.Content>
-                    <Grid stackable>
-                        <Grid.Row columns={"equal"}>
-                            <Grid.Column width={4}>
-                                <Image
-                                    floated='left'
-                                    size='small'
-                                    src={this.state.requestDetails.student.imageURL}
-                                    rounded
-                                />
-                            </Grid.Column>
-                            <Grid.Column>
-                                <Modal.Description> 
-                                    Please select up to 3 action items for {this.state.requestDetails.student.name} 
-                                </Modal.Description>
-                                <PooledMultiSelectDropdown 
-                                 allowAddition='true'
-                                 endpoint={`/drop/actionItems`}
-                                 dataType={"Action Item"}
-                                 getInputs={this.getActionItemsInput.bind(this)}
-                                />
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
-                </Modal.Content>
-                    <Modal.Actions>
-                        <Button onClick={this.toggleActionItemModal.bind(this)}>
-                            Cancel
-                        </Button>
-                        <Button 
-                            onClick={this.submitActionItems.bind(this)} 
-                            disabled = {!(this.state.existingActionItems && this.state.existingActionItems.length) 
-                            && !(this.state.newActionItems && this.state.newActionItems.length)} 
-                            primary
-                        >
                             Submit
                         </Button>
                     </Modal.Actions>
