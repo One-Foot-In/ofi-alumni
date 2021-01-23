@@ -147,7 +147,9 @@ export default class LocationSelectionModal extends Component {
                         Update
                     </Button>
                     <Button 
-                        onClick={this.props.closeModal}>
+                        onClick={this.props.closeModal}
+                        disabled={this.state.submitting}
+                    >
                         Done
                     </Button>
                 </Modal.Actions>

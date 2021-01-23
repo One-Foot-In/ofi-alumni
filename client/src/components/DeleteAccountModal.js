@@ -82,11 +82,13 @@ export default class DeleteAccountModal extends Component {
                     <Modal.Actions>
                         <Button
                             primary
+                            disabled={this.state.submittingRequest}
                             onClick={this.deleteAccount}
                         >
                             Yes
                         </Button>
                         <Button
+                            disabled={this.state.submittingRequest}
                             onClick={this.toggleModal}
                         >
                             No

@@ -127,7 +127,10 @@ export default class AlumniContactModal extends Component {
                     >
                         Send Message
                     </Button>
-                    <Button onClick={this.props.closeModal}>
+                    <Button
+                        onClick={this.props.closeModal}
+                        disabled={this.state.submitting}
+                    >
                         Close
                     </Button>
                 </Modal.Actions>
