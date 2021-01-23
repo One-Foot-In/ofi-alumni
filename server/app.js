@@ -123,7 +123,8 @@ async function main() {
     ));
 
     var emailDigestJob = new CronJob(emailDigestCron, async () => {
-        await sendWeeklyEmailDigest();
+    // do not wait on sending email
+    sendWeeklyEmailDigest();
     }, null, true, 'America/New_York');
 
     if (process.env.ACTIVATE_CRON) {
@@ -185,6 +186,5 @@ async function main() {
 }
 
 main().catch(console.err);
-
 
 module.exports = app;

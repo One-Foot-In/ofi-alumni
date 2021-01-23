@@ -254,6 +254,8 @@ export default class NewsFeed extends Component {
             <Segment style={{'marginBottom': '1em'}}>
                 <PollCarousel
                     userId={this.props.userDetails.user}
+                    isAlumni={this.props.userRole === 'ALUMNI'}
+                    alumniOrStudentId={this.props.userDetails._id}
                 />
                 <Header>
                     <Icon name={'newspaper outline'}/>
