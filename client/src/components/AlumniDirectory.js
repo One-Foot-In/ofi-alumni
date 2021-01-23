@@ -46,7 +46,12 @@ const searchOptions = [
         key: 'Interests',
         text: 'Interests',
         value: 'interests'
-    }
+    },
+    {
+        key: 'Consultancy Topics',
+        text: 'Consultancy Topics',
+        value: 'topics'
+    },
 ]
 
 const pageSize = 3;
@@ -72,6 +77,7 @@ export default class AlumniDirectory extends Component {
             allText: [],
             display: [],
             interestOptions: [],
+            topicOption: [],
             numResults: 0,
             filter: 'all',
             requestModalOpen: false,
@@ -136,6 +142,14 @@ export default class AlumniDirectory extends Component {
                     return interestByCountMap
                 },
             {})
+            let topicsByCount = result.alumni.reduce(
+                (topicByCountMap, alumnus) => {
+                    for (let topic of alumnus.topics) {
+                        topicByCountMap[topic] = (topicByCountMap[topic] || 0) + 1
+                    }
+                    return topicByCountMap
+                },
+            {})
             let interestOptions = []
             for (let [interest, count] of Object.entries(interestsByCount)) {
                 interestOptions.push({
@@ -144,8 +158,17 @@ export default class AlumniDirectory extends Component {
                     text: `${interest} (${count})`,
                 })
             }
+            let topicOptions = []
+            for (let [topic, count] of Object.entries(topicsByCount)) {
+                topicOptions.push({
+                    key: topic,
+                    value: topic,
+                    text: `${topic} (${count})`,
+                })
+            }
             this.setState({
-                interestOptions
+                interestOptions,
+                topicOptions
             }, () => {
                 this.setAlumniDirectory(result)
             })
@@ -170,9 +193,11 @@ export default class AlumniDirectory extends Component {
                          + post.country + ' '
                          + post.jobTitleName + ' '
                          + post.companyName + ' '
+                         + post.collegeName + ' '
                          + post.name + ' '
                          + post.gradYear
                          + post.interests.map(interest => interest.name).join(' ')
+                         + post.topics.join(' ')
                          );
             display.push(this.constructProfile(post, i));
             i++;
@@ -215,7 +240,8 @@ export default class AlumniDirectory extends Component {
                             <Card.Description>Location: {(post.city && post.country) && `${post.city} (${post.country})`}</Card.Description>
                             <Card.Description>Profession: {post.jobTitleName || 'Unavailable'}</Card.Description>
                             <Card.Description>Company: {post.companyName || 'Unavailable'}</Card.Description>
-                            <Card.Description>{this.getInterestsForOpportunities(post.interests)}</Card.Description>
+                            {post.interests && post.interests.length ? <Card.Description>Interests: {this.getInterests(post.interests)}</Card.Description> : null}
+                            {post.topics && post.topics.length ? <Card.Description>Topics of Consultancy: {this.getTopics(post.topics)}</Card.Description> : null}
                             <br />
                         </Card.Content>
                         {this.requestButton(post, i)}
@@ -283,7 +309,7 @@ export default class AlumniDirectory extends Component {
         return makeCall(null, `/alumni/all/${this.props.schoolId}/${this.state.accessContext}/${this.props.userDetails.user}`, 'get').catch(e => console.log(e))
     }
 
-    getInterestsForOpportunities(allInterests, displayLimit = 4) {
+    getInterests(allInterests, displayLimit = 4) {
         return (
             <div
                 style={{
@@ -314,12 +340,43 @@ export default class AlumniDirectory extends Component {
         )
     }
 
+    getTopics(topics, displayLimit = 3) {
+        return (
+            <div
+                style={{
+                    margin: '5px'
+                }}
+            >
+            {
+                topics.slice(0, displayLimit).map(topic => {
+                    return (
+                        <Label
+                            key={topic}
+                            style={{
+                                'margin': '3px'
+                            }}
+                            color='olive'
+                        >
+                            {topic}
+                        </Label>
+                    )
+                })
+            }
+            {
+                topics.length > displayLimit ?
+                `+ ${topics.length - displayLimit} more...`
+                : null
+            }
+            </div>
+        )
+    }
+
     search(value) {
         this.setState({value: value})
         this.setState({results: 0})
         var numResults = 0;
         if (typeof(value) === 'string') {
-            value = value.replace(/[\W_]+/g," ")
+            value = value.replace(/[^a-zA-Z0-9_,/-]+/g," ")
         }
         let searchPattern = new RegExp(value, 'i');
         let display = [];
@@ -374,6 +431,10 @@ export default class AlumniDirectory extends Component {
         this.search(value)
     }
 
+    handleTopicSelectionChange = (e, {value}) => {
+        this.search(value)
+    }
+
     handleRequestButton(e) {
         this.setState({alumniDetails: this.state.entries[e.currentTarget.dataset.id]})
         this.toggleRequestModal()
@@ -408,6 +469,19 @@ export default class AlumniDirectory extends Component {
                         name='interest'
                         options={this.state.interestOptions}
                         onChange={this.handleInterestSelectionChange}
+                    />
+                )
+            case 'topics':
+                return (
+                    <Dropdown 
+                        placeholder='Consultancy Topics'
+                        fluid
+                        floating
+                        selection
+                        search
+                        name='topics'
+                        options={this.state.topicOptions}
+                        onChange={this.handleTopicSelectionChange}
                     />
                 )
             default:
