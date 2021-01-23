@@ -48,7 +48,8 @@ router.post('/', async (req, res, next) => {
               emailVerified: emailVerified,
               emailSubscribed: true,
               emailSubscriptionToken: emailSubscriptionToken,
-              approved: approved
+              approved: approved,
+              accessContexts: ["INTRASCHOOL"]
             }
         );
         await user_instance.save();
@@ -77,7 +78,8 @@ router.post('/', async (req, res, next) => {
             }
         )
         await news_instance.save();
-        await sendStudentVerificationEmail(email, verificationToken, school.name)
+        // do not wait on sending verification email
+        sendStudentVerificationEmail(email, verificationToken, school.name)
         res.status(200).send({
             message: 'Successfully added student',
             student: student_instance
@@ -93,7 +95,11 @@ router.post('/', async (req, res, next) => {
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         const dbData = await studentSchema.findOne({_id: req.params.id}).populate('school')
-        res.json({'result' : dbData});
+        const userRecord = await userSchema.findById(dbData.user)
+        res.json({
+            result : dbData,
+            accessContexts: userRecord.accessContexts || ["INTRASCHOOL"]
+        });
     } catch (e) {
         console.log("Error: util#oneStudent", e);
         res.status(500).send({'error' : e});
@@ -185,4 +191,77 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
     }
 })
 
+router.get('/opportunities/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.studentId})
+        await student.populate('opportunitiesQueued').execPopulate()
+        // only work with last 10 opportunities added for student
+        let mostRecent10Opportunities = student.opportunitiesQueued.slice(-10)
+        for (let opportunity of mostRecent10Opportunities) {
+            await opportunity.populate('owner', 'name imageURL').execPopulate()
+        }
+        res.status(200).json({
+            opportunities: mostRecent10Opportunities
+        })
+    } catch (e) {
+        console.log("Error: student#opportunities", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.get('/bookmarkedOpportunities/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.studentId})
+        await student.populate('opportunitiesBookmarked').execPopulate()
+        for (let opportunity of student.opportunitiesBookmarked) {
+            await opportunity.populate('owner', 'name imageURL').execPopulate()
+        }
+        res.status(200).json({
+            opportunities: student.opportunitiesBookmarked
+        })
+    } catch (e) {
+        console.log("Error: student#opportunitiesBookmarked", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/opportunity/interact/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let bookmarked = req.body.bookmarked
+        let opportunityId = req.body.opportunityId
+        let studentId = req.params.studentId
+        if (bookmarked) {
+            await studentSchema.update({_id: studentId}, {
+                $push: {opportunitiesBookmarked: opportunityId},
+                $pull: { opportunitiesQueued: opportunityId}
+            })
+        } else {
+            await studentSchema.update({_id: studentId}, {
+                $pull: { opportunitiesQueued: opportunityId}
+            })
+        }
+        res.status(200).json({
+            message: 'Your response to this opportunity has been recorded!'
+        })
+    } catch (e) {
+        console.log("Error: student#opportunities", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/unbookmarkOpportunity/:studentId/:opportunityId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let opportunityId = req.params.opportunityId
+        let studentId = req.params.studentId
+        await studentSchema.update({_id: studentId}, {
+            $pull: {opportunitiesBookmarked: opportunityId},
+        })
+        res.status(200).json({
+            message: 'Opportunity is unbookmarked!'
+        })
+    } catch (e) {
+        console.log("Error: student#unbookmarkOpportunity", e);
+        res.status(500).send({'error' : e});
+    }
+})
 module.exports = router;

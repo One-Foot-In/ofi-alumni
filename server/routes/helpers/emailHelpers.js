@@ -13,6 +13,8 @@ var htmlBuilder = require('./emailBodyBuilder').buildBody
 // Comment out actual sendgrid call to avoid hitting free quota during testing
 sg.setApiKey(process.env.SENDGRID_KEY);
 
+const doNotSendEmails = process.env.DO_NOT_SEND_EMAILS && process.env.DO_NOT_SEND_EMAILS.toLowerCase() === 'true'
+
 const createPersonalization = (to, subject, html) => {
   return {
     to: to,
@@ -41,8 +43,11 @@ const sendAlumniVerificationEmail = async (to, token, schoolName) => {
       `${BACKEND}/verification/${to}/${token}`
     )
   )
-  // console.log("Sending email with", emailObject)
-  await sg.send(emailObject, true)
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
 }
 
 const sendStudentVerificationEmail = async (to, token, schoolName) => {
@@ -56,8 +61,11 @@ const sendStudentVerificationEmail = async (to, token, schoolName) => {
       `${BACKEND}/verification/${to}/${token}`
     )
   )
-  // console.log("Sending email with", emailObject)
-  await sg.send(emailObject, true)
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
 }
 
 const sendNewRequestEmail = async (to) => {
@@ -71,8 +79,11 @@ const sendNewRequestEmail = async (to) => {
       APP
     )
   )
-  // console.log("Sending email with", emailObject)
-  await sg.send(emailObject, true)
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
 }
 
 const sendRequestConfirmedEmail = async (menteeEmail, menteeName, menteeTime, mentorEmail, mentorName, mentorTime, topic) => {
@@ -96,9 +107,13 @@ const sendRequestConfirmedEmail = async (menteeEmail, menteeName, menteeTime, me
       APP
     )
   )
-  // console.log("Sending email with", emailObject)
-  await sg.send(emailObjectForMentee, true)
-  await sg.send(emailObjectForMentor, true)
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObjectForMentee.to, " with subject: ", emailObjectForMentee.subject)
+    console.log("Sending email to ", emailObjectForMentor.to, " with subject: ", emailObjectForMentor.subject)
+  } else {
+    await sg.send(emailObjectForMentee, true)
+    await sg.send(emailObjectForMentor, true)
+  }
 }
 
 const sendPasswordChangeEmail = async (to, token) => {
@@ -112,8 +127,11 @@ const sendPasswordChangeEmail = async (to, token) => {
       `${BACKEND}/tempPassword/${to}/${token}`
     )
   )
-  // console.log("Sending email with", emailObject)
-  await sg.send(emailObject, true)
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
 }
 
 const sendTemporaryPasswordEmail = async (to, tempPass) => {
@@ -127,8 +145,11 @@ const sendTemporaryPasswordEmail = async (to, tempPass) => {
       APP
     )
   )
-  // console.log("Sending email with", emailObject)
-  await sg.send(emailObject, true)
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
 }
 
 /*
@@ -200,8 +221,11 @@ const sendAlumnusEmailDigest = async(to, alumnus, token) => {
           'Click here to unsubscribe from weekly digests!'
         )
       )
-      // console.log("Sending email with", emailObject)
-      await sg.send(emailObject, true)
+      if (doNotSendEmails) {
+        console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+      } else {
+        await sg.send(emailObject, true)
+      }
     }
 }
 
@@ -216,6 +240,60 @@ const sendWeeklyEmailDigest = async () => {
   // TODO: Send weekly student email digest
 }
 
+const sendNewMessageAlert = async (to, senderName, message) => {
+  let emailObject = createPersonalization(
+    to,
+    `You have a new message from ${senderName}!`,
+    htmlBuilder(
+      `Message from ${senderName}`,
+      message,
+      'Go To App',
+      APP
+    )
+  )
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
+}
+
+const sendPollAlert = async (to, isAnnouncement, prompt) => {
+  let emailObject = createPersonalization(
+    to,
+    `You have a new ${isAnnouncement? 'annoucement' : 'poll'}!`,
+    htmlBuilder(
+      `${isAnnouncement ? 'We have a new announcement for you!' : 'A new poll has been posted and your input would be invaluable! You can vote via the app!'}`,
+      prompt,
+      'Go To App',
+      APP
+    )
+  )
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
+}
+
+const sendApprovalAlert = async (to, name) => {
+  let emailObject = createPersonalization(
+    to,
+    `You have been approved!!`,
+    htmlBuilder(
+      `Your account has been approved after review by an admin. Welcome aboard ${name}!`,
+      `You can now use the app!`,
+      'Go To App',
+      APP
+    )
+  )
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
+}
+
 exports.sendTestEmail = sendTestEmail
 exports.sendAlumniVerificationEmail = sendAlumniVerificationEmail
 exports.sendStudentVerificationEmail = sendStudentVerificationEmail
@@ -226,3 +304,6 @@ exports.sendTemporaryPasswordEmail = sendTemporaryPasswordEmail
 exports.sendWeeklyEmailDigest = sendWeeklyEmailDigest
 exports.getWeeklyMessagesSummaryForAlumni = getWeeklyMessagesSummaryForAlumni
 exports.getNewMessagesForAlumniString = getNewMessagesForAlumniString
+exports.sendNewMessageAlert = sendNewMessageAlert
+exports.sendPollAlert = sendPollAlert
+exports.sendApprovalAlert = sendApprovalAlert

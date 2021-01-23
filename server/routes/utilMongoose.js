@@ -305,7 +305,7 @@ router.post('/addAlumni/', async (req, res, next) => {
         const zoomLink = req.body.zoomLink;
         const password = req.body.password;
 
-        const role = "ALUMNI"
+        const role = ["ALUMNI"]
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
@@ -392,7 +392,7 @@ router.post('/addStudent/', async (req, res, next) => {
         const timeZone = req.body.timeZone;
         const password = req.body.password;
 
-        const role = "STUDENT"
+        const role = ["STUDENT"]
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});

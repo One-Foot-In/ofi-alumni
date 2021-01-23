@@ -42,12 +42,15 @@ app.use(express.static(path.join(__dirname, 'build')));
  * Otherwise, it will use a cloud hosted DB set in the .env file
  * MongoDB must be installed
  */
- 
-const testDB = (process.env.DEV_MODE.toLowerCase() === "true");
+const testDB = (process.env.DEV_MODE && process.env.DEV_MODE.toLowerCase() === "true");
 
-/* Mongoose Setup */
+/*
+  Mongoose Setup
+  w=majority specifies that all database replicas acknowledge that the write is completed
+  retryWrites=true retries writing to database if the first attempt fails
+ */
 const mongoose = require('mongoose');
-const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}`;
+const uri = testDB ? 'mongodb://localhost:27017/ofi-testdata' : `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}/${process.env.DB}?retryWrites=true&w=majority`;
 
 /* Mongoose Models */
 const userSchema = require('./models/userSchema')
@@ -120,7 +123,8 @@ async function main() {
     ));
 
     var emailDigestJob = new CronJob(emailDigestCron, async () => {
-        await sendWeeklyEmailDigest();
+    // do not wait on sending email
+    sendWeeklyEmailDigest();
     }, null, true, 'America/New_York');
 
     if (process.env.ACTIVATE_CRON) {
@@ -182,6 +186,5 @@ async function main() {
 }
 
 main().catch(console.err);
-
 
 module.exports = app;

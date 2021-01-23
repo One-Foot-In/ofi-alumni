@@ -35,11 +35,13 @@ export default class Conversation extends Component {
                 timezone: parseInt(this.props.userDetails.timeZone/100),
                 message: this.state.message
             }, '/conversations/sendMessage/' + this.props.userDetails._id, 'patch')
-        this.createDisplay(result.conversation)
-        this.setState({
-            conversation: result.conversation,
-            message: ''
-        })
+        if (result.conversation) {
+            this.createDisplay(result.conversation)
+            this.setState({
+                conversation: result.conversation,
+                message: ''
+            })
+        }
     }
 
     createDisplay(conversation) {

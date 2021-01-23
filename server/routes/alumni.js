@@ -5,6 +5,7 @@ var bcrypt = require('bcrypt');
 var passport = require("passport");
 var userSchema = require('../models/userSchema');
 var alumniSchema = require('../models/alumniSchema');
+var studentSchema = require('../models/studentSchema');
 var collegeSchema = require('../models/collegeSchema');
 var jobTitleSchema = require('../models/jobTitleSchema');
 var interestsSchema = require('../models/interestsSchema');
@@ -13,7 +14,8 @@ var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
 var majorSchema = require('../models/majorSchema');
 var requestSchema = require('../models/requestSchema');
-var timezoneHelpers = require("../helpers/timezoneHelpers")
+var timezoneHelpers = require("../helpers/timezoneHelpers");
+const opportunitySchema = require('../models/opportunitySchema');
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
 require('mongoose').Promise = global.Promise
 
@@ -144,7 +146,9 @@ router.post('/', async (req, res, next) => {
 
         // find schoolLogo
         let school = await schoolSchema.findOne({_id: schoolId})
+        // all alumni are started with INTRASCHOOL as default role
         const role = ["ALUMNI"]
+        const accessContexts = ['INTRASCHOOL']
         const emailVerified = false
         const approved = false
         const verificationToken = crypto({length: 16});
@@ -157,6 +161,7 @@ router.post('/', async (req, res, next) => {
               passwordHash: passwordHash,
               verificationToken: verificationToken,
               role: role,
+              accessContexts: accessContexts,
               emailVerified: emailVerified,
               emailSubscribed: true,
               emailSubscriptionToken: emailSubscriptionToken,
@@ -197,7 +202,8 @@ router.post('/', async (req, res, next) => {
             school: schoolId
         })
         await news_instance.save();
-        await sendAlumniVerificationEmail(email, verificationToken, school.name)
+        // do not wait on sending verification email
+        sendAlumniVerificationEmail(email, verificationToken, school.name)
         res.status(200).send({
             message: 'Successfully added alumni',
             alumni: alumni_instance
@@ -210,10 +216,39 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/all/:schoolId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+/*
+    API used by students and alumni alike
+    Return all alumni accessible in intraschool, interschool (country-wide), or global context
+    @param schoolId - ID of school for alumnus/ student
+    @param role - role that the user is requesting context for
+    @param userId
+*/
+router.get('/all/:schoolId/:accessContext/:userId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        let alumni = await alumniSchema.find({school: req.params.schoolId})
-        res.json({'alumni' : alumni});
+        let accessContext = req.params.accessContext
+        let userRecord = await userSchema.findById(req.params.userId)
+        if (accessContext &&!userRecord.accessContexts.includes(accessContext)) {
+            res.status(404).json({
+                message : `User does not have access level ${accessContext}`
+            });
+        } else {
+            let isAlumni = userRecord.role.includes("ALUMNI")
+            let alumni = []
+            if (!accessContext || accessContext === "INTRASCHOOL") {
+                alumni = await alumniSchema.find({school: req.params.schoolId})
+            } else if (accessContext === "INTERSCHOOL") {
+                if (isAlumni) {
+                    let alumnusCountry = await alumniSchema.findOne({user: req.params.userId}, {country: 1})
+                    alumni = await alumniSchema.find({country: alumnusCountry.country})
+                } else {
+                    let studentCountry = await studentSchema.findOne({user: req.params.userId}, {country: 1})
+                    alumni = await alumniSchema.find({country: studentCountry.country})
+                }
+            } else if (accessContext === "GLOBAL") {
+                alumni = await alumniSchema.find()
+            }
+            res.status(200).json({'alumni' : alumni});
+        }
     } catch (e) {
         console.log("Error: alumni#allAlumni", e);
         res.status(500).send({'error' : e});
@@ -248,8 +283,12 @@ router.post('/approve/', passport.authenticate('jwt', {session: false}), async(r
 router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         let alumnus = await alumniSchema.findOne({_id: req.params.id}).populate('school')
+        const userRecord = await userSchema.findById(alumnus.user)
         alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
-        res.json({'result' : alumnus});
+        res.json({
+            result : alumnus,
+            accessContexts: userRecord.accessContexts || ["INTRASCHOOL"]
+        });
     } catch (e) {
         console.log("Error: alumni#oneAlumni", e);
         res.status(500).send({'error' : e});
@@ -520,6 +559,119 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
         res.status(500).send({'error' : e});
     }
 })
+
+async function queueOpportunities(alumnusModel, opportunityModel) {
+    let studentsToQueueOpportunitiesFor = await studentSchema.find({
+        school: {$in: alumnusModel.school}
+    })
+    let userRecordForAlumnus = await userSchema.findById(alumnusModel.user)
+    let userRecordsForStudentsToQueueOpportunitiesFor = []
+    if (userRecordForAlumnus.accessContexts.includes("INTERSCHOOL") && !userRecordForAlumnus.accessContexts.includes("GLOBAL")) {
+        userRecordsForStudentsToQueueOpportunitiesFor = await userSchema.find({
+            role: {$in : ["STUDENT"]},
+            accessContexts: {$in: ["INTERSCHOOL"]}
+        })
+    } else if (userRecordForAlumnus.accessContexts.includes("GLOBAL")) {
+        userRecordsForStudentsToQueueOpportunitiesFor = await userSchema.find({
+            role: {$in : ["STUDENT"]},
+            accessContexts: {$in: ["GLOBAL"]}
+        })
+    }
+    let contextBasedStudentAdditions = await studentSchema.find({
+        user: {$in: userRecordsForStudentsToQueueOpportunitiesFor.map(user => user._id)}
+    })
+    studentsToQueueOpportunitiesFor = [...studentsToQueueOpportunitiesFor, ...contextBasedStudentAdditions]
+    for (let student of studentsToQueueOpportunitiesFor) {
+        student.opportunitiesQueued.push(opportunityModel)
+        student.save()
+    }
+}
+
+router.post('/opportunity/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.id})
+        let description = req.body.description
+        let existingInterests = req.body.existingInterests || []
+        let newInterests = req.body.newInterests || []
+        let interestsToAdd = []
+        if (newInterests.length || existingInterests.length) {
+            interestsToAdd = await generateNewAndExistingInterests(newInterests, existingInterests)
+        }
+        let deadline = req.body.deadline
+        let link = req.body.link
+        let newOpportunity = new opportunitySchema({
+            owner: alumni,
+            description: description,
+            interests: interestsToAdd,
+            deadline: deadline,
+            link: link
+        })
+        await newOpportunity.save()
+        alumni.opportunities.push(newOpportunity)
+        await alumni.save()
+        // do not wait on finishing request
+        queueOpportunities(alumni, newOpportunity)
+        res.status(200).send({message: "Successfully added new opportunity"})
+    } catch (e) {
+        console.log("Error: alumni#addOpportunity", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.delete('/opportunity/:alumniId/:oppId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        await alumniSchema.update({_id: req.params.alumniId}, {$pull:{opportunities: req.params.oppId}})
+        await studentSchema.updateMany({}, {$pull: {opportunitiesQueued: req.params.oppId, opportunitiesBookmarked: req.params.oppId}})
+        await opportunitySchema.remove({_id: req.params.oppId})
+        res.status(200).send({message: "Successfully removed opportunity"})
+    } catch (e) {
+        console.log("Error: alumni#removeOpportunity", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.patch('/opportunity/:oppId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let description = req.body.description
+        let existingInterests = req.body.existingInterests
+        let newInterests = req.body.newInterests || []
+        let interestsToAdd = []
+        if (newInterests.length && existingInterests.length) {
+            interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
+        }
+        let deadline = req.body.deadline
+        let link = req.body.link
+        let opportunityToUpdate = await opportunitySchema.findById(req.params.oppId)
+        opportunityToUpdate.description = description ? description : opportunityToUpdate.description
+        // only update interest if there is a difference in any existing interest
+        opportunityToUpdate.interests = (opportunityToUpdate.interests.every(int1 => {
+            interestsToAdd.some(int2 => int2._id === int1._id)
+        })) ? opportunityToUpdate.interests : interestsToAdd
+        opportunityToUpdate.link = link ? link : opportunityToUpdate.link
+        opportunityToUpdate.deadline = deadline ? deadline : opportunityToUpdate.deadline
+        opportunityToUpdate.save()
+        res.status(200).send({message: "Successfully updated opportunity"})
+    } catch (e) {
+        console.log("Error: alumni#updateOpportunity", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.get('/opportunities/:alumniId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let alumni = await alumniSchema.findOne({_id: req.params.alumniId})
+        await alumni.populate('opportunities').execPopulate()
+        let opportunitiesArray = alumni.toObject().opportunities
+        for (let opportunityObj of opportunitiesArray) {
+            opportunityObj.timesBookmarked = await studentSchema.count({opportunitiesBookmarked: { $in: opportunityObj._id }})
+        }
+        res.status(200).send({opportunities: opportunitiesArray})
+    } catch (e) {
+        console.log("Error: alumni#opportunities", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 
 module.exports = router;
 module.exports.generateNewAndExistingInterests = generateNewAndExistingInterests
