@@ -12,7 +12,8 @@ const userSchema = new Schema(
     accessContexts: [{type: String, default: ['INTRASCHOOL'], enum: ['INTRASCHOOL', 'INTERSCHOOL', 'GLOBAL']}],
     emailVerified: {type: Boolean, required: true},
     emailSubscribed: {type: Boolean, required: false},
-    emailSubscriptionToken: {type: String, required: false}
+    emailSubscriptionToken: {type: String, required: false},
+    pollsQueued: [{type: Schema.Types.ObjectId, ref: 'Poll', required: false}]
   }
 );
 

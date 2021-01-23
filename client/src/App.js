@@ -15,14 +15,15 @@ import StudentVerification from './components/StudentVerification'
 import AlumniMentorship from './components/AlumniMentorship';
 import StudentMentorship from './components/StudentMentorship'
 import AlumniNetworking from './components/AlumniNetworking'
-import CollegeShortlist from './components/CollegeShortlist';
 import ProfileList from './components/admin_dashboard/ProfileList';
 import CollegesList from './components/admin_dashboard/CollegesList';
 import SchoolsList from './components/admin_dashboard/SchoolsList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
-
+import AlumniWorkspace from './components/AlumniWorkspace';
+import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
+import Polls from './components/admin_dashboard/Polls';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -120,6 +121,11 @@ var alumniNavBarItems = (approved) => {
         id: 'networking',
         name: 'Networking',
         navLink: '/networking'
+    },
+    {
+        id: 'workspaces',
+        name: 'Workspaces',
+        navLink: '/workspaces'
     }
   ]
   if (approved) {
@@ -158,7 +164,12 @@ var adminNavBarItems = () => {
         id: 'schools',
         name: 'Schools',
         navLink: '/schools'
-    }
+    },
+    {
+      id: 'polls',
+      name: 'Polls',
+      navLink: '/polls'
+  }
   ]
   return navBarItems;
 }
@@ -186,9 +197,9 @@ const studentNavBarItems = (isModerator) => {
         navLink: '/mentorship'
     },
     {
-      id: 'workspace',
-      name: 'Workspace',
-      navLink: '/workspace'
+      id: 'workspaces',
+      name: 'Workspaces',
+      navLink: '/workspaces'
     }
   ]
   if (isModerator) {
@@ -440,6 +451,24 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          <Route exact path = {`/workspaces`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+
           { this.state.userDetails.approved &&
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
@@ -542,27 +571,26 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
-          <Route exact path={`/workspace`} render={(props) => 
+          <Route exact path={`/workspaces`} render={(props) => 
                   this.state.loggedIn ?
                   <>
                       <Navbar
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
-                          activeItem={'workspace'}
+                          navItems={studentNavBarItems(this.state.approved)}
+                          activeItem={'workspaces'}
                       />
-                      <CollegeShortlist
-                          details={this.state.userDetails}
-                          refreshProfile={this.refreshProfile}
-                      />
+                        <StudentWorkspace 
+                            userDetails={this.state.userDetails}
+                        />
                   </> :
                   <Redirect to={"/login"}/>
               }
           />
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
-                    this.state.userDetails.isModerator ?
+                    (this.state.userDetails.isModerator ?
                       <>
                         <Navbar
                           navItems={studentNavBarItems(this.state.userDetails.isModerator)}
@@ -574,8 +602,8 @@ class App extends Component {
                           studentId={this.state.userDetails._id}
                         />
                       </>
-                      : <Redirect to={"/"}/>
-                  :<Redirect to={"/login"}/>
+                      : <Redirect to={"/"}/>)
+                  : <Redirect to={"/login"}/>
               }
           />
           </>
@@ -663,6 +691,23 @@ class App extends Component {
                       />
                       <SchoolsList
                           userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/polls`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={adminNavBarItems()}
+                          activeItem={'polls'}
+                      />
+                      <Polls
+                        userDetails={this.state.userDetails}
                       />
                   </> :
                   <Redirect to={"/login"}/>

@@ -9,7 +9,7 @@ var studentSchema = require('../models/studentSchema');
 var adminSchema = require('../models/adminSchema');
 var collegeRepSchema = require('../models/collegeRepSchema');
 var userSchema = require('../models/userSchema');
-var timezoneHelpers = require("../helpers/timezoneHelpers")
+var pollOptionSchema = require('../models/polls/pollOptionSchema');
 var htmlBuilder = require("./helpers/emailBodyBuilder").buildBody
 require('dotenv').config();
 var path = require('path');
@@ -61,7 +61,7 @@ router.post('/login', (req, res, next) => {
               return role.toUpperCase()
             })
             if (!user.emailVerified) {
-              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email.` });
+              res.status(404).send({ error: `Please verify your email! Check your inbox for a verification email. Sometimes this email may end up in your spam/junk/promotions folder.` });
               return;
             }
             let cookie = null
@@ -155,7 +155,8 @@ router.post('/password/forgot', async (req, res, next) => {
     let passwordChangeToken = crypto({length: 16})
     user.passwordChangeToken = passwordChangeToken;
     await user.save()
-    await sendPasswordChangeEmail(email, passwordChangeToken)
+    // do not wait on sending email
+    sendPasswordChangeEmail(email, passwordChangeToken)
     res.status(200).send({message: 'We have sent you an email with further instructions!'})
   } catch (e) {
     console.log("Error index.js#password/change", e)
@@ -177,7 +178,8 @@ router.get('/tempPassword/:to/:token', async (req, res, next) => {
       user.passwordHash = passwordHash
       user.passwordChangeToken = null // reset token to prevent multiple password changes with stale link
       await user.save()
-      await sendTemporaryPasswordEmail(email, newTempPass)
+      // do not wait on sending email
+      sendTemporaryPasswordEmail(email, newTempPass)
       res.status(200).send(htmlBuilder('Thanks!', 'Thank you for verifying your request for a password change! We will send you an email with a temporary password shortly.', 'Go To App', APP_LINK))
     } else {
       res.status(500).send(htmlBuilder('Whoops!', 'Your password change token could not be verified. Please contact support at onefootincollege@gmail.com', 'Go To App', APP_LINK))
@@ -213,6 +215,78 @@ router.get('/unsubscribe/:to/:token', async (req, res, next) => {
 
 router.get('/isLoggedIn', passport.authenticate('jwt', {session: false}), (req, res, next) => {
   res.json({message: "You have a fresh cookie!"});
+});
+
+router.get('/polls/:id', 
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+  try {
+    let id = req.params.id
+    let userRecord = await userSchema.findById(id)
+    await userRecord.populate('pollsQueued').execPopulate()
+    for (let poll of userRecord.pollsQueued) {
+      await poll.populate('options').execPopulate()
+    }
+    // send most recent 10 polls
+    let mostRecentTenPolls = userRecord.pollsQueued.slice(-10)
+    res.status(200).json({polls: mostRecentTenPolls})
+  } catch (e) {
+    console.log("poll fetch error" + e)
+    res.status(500).send({message: "polls fetch error" + e})
+  }
+});
+
+router.patch('/answerPoll/:pollId/:pollOptionId/:userId',
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+    let pollId = req.params.pollId
+    let pollOptionId = req.params.pollOptionId
+    let userId = req.params.userId
+    try {
+      let pollOption = await pollOptionSchema.findById(pollOptionId)
+      pollOption.responders.push(userId)
+      // remove user from poll queue
+      await pollOption.save()
+      let user = await userSchema.findById(userId)
+      if (!(user.pollsQueued.includes(pollId))) {
+        res.status(500).json({
+          error: 'This poll is not queued for this user'
+        })
+        return
+      }
+      user.pollsQueued.splice(user.pollsQueued.indexOf(pollId), 1)
+      await user.save()
+      res.status(200).json({
+        message: 'User\'s poll response was submitted'
+      })
+    } catch (e) {
+      console.log("poll answer error" + e)
+      res.status(500).send({message: "polls answer error" + e})
+    }
+});
+
+router.patch('/acknowledgePoll/:pollId/:userId',
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+    let pollId = req.params.pollId
+    let userId = req.params.userId
+    try {
+      let user = await userSchema.findById(userId)
+      if (!(user.pollsQueued.includes(pollId))) {
+        res.status(500).json({
+          error: 'This poll is not queued for this user'
+        })
+        return
+      }
+      user.pollsQueued.splice(user.pollsQueued.indexOf(pollId), 1)
+      await user.save()
+      res.status(200).json({
+        message: 'User\'s poll response was submitted'
+      })
+    } catch (e) {
+      console.log("poll answer error" + e)
+      res.status(500).send({message: "polls answer error" + e})
+    }
 });
 
 router.patch('/changeTimeZone/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
