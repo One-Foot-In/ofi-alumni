@@ -24,6 +24,7 @@ import AlumniWorkspace from './components/AlumniWorkspace';
 import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
 import Polls from './components/admin_dashboard/Polls';
+import Footer from './components/Footer'
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -95,44 +96,53 @@ let registerButtonGroup = (props) =>
   STORE SETUP
 */
 
-var alumniNavBarItems = (approved) => {
+var alumniNavBarItems = (approved, newRequestCount, unseenMessagesCount) => {
   let navBarItems = [
     {
         id: 'home',
         name: 'Home',
-        navLink: '/'
+        navLink: '/',
+        icon: 'home'
     },
     {
         id: 'profile',
         name: 'Profile',
-        navLink: '/profile'
+        navLink: '/profile',
+        icon: 'user'
     },
     {
         id: 'alumniDirectory',
         name: 'Alumni Directory',
-        navLink: '/alumniDirectory'
+        navLink: '/alumniDirectory',
+        icon: 'address book'
     },
     {
         id: 'mentorship',
         name: 'Mentorship',
-        navLink: '/mentorship'
+        navLink: '/mentorship',
+        icon: 'handshake',
+        notificationBubbleCounter: newRequestCount
     },
     {
         id: 'networking',
         name: 'Networking',
-        navLink: '/networking'
+        navLink: '/networking',
+        icon: 'comments',
+        notificationBubbleCounter: unseenMessagesCount
     },
     {
         id: 'workspaces',
         name: 'Workspaces',
-        navLink: '/workspaces'
+        navLink: '/workspaces',
+        icon: 'briefcase'
     }
   ]
   if (approved) {
     navBarItems.push({
         id: 'verification',
         name: 'Verify Alumni',
-        navLink: '/verify'
+        navLink: '/verify',
+        icon: 'users'
     })
   }
   return navBarItems;
@@ -174,39 +184,46 @@ var adminNavBarItems = () => {
   return navBarItems;
 }
 
-const studentNavBarItems = (isModerator) => {
+const studentNavBarItems = (isModerator, approvedRequestsCount) => {
   let navBarItems = [
     {
         id: 'home',
         name: 'Home',
-        navLink: '/'
+        navLink: '/',
+        icon: 'home'
     },
     {
         id: 'profile',
         name: 'Profile',
-        navLink: '/profile'
+        navLink: '/profile',
+        icon: 'user'
     },
     {
         id: 'alumniDirectory',
         name: 'Alumni Directory',
-        navLink: '/alumniDirectory'
+        navLink: '/alumniDirectory',
+        icon: 'address book'
     },
     {
         id: 'mentorship',
         name: 'Mentorship',
-        navLink: '/mentorship'
+        navLink: '/mentorship',
+        icon: 'handshake',
+        notificationBubbleCounter: approvedRequestsCount
     },
     {
       id: 'workspaces',
       name: 'Workspaces',
-      navLink: '/workspaces'
+      navLink: '/workspaces',
+      icon: 'briefcase'
     }
   ]
   if (isModerator) {
     navBarItems.push({
         id: 'verification',
         name: 'Verify Students',
-        navLink: '/verify'
+        navLink: '/verify',
+        icon: 'users'
     })
   }
   return navBarItems;
@@ -242,7 +259,10 @@ class App extends Component {
       approved: false,
       role: null,
       roleChanged: false,
-      userDetails: {}
+      userDetails: {},
+      newRequestsCount: 0,
+      unseenMessagesCount: 0,
+      approvedRequestsCount: 0
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
@@ -251,6 +271,7 @@ class App extends Component {
     this.renderLoggedInRoutes = this.renderLoggedInRoutes.bind(this);
     this.refreshProfile = this.refreshProfile.bind(this);
     this.liftRole = this.liftRole.bind(this);
+    this.refreshMenuPopupCounters = this.refreshMenuPopupCounters.bind(this);
   }
 
   async UNSAFE_componentWillMount() {
@@ -278,6 +299,8 @@ class App extends Component {
           userDetails: profile,
           approved: profile.approved,
           loggedIn: true
+        }, async () => {
+          await this.refreshMenuPopupCounters(role, profile._id)
         })
       } else {
         this.setState({
@@ -300,6 +323,24 @@ class App extends Component {
       userDetails: result.result,
       accessContexts: result.accessContexts
     })
+  }
+
+  async refreshMenuPopupCounters(role, id) {
+    if (role && role.length && id) {
+      if (role.includes(ALUMNI)) {
+        let newRequestsCountResponse = await makeCall({}, `/alumni/newRequestsCount/${id}`, 'get')
+        let unseenMessagesCountResponse = await makeCall({}, `/alumni/unseenMessagesCount/${id}`, 'get')
+        this.setState({
+          newRequestsCount: newRequestsCountResponse.newRequestsCount,
+          unseenMessagesCount: unseenMessagesCountResponse.unseenMessagesCount
+        })
+      } else {
+        let approvedRequestsCountResponse = await makeCall({}, `/student/approvedRequestsCount/${id}`, 'get')
+        this.setState({
+          approvedRequestsCount: approvedRequestsCountResponse.approvedRequestsCount
+        })
+      }
+    }
   }
 
   async fetchProfile(role, id) {
@@ -365,7 +406,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved)}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
                           activeItem={'home'}
                       />
                       <NewsFeed
@@ -383,7 +424,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved)}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
                           activeItem={'profile'}
                       />
                       <AlumniProfile
@@ -403,7 +444,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved)}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
                           activeItem={'alumniDirectory'}
                       />
                       <AlumniDirectory
@@ -423,12 +464,13 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved)}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
                           activeItem={'mentorship'}
                       />
                       <AlumniMentorship 
                           userDetails={this.state.userDetails}
                           refreshProfile={this.refreshProfile}
+                          refreshMenuPopupCounters={this.refreshMenuPopupCounters}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -441,11 +483,12 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved)}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
                           activeItem={'networking'}
                       />
                       <AlumniNetworking 
                           userDetails={this.state.userDetails}
+                          refreshMenuPopupCounters={this.refreshMenuPopupCounters}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -458,7 +501,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved)}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
                           activeItem={'workspaces'}
                       />
                       <AlumniWorkspace 
@@ -478,7 +521,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved)}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
                           activeItem={'verify'}
                       />
                         <AlumniVerification
@@ -503,7 +546,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
                           activeItem={'home'}
                       />
                       <NewsFeed
@@ -521,7 +564,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
                           activeItem={'profile'}
                       />
                       <StudentProfile
@@ -541,7 +584,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
                           activeItem={'alumniDirectory'}
                       />
                       <AlumniDirectory
@@ -561,11 +604,12 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
                           activeItem={'mentorship'}
                       />
                       <StudentMentorship 
                           userDetails={this.state.userDetails}
+                          refreshMenuPopupCounters={this.refreshMenuPopupCounters}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -578,7 +622,7 @@ class App extends Component {
                           userDetails={this.state.userDetails}
                           role={role}
                           timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.approved)}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
                           activeItem={'workspaces'}
                       />
                         <StudentWorkspace 
@@ -593,7 +637,7 @@ class App extends Component {
                     (this.state.userDetails.isModerator ?
                       <>
                         <Navbar
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator)}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
                           activeItem={'verification'}
                         />
                         <StudentVerification
@@ -849,6 +893,7 @@ class App extends Component {
             <Container>
               {this.renderScreens(this.state.role)}
             </Container>
+            <Footer/>
             </>
           }
           {this.state.roleChanged && 

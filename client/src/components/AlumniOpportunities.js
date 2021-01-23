@@ -272,6 +272,7 @@ export default function AlumniOpportunities(props) {
                             placeholder='Describe the opportunity, requirements, how this has benefitted you, etc...'
                             onChange={handleDescChange.bind(this)}
                             value={desc}
+                            maxLength="300"
                         />
                     </Form.Field>
                     <Form.Field

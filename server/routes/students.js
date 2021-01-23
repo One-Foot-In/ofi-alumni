@@ -23,6 +23,22 @@ async function isModerator(studentId) {
 router.post('/', async (req, res, next) => {
     try {
         const email = req.body.email;
+
+        if (!email) {
+            res.status(500).json({
+                error: 'No email was provided!'
+            })
+            return
+        }
+
+        let userRecord = await userSchema.findOne({email: email})
+        if (userRecord) {
+            res.status(500).json({
+                error: "There is already an existing account with this email!"
+            })
+            return
+        }
+
         const name = req.body.name;
         const grade = parseInt(req.body.grade);
         const password = req.body.password;
@@ -248,4 +264,16 @@ router.patch('/unbookmarkOpportunity/:studentId/:opportunityId', passport.authen
         res.status(500).send({'error' : e});
     }
 })
+
+router.get('/approvedRequestsCount/:studentId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let student = await studentSchema.findOne({_id: req.params.studentId})
+        let approvedRequestsCount = await requestSchema.count({student: student, status: 'Confirmed'})
+        res.status(200).send({approvedRequestsCount: approvedRequestsCount})
+    } catch (e) {
+        console.log("Error: student#approvedRequestsCount", e);
+        res.status(500).send({'error' : e});
+    }
+})
+
 module.exports = router;
