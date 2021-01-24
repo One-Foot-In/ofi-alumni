@@ -1,11 +1,8 @@
 // In this file you can configure migrate-mongo
 require('dotenv').config();
-console.log(process.env.DB)
 
 const config = {
   mongodb: {
-    // TODO: Update this with prod config
-
     
     url: (process.env.DBUSER && process.env.DBPASSWORD && process.env.DBHOST) ?  `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASSWORD}@${process.env.DBHOST}` : "mongodb://localhost:27017",
 
@@ -15,8 +12,6 @@ const config = {
     options: {
       useNewUrlParser: true, // removes a deprecation warning when connecting
       useUnifiedTopology: true, // removes a deprecating warning when connecting
-      //   connectTimeoutMS: 3600000, // increase connection timeout to 1 hour
-      //   socketTimeoutMS: 3600000, // increase socket timeout to 1 hour
     }
   },
 
