@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { connect } from 'react-redux';
-import { Container, Segment, Message , Button, Grid} from 'semantic-ui-react';
+import { Container, Segment, Message , Button, Grid, Modal } from 'semantic-ui-react';
 import { Route, BrowserRouter as Router, Switch, Redirect, Link } from 'react-router-dom'
 import Header from './components/Header';
 import LoginForm from './components/LoginForm';
@@ -25,6 +25,7 @@ import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
 import Polls from './components/admin_dashboard/Polls';
 import Footer from './components/Footer'
+import LandingPage from './LandingPage';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -262,7 +263,8 @@ class App extends Component {
       userDetails: {},
       newRequestsCount: 0,
       unseenMessagesCount: 0,
-      approvedRequestsCount: 0
+      approvedRequestsCount: 0,
+      loginModalOpen: false
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
@@ -272,6 +274,7 @@ class App extends Component {
     this.refreshProfile = this.refreshProfile.bind(this);
     this.liftRole = this.liftRole.bind(this);
     this.refreshMenuPopupCounters = this.refreshMenuPopupCounters.bind(this);
+    this.toggleLoginModal = this.toggleLoginModal.bind(this)
   }
 
   async UNSAFE_componentWillMount() {
@@ -315,6 +318,12 @@ class App extends Component {
         });
         console.log("Error: App#componentDidMount", e)
     }
+  }
+
+  toggleLoginModal() {
+    this.setState({
+      loginModalOpen: !this.state.loginModalOpen
+    })
   }
 
   async refreshProfile(role, id) {
@@ -841,12 +850,22 @@ class App extends Component {
                   />
               }
           />
-          <Route exact path={"/login"} render={(props) => 
-              <LoginForm
-                isLoggedIn={this.state.loggedIn}
-                completeLogin={this.completeLogin}
-                login={this.login}
-              />
+          <Route exact path={"/login"} render={(props) =>
+            <>
+              <Modal
+                closeIcon
+                open={this.state.loginModalOpen}
+                onClose={this.toggleLoginModal}
+              >
+                <LoginForm
+                  isLoggedIn={this.state.loggedIn}
+                  completeLogin={this.completeLogin}
+                  toggleLoginModal={this.toggleLoginModal}
+                  login={this.login}
+                />
+              </Modal>
+              <LandingPage/>
+            </>
             }
           />
           {this.renderLoggedInRoutes(role)}
@@ -882,18 +901,19 @@ class App extends Component {
               </Segment>
             </> :
             <>
-            <Header
-              loggedIn={this.state.loggedIn}
-              logout={this.logout}
-              school={this.state.userDetails && this.state.userDetails.school}
-              userId={this.state.userDetails && this.state.userDetails.user}
-              role={this.state.role}
-              liftRole={this.liftRole}
-            />
-            <Container>
-              {this.renderScreens(this.state.role)}
-            </Container>
-            <Footer/>
+              <Header
+                loggedIn={this.state.loggedIn}
+                logout={this.logout}
+                school={this.state.userDetails && this.state.userDetails.school}
+                userId={this.state.userDetails && this.state.userDetails.user}
+                role={this.state.role}
+                liftRole={this.liftRole}
+                toggleLoginModal={this.toggleLoginModal}
+              />
+              <Container>
+                {this.renderScreens(this.state.role)}
+              </Container>
+              <Footer/>
             </>
           }
           {this.state.roleChanged && 

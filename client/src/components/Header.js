@@ -204,6 +204,7 @@ export default class HeaderComponent extends Component {
                 <Button 
                     basic
                     color='orange'
+                    onClick={this.props.toggleLoginModal}
                 >
                     Log In
                 </Button>
@@ -223,9 +224,7 @@ export default class HeaderComponent extends Component {
         let imageLink = this.props.loggedIn && this.state.currRole !== 'ADMIN' && this.state.currRole !== 'COLLEGE_REP' ? 
             this.props.school.logoURL : require('./logo.png');
         return (
-                <>
-                <Image centered src={imageLink} size='small'/>
-                </>         
+            <Image centered src={imageLink} size='small'/>    
         )
     }
 
@@ -286,6 +285,7 @@ export default class HeaderComponent extends Component {
                 }}
                 columns={3}
                 centered
+                padded={false}
             >
                 <Grid.Row columns={"equal"}>
                     <Grid.Column width={5} textAlign='right' verticalAlign='middle'>
@@ -300,22 +300,24 @@ export default class HeaderComponent extends Component {
                         {this.renderLoginStateInfo()}
                     </Grid.Column>
                 </Grid.Row>
-                <Grid.Row columns={"equal"}>
-                    <Grid.Column textAlign='center'>
-                        {this.props.school && this.props.loggedIn &&
-                            <Header as='h4'>
-                                {this.props.school.name}
-                                {
-                                    (process.env.REACT_APP_IS_BETA && process.env.REACT_APP_IS_BETA.toLowerCase() === 'true') ? 
-                                    <Label color='yellow'>
-                                        beta
-                                    </Label>
-                                    : null
-                                }
-                            </Header>
-                        }  
-                    </Grid.Column>
-                </Grid.Row>
+                { this.props.loggedIn ?
+                    <Grid.Row columns={"equal"}>
+                        <Grid.Column textAlign='center'>
+                            {this.props.school && this.props.loggedIn &&
+                                <Header as='h4'>
+                                    {this.props.school.name}
+                                    {
+                                        (process.env.REACT_APP_IS_BETA && process.env.REACT_APP_IS_BETA.toLowerCase() === 'true') ? 
+                                        <Label color='yellow'>
+                                            beta
+                                        </Label>
+                                        : null
+                                    }
+                                </Header>
+                            }  
+                        </Grid.Column>
+                    </Grid.Row> : null
+                }
             </Grid>
         )
     }
