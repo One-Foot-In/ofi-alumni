@@ -25,7 +25,7 @@ import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
 import Polls from './components/admin_dashboard/Polls';
 import Footer from './components/Footer'
-import LandingPage from './LandingPage';
+import LandingPage from './landingPageContent/LandingPage';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
