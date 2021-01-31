@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { connect } from 'react-redux';
-import { Container, Segment, Message , Button, Grid, Modal } from 'semantic-ui-react';
+import { Container, Segment, Message , Button, Grid } from 'semantic-ui-react';
 import { Route, BrowserRouter as Router, Switch, Redirect, Link } from 'react-router-dom'
 import Header from './components/Header';
-import LoginForm from './components/LoginForm';
 import AlumniDirectory from './components/AlumniDirectory'
 import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
@@ -264,7 +263,6 @@ class App extends Component {
       newRequestsCount: 0,
       unseenMessagesCount: 0,
       approvedRequestsCount: 0,
-      loginModalOpen: false
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
@@ -274,7 +272,6 @@ class App extends Component {
     this.refreshProfile = this.refreshProfile.bind(this);
     this.liftRole = this.liftRole.bind(this);
     this.refreshMenuPopupCounters = this.refreshMenuPopupCounters.bind(this);
-    this.toggleLoginModal = this.toggleLoginModal.bind(this)
   }
 
   async UNSAFE_componentWillMount() {
@@ -318,12 +315,6 @@ class App extends Component {
         });
         console.log("Error: App#componentDidMount", e)
     }
-  }
-
-  toggleLoginModal() {
-    this.setState({
-      loginModalOpen: !this.state.loginModalOpen
-    })
   }
 
   async refreshProfile(role, id) {
@@ -851,21 +842,7 @@ class App extends Component {
               }
           />
           <Route exact path={"/login"} render={(props) =>
-            <>
-              <Modal
-                closeIcon
-                open={this.state.loginModalOpen}
-                onClose={this.toggleLoginModal}
-              >
-                <LoginForm
-                  isLoggedIn={this.state.loggedIn}
-                  completeLogin={this.completeLogin}
-                  toggleLoginModal={this.toggleLoginModal}
-                  login={this.login}
-                />
-              </Modal>
-              <LandingPage/>
-            </>
+              this.state.loggedIn ? <Redirect to={"/"}/> : <LandingPage/>
             }
           />
           {this.renderLoggedInRoutes(role)}
@@ -908,7 +885,8 @@ class App extends Component {
                 userId={this.state.userDetails && this.state.userDetails.user}
                 role={this.state.role}
                 liftRole={this.liftRole}
-                toggleLoginModal={this.toggleLoginModal}
+                completeLogin={this.completeLogin}
+                login={this.login}
               />
               <Container>
                 {this.renderScreens(this.state.role)}

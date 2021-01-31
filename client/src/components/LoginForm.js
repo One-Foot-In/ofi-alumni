@@ -86,7 +86,7 @@ class LoginForm extends React.Component {
                     loginLoading: false,
                 }, () => {
                     this.props.completeLogin();
-                    this.toggleLoginModal();
+                    this.props.toggleLoginModal();
                     this.props.login();
                 });
             }
