@@ -298,19 +298,15 @@ router.post('/approve/', passport.authenticate('jwt', {session: false}), async(r
     }
 });
 
-router.get('/one/:id', async (req, res, next) => {
+router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        let alumnus = await alumniSchema.findOne();
-        console.log(alumnus);
-        // console.log(alumniSchema);
-        res.status(200).send({hello: 'hi'})
-        // let alumnus = await alumniSchema.findOne({_id: req.params.id}).populate('school')
-        // const userRecord = await userSchema.findById(alumnus.user)
-        // alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
-        // res.json({
-        //     result : alumnus,
-        //     accessContexts: userRecord.accessContexts || ["INTRASCHOOL"]
-        // });
+        let alumnus = await alumniSchema.findOne({_id: req.params.id}).populate('school')
+        const userRecord = await userSchema.findById(alumnus.user)
+        alumnus.availabilities = timezoneHelpers.applyTimezone(alumnus.availabilities, alumnus.timeZone)
+        res.json({
+            result : alumnus,
+            accessContexts: userRecord.accessContexts || ["INTRASCHOOL"]
+        });
     } catch (e) {
         console.log("Error: alumni#oneAlumni", e);
         res.status(500).send({'error' : e});
