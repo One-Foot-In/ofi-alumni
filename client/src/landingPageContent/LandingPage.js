@@ -1,25 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 import { Container, Menu, Segment } from 'semantic-ui-react'
 import OurStory from "./OurStory"
 import AboutUs from "./AboutUs"
 import JoinUs from "./JoinUs"
 import FAQs from "./FAQs"
 
-const mobileWidthThreshold = 500
-
 export default function LandingPage () {
     const [activeItem, setActiveItem] = useState("aboutUs")
-    const viewPortWidth = (window && window.innerWidth) || mobileWidthThreshold
 
     const handleItemClick = (e, { id }) => setActiveItem(id)
     return (
         <Container
             centered
             fluid
-            style={{
-                overflow: 'auto',
-                maxHeight: (viewPortWidth < mobileWidthThreshold) ? 250 : 1000,
-            }}  
         >
             <div
                 style={{
