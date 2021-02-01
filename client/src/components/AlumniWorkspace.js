@@ -54,7 +54,6 @@ export default class AlumniWorkspace extends Component {
         } else {
             return (
                 colleges.map(college => {
-                    console.log(college._id)
                     return(
                             <>
                                 <Card
