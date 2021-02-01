@@ -6,6 +6,7 @@ var bcrypt = require('bcrypt');
 var crypto = require('crypto-random-string');
 var alumniSchema = require('../models/alumniSchema');
 var studentSchema = require('../models/studentSchema');
+var schoolSchema = require('../models/schoolSchema');
 var adminSchema = require('../models/adminSchema');
 var collegeRepSchema = require('../models/collegeRepSchema');
 var userSchema = require('../models/userSchema');
@@ -309,6 +310,22 @@ router.patch('/changeTimeZone/', passport.authenticate('jwt', {session: false}),
   } catch (e) {
     console.log("Change time zone error" + e)
     res.status(500).send({message: "change time zone error" + e})
+  }
+})
+
+router.get('/totalCounts', async (req, res, next) => {  
+  try {
+      let studentsCount = await studentSchema.count()
+      let alumniCount = await alumniSchema.count()
+      let schoolsCount = await schoolSchema.count()
+      res.status(200).json({
+          studentsCount,
+          alumniCount,
+          schoolsCount
+      })
+  } catch (e) {
+      console.log("Error: index#totalCount", e);
+      res.status(500).send({'error' : e});
   }
 })
 

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Menu, Segment } from 'semantic-ui-react'
-import Team from "./Team"
 import OurStory from "./OurStory"
-import GetInvolved from "./GetInvolved"
+import AboutUs from "./AboutUs"
+import JoinUs from "./JoinUs"
 import FAQs from "./FAQs"
 
 const mobileWidthThreshold = 500
 
 export default function LandingPage () {
-    const [activeItem, setActiveItem] = useState("ourStory")
+    const [activeItem, setActiveItem] = useState("aboutUs")
     const viewPortWidth = (window && window.innerWidth) || mobileWidthThreshold
 
     const handleItemClick = (e, { id }) => setActiveItem(id)
@@ -28,21 +28,21 @@ export default function LandingPage () {
             >
                 <Menu attached='top' tabular stackable>
                     <Menu.Item
+                        id='aboutUs'
+                        name='About Us'
+                        active={activeItem === 'aboutUs'}
+                        onClick={handleItemClick.bind(this)}
+                    />
+                    <Menu.Item
+                        id='joinUs'
+                        name='Join Us'
+                        active={activeItem === 'joinUs'}
+                        onClick={handleItemClick.bind(this)}
+                    />
+                     <Menu.Item
                         id='ourStory'
-                        name='Our Story'
+                        name='OurStory'
                         active={activeItem === 'ourStory'}
-                        onClick={handleItemClick.bind(this)}
-                    />
-                    <Menu.Item
-                        id='team'
-                        name='Team'
-                        active={activeItem === 'team'}
-                        onClick={handleItemClick.bind(this)}
-                    />
-                    <Menu.Item
-                        id='getInvolved'
-                        name='Get Involved'
-                        active={activeItem === 'getInvolved'}
                         onClick={handleItemClick.bind(this)}
                     />
                     <Menu.Item
@@ -56,16 +56,16 @@ export default function LandingPage () {
                     attached='bottom'
                 >
                     {
+                        activeItem === 'aboutUs' &&
+                        <AboutUs/>
+                    }
+                    {
+                        activeItem === 'joinUs' &&
+                        <JoinUs/>
+                    }
+                    {
                         activeItem === 'ourStory' &&
                         <OurStory/>
-                    }
-                    {
-                        activeItem === 'team' &&
-                        <Team/>
-                    }
-                    {
-                        activeItem === 'getInvolved' &&
-                        <GetInvolved/>
                     }
                     {
                         activeItem === 'faqs' &&
