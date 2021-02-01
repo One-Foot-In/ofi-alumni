@@ -16,6 +16,8 @@ const app = createServer();
 beforeAll(async () => {
     process.env.NODE_ENV = 'test';
     mongoose.connect("mongodb://localhost:27017/test-test", { useNewUrlParser: true });
+    // NOTE: The seed call currently has a chance of failing, so you may need to rerun
+    //       the test if you run into this issue.
     await request(app).get('/util/seed/');
 });
 
