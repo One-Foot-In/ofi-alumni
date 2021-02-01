@@ -15,7 +15,6 @@ export default class AlumniWorkspace extends Component {
         super(props)
         this.state = {
             activeItem: 'collegesAccepted',
-            //do I even need to bother with the state of things given my 
             collegesAccepted: [],
             
         }
@@ -24,7 +23,6 @@ export default class AlumniWorkspace extends Component {
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
 
-    //the prop you want is userDetails
     componentWillMount(){
         this.getCollegesAcceptedInto();
     }
@@ -33,11 +31,9 @@ export default class AlumniWorkspace extends Component {
         const theEndPoint = `/alumni/collegesAcceptedInto/all/${this.props.userDetails._id}`;
         makeCall({}, theEndPoint, `GET`)
         .then(res => {
-            //you'll need a condition to see whether or not the response is ok
             this.setState({
                 collegesAccepted: res
             })
-            //this.updateState()
         })
         .catch(e => {
             console.log('Error #getCollegeAcceptedInto', e)
@@ -46,7 +42,6 @@ export default class AlumniWorkspace extends Component {
 
     renderCollegesAcceptedInto = () => {
         let colleges = this.state.collegesAccepted;
-        //console.log(colleges);
         if(this.state.collegeAcceptedInto == [] || this.state.collegesAccepted == null){
             return(
                 <Message info>
@@ -84,20 +79,6 @@ export default class AlumniWorkspace extends Component {
         }
 
     render(){
-        /*const handleRenderFunction = () => {
-            if (this.state.collegesAccepted === []){
-                return(
-                    <Message info>
-                    <Message.Header>No colleges in accepted college list.</Message.Header>
-                    {
-                        <Message.Content>Please add any colleges you have been offered an admission into </Message.Content>
-                    }
-                    </Message>
-                )
-            }else{
-                this.renderCollegesAcceptedInto()
-            }
-        } */
         return(
             <>
             <div>
