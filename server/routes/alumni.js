@@ -601,12 +601,17 @@ router.patch('/collegesAcceptedInto/delete/:id', /*passport.authenticate('jwt', 
 
 router.get('/collegesAcceptedInto/all/:id', /*passport.authenticate('jwt', {session: false})*/ async (req, res, next) =>{
     try{
-        const alumni = await alumniSchema.findOne({_id: req.params.id});
+         const alumni = await alumniSchema
+            .findOne({_id: req.params.id})
+            .populate('collegesAcceptedInto')
+            .exec();
         let collegesAcceptedInto = alumni.collegesAcceptedInto;
+        console.log(collegesAcceptedInto);
         res.status(200).json(collegesAcceptedInto)
     }
     catch (e){
         console.log('Unable to get collegesAcceptedInto at this time')
+        console.log(e)
         res.status(500).json({'error': e})
     }
 })
