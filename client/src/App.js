@@ -121,6 +121,7 @@ var alumniNavBarItems = (approved) => {
         name: 'Networking',
         navLink: '/networking'
     },
+    //workspace is where collegeAcceptedInto lives
     {
         id: 'workspaces',
         name: 'Workspaces',
