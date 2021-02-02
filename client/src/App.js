@@ -20,7 +20,8 @@ import CollegesList from './components/admin_dashboard/CollegesList';
 import SchoolsList from './components/admin_dashboard/SchoolsList';
 import NewsFeed from './components/NewsFeed'
 import Signup from './components/Signup';
-
+import AlumniWorkspace from './components/AlumniWorkspace';
+import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
 
 export const ALUMNI = "ALUMNI"
@@ -119,6 +120,11 @@ var alumniNavBarItems = (approved) => {
         id: 'networking',
         name: 'Networking',
         navLink: '/networking'
+    },
+    {
+        id: 'workspaces',
+        name: 'Workspaces',
+        navLink: '/workspaces'
     }
   ]
   if (approved) {
@@ -183,6 +189,11 @@ const studentNavBarItems = (isModerator) => {
         id: 'mentorship',
         name: 'Mentorship',
         navLink: '/mentorship'
+    },
+    {
+      id: 'workspaces',
+      name: 'Workspaces',
+      navLink: '/workspaces'
     }
   ]
   if (isModerator) {
@@ -432,6 +443,24 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          <Route exact path = {`/workspaces`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+
           { this.state.userDetails.approved &&
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
@@ -527,6 +556,23 @@ class App extends Component {
                           activeItem={'mentorship'}
                       />
                       <StudentMentorship 
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={studentNavBarItems(this.state.approved)}
+                          activeItem={'workspaces'}
+                      />
+                      <StudentWorkspace 
                           userDetails={this.state.userDetails}
                       />
                   </> :

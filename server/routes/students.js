@@ -171,14 +171,11 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
 router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         let student = await studentSchema.findOne({_id: req.params.id});
-        const existingColleges = req.body.existingColleges;
+        const existingColleges = req.body.existingColleges || [];
         const newColleges = req.body.newColleges || [];
-        console.log(existingColleges)
-        console.log(newColleges)
         let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
-        student.interests = getUniqueCollege([...student.collegeShortList, ...collegesToAdd]);
+        student.collegeShortList = getUniqueCollege([...student.collegeShortList, ...collegesToAdd]);
         await student.save();
-        console.log(student.collegeShortList)
         res.status(200).json({message: `you have successfully added the colleges to your short list`})
     } catch(e){
         console.log('Error: cannot add college');
@@ -210,6 +207,18 @@ router.patch('/collegeShortList/remove/:id', /*passport.authenticate('jwt', {ses
     } catch(e){
         console.log("Error: College can't be removed at this time")
         res.status(500).json({"error": e})
+    }
+})
+
+router.get('/collegeShortList/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+    try{
+        console.log(req.params.id)
+        const student = await studentSchema.findOne({_id: req.params.id}).populate('collegeShortList').exec();
+        console.log(student)
+        res.status(200).json(student.collegeShortList)
+    } catch(e){
+        console.log("Error: can't find a college shortlist", e);
+        res.status(500).send({'error' : e});
     }
 })
 
