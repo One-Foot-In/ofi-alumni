@@ -9,6 +9,7 @@ import CompanyUpdateModal from './alumni_profile_update_modals/CompanyUpdateModa
 import MajorUpdateModal from './alumni_profile_update_modals/MajorUpdateModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import { makeCall } from "../apis";
+import FootyPoints from './FootyPoints';
 
 const ALUMNI = "ALUMNI"
 
@@ -426,6 +427,12 @@ export default class AlumniProfile extends Component {
                             >
                                 {this.getInterests()}
                             </Segment>
+                        </Card.Content>
+                }
+                {
+                    isViewOnly ? null : 
+                        <Card.Content>
+                            <FootyPoints points={this.props.details.footyPoints}></FootyPoints>
                         </Card.Content>
                 }
                 {
