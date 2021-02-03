@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www",
-    "test": "mocha"
+    "test": "jest"
   },
   "dependencies": {
     "@sendgrid/mail": "^6.5.5",
@@ -22,7 +22,9 @@
     "express": "^4.16.4",
     "file-type": "^14.6.2",
     "http-errors": "^1.6.3",
+    "jest": "^26.6.3",
     "jsonwebtoken": "^8.5.1",
+    "migrate-mongo": "^8.1.4",
     "mocha": "^7.2.0",
     "moment": "^2.27.0",
     "mongodb": "^3.5.9",
@@ -32,6 +34,7 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
-    "superagent": "^5.3.1"
+    "superagent": "^5.3.1",
+    "supertest": "^6.1.1"
   }
 }
