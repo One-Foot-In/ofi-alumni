@@ -130,4 +130,21 @@ router.get('/colleges/:country', async (req, res) => {
   }
 })
 
+router.get('/colleges', async (req, res) => {
+  try {
+    let colleges = await collegeSchema.find({})
+    let collegeOptions = colleges.map( college => {
+      return {
+        key: college.name,
+        value: college._id,
+        text: `${college.name} (${college.country})`,
+      }
+    })
+    res.status(200).send(collegeOptions)
+  } catch (e) {
+    console.error("Error dropdown.js#collegeOptions", e)
+    res.status(500).json({success:false, error: e})
+  }
+})
+
 module.exports = router;

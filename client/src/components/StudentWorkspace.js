@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Message, Menu, Card, Grid, Label} from 'semantic-ui-react';
+import { Message, Menu, Card, Grid, Label, Dropdown, Button, Icon} from 'semantic-ui-react';
 import { makeCall } from '../apis'
 
 /*
@@ -12,20 +12,24 @@ export default class StudentWorkspace extends Component {
         super(props)
         this.state = {
             activeItem: 'collegeShortList',
-            collegeShortList: []
+            collegeShortList: [],
+            allExistingColleges: [],
+            selectedCollege = ''
         }
 
         this.getCollegeShortList = this.getCollegeShortList.bind(this)
+        this.getAllExistingColleges = this.getAllExistingColleges.bind(this)
         this.renderCollegeShortList = this.renderCollegeShortList.bind(this)
         this.handleMenuClick = this.handleMenuClick.bind(this)
     }
 
     async componentWillMount() {
         await this.getCollegeShortList();
+        await this.getAllExistingColleges();
     }
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
-
+   
     async getCollegeShortList() {
         await makeCall({}, `/student/collegeShortList/${this.props.userDetails._id}`, 'get')
         .then(res => {
@@ -34,7 +38,19 @@ export default class StudentWorkspace extends Component {
             })
         })
         .catch(e => {
-            console.log("Error", e);
+            console.log("Error, couldn't get collegeShortList", e);
+        })
+    }
+
+    async getAllExistingColleges() {
+        await makeCall({}, `/drop/colleges`, 'get')
+        .then(res => {
+            this.setState({
+                allExistingColleges: res
+            })
+        })
+        .catch(e => {
+            console.log("Error, couldn't get all existing colleges", e);
         })
     }
 
@@ -77,6 +93,9 @@ export default class StudentWorkspace extends Component {
     }
     
     render() {
+        let allColleges = this.state.allExistingColleges
+        const allOptions = allColleges.map(({ key, value }) => ({ text: key, value: value}))
+
         return(
             <>
             <Menu>
@@ -92,6 +111,24 @@ export default class StudentWorkspace extends Component {
             </Menu>
             <Grid stackable divided="vertically">
                 <Grid.Row centered> {this.props.userDetails.name}'s College ShortList </Grid.Row>
+                <Grid.Row columns={2}>
+                <Grid.Column>
+                    <Dropdown
+                            placeholder="Search for a college to add to your shortlist"
+                            style={{'margin': '5px'}}
+                            fluid
+                            search
+                            selection
+                            options={allOptions}
+                    />
+                </Grid.Column>
+                <Button     
+                    color="blue"
+                    type="button"
+                    size="mini">  
+                    <Icon name="add" style={{'margin': '3px'}}></Icon> 
+                </Button>
+                </Grid.Row>
                 {this.renderCollegeShortList()}
             </Grid>
             </>
