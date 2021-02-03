@@ -16,7 +16,7 @@ export default function FAQs () {
           <Accordion.Title
             active={activeIndex === 0}
             index={0}
-            onClick={handleItemClick.bind(this)}
+            onClick={handleItemClick}
           >
             <Icon name='dropdown' />
               How can my school get involved?

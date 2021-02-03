@@ -14,6 +14,7 @@ export default function JoinUs (props) {
                     setSendingRequest(false)
                 } else {
                     // TODO: error
+                    // Add error toast when we introduce toasts to system
                     setSendingRequest(false)
                 }
             })
