@@ -37,7 +37,8 @@ afterAll(async () => {
         const collection = mongoose.connection.collections[collectionName];
         await collection.deleteMany();
     }
-    mongoose.connection.close();
+    await mongoose.connection.close();
+    delete process.env.NODE_ENV
 });
 
 test('8 footy points added for new opportunity post', async () => {
