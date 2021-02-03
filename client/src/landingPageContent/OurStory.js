@@ -1,14 +1,16 @@
 import React from 'react';
 import { Grid, Card, Image, Transition, Segment, Header, Container } from 'semantic-ui-react'
+import {darkBlack, black} from "../colors"
 
 export default function OurStory () {
     return (
         <Container>
             <Grid>
-                <Grid.Row>
+                <Grid.Row style={{margin: '0 10px 0 10px'}}>
                     <Transition transitionOnMount={true} animation='fade down' duration={2000}>
                         <Segment
-                            padded
+                            inverted
+                            style={{backgroundColor: darkBlack}}
                         >
                             <Header as='h2'>
                                 The Genesis
@@ -25,7 +27,7 @@ export default function OurStory () {
                     >
                         <Transition transitionOnMount={true} animation='fade down' duration={2000}>
                             <Card>
-                                <Image src='https://placedog.net/640/480?random' wrapped ui={false} />
+                                <Image src={require('./image_assets/reshad.jpg')} wrapped ui={false} />
                                 <Card.Content>
                                 <Card.Header>Reshad</Card.Header>
                                 <Card.Meta>
@@ -34,10 +36,11 @@ export default function OurStory () {
                                 <Card.Description>
                                     <i>
                                         <p>
-                                        “I’m a Bangladeshi citizen who tumbled through a mess of application strategies to end up in college in the Boston area in 2014! The motivation, comfort, and guidance I was able to find during the application process without a doubt helped me secure an education in the United States. Coming from a family of limited means, I was incredibly grateful for the college experience I was able to enjoy, as a result of crowdsourcing guidance from my near-peers!
+                                            “I tumbled through a mess of application strategies to end up attending college in the Boston area in 2014. The motivation, assurance, and guidance I was able to find in my near-peer mentors during the application process without a doubt helped me secure an education in the United States. Coming from a family of limited means, I was incredibly grateful for the college experience I was able to enjoy, as a result of crowdsourcing guidance from my near-peers!
                                         </p>
                                         <p>
-                                            This impetus to do pay mentorship forward, and streamline the flow of information so that you, as a student, are able to get the information you need, when you need it, was the impetus for me to co-found One Foot In. I believe near-peers are the best resources when it comes to providing guidance, motivation, and any other kind of counseling when it comes to you figuring out where you want to study, how you could be better using your time, or if you just want a peek into the catalogues of all career paths that your past generations of students around the world have embarked on.
+                                            The drive do pay mentorship forward and streamline the flow of information so that you, as a student, are able to get the information you need, when you need it, was the impetus for me to found One Foot In.
+                                            I believe near-peers are the best resources when it comes to providing relevant guidance counseling as you are drafting up your plans beyond high school. Take a peek into the catalogues of all career paths that your past generations of students around the world have embarked on, and find what inspires you.
                                         </p>
                                         <p>
                                             I believe One Foot In will serve as the community that can connect you to your near-peers, and motivate you to unlock the best version of yourself. I look forward to seeing you on the platform!”
@@ -53,7 +56,7 @@ export default function OurStory () {
                     >
                         <Transition transitionOnMount={true} animation='fade down' duration={2000}>
                             <Card>
-                                <Image src='https://placedog.net/640/480?random' wrapped ui={false} />
+                                <Image src={require('./image_assets/mir.jpg')} wrapped ui={false} />
                                 <Card.Content>
                                 <Card.Header>Mir</Card.Header>
                                 <Card.Meta>

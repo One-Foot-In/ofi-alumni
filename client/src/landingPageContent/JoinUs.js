@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Statistic, Transition, Segment, Step, Icon, Header } from 'semantic-ui-react'
+import { Container, Statistic, Transition, Segment, Step, Icon, Header, Image } from 'semantic-ui-react'
 import { makeCall } from '../apis';
+import {black, darkBlack, grey} from "../colors"
 
 export default function JoinUs (props) {
     const [counts, setCounts] = useState({})
@@ -28,6 +29,7 @@ export default function JoinUs (props) {
             <Segment
                 loading={sendingRequest}
                 textAlign='center'
+                style={{backgroundColor: grey}}
             >
                 <Transition transitionOnMount={true} animation='fade right' duration={1000}>
                     <Statistic.Group
@@ -55,17 +57,25 @@ export default function JoinUs (props) {
                 </Transition>
             </Segment>
             <Transition transitionOnMount={true} animation='fade down' duration={2000}>
-                <Segment>
+                <Segment
+                    textAlign='center'
+                    inverted
+                    style={{backgroundColor: darkBlack}}
+                >
                     <Header as='h2'>
                         What you'll get
                     </Header>
+                    <Image floated='left' src={require('./image_assets/what_you_will_get.png')} size='large' />
                     <p>
                         First and foremost - you’ll have access to your school’s alumni network. Because individual schools vary immensely in terms of how well they maintain this, we want to unlock massive dormant opportunities in these connections. Our product also lets students interact with these mentors (and other students) through our native application. Soon, students will be able to access mentors from other schools in their region and those outside their regions as well. In essence, we’re part LinkedIn (for the connections), part Facebook (the interactional component) and part admissions forums (for the content and information). Power of three trends bundled in one purpose-built platform, made by folks with a deep mission and comprising mentors that have opted in proactively to give back equates to a powerful self-reinforcing engine that hopefully enables students to reach their fullest potential. 
                     </p>
                 </Segment>
             </Transition>
             <Transition transitionOnMount={true} animation='fade down' duration={2000}>
-                <Segment>
+                <Segment
+                    inverted
+                    style={{backgroundColor: black}}
+                >
                     <Header as='h2'>
                         Why we think you could benefit from it
                     </Header>
@@ -111,15 +121,6 @@ export default function JoinUs (props) {
                             </Step.Content>
                         </Step>
                     </Step.Group>
-                </Segment>
-            </Transition>
-            <Transition transitionOnMount={true} animation='fade down' duration={2000}>
-                <Segment>
-                    <Header as='h2'>
-                        Pricing
-                    </Header>
-                    <p>We bring to you a host of free resources as a student, including all resources within your own school's network! To avail our premium resources, we charge students <b>$4.99 a month</b> after the first month.</p>
-                    <p>Alumni may use this platform for free!</p>
                 </Segment>
             </Transition>
         </Container>

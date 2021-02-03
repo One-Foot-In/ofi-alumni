@@ -822,11 +822,15 @@ class App extends Component {
           <Route exact path={'/register'} render={
               (props) =>
               <>
-                  {registerButtonGroup(props)}
+                  {
+                    this.state.loggedIn ? <Redirect to={"/"}/> :
+                    registerButtonGroup(props)
+                  }
               </>
           }/>
           <Route exact path={`/register/alumni`} render={
-              (props) => 
+              (props) =>
+                  this.state.loggedIn ? <Redirect to={"/"}/> : 
                   <Signup
                       isAlumni={true}
                       match={props}
@@ -835,7 +839,8 @@ class App extends Component {
           />
           <Route exact path={`/register/student`} render={
               (props) => 
-                  <Signup
+                this.state.loggedIn ? <Redirect to={"/"}/> :
+                <Signup
                       isAlumni={false}
                       match={props}
                   />

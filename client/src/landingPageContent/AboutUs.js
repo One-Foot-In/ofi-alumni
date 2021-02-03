@@ -1,17 +1,22 @@
 import React from 'react';
-import { Container, Step, Icon, Transition, Header, Segment } from 'semantic-ui-react'
+import { Container, Step, Icon, Transition, Header, Segment, Image } from 'semantic-ui-react'
+import {black, darkBlack} from "../colors"
 
 export default function AboutUs() {
     return (
         <Container>
             <Segment.Group stacked>
                 <Transition transitionOnMount={true} animation='fade down' duration={1000}>
-                    <Segment>
+                    <Segment
+                        inverted
+                        style={{backgroundColor: black}}
+                    >
                         <Header as='h2'>
                             The Problem
                         </Header>
+                        <Image floated='left' src={require('./image_assets/the_problem.png')} size='large' />
                         <p>
-                        Access to quality education is as much of a financial problem as it is about access to the right information. We live in an increasingly globalized world where the rapid proliferation of the internet and online forums have opened up channels of communication with a quantum leap over the past decade and consequently the average person is now fewer degrees of separation away from each other than ever before. It is now easier to access the world’s information and connect with people across the globe than ever before and yet there are silos and closed networks where the participants are structurally marginalized. We believe this problem is particularly pronounced when it comes to education and are on a mission to attack it. 
+                            Access to quality education is as much of a financial problem as it is about access to the right information. We live in an increasingly globalized world where the rapid proliferation of the internet and online forums have opened up channels of communication with a quantum leap over the past decade and consequently the average person is now fewer degrees of separation away from each other than ever before. It is now easier to access the world’s information and connect with people across the globe than ever before and yet there are silos and closed networks where the participants are structurally marginalized. We believe this problem is particularly pronounced when it comes to education and are on a mission to attack it. 
                         </p>
                         <p>
                             We target primarily students that have access to the infrastructure and often the means to pursue the best education (often through the myriads of generous scholarships from philanthropists and institutions alike) but lack the following:
@@ -49,10 +54,14 @@ export default function AboutUs() {
                     </Segment>
                 </Transition>
                 <Transition transitionOnMount={true} animation='fade down' duration={2000}>
-                    <Segment>
+                    <Segment
+                        inverted
+                        style={{backgroundColor: darkBlack}}
+                    >
                         <Header as='h2'>
                             The Solution
                         </Header>
+                        <Image floated='right' src={require('./image_assets/the_solution.png')} size='large' />
                         <p>
                             Enter One Foot In -- a near-peer mentor network where students are able to interact with alumni from their own schools and other schools in similar domains, all in a moderated platform, with access to the most crucial information and a way to connect with like-minded folks and mentors alike in a mission-driven domain. 
                         </p>
@@ -65,10 +74,14 @@ export default function AboutUs() {
                     </Segment>
                 </Transition>
                 <Transition transitionOnMount={true} animation='fade down' duration={2000}>
-                    <Segment>
+                    <Segment
+                        inverted
+                        style={{backgroundColor: black}}
+                    >
                         <Header as='h2'>
                             Why now
                         </Header>
+                        <Image floated='left' src={require('./image_assets/why_now.png')} size='large' />
                         <p>
                             2020 has been a pivotal year in many ways, and diversity & inclusion have fortunately been in the spotlight on numerous occasions as we rethink if our nation and our world is systematically structured to enable anyone, from any background to have fair access to opportunity and access to the most basic human needs - safety, education, necessities, shelter, healthcare, and justice.
                         </p>
@@ -78,10 +91,14 @@ export default function AboutUs() {
                     </Segment>
                 </Transition>
                 <Transition transitionOnMount={true} animation='fade down' duration={2000}>
-                    <Segment>
+                    <Segment
+                        inverted
+                        style={{backgroundColor: darkBlack}}
+                    >
                         <Header as='h2'>
                             Where we come in
                         </Header>
+                        <Image floated='right' src={require('./image_assets/where_we_come_in.png')} size='large' />
                         <p>
                             We’ve been at it at OFI for almost 4 years with the central mantra to provide access to information to high school students but Covid has made us think long and hard about our approach. While the goal has always remained the same, we’ve been flexible in our approach.
                         </p>

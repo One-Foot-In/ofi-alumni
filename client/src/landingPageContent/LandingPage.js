@@ -24,25 +24,25 @@ export default function LandingPage () {
                         id='aboutUs'
                         name='About Us'
                         active={activeItem === 'aboutUs'}
-                        onClick={handleItemClick.bind(this)}
+                        onClick={handleItemClick}
                     />
                     <Menu.Item
                         id='joinUs'
                         name='Join Us'
                         active={activeItem === 'joinUs'}
-                        onClick={handleItemClick.bind(this)}
+                        onClick={handleItemClick}
                     />
                      <Menu.Item
                         id='ourStory'
                         name='OurStory'
                         active={activeItem === 'ourStory'}
-                        onClick={handleItemClick.bind(this)}
+                        onClick={handleItemClick}
                     />
                     <Menu.Item
                         id='faqs'
                         name='FAQs'
                         active={activeItem === 'faqs'}
-                        onClick={handleItemClick.bind(this)}
+                        onClick={handleItemClick}
                     />
                 </Menu>
                 <Segment
