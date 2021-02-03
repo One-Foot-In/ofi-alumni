@@ -14,7 +14,7 @@ export default class StudentWorkspace extends Component {
             activeItem: 'collegeShortList',
             collegeShortList: [],
             allExistingColleges: [],
-            selectedCollege = ''
+            selectedCollege: ''
         }
 
         this.getCollegeShortList = this.getCollegeShortList.bind(this)
