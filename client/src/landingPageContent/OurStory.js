@@ -36,14 +36,16 @@ export default function OurStory () {
                                 <Card.Description>
                                     <i>
                                         <p>
-                                            “I tumbled through a mess of application strategies to end up attending college in the Boston area in 2014. The motivation, assurance, and guidance I was able to find in my near-peer mentors during the application process without a doubt helped me secure an education in the United States. Coming from a family of limited means, I was incredibly grateful for the college experience I was able to enjoy, as a result of crowdsourcing guidance from my near-peers!
+                                            “I remember how confused I was during my gap year between high school graduation and college admission. Who else was on the same boat as I was? How do I present my portfolio and my statement in a way that puts my best foot forward?
                                         </p>
                                         <p>
-                                            The drive do pay mentorship forward and streamline the flow of information so that you, as a student, are able to get the information you need, when you need it, was the impetus for me to found One Foot In.
-                                            I believe near-peers are the best resources when it comes to providing relevant guidance counseling as you are drafting up your plans beyond high school. Take a peek into the catalogues of all career paths that your past generations of students around the world have embarked on, and find what inspires you.
+                                            Thankfully, I was fortunate enough to have mentors, including alumni at my high school, who were able to offer help at different points along my application. I realize looking back that getting the best guidance has the ingredients of having access to relatable mentors who can give you the most relevant and recent information, knowing the right questions to ask, and knowing when to ask these questions.
                                         </p>
                                         <p>
-                                            I believe One Foot In will serve as the community that can connect you to your near-peers, and motivate you to unlock the best version of yourself. I look forward to seeing you on the platform!”
+                                            As an international student coming from limited means, I feel blessed to have had the opportunity to have completed an undergraduate education in the USA. Even as I navigate the world of opportunities post-graduation, the mentorship of near-peers is an indispensable trail map in my journey forward.
+                                        </p>
+                                        <p>
+                                            I believe One Foot In can serve as the platform that can bring near-peer mentors and students together in a sustainable framework of mentorship, that helps students discover the best version of themselves, as they prepare for the world beyond high school.”
                                         </p>
                                     </i>
                                 </Card.Description>
