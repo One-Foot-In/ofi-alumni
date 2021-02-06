@@ -293,7 +293,6 @@ export default class HeaderComponent extends Component {
                     open={this.state.loginModalOpen}
                     onClose={this.toggleLoginModal}
                     onOpen={this.toggleLoginModal}
-                    dimmer='blurring'
                 >
                     <Modal.Content>
                         <LoginForm
