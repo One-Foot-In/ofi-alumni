@@ -331,7 +331,7 @@ router.get('/totalCounts', async (req, res, next) => {
 
 router.get('/sampleSignUps', async (req, res, next) => {  
   try {
-      let alumniRecords = await alumniSchema.find({},'imageURL name collegeName country city')
+      let alumniRecords = await alumniSchema.find({approved: true},'imageURL name collegeName country city')
       let randomIndices = []
       while (randomIndices.length < 5) {
         let newIndex = Math.floor(Math.random() * alumniRecords.length)

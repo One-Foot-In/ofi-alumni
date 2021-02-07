@@ -35,3 +35,17 @@ test('get counts for schools, alumni, and students', async () => {
     expect(res.body.alumniCount).toEqual(alumniCount);
     expect(res.body.studentsCount).toEqual(studentsCount);
 })
+
+test('get sampleSignUps for alumni', async () => {
+    const res = await request(app).get(`/sampleSignUps`)
+    let alumni = await alumniSchema.find();
+    expect(res.status).toEqual(200);
+    let alumniNamesInResponse = res.body.sampleSignUps.map(alumnus => alumnus.name)
+    let approvedAlumniNamesInDb = alumni.filter(alumnus => alumnus.approved).map(alumnus => alumnus.name)
+    let allAlumniAreApproved = true
+    for (let name of alumniNamesInResponse) {
+        allAlumniAreApproved = approvedAlumniNamesInDb.includes(name)
+    }
+    expect(res.body.sampleSignUps.length).toEqual(5);
+    expect(allAlumniAreApproved).toEqual(true);
+})
