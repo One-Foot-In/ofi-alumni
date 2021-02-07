@@ -329,6 +329,30 @@ router.get('/totalCounts', async (req, res, next) => {
   }
 })
 
+router.get('/sampleSignUps', async (req, res, next) => {  
+  try {
+      let alumniRecords = await alumniSchema.find({},'imageURL name collegeName country city')
+      let randomIndices = []
+      while (randomIndices.length < 5) {
+        let newIndex = Math.floor(Math.random() * alumniRecords.length)
+        if (randomIndices.indexOf(newIndex) === -1) {
+          randomIndices.push(newIndex)
+        }
+      }
+      let alumniRecordsToSend = [
+        alumniRecords[randomIndices[0]],
+        alumniRecords[randomIndices[1]],
+        alumniRecords[randomIndices[2]],
+        alumniRecords[randomIndices[3]],
+        alumniRecords[randomIndices[4]],
+      ]
+      res.status(200).json({sampleSignUps: alumniRecordsToSend})
+  } catch (e) {
+      console.log("Error: index#sampleSignUps", e);
+      res.status(500).send({'error' : e});
+  }
+})
+
 /*
   LinkedIn API
 */

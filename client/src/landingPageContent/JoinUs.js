@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Statistic, Transition, Segment, Step, Icon, Header, Image } from 'semantic-ui-react'
+import { Container, Statistic, Transition, Segment, Step, Icon, Header, Image, Card, Grid } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import {black, darkBlack, grey} from "../colors"
 
 export default function JoinUs (props) {
     const [counts, setCounts] = useState({})
     const [sendingRequest, setSendingRequest] = useState(false)
+    const [sampleSignUps, setSampleSignUps] = useState([])
     const fetchCounts = () => {
+        setSendingRequest(true)
         return makeCall({}, `/totalCounts`, 'get')
             .then(countsResponse => {
                 if (countsResponse) {
@@ -20,10 +22,63 @@ export default function JoinUs (props) {
             })
     }
 
+    const fetchSignUps = () => {
+        setSendingRequest(true)
+        return makeCall({}, `/sampleSignUps`, 'get')
+            .then(sampleSignUpsResponse => {
+                if (sampleSignUpsResponse) {
+                    setSampleSignUps(sampleSignUpsResponse.sampleSignUps)
+                    setSendingRequest(false)
+                } else {
+                    // TODO: error
+                    // Add error toast when we introduce toasts to system
+                    setSendingRequest(false)
+                }
+            })
+    }
+    const sampleSignUpsDisplayCards = () => {
+        return sampleSignUps && sampleSignUps.length ? 
+            <Segment>
+                <Header as='h4'>Get a chance to meet mentors like...</Header>
+                <Grid
+                    stackable
+                    textAlign='center'
+                >
+                    {
+                        sampleSignUps.map(alumnus => {
+                            let transitionDuration = [1000, 2000, 3000][Math.floor(Math.random() * [1000, 2000, 3000].length)]
+                            return (
+                                <Grid.Column
+                                    width='3'
+                                >
+                                    <Transition transitionOnMount={true} animation='fade right' duration={transitionDuration}>
+                                        <Card>
+                                            <Image src={alumnus.imageURL}/>
+                                            <Card.Content>
+                                                <Card.Header>
+                                                    {alumnus.name}
+                                                </Card.Header>
+                                                <Card.Meta>
+                                                    {alumnus.collegeName} | {alumnus.city} ({alumnus.country})
+                                                </Card.Meta>
+                                            </Card.Content>
+                                        </Card>
+                                    </Transition>
+                                </Grid.Column>
+                            )
+                        })
+                    }
+                </Grid>
+            </Segment>
+            :
+            null
+    }
+
     // Mounting
     useEffect(() => {
-        setSendingRequest(true)
-        fetchCounts()
+        fetchCounts().then(() => {
+            fetchSignUps()
+        })
     }, [props])
     return (
         <Container>
@@ -56,6 +111,7 @@ export default function JoinUs (props) {
                         </Statistic>
                     </Statistic.Group>
                 </Transition>
+                {sendingRequest ? null : sampleSignUpsDisplayCards()}
             </Segment>
             <Transition transitionOnMount={true} animation='fade down' duration={2000}>
                 <Segment
