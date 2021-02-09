@@ -14,12 +14,13 @@ export default class StudentWorkspace extends Component {
             activeItem: 'collegeShortList',
             collegeShortList: [],
             allExistingColleges: [],
-            selectedCollege: ''
+            selectedCollegeId: ''
         }
 
         this.getCollegeShortList = this.getCollegeShortList.bind(this)
         this.getAllExistingColleges = this.getAllExistingColleges.bind(this)
         this.renderCollegeShortList = this.renderCollegeShortList.bind(this)
+        this.addSelectedCollege = this.addSelectedCollege.bind(this)
         this.handleMenuClick = this.handleMenuClick.bind(this)
     }
 
@@ -30,6 +31,12 @@ export default class StudentWorkspace extends Component {
 
     handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
    
+    handleDropdownChange = (e, { key, value }) => {
+        this.setState({ selectedCollegeId: {name: key, id: value} })
+        console.log(this.state.selectedCollegeId)
+        console.log("changed")
+    }
+
     async getCollegeShortList() {
         await makeCall({}, `/student/collegeShortList/${this.props.userDetails._id}`, 'get')
         .then(res => {
@@ -52,6 +59,16 @@ export default class StudentWorkspace extends Component {
         .catch(e => {
             console.log("Error, couldn't get all existing colleges", e);
         })
+    }
+
+    async addSelectedCollege() {
+        console.log('hi', this.state.selectedCollegeId)
+
+        let payload = {
+            newColleges:[{name: "Georgetown", country: "United States of America"}, {name: "Northeastern", country: "United States of America"}]
+        }
+        
+        await makeCall(payload, `/student/collegeShortList/add/${this.state.selectedCollegeId}`, 'patch')
     }
 
     renderCollegeShortList() {
@@ -95,6 +112,7 @@ export default class StudentWorkspace extends Component {
     render() {
         let allColleges = this.state.allExistingColleges
         const allOptions = allColleges.map(({ key, value }) => ({ text: key, value: value}))
+        console.log("allOptions: ", allOptions)
 
         return(
             <>
@@ -120,12 +138,15 @@ export default class StudentWorkspace extends Component {
                             search
                             selection
                             options={allOptions}
+                            onChange={this.handleDropdownChange}
                     />
                 </Grid.Column>
                 <Button     
                     color="blue"
                     type="button"
-                    size="mini">  
+                    size="mini"
+                    onClick={this.addSelectedCollege}>
+ 
                     <Icon name="add" style={{'margin': '3px'}}></Icon> 
                 </Button>
                 </Grid.Row>

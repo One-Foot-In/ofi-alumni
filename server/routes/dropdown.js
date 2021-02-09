@@ -137,7 +137,7 @@ router.get('/colleges', async (req, res) => {
       return {
         key: college.name,
         value: college._id,
-        text: `${college.name} (${college.country})`,
+        country: college.country,
       }
     })
     res.status(200).send(collegeOptions)

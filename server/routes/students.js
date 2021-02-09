@@ -171,9 +171,15 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
 router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         let student = await studentSchema.findOne({_id: req.params.id});
+
         const existingColleges = req.body.existingColleges || [];
         const newColleges = req.body.newColleges || [];
+
+        console.log("existing", existingColleges)
+        console.log("new ", newColleges)
+
         let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
+        console.log(student.collegeShortList)
         student.collegeShortList = getUniqueCollege([...student.collegeShortList, ...collegesToAdd]);
         await student.save();
         res.status(200).json({message: `you have successfully added the colleges to your short list`})
