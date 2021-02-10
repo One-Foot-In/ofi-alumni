@@ -130,6 +130,7 @@ var alumniNavBarItems = (approved, newRequestCount, unseenMessagesCount) => {
         icon: 'comments',
         notificationBubbleCounter: unseenMessagesCount
     },
+    //workspace is where collegeAcceptedInto lives
     {
         id: 'workspaces',
         name: 'Workspaces',

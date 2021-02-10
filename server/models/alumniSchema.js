@@ -45,7 +45,8 @@ const alumniSchema = new Schema(
     major: {type: Schema.Types.ObjectId, ref: 'Major', required: true},
     majorName: {type: String, required: true}, // to avoid lookup for display purposes
     opportunities: [{type: Schema.Types.ObjectId, ref: 'Opportunity', required: false}],
-    footyPoints: {type: Number, required: true, default: 0}
+    footyPoints: {type: Number, required: true, default: 0},
+    collegesAcceptedInto: [{type: Schema.Types.ObjectId, ref: 'College', required: false}]
   }
 );
 

@@ -61,7 +61,7 @@ const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _schoolLogo, _interests, _major) => {
+const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _schoolLogo, _interests, _major, _collegesAcceptedInto) => {
     const email = _email;
     const gradYear = Math.floor((Math.random() * 1000) + 2000);
     const zoomLink = _hasZoom ? 'yourZoomLink' : null;
@@ -109,13 +109,14 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             school: _school,
             schoolLogo: _schoolLogo,
             major: _major,
-            majorName: _major.name
+            majorName: _major.name,
+            collegesAcceptedInto: _collegesAcceptedInto
         }
     )
     let insert = await alumni_instance.save();
 }
 
-const createStudent = async (_email, _name, _picLink, timezone, _school, _schoolLogo) => {
+const createStudent = async (_email, _name, _picLink, timezone, _school, _schoolLogo, _collegeShortList) => {
     const email = _email;
     const grade = Math.floor((Math.random() * 10) + 2);
     const password = MOCK_PASSWORD;
@@ -147,7 +148,8 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
             imageURL: _picLink,
             approved: approved,
             school: _school,
-            schoolLogo: _schoolLogo
+            schoolLogo: _schoolLogo,
+            collegeShortList: _collegeShortList
         }
     )
     let insert = await student_instance.save();
@@ -170,6 +172,8 @@ const createCollege = async (_name, _country, _logoURL) => {
     })
     await college_instance.save()
 }
+
+
 
 router.get('/seed/', async (req, res, next) => {
     try {
