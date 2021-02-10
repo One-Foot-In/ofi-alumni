@@ -19,6 +19,9 @@ var timezoneHelpers = require("../helpers/timezoneHelpers");
 const opportunitySchema = require('../models/opportunitySchema');
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail;
 const { ObjectId } = require('mongodb');
+var timezoneHelpers = require("../helpers/timezoneHelpers");
+var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail
+
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -63,6 +66,37 @@ const generateNewAndExistingInterests = async (existingInterests, newInterests) 
     return existingInterestsRecords
 }
 
+const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
+    let existingCollegeNames = [];
+    let newCollegeNames = [];
+    for (let i = 0; i < existingColleges.length; i++){
+        let collegeName = existingColleges[i].name;
+        existingCollegeNames.push(collegeName)
+    }
+    for (let i = 0; i < newCollege.length; i++){
+        let collegeName = newCollege[i].name;
+        newCollegeNames.push(collegeName)
+    }
+    let existingCollegeRecords = await collegeSchema.find().where('name').in(existingCollegeNames).exec();
+    if(newCollegeNames.length){
+        for (let i = 0; i < newCollegeNames.length; i++){
+            let collegeExists = await collegeSchema.find({name: newCollegeNames[i]});
+            if(!collegeExists.length){
+                var newCollegeMade = new collegeSchema({
+                    name: newColleges[i].name,
+                    country: newColleges[i].country
+                })
+                await newCollegeMade.save()
+                existingCollegeRecords.push(newCollegeMade)
+            } else {
+                existingCollegeRecords.push(collegeExists[0])
+            }
+        }
+    }
+    return existingCollegeRecords
+}
+
+
 const getUniqueInterests = (allInterests) => {
     let allUniqueNames = new Set()
     let uniqueInterests = []
@@ -73,6 +107,18 @@ const getUniqueInterests = (allInterests) => {
         }
     }
     return uniqueInterests
+}
+
+const getUniqueCollege = (allColleges) => {
+    let allUniqueColleges = new Set();
+    let uniqueColleges = [];
+    for (let i = 0; i < allColleges.length; i++){
+        if (!allUniqueColleges.has(allColleges[i].name)){
+            allUniqueColleges.add(allColleges[i].name);
+            uniqueColleges.push(allColleges[i]);
+        }
+    }
+    return uniqueColleges
 }
 
 router.post('/', async (req, res, next) => {
@@ -379,7 +425,6 @@ router.patch('/interests/add/:id', passport.authenticate('jwt', {session: false}
         const existingInterests = req.body.existingInterests
         const newInterests = req.body.newInterests || []
         let interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
-
         alumni.interests = getUniqueInterests([...alumni.interests, ...interestsToAdd])
         await alumni.save()
         res.status(200).send({message: "Successfully added alumni's interests"})
@@ -720,6 +765,62 @@ router.get('/newRequestsCount/:alumniId', passport.authenticate('jwt', {session:
 })
 
 
+
+router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {session: false}, */ async (req, res, next) => {
+    try{
+        let alumni = await alumniSchema.findOne({_id: req.params.id});
+        const existingColleges = req.body.existingColleges || [];
+        const newColleges = req.body.newColleges;
+        let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
+        alumni.collegesAcceptedInto = getUniqueCollege([...alumni.collegesAcceptedInto, ...collegesToAdd]);
+        await alumni.save(); 
+        res.status(200).json({message: `your colleges have been added successfully!`});
+    } catch(e) {
+        console.log("Error: cannot add college", e);
+        res.status(500).json({'error': e});
+    };
+});
+
+router.patch('/collegesAcceptedInto/delete/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+    try{
+        const alumni = await alumniSchema.findOne({_id: req.params.id});
+        const collegeName = req.body.collegeToRemove.name;
+        const collegesInfoForFilter = await collegeSchema.findOne().where('name').in(collegeName).exec();
+        const theCollegeId = collegesInfoForFilter.id;
+        let newCollegeList = [];
+        for (let i = 0; i < alumni.collegesAcceptedInto.length; i++){
+            if (alumni.collegesAcceptedInto[i].toString() !== theCollegeId.toString()){
+                newCollegeList.push(alumni.collegesAcceptedInto[i])
+            }
+        };
+        alumni.collegesAcceptedInto = newCollegeList;
+        await alumni.save();
+        res.status(200).json({message: "Successfully removed college from list!"});
+    }catch(e){
+        console.log("error: alumni college removal error", e);
+        res.status(500).json({'error': e});
+    }
+})
+
+router.get('/collegesAcceptedInto/all/:id', /*passport.authenticate('jwt', {session: false})*/ async (req, res, next) =>{
+    try{
+         const alumni = await alumniSchema
+            .findOne({_id: req.params.id})
+            .populate('collegesAcceptedInto')
+            .exec();
+        let collegesAcceptedInto = alumni.collegesAcceptedInto;
+        console.log(collegesAcceptedInto);
+        res.status(200).json(collegesAcceptedInto)
+    }
+    catch (e){
+        console.log('Unable to get collegesAcceptedInto at this time')
+        console.log(e)
+        res.status(500).json({'error': e})
+    }
+})
+
 module.exports = router;
 module.exports.generateNewAndExistingInterests = generateNewAndExistingInterests
 module.exports.getUniqueInterests = getUniqueInterests
+module.exports.generateNewAndExistingCollege = generateNewAndExistingCollege
+module.exports.getUniqueCollege = getUniqueCollege

@@ -130,6 +130,7 @@ var alumniNavBarItems = (approved, newRequestCount, unseenMessagesCount) => {
         icon: 'comments',
         notificationBubbleCounter: unseenMessagesCount
     },
+    //workspace is where collegeAcceptedInto lives
     {
         id: 'workspaces',
         name: 'Workspaces',
@@ -628,6 +629,23 @@ class App extends Component {
                         <StudentWorkspace 
                             userDetails={this.state.userDetails}
                         />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={studentNavBarItems(this.state.approved)}
+                          activeItem={'workspaces'}
+                      />
+                      <StudentWorkspace 
+                          userDetails={this.state.userDetails}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }

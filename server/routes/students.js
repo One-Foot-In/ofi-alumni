@@ -8,9 +8,12 @@ var studentSchema = require('../models/studentSchema');
 var schoolSchema = require('../models/schoolSchema');
 var newsSchema = require('../models/newsSchema');
 var requestSchema = require('../models/requestSchema');
+var collegeSchema = require('../models/collegeSchema')
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
 var getUniqueInterests = require("./alumni").getUniqueInterests
+var generateNewAndExistingCollege = require("./alumni").generateNewAndExistingCollege
+var getUniqueCollege = require("./alumni").getUniqueCollege
 require('mongoose').Promise = global.Promise
 
 const HASH_COST = 10;
@@ -167,7 +170,6 @@ router.patch('/interests/add/:id', async (req, res, next) => {
         const existingInterests = req.body.existingInterests
         const newInterests = req.body.newInterests || []
         let interestsToAdd = await generateNewAndExistingInterests(existingInterests, newInterests)
-
         student.interests = getUniqueInterests([...student.interests, ...interestsToAdd])
         await student.save()
         res.status(200).send({message: "Successfully added student's interests"})
@@ -272,6 +274,51 @@ router.get('/approvedRequestsCount/:studentId', passport.authenticate('jwt', {se
         res.status(200).send({approvedRequestsCount: approvedRequestsCount})
     } catch (e) {
         console.log("Error: student#approvedRequestsCount", e);
+        res.status(500).send({'error' : e});
+
+router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+    try{
+        let student = await studentSchema.findOne({_id: req.params.id});
+
+        const existingColleges = req.body.existingColleges || [];
+        const newColleges = req.body.newColleges || [];
+        let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
+        student.collegeShortList = getUniqueCollege([...student.collegeShortList, ...collegesToAdd]);
+        await student.save();
+        res.status(200).json({message: `you have successfully added the colleges to your short list`});
+    } catch(e){
+        console.log('Error: cannot add college', e);
+        res.status(500).json({'error': e});
+    }
+})
+
+router.patch('/collegeShortList/remove/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+    try{
+        const student = await studentSchema.findOne({_id: req.params.id});
+        const collegeName = req.body.collegeToRemove.name;
+        const collegeToRemove = await collegeSchema.findOne().where('name').in(collegeName).exec();
+        const theCollegeId = collegeToRemove._id;
+        let newCollegeList = [];
+        for (let i = 0; i < student.collegeShortList.length; i++){
+            if (student.collegeShortList[i].toString() !== theCollegeId.toString()){
+                newCollegeList.push(student.collegeShortList[i]);
+            };
+        };
+        student.collegeShortList = newCollegeList;
+        await student.save();
+        res.status(200).json({message: 'Successfully removed college from list'});
+    } catch(e){
+        console.log("Error: College can't be removed at this time", e);
+        res.status(500).json({"error": e});
+    }
+})
+
+router.get('/collegeShortList/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+    try{
+        const student = await studentSchema.findOne({_id: req.params.id}).populate('collegeShortList').exec();
+        res.status(200).json(student.collegeShortList)
+    } catch(e){
+        console.log("Error: can't find a college shortlist", e);
         res.status(500).send({'error' : e});
     }
 })
