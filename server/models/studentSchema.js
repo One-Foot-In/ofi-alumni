@@ -19,7 +19,7 @@ const studentSchema = new Schema(
     opportunitiesQueued: [{type: Schema.Types.ObjectId, ref: 'Opportunity'}],
     opportunitiesBookmarked: [{type: Schema.Types.ObjectId, ref: 'Opportunity'}],
     footyPoints: {type: Number, required: true, default: 0},
-    collegeShortList: [{type: Schema.Types.ObjectId, required: false}]
+    collegeShortList: [{type: Schema.Types.ObjectId, ref: 'College', required: false}]
   }
 );
 

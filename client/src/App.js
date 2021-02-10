@@ -633,6 +633,23 @@ class App extends Component {
                   <Redirect to={"/login"}/>
               }
           />
+          <Route exact path = {`/workspaces`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={studentNavBarItems(this.state.approved)}
+                          activeItem={'workspaces'}
+                      />
+                      <StudentWorkspace 
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
           <Route exact path={`/verify`} render={(props) => 
                   this.state.loggedIn ?
                     (this.state.userDetails.isModerator ?

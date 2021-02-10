@@ -155,7 +155,7 @@ async function main() {
 
     app.use('/news/', newsRouter);
 
-    app.use('/image/', imageRouter);
+    //app.use('/image/', imageRouter);
 
     app.use('/conversations/', conversationsRouter);
 

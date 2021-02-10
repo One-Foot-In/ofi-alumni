@@ -83,8 +83,8 @@ const generateNewAndExistingCollege = async (existingColleges, newCollege) => {
             let collegeExists = await collegeSchema.find({name: newCollegeNames[i]});
             if(!collegeExists.length){
                 var newCollegeMade = new collegeSchema({
-                    name: newCollege[i].value,
-                    country: newCollege[i].value
+                    name: newColleges[i].name,
+                    country: newColleges[i].country
                 })
                 await newCollegeMade.save()
                 existingCollegeRecords.push(newCollegeMade)
