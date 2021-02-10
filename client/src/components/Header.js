@@ -237,7 +237,7 @@ export default class HeaderComponent extends Component {
                 <Label basic >Current Role:
                     <Dropdown
                         compact
-                        style={{'marginLeft': '5px'}}
+                        style={{'marginLeft': '5px', width: '100px'}}
                         selection
                         options={this.state.availableRoles}
                         value={this.state.currRole}
@@ -275,9 +275,11 @@ export default class HeaderComponent extends Component {
             userInfo = await this.fetchUser()
             availableRoles = userInfo.result.role.map(role => {
                 role = role.toLowerCase()
+                let roleWords = role.split('_')
+                roleWords = roleWords.map(word => word[0].toUpperCase() + word.slice(1))
                 return {
                     key: role,
-                    text: role.charAt(0).toUpperCase() + role.slice(1),
+                    text: roleWords.join(' '),
                     value: role.toUpperCase()
                 }
             })

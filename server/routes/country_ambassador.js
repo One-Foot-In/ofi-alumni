@@ -1,30 +1,26 @@
 var express = require('express');
 var passport = require("passport");
 var router = express.Router();
-var collegeSchema = require('../models/collegeSchema');
 var schoolSchema = require('../models/schoolSchema');
 var alumniSchema = require('../models/alumniSchema');
-var adminSchema = require('../models/adminSchema');
 var studentSchema = require('../models/studentSchema');
-var requestSchema = require('../models/requestSchema');
 var userSchema = require('../models/userSchema');
 var pollSchema = require('../models/polls/pollSchema');
 var pollOptionSchema = require('../models/polls/pollOptionSchema');
 const { sendPollAlert, sendApprovalAlert } = require('./helpers/emailHelpers');
 require('mongoose').Promise = global.Promise
 
-async function isAdmin(id) {
-    let admin = await adminSchema.findById(id)
+async function isCountryAmbassador(id, country) {
     let alumni = await alumniSchema.findById(id).populate('user')
-    return (admin !== null || (alumni && alumni.user.role.includes('ADMIN')))
+    return (alumni && alumni.user.role.includes('COUNTRY_AMBASSADOR') && alumni.country === country)
 }
 
 /*
-    Return all alumni with the school and access context information populated
+    Return all alumni with the school and access context information populated for given country
     @return array of alumni objects
 */
-async function fetchAllAlumniWithAccessContexts() {
-    let alumniData = await alumniSchema.find({}).populate('school')
+async function fetchAllAlumniWithAccessContexts(country) {
+    let alumniData = await alumniSchema.find({country: country}).populate('school')
     let alumni = []
     for (let alumnusModel of alumniData) {
         let alumnus = alumnusModel.toObject()
@@ -42,8 +38,8 @@ async function fetchAllAlumniWithAccessContexts() {
     Return all students with the school and access context information populated
     @return array of student objects
 */
-async function fetchAllStudentsWithAccessContexts() {
-    let studentsData = await studentSchema.find({}).populate('school')
+async function fetchAllStudentsWithAccessContexts(country) {
+    let studentsData = await studentSchema.find({country: country}).populate('school')
     let students = []
     for (let studentModel of studentsData) {
         let student = studentModel.toObject()
@@ -57,87 +53,62 @@ async function fetchAllStudentsWithAccessContexts() {
     return students
 }
 
-router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+router.get('/allAlumni/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId
+    let country = req.params.country
     try {
-        const dbData = await adminSchema.findOne({_id: req.params.id})
-        const userRecord = await userSchema.findById(dbData.user)
-        res.json({
-            result : dbData,
-            accessContexts: userRecord.accessContexts || ["INTRASCHOOL"]
-        });
-    } catch (e) {
-        console.log("Error: util#oneAdmin", e);
-        res.status(500).send({'error' : e});
-    }
-});
-
-router.get('/allAlumni/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
-    try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        let alumni = await fetchAllAlumniWithAccessContexts()
+        let alumni = await fetchAllAlumniWithAccessContexts(country)
         res.status(200).send({'alumni': alumni})
     } catch (e) {
-        console.log('admin/allAlumni error: ' + e);
-        res.status(500).send({'admin/allAlumni error' : e})
+        console.log('ambassador/allAlumni error: ' + e);
+        res.status(500).send({'ambassador/allAlumni error' : e})
     }
 });
 
-router.get('/allStudents/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
+router.get('/allStudents/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId
+    let country = req.params.country
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        let students = await fetchAllStudentsWithAccessContexts()
+        let students = await fetchAllStudentsWithAccessContexts(country)
         res.status(200).send({'students': students})
     } catch (e) {
-        console.log('admin/allStudents error: ' + e);
-        res.status(500).send({'admin/allStudents error' : e})
+        console.log('ambassador/allStudents error: ' + e);
+        res.status(500).send({'ambassador/allStudents error' : e})
     }
 });
 
-router.get('/allColleges/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
+router.get('/allSchools/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId
+    let country = req.params.country
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        let dbData = await collegeSchema.find({})
-        res.status(200).send({'colleges': dbData})
-    } catch (e) {
-        console.log('admin/allColleges error: ' + e);
-        res.status(500).send({'admin/allColleges error' : e})
-    }
-});
-
-router.get('/allSchools/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
-    try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
-            return;
-        }
-        let dbData = await schoolSchema.find({})
+        let dbData = await schoolSchema.find({country: country})
         res.status(200).send({'schools': dbData})
     } catch (e) {
-        console.log('admin/allSchools error: ' + e);
-        res.status(500).send({'admin/allSchools error' : e})
+        console.log('ambassador/allSchools error: ' + e);
+        res.status(500).send({'ambassador/allSchools error' : e})
     }
 });
 
-router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
+router.patch('/toggleApprove/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId
+    let country = req.params.country
     let profileId = req.body.profileId;
     let type = req.body.type;
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
         let dbData = []
@@ -151,7 +122,7 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
             email = userRecordForAlumnus.email
             name = alumni.name
             await alumni.save()
-            dbData = await fetchAllAlumniWithAccessContexts()
+            dbData = await fetchAllAlumniWithAccessContexts(country)
         } else if (type === 'STUDENT') {
             let student = await studentSchema.findById(profileId);
             newApprovalState = !student.approved
@@ -160,7 +131,7 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
             email = userRecordForStudent.email
             name = student.name
             await student.save()
-            dbData = await fetchAllStudentsWithAccessContexts()
+            dbData = await fetchAllStudentsWithAccessContexts(country)
         }
         if (newApprovalState) {
             await sendApprovalAlert(email, name)
@@ -168,20 +139,21 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
         res.status(200).send({profiles: dbData})
         return;
     } catch (e) {
-        console.log('admin/toggleApprove error: ' + e)
+        console.log('ambassador/toggleApprove error: ' + e)
         res.status(500).send({'toggleApprove error' : e})
     }
 });
 
-router.patch('/changeAccess/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
+router.patch('/changeAccess/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId
+    let country = req.params.country
     let userId = req.body.userId;
     let type = req.body.type;
     let accessContext = req.body.newAccessContext;
     let isGranting = req.body.isGranting;
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
         if (!(["GLOBAL", "INTRASCHOOL", "INTERSCHOOL"].includes(accessContext))) {
@@ -216,27 +188,28 @@ router.patch('/changeAccess/:adminId', passport.authenticate('jwt', {session: fa
         await user.save()
         let dbData = []
         if (type === 'ALUMNI') {
-            dbData = await fetchAllAlumniWithAccessContexts()
+            dbData = await fetchAllAlumniWithAccessContexts(country)
         } else if (type === 'STUDENT') {
-            dbData = await fetchAllStudentsWithAccessContexts()
+            dbData = await fetchAllStudentsWithAccessContexts(country)
         }
         res.status(200).send({profiles: dbData});
         return;
     } catch (e) {
-        console.log('admin/changeAccess error: ' + e)
+        console.log('ambassador/changeAccess error: ' + e)
         res.status(500).send({'changeAccess error' : e})
     }
 });
 
-router.get('/feedback/:adminId/:profileId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId;
+router.get('/feedback/:alumniId/:country/:profileId', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId;
+    let country = req.params.country;
     let profileId = req.params.profileId;
     let public = [];
     let private = [];
     let testimonial = [];
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
         let allFeedback = await requestSchema.find({mentor: profileId}, 'publicFeedback privateFeedback testimonial')
@@ -262,23 +235,24 @@ router.get('/feedback/:adminId/:profileId', passport.authenticate('jwt', {sessio
             }
         );
     } catch (e) {
-        console.log('admin/feedback error: ' + e);
-        res.status(500).send({'admin/feedback error' : e})
+        console.log('ambassador/feedback error: ' + e);
+        res.status(500).send({'ambassador/feedback error' : e})
     }
 });
 
-router.patch('/toggleModerator/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
+router.patch('/toggleModerator/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId;
+    let country = req.params.country;
     let studentId = req.body.studentId
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
         let student = await studentSchema.findById(studentId)
         student.isModerator = !student.isModerator
         await student.save()
-        let studentsData = await studentSchema.find({}).populate('school')
+        let studentsData = await studentSchema.find({school: school}).populate('school')
         let students = []
         for (let studentModel of studentsData) {
             let student = studentModel.toObject()
@@ -288,47 +262,18 @@ router.patch('/toggleModerator/:adminId', passport.authenticate('jwt', {session:
         }
         res.status(200).send({'students': students})
     } catch (e) {
-        console.log('admin/toggleModerator error: ' + e);
-        res.status(500).send({'admin/toggleModerator error' : e})
+        console.log('ambassador/toggleModerator error: ' + e);
+        res.status(500).send({'ambassador/toggleModerator error' : e})
     }
 });
 
-router.patch('/mergeColleges/:adminid', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
-    let colleges = req.body.items
-    let name = req.body.name
-    let location = await collegeSchema.findById(colleges[0])
-    let country = location.country
-    try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
-            return;
-        }
-        let newCollege = new collegeSchema({name: name, country: country});
-        await newCollege.save();
-        let update = {
-            college: newCollege._id,
-            collegeName: newCollege.name
-        }
-        for (let college of colleges) {
-            let alumni = await alumniSchema.updateMany({college: college}, update)
-            await collegeSchema.findByIdAndDelete(college)
-        }
-        res.status(200).send({'message': 'Successfully merged colleges'})
-    } catch (e) {
-        console.log('/mergeColleges error:' + e);
-        res.status(500).send({'admin/mergeColleges error' : e})
-    }
-});
-
-router.post('/addSchool/:adminid', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
+router.post('/addSchool/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId;
     let country = req.body.country
     let name = req.body.name
-
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
         let school = new schoolSchema({
@@ -343,35 +288,15 @@ router.post('/addSchool/:adminid', passport.authenticate('jwt', {session: false}
     }
 });
 
-router.post('/addCollege/:adminid', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
+router.get('/polls/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId;
     let country = req.body.country
-    let name = req.body.name
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        let college = new collegeSchema({
-            name: name,
-            country: country
-        })
-        await college.save();
-        res.status(200).send({'message': 'Successfully added college'})
-    } catch (e) {
-        console.log('/addCollege error:' + e);
-        res.status(500).send({'error' : 'Add College Error' + e})
-    }
-});
-
-router.get('/polls/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
-    try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
-            return;
-        }
-        let polls = await pollSchema.find().populate('options schoolsTargetted')
+        let polls = await pollSchema.find({countriesTargetted: {$in: [country]}}).populate('options schoolsTargetted')
         res.status(200).json({
             polls: polls
         })
@@ -425,11 +350,12 @@ async function queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, 
     }
 }
 
-router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}), async (req, res) => {
-    let adminId = req.params.adminId
+router.post('/addPoll/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    let alumniId = req.params.alumniId;
+    let country = req.params.country
     try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
+        if (!isCountryAmbassador(alumniId, country)) {
+            res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
         let rolesTargetted = []
@@ -438,7 +364,7 @@ router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}),
         } else {
             rolesTargetted = [req.body.rolesTargetted]
         }
-        let countriesTargetted = req.body.countriesTargetted
+        let countriesTargetted = [country]
         let schoolsTargetted = req.body.schoolsTargetted
         let type = req.body.type
         let prompt = req.body.prompt
@@ -485,27 +411,28 @@ router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}),
     }
 });
 
-router.delete('/poll/:adminId/:pollId',
+router.delete('/poll/:alumniId/:country',
     passport.authenticate('jwt', {session: false}),
     async (req, res) => {
-    let adminId = req.params.adminId
-    try {
-        if (!isAdmin(adminId)) {
-            res.status(400).send('Invalid Admin ID');
-            return;
+        let alumniId = req.params.alumniId;
+        let country = req.params.country
+        try {
+            if (!isCountryAmbassador(alumniId, country)) {
+                res.status(400).send('Alumnus does not have access as ambassador for ' + country);
+                return;
+            }
+            // TODO: add mongoose schema pre-findOneAndRemove hook to delete poll options and pull from user records
+            let poll = await pollSchema.findById(req.params.pollId)
+            for (let option of poll.options) {
+                await pollOptionSchema.deleteOne({_id: option})
+            }
+            await userSchema.updateMany({}, {$pull: {pollsQueued: poll._id}})
+            await pollSchema.deleteOne({_id: req.params.pollId})
+            res.status(200).json({message: 'Successfully deleted poll'})
+        } catch (e) {
+            console.log('/delete poll error:' + e);
+            res.status(500).send({'error' : 'Delete Poll Error' + e})
         }
-        // TODO: add mongoose schema pre-findOneAndRemove hook to delete poll options and pull from user records
-        let poll = await pollSchema.findById(req.params.pollId)
-        for (let option of poll.options) {
-            await pollOptionSchema.deleteOne({_id: option})
-        }
-        await userSchema.updateMany({}, {$pull: {pollsQueued: poll._id}})
-        await pollSchema.deleteOne({_id: req.params.pollId})
-        res.status(200).json({message: 'Successfully deleted poll'})
-    } catch (e) {
-        console.log('/delete poll error:' + e);
-        res.status(500).send({'error' : 'Delete Poll Error' + e})
-    }
 });
 
 

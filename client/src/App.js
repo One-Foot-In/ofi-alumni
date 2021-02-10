@@ -30,6 +30,7 @@ export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
 export const ADMIN = "ADMIN"
 export const COLLEGE_REP = "COLLEGE_REP"
+export const COUNTRY_AMBASSADOR = "COUNTRY_AMBASSADOR"
 
 /*
   STORE SETUP
@@ -184,6 +185,36 @@ var adminNavBarItems = () => {
   return navBarItems;
 }
 
+var countryAmbassadorNavBarItems = () => {
+  let navBarItems = [
+    {
+      id: 'schools',
+      name: 'Schools',
+      navLink: '/',
+      icon: 'university'
+    },
+    {
+        id: 'students',
+        name: 'Students',
+        navLink: '/students',
+        icon: 'users'
+    },
+    {
+        id: 'alumni',
+        name: 'Alumni',
+        navLink: '/alumni',
+        icon: 'users'
+    },
+    {
+      id: 'polls',
+      name: 'Polls',
+      navLink: '/polls',
+      icon: 'chart bar'
+  }
+  ]
+  return navBarItems;
+}
+
 const studentNavBarItems = (isModerator, approvedRequestsCount) => {
   let navBarItems = [
     {
@@ -272,10 +303,27 @@ class App extends Component {
     this.refreshProfile = this.refreshProfile.bind(this);
     this.liftRole = this.liftRole.bind(this);
     this.refreshMenuPopupCounters = this.refreshMenuPopupCounters.bind(this);
+    this.getPrimaryRole = this.getPrimaryRole.bind(this)
+  }
+
+  /**
+   * Gets roles available in order of priority
+   * Find Alumni first, then student, and if neither are present,
+   * return first value in array
+   * @param roles, all roles available to user
+   */
+  getPrimaryRole(roles) {
+    if (roles.includes(ALUMNI)) {
+      return ALUMNI
+    }
+    if (roles.includes(STUDENT)) {
+      return STUDENT
+    }
+    return roles[0]
   }
 
   async UNSAFE_componentWillMount() {
-    var role;
+    var roles;
     var profile;
     var id;
     this.setState({
@@ -289,18 +337,18 @@ class App extends Component {
       if (result && !result.error) {
         var jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
-        role = parsedJWT.role;
+        roles = parsedJWT.role;
         id = parsedJWT.id;
-        let result = await this.fetchProfile(role[0], id);
+        let result = await this.fetchProfile(this.getPrimaryRole(roles), id);
         profile = result.result
         this.setState({
           accessContexts: result.accessContexts,
-          role: role[0],
+          role: this.getPrimaryRole(roles),
           userDetails: profile,
           approved: profile.approved,
           loggedIn: true
         }, async () => {
-          await this.refreshMenuPopupCounters(role, profile._id)
+          await this.refreshMenuPopupCounters(roles, profile._id)
         })
       } else {
         this.setState({
@@ -325,9 +373,9 @@ class App extends Component {
     })
   }
 
-  async refreshMenuPopupCounters(role, id) {
-    if (role && role.length && id) {
-      if (role.includes(ALUMNI)) {
+  async refreshMenuPopupCounters(roles, id) {
+    if (roles && roles.length && id) {
+      if (roles.includes(ALUMNI)) {
         let newRequestsCountResponse = await makeCall({}, `/alumni/newRequestsCount/${id}`, 'get')
         let unseenMessagesCountResponse = await makeCall({}, `/alumni/unseenMessagesCount/${id}`, 'get')
         this.setState({
@@ -350,6 +398,9 @@ class App extends Component {
         result = await makeCall({}, ('/student/one/'+id), 'get');
         break;
       case ALUMNI:
+        result = await makeCall({}, ('/alumni/one/'+id), 'get')
+        break;
+      case COUNTRY_AMBASSADOR:
         result = await makeCall({}, ('/alumni/one/'+id), 'get')
         break;
       case ADMIN:
@@ -734,7 +785,9 @@ class App extends Component {
                           activeItem={'schools'}
                       />
                       <SchoolsList
-                          userDetails={this.state.userDetails}
+                          currentRole={this.state.role}
+                          userId={this.state.userDetails._id}
+                          country={null}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -803,6 +856,86 @@ class App extends Component {
                           activeItem={'shortlists'}
                       />
                       <p>Shortlists</p>
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+        </>
+        )
+      case COUNTRY_AMBASSADOR:
+        return (
+          <>
+          <Route exact path={`/`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={countryAmbassadorNavBarItems()}
+                          activeItem={'schools'}
+                      />
+                      <SchoolsList
+                          currentRole={this.state.role}
+                          userId={this.state.userDetails._id}
+                          country={this.state.userDetails.country}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/students`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={countryAmbassadorNavBarItems()}
+                          activeItem={'students'}
+                      />
+                      <ProfileList
+                          viewing={'STUDENT'}
+                          currentRole={this.state.role}
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                    <Redirect to={"/login"}/>
+                }
+          />
+          <Route exact path={`/alumni`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={countryAmbassadorNavBarItems()}
+                          activeItem={'alumni'}
+                      />
+                      <ProfileList
+                          viewing={'ALUMNI'}
+                          currentRole={this.state.role}
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/polls`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={countryAmbassadorNavBarItems()}
+                          activeItem={'polls'}
+                      />
+                      <Polls
+                        currentRole={this.state.role}
+                        userDetails={this.state.userDetails}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
