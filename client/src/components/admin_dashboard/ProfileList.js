@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, List, Checkbox } from 'semantic-ui-react'
+import { Card, Image, Search, Pagination, Grid, Segment, Button, Dropdown, List, Checkbox, Flag, Label } from 'semantic-ui-react'
 import FeedbackModal from './FeedbackModal'
 import { makeCall } from '../../apis';
+import { flagCodeByCountry } from "../../flags"
 
-export default function ProfileList(props){
+/**
+ * Allows displaying student and alumni profiles from admin and ambassador dashboards
+ * These roles can use this view to approve/suspend accounts, and add levels of access
+ * A country ambassador can only grant access levels intraschool and interschool
+ * An admin can make an alumnus a country ambassador
+ * @param {*} props 
+ * viewing: String "STUDENT" | "ALUMNI", the kind of profiles the admin is viewing
+ * userDetails: Object, the alumni record of the admin
+ * currentRole: "ADMIN" | "COUNTRY_AMBASSADOR"
+ */
+export default function ProfileList(props) {
     const [allProfiles, setAllProfiles] = useState([]);
     const [filteredProfiles, setFilteredProfiles] = useState([])
     const [display, setDisplay] = useState([])
@@ -88,10 +99,23 @@ export default function ProfileList(props){
         return filters;
     }
 
+    const urlBuilder = (path) => {
+        let prepend = ''
+        let identifierParams = ''
+        if (props.currentRole === 'COUNTRY_AMBASSADOR') {
+            prepend = 'ambassador'
+            identifierParams = `${props.userDetails._id}/${props.userDetails.school.country}`
+        } else {
+            prepend = 'admin'
+            identifierParams = props.userDetails._id
+        }
+        return `/${prepend}/${path}/${identifierParams}`
+    }
+
     //Mounting
     useEffect(() => {
         if (props.viewing === 'ALUMNI') {
-            makeCall({}, '/admin/allAlumni/' + props.userDetails._id, 'get')
+            makeCall({}, urlBuilder('allAlumni'), 'get')
                 .then((res) => {
                     // null check to ensure server-side error does not return a non-iterable
                     if (res.alumni) {
@@ -99,7 +123,7 @@ export default function ProfileList(props){
                     }
                 })
         } else if (props.viewing === 'STUDENT') {
-            makeCall({}, '/admin/allStudents/' + props.userDetails._id, 'get')
+            makeCall({}, urlBuilder('allStudents'), 'get')
                 .then((res) => {
                     if (res.students) {
                         setAllProfiles(res.students)
@@ -207,15 +231,51 @@ export default function ProfileList(props){
                         onChange={handleAccessChange.bind(this)}
                     />
                 </List.Item>
-                <List.Item>
-                    <Checkbox
-                        checked={accessContexts.includes('GLOBAL')}
-                        label='GLOBAL'
-                        userId={userId}
-                        onChange={handleAccessChange.bind(this)}
-                    />
-                </List.Item>
+                {
+                    props.currentRole === 'COUNTRY_AMBASSADOR' ?
+                    null : 
+                    <List.Item>
+                        <Checkbox
+                            checked={accessContexts.includes('GLOBAL')}
+                            label='GLOBAL'
+                            userId={userId}
+                            onChange={handleAccessChange.bind(this)}
+                        />
+                    </List.Item>
+                }
             </List>
+        )
+    }
+
+    const makeAmbassador = (e, { userId }) => {
+        makeCall(
+            {}, 
+            `/admin/makeAmbassador/${props.userDetails._id}/${userId}`,
+            'patch'
+        ).then((res) => {
+            if (res.profiles) {
+                setAllProfiles(res.profiles)
+            }
+        })
+    }
+
+    const ambassadorStatusControl = (profile) => {
+        if (profile.roles.includes("COUNTRY_AMBASSADOR")) {
+            return (
+                <Label>
+                    <Flag name={profile.school.country && flagCodeByCountry[profile.school.country]} />
+                    Ambassador ({profile.school.country})
+                </Label>
+            )
+        }
+        return (
+            <Button
+                primary
+                userId={profile.user}
+                onClick={makeAmbassador.bind(this)}
+            >
+                Make Ambassador for {profile.school.country}
+            </Button>
         )
     }
 
@@ -304,9 +364,16 @@ export default function ProfileList(props){
                                 <Grid stackable>
                                     <Grid.Row>
                                         <Grid.Column width="6">Access levels granted</Grid.Column>
-                                        <Grid.Column>
+                                        <Grid.Column width="6">
                                             {accessContextCheckBox(profile.accessContexts, profile.user)}
                                         </Grid.Column>
+                                        {
+                                            role === 'ALUMNI' && props.currentRole === 'ADMIN' ?
+                                            <Grid.Column width ='6'>
+                                                {ambassadorStatusControl(profile)}
+                                            </Grid.Column> :
+                                            null
+                                        }
                                     </Grid.Row>
                                 </Grid>
                             </Card.Content>

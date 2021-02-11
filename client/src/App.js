@@ -734,6 +734,7 @@ class App extends Component {
                       <ProfileList
                           viewing={'STUDENT'}
                           userDetails={this.state.userDetails}
+                          currentRole={ADMIN}
                       />
                   </> :
                     <Redirect to={"/login"}/>
@@ -752,6 +753,7 @@ class App extends Component {
                       <ProfileList
                           viewing={'ALUMNI'}
                           userDetails={this.state.userDetails}
+                          currentRole={ADMIN}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -804,6 +806,7 @@ class App extends Component {
                           activeItem={'polls'}
                       />
                       <Polls
+                        currentRole={ADMIN}
                         userDetails={this.state.userDetails}
                       />
                   </> :
@@ -878,7 +881,7 @@ class App extends Component {
                       <SchoolsList
                           currentRole={this.state.role}
                           userId={this.state.userDetails._id}
-                          country={this.state.userDetails.country}
+                          country={this.state.userDetails.school.country}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -896,7 +899,7 @@ class App extends Component {
                       />
                       <ProfileList
                           viewing={'STUDENT'}
-                          currentRole={this.state.role}
+                          currentRole={COUNTRY_AMBASSADOR}
                           userDetails={this.state.userDetails}
                       />
                   </> :
@@ -915,7 +918,7 @@ class App extends Component {
                       />
                       <ProfileList
                           viewing={'ALUMNI'}
-                          currentRole={this.state.role}
+                          currentRole={COUNTRY_AMBASSADOR}
                           userDetails={this.state.userDetails}
                       />
                   </> :
@@ -933,7 +936,7 @@ class App extends Component {
                           activeItem={'polls'}
                       />
                       <Polls
-                        currentRole={this.state.role}
+                        currentRole={COUNTRY_AMBASSADOR}
                         userDetails={this.state.userDetails}
                       />
                   </> :

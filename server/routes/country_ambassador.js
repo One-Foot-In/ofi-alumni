@@ -17,10 +17,14 @@ async function isCountryAmbassador(id, country) {
 
 /*
     Return all alumni with the school and access context information populated for given country
+    The country is determined from location of school and NOT where the alumni
+    currently reside
+    @param country
     @return array of alumni objects
 */
 async function fetchAllAlumniWithAccessContexts(country) {
-    let alumniData = await alumniSchema.find({country: country}).populate('school')
+    let schoolsInCountry = await schoolSchema.find({country: country})
+    let alumniData = await alumniSchema.find().where('school').in(schoolsInCountry).populate('school').exec()
     let alumni = []
     for (let alumnusModel of alumniData) {
         let alumnus = alumnusModel.toObject()
@@ -36,10 +40,13 @@ async function fetchAllAlumniWithAccessContexts(country) {
 
 /*
     Return all students with the school and access context information populated
+    The country is determined from location of school
+    @param country
     @return array of student objects
 */
 async function fetchAllStudentsWithAccessContexts(country) {
-    let studentsData = await studentSchema.find({country: country}).populate('school')
+    let schoolsInCountry = await schoolSchema.find({country: country})
+    let studentsData = await studentSchema.find().where('school').in(schoolsInCountry).populate('school').exec()
     let students = []
     for (let studentModel of studentsData) {
         let student = studentModel.toObject()
@@ -346,7 +353,8 @@ async function queuePolls(schoolsTargetted, countriesTargetted, rolesTargetted, 
         let userModel = await userSchema.findById(user)
         userModel.pollsQueued.push(pollModel)
         await userModel.save()
-        await sendPollAlert(userModel.email, (!pollModel.allowInput && !pollModel.options.length), pollModel.prompt)
+        // Hold off on sending emails as these API calls may climb fast
+        // await sendPollAlert(userModel.email, (!pollModel.allowInput && !pollModel.options.length), pollModel.prompt)
     }
 }
 
