@@ -1023,11 +1023,13 @@ class App extends Component {
                 loggedIn={this.state.loggedIn}
                 logout={this.logout}
                 school={this.state.userDetails && this.state.userDetails.school}
+                name={this.state.userDetails && this.state.userDetails.name}
                 userId={this.state.userDetails && this.state.userDetails.user}
                 role={this.state.role}
                 liftRole={this.liftRole}
                 completeLogin={this.completeLogin}
                 login={this.login}
+                currentRole={this.state.role}
               />
               <Container>
                 {this.renderScreens(this.state.role)}
