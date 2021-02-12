@@ -46,7 +46,7 @@ test('8 footy points added for new opportunity post', async () => {
     // Need to extract the user ID for being able to make calls to the 
     // endpoints regarding the specific user (alumni, in this case)
     const userID = user._id;
-    let res = await request(app).post(`/alumni/opportunity/${userID}`)
+    const res = await request(app).post(`/alumni/opportunity/${userID}`)
         .send({
             description: 'asdf',
             deadline: '10/12/2021',

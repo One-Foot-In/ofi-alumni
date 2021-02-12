@@ -2,7 +2,6 @@ const express = require("express");
 var indexRouter = require('../routes/index');
 var alumniRouter = require('../routes/alumni');
 var mongooseUtilRouter = require('../routes/utilMongoose');
-var passport = require("passport");
 
 
 /*
@@ -14,7 +13,6 @@ var passport = require("passport");
  */
 function createServer() {
     const app = express();
-    passport.authenticate = jest.fn((authType, options, callback) => () => { callback('Success!', null); });
     app.use(express.json());
     app.use('/', indexRouter);
     app.use('/alumni/', alumniRouter);
