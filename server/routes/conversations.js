@@ -19,7 +19,12 @@ router.post('/add/', passport.authenticate('jwt', {session: false}), async (req,
         const senderId = req.body.senderId;
         const recipientId = req.body.recipientId;
         const message = req.body.message;
-
+        let alumniInConversation = await alumniSchema.find({approved: false, _id: {$in: [senderId, recipientId]}})
+        if (alumniInConversation.length) {
+            res.status(500).send({
+                message: 'Conversation may not happen between unapproved alumni',
+            });
+        }
         var conversation_instance = await conversationSchema.findOne({alumni: {$all: [senderId, recipientId]}});
         if (!conversation_instance) {
             conversation_instance = new conversationSchema(
