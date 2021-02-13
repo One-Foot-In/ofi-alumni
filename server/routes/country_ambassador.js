@@ -298,13 +298,14 @@ router.post('/addSchool/:alumniId/:country', passport.authenticate('jwt', {sessi
 
 router.get('/polls/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
     let alumniId = req.params.alumniId;
-    let country = req.body.country
+    let country = req.params.country
     try {
         if (!isCountryAmbassador(alumniId, country)) {
             res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        let polls = await pollSchema.find({countriesTargetted: {$in: [country]}}).populate('options schoolsTargetted')
+        let schoolsInPurviewOfAmbassador = await schoolSchema.find({country: country})
+        let polls = await pollSchema.find({schoolsTargetted: {$in: schoolsInPurviewOfAmbassador}}).populate('options schoolsTargetted')
         res.status(200).json({
             polls: polls
         })
@@ -420,7 +421,7 @@ router.post('/addPoll/:alumniId/:country', passport.authenticate('jwt', {session
     }
 });
 
-router.delete('/poll/:alumniId/:country',
+router.delete('/poll/:alumniId/:country/:pollId',
     passport.authenticate('jwt', {session: false}),
     async (req, res) => {
         let alumniId = req.params.alumniId;
