@@ -6,6 +6,9 @@ import {black, darkBlack, grey} from "../colors"
 export default function JoinUs (props) {
     const [counts, setCounts] = useState({})
     const [sendingRequest, setSendingRequest] = useState(false)
+    /**
+     * Gets live count of mentors, students, and schools on our platform
+     */
     const fetchCounts = () => {
         return makeCall({}, `/totalCounts`, 'get')
             .then(countsResponse => {
