@@ -4,6 +4,8 @@ import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
+import FootyPoints from './FootyPoints';
+
 
 function getErrorLabel(content) {
     return (
@@ -247,6 +249,7 @@ export default class HeaderComponent extends Component {
                 
             </>
             }
+            <FootyPoints points={this.props.footyPoints}/>
             </div>
         )
     }

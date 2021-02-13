@@ -889,6 +889,7 @@ class App extends Component {
               userId={this.state.userDetails && this.state.userDetails.user}
               role={this.state.role}
               liftRole={this.liftRole}
+              footyPoints={this.state.userDetails && this.state.userDetails.footyPoints}
             />
             <Container>
               {this.renderScreens(this.state.role)}
