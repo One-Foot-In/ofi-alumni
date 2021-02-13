@@ -259,7 +259,8 @@ router.patch('/toggleModerator/:alumniId/:country', passport.authenticate('jwt',
         let student = await studentSchema.findById(studentId)
         student.isModerator = !student.isModerator
         await student.save()
-        let studentsData = await studentSchema.find({school: school}).populate('school')
+        let studentsData = await studentSchema.find().populate('school')
+        studentsData = studentsData.filter(student => student.school.country === country)
         let students = []
         for (let studentModel of studentsData) {
             let student = studentModel.toObject()

@@ -391,7 +391,7 @@ export default function ProfileList(props) {
     const handleButtonPress = (e, { dataid, op }) => {
         if (op === 'toggle_approve') {
             makeCall({profileId: dataid, type: props.viewing}, 
-                '/admin/toggleApprove/' + props.userDetails._id, 'patch')
+                urlBuilder('toggleApprove'), 'patch')
                 .then((res) => {
                     if (res.profiles) {
                         setAllProfiles(res.profiles)
@@ -401,7 +401,7 @@ export default function ProfileList(props) {
             setProfileId(dataid)
             setFeedbackModalOpen(true)
         } else if (op === 'toggle_moderator') {
-            makeCall({studentId: dataid}, '/admin/toggleModerator/' + props.userDetails._id, 'patch')
+            makeCall({studentId: dataid}, urlBuilder('toggleModerator'), 'patch')
                 .then((res) => {
                     if (res.students) {
                         setAllProfiles(res.students)
@@ -418,7 +418,7 @@ export default function ProfileList(props) {
                 newAccessContext: label,
                 isGranting: checked
             }, 
-            '/admin/changeAccess/' + props.userDetails._id,
+            urlBuilder('changeAccess'),
             'patch'
         ).then((res) => {
             if (res.profiles) {
