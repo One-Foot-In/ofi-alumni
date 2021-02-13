@@ -16,48 +16,32 @@ async function isCountryAmbassador(id, country) {
 }
 
 /*
-    Return all alumni with the school and access context information populated for given country
-    The country is determined from location of school and NOT where the alumni
+    Return all profiles (alumni or students) with the school and access context information populated for given country
+    The country is determined from location of school and NOT where the alumni/students
     currently reside
     @param country
-    @return array of alumni objects
+    @param role: ALUMNI | STUDENT
+    @return array of alumni or student objects
 */
-async function fetchAllAlumniWithAccessContexts(country) {
+async function fetchAllProfilesWithAccessContexts(country, role) {
     let schoolsInCountry = await schoolSchema.find({country: country})
-    let alumniData = await alumniSchema.find().where('school').in(schoolsInCountry).populate('school').exec()
-    let alumni = []
-    for (let alumnusModel of alumniData) {
-        let alumnus = alumnusModel.toObject()
-        let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
-        // do not return alumni who do not have an associated user record
+    let profileData = []
+    if (role === "ALUMNI") {
+        profileData = await alumniSchema.find().where('school').in(schoolsInCountry).populate('school').exec()
+    } else if (role === "STUDENT") {
+        profileData = await studentSchema.find().where('school').in(schoolsInCountry).populate('school').exec()
+    }
+    let profiles = []
+    for (let profileModel of profileData) {
+        let profile = profileModel.toObject()
+        let userRecordWithAccessContext = await userSchema.findById(profileModel.user, {accessContexts: 1})
+        // do not return profiles which do not have an associated user record
         if (userRecordWithAccessContext) {            
-            alumnus.accessContexts = userRecordWithAccessContext.accessContexts
-            alumni.push(alumnus)
+            profile.accessContexts = userRecordWithAccessContext.accessContexts
+            profiles.push(profile)
         }
     }
-    return alumni
-}
-
-/*
-    Return all students with the school and access context information populated
-    The country is determined from location of school
-    @param country
-    @return array of student objects
-*/
-async function fetchAllStudentsWithAccessContexts(country) {
-    let schoolsInCountry = await schoolSchema.find({country: country})
-    let studentsData = await studentSchema.find().where('school').in(schoolsInCountry).populate('school').exec()
-    let students = []
-    for (let studentModel of studentsData) {
-        let student = studentModel.toObject()
-        let userRecordWithAccessContext = await userSchema.findById(studentModel.user, {accessContexts: 1})
-        // do not return alumni who do not have an associated user record
-        if (userRecordWithAccessContext) {
-            student.accessContexts = userRecordWithAccessContext.accessContexts
-            students.push(student)
-        }
-    }
-    return students
+    return profiles
 }
 
 router.get('/allAlumni/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
@@ -68,7 +52,8 @@ router.get('/allAlumni/:alumniId/:country', passport.authenticate('jwt', {sessio
             res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        let alumni = await fetchAllAlumniWithAccessContexts(country)
+        // let alumni = await fetchAllAlumniWithAccessContexts(country)
+        let alumni = await fetchAllProfilesWithAccessContexts(country, "ALUMNI")
         res.status(200).send({'alumni': alumni})
     } catch (e) {
         console.log('ambassador/allAlumni error: ' + e);
@@ -84,7 +69,7 @@ router.get('/allStudents/:alumniId/:country', passport.authenticate('jwt', {sess
             res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        let students = await fetchAllStudentsWithAccessContexts(country)
+        let students = await fetchAllProfilesWithAccessContexts(country, "STUDENT")
         res.status(200).send({'students': students})
     } catch (e) {
         console.log('ambassador/allStudents error: ' + e);
@@ -129,7 +114,8 @@ router.patch('/toggleApprove/:alumniId/:country', passport.authenticate('jwt', {
             email = userRecordForAlumnus.email
             name = alumni.name
             await alumni.save()
-            dbData = await fetchAllAlumniWithAccessContexts(country)
+            // dbData = await fetchAllAlumniWithAccessContexts(country)
+            dbData = await fetchAllProfilesWithAccessContexts(country, "ALUMNI")
         } else if (type === 'STUDENT') {
             let student = await studentSchema.findById(profileId);
             newApprovalState = !student.approved
@@ -138,7 +124,7 @@ router.patch('/toggleApprove/:alumniId/:country', passport.authenticate('jwt', {
             email = userRecordForStudent.email
             name = student.name
             await student.save()
-            dbData = await fetchAllStudentsWithAccessContexts(country)
+            dbData = await fetchAllProfilesWithAccessContexts(country, "STUDENT")
         }
         if (newApprovalState) {
             await sendApprovalAlert(email, name)
@@ -193,12 +179,7 @@ router.patch('/changeAccess/:alumniId/:country', passport.authenticate('jwt', {s
             }
         }
         await user.save()
-        let dbData = []
-        if (type === 'ALUMNI') {
-            dbData = await fetchAllAlumniWithAccessContexts(country)
-        } else if (type === 'STUDENT') {
-            dbData = await fetchAllStudentsWithAccessContexts(country)
-        }
+        let dbData = await fetchAllProfilesWithAccessContexts(country, type)
         res.status(200).send({profiles: dbData});
         return;
     } catch (e) {
