@@ -52,7 +52,6 @@ router.get('/allAlumni/:alumniId/:country', passport.authenticate('jwt', {sessio
             res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        // let alumni = await fetchAllAlumniWithAccessContexts(country)
         let alumni = await fetchAllProfilesWithAccessContexts(country, "ALUMNI")
         res.status(200).send({'alumni': alumni})
     } catch (e) {
@@ -93,6 +92,35 @@ router.get('/allSchools/:alumniId/:country', passport.authenticate('jwt', {sessi
     }
 });
 
+/**
+ * Changes approval status on alumnus or student record, and refetches all profiles
+ * @param {*} role 
+ * @param {*} profileId
+ * @param {*} country
+ * @return Map with name, email, approval state, and all profiles refetched
+ */
+async function handleApprovalOperation (role, profileId, country) {
+    let profile = null
+    if (role === "ALUMNI") {
+        profile = await alumniSchema.findById(profileId);
+    } else if (role === "STUDENT") {
+        profile = await studentSchema.findById(profileId);
+    }
+    let newApprovalState = !profile.approved
+    profile.approved = newApprovalState;
+    let userRecordForAlumnus = await userSchema.findById(profile.user, {email: 1})
+    let email = userRecordForAlumnus.email
+    let name = profile.name
+    await profile.save()
+    let dbData = await fetchAllProfilesWithAccessContexts(country, role)
+    return {
+        dbData: dbData,
+        name: name,
+        email: email,
+        newApprovalState: newApprovalState
+    }
+}
+
 router.patch('/toggleApprove/:alumniId/:country', passport.authenticate('jwt', {session: false}), async (req, res) => {
     let alumniId = req.params.alumniId
     let country = req.params.country
@@ -103,33 +131,11 @@ router.patch('/toggleApprove/:alumniId/:country', passport.authenticate('jwt', {
             res.status(400).send('Alumnus does not have access as ambassador for ' + country);
             return;
         }
-        let dbData = []
-        let newApprovalState = false
-        let email = '', name = ''
-        if (type === 'ALUMNI') {
-            let alumni = await alumniSchema.findById(profileId);
-            newApprovalState = !alumni.approved
-            alumni.approved = newApprovalState;
-            let userRecordForAlumnus = await userSchema.findById(alumni.user, {email: 1})
-            email = userRecordForAlumnus.email
-            name = alumni.name
-            await alumni.save()
-            // dbData = await fetchAllAlumniWithAccessContexts(country)
-            dbData = await fetchAllProfilesWithAccessContexts(country, "ALUMNI")
-        } else if (type === 'STUDENT') {
-            let student = await studentSchema.findById(profileId);
-            newApprovalState = !student.approved
-            student.approved = newApprovalState;
-            let userRecordForStudent = await userSchema.findById(student.user, {email: 1})
-            email = userRecordForStudent.email
-            name = student.name
-            await student.save()
-            dbData = await fetchAllProfilesWithAccessContexts(country, "STUDENT")
+        let approvalResponse = await handleApprovalOperation(type, profileId, country)
+        if (approvalResponse.newApprovalState) {
+            await sendApprovalAlert(approvalResponse.email, approvalResponse.name)
         }
-        if (newApprovalState) {
-            await sendApprovalAlert(email, name)
-        }
-        res.status(200).send({profiles: dbData})
+        res.status(200).send({profiles: approvalResponse.dbData})
         return;
     } catch (e) {
         console.log('ambassador/toggleApprove error: ' + e)
