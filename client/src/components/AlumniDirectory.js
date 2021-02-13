@@ -114,8 +114,9 @@ export default class AlumniDirectory extends Component {
             entries: result.alumni,
             totalPages: totalPages,
             numEntries: result.alumni.length
+        }, () => {
+            this.populateSearchDropdownStates(this.state.entries)
         })
-        this.populateSearchDropdownStates(this.state.entries)
     }
 
     toggleRequestModal() {

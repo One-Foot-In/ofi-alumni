@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {Grid, Button, Modal, Form, Image, Label, Dropdown, Header} from 'semantic-ui-react';
+import LoginForm from './LoginForm';
 import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
 import swal from "sweetalert";
@@ -31,7 +32,8 @@ export default class HeaderComponent extends Component {
             passwordsMatching: true,
             currRole: this.props.role,
             userId: this.props.userId,
-            availableRoles: []
+            availableRoles: [],
+            loginModalOpen: false
         }
         this.renderLoginStateInfo = this.renderLoginStateInfo.bind(this);
         this.sendNewPasswordRequest = this.sendNewPasswordRequest.bind(this);
@@ -41,6 +43,7 @@ export default class HeaderComponent extends Component {
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
         this.comparePasswords = this.comparePasswords.bind(this);
         this.renderRoleDropdown = this.renderRoleDropdown.bind(this);
+        this.toggleLoginModal = this.toggleLoginModal.bind(this);
     }
 
     async componentDidUpdate(prevProps) {
@@ -202,14 +205,13 @@ export default class HeaderComponent extends Component {
                 </Button>
             </Link>
             <br/>
-            <Link to="/login">
-                <Button 
-                    basic
-                    color='orange'
-                >
-                    Log In
-                </Button>
-            </Link>
+            <Button 
+                basic
+                color='orange'
+                onClick={this.toggleLoginModal}
+            >
+                Log In
+            </Button>
         </Button.Group>
         return (
         <Grid.Column
@@ -225,9 +227,7 @@ export default class HeaderComponent extends Component {
         let imageLink = this.props.loggedIn && this.state.currRole !== 'ADMIN' && this.state.currRole !== 'COLLEGE_REP' ? 
             this.props.school.logoURL : require('./logo.png');
         return (
-                <>
-                <Image centered src={imageLink} size='small'/>
-                </>         
+            <Image centered src={imageLink} size='small'/>    
         )
     }
 
@@ -260,6 +260,13 @@ export default class HeaderComponent extends Component {
         })
     }
 
+
+    toggleLoginModal() {
+        this.setState({
+        loginModalOpen: !this.state.loginModalOpen
+        })
+    }
+
     async fetchUser() {
         return makeCall({}, '/user/one/' + this.state.userId, 'get');
     }
@@ -283,43 +290,64 @@ export default class HeaderComponent extends Component {
 
     render () {
         return (
-            <Grid 
-                style={{
-                    'margin': '5px 0 20px 0'
-                }}
-                columns={3}
-                centered
-            >
-                <Grid.Row columns={"equal"}>
-                    <Grid.Column width={5} textAlign='right' verticalAlign='middle'>
-                        {this.props.loggedIn &&
-                            this.renderRoleDropdown()
-                        }
-                    </Grid.Column>
-                    <Grid.Column width={6}>
-                        {this.renderLogo()}
-                    </Grid.Column>
-                    <Grid.Column width={5} verticalAlign='middle' textAlign='left'>
-                        {this.renderLoginStateInfo()}
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row columns={"equal"}>
-                    <Grid.Column textAlign='center'>
-                        {this.props.school && this.props.loggedIn &&
-                            <Header as='h4'>
-                                {this.props.school.name}
-                                {
-                                    (process.env.REACT_APP_IS_BETA && process.env.REACT_APP_IS_BETA.toLowerCase() === 'true') ? 
-                                    <Label color='yellow'>
-                                        beta
-                                    </Label>
-                                    : null
+            <>
+                <Modal
+                    closeIcon
+                    open={this.state.loginModalOpen}
+                    onClose={this.toggleLoginModal}
+                    onOpen={this.toggleLoginModal}
+                    dimmer='blurring'
+                >
+                    <Modal.Content>
+                        <LoginForm
+                            isLoggedIn={this.props.loggedIn}
+                            completeLogin={this.props.completeLogin}
+                            toggleLoginModal={this.toggleLoginModal}
+                            login={this.props.login}
+                        />
+                    </Modal.Content>
+                </Modal>
+                <Grid
+                    style={{
+                        'margin': '5px 0 20px 0'
+                    }}
+                    columns={3}
+                    centered
+                    padded={false}
+                >
+                    <Grid.Row columns={"equal"}>
+                        <Grid.Column width={5} textAlign='right' verticalAlign='middle'>
+                            {this.props.loggedIn &&
+                                this.renderRoleDropdown()
+                            }
+                        </Grid.Column>
+                        <Grid.Column width={6}>
+                            {this.renderLogo()}
+                        </Grid.Column>
+                        <Grid.Column width={5} verticalAlign='middle' textAlign='left'>
+                            {this.renderLoginStateInfo()}
+                        </Grid.Column>
+                    </Grid.Row>
+                    { this.props.loggedIn ?
+                        <Grid.Row columns={"equal"}>
+                            <Grid.Column textAlign='center'>
+                                {this.props.school && this.props.loggedIn &&
+                                    <Header as='h4'>
+                                        {this.props.school.name}
+                                        {
+                                            (process.env.REACT_APP_IS_BETA && process.env.REACT_APP_IS_BETA.toLowerCase() === 'true') ? 
+                                            <Label color='yellow'>
+                                                beta
+                                            </Label>
+                                            : null
+                                        }
+                                    </Header>
                                 }
-                            </Header>
-                        }  
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
+                            </Grid.Column>
+                        </Grid.Row> : null
+                    }
+                </Grid>
+            </>
         )
     }
 }

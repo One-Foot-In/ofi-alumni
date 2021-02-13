@@ -1,2 +1,6 @@
-export const primary = '#805825'
-export const secondary = '#AE906A'
+export const darkOrange = '#ff9900'
+export const orange = '#fff5e6'
+export const black = '#333333'
+export const grey = '#e6e6e6'
+export const yellow = '#e6e600'
+export const darkBlack = '#000000'

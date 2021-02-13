@@ -85,10 +85,8 @@ class LoginForm extends React.Component {
                 this.setState({
                     loginLoading: false,
                 }, () => {
-                    // TECH DEBT: result will not contain user profile information upon successful login,
-                    // this will need to be retrieved by refreshProfile when committing this data to store
-                    this.props.addUserDetails(result);
                     this.props.completeLogin();
+                    this.props.toggleLoginModal();
                     this.props.login();
                 });
             }
