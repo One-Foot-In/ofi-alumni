@@ -4,6 +4,7 @@ import ImageUpdateModal from './ImageUpdateModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
 import { makeCall } from "../apis";
+import FootyPoints from './FootyPoints';
 
 const STUDENT = "STUDENT"
 
@@ -207,6 +208,12 @@ export default class StudentProfile extends Component {
                                 {this.getInterests()}
                             </Segment>
                         </Card.Content>
+                }
+                {isViewOnly ? 
+                    null :
+                    <Card.Content>
+                        <FootyPoints points={this.props.details.footyPoints} />
+                    </Card.Content>
                 }
                 {
                     isViewOnly ?
