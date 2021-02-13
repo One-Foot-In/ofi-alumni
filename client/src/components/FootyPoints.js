@@ -5,8 +5,8 @@ const logo = require('./logo.png');
 function FootyPoints (props) {
     return (
         <Label as='a' image>
-        <img src={logo} />
-        {props.points}
+            <img src={logo} />
+            {props.points}
         </Label>
     )
 

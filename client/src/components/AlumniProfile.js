@@ -432,7 +432,7 @@ export default class AlumniProfile extends Component {
                 {
                     isViewOnly ? null : 
                         <Card.Content>
-                            <FootyPoints points={this.props.details.footyPoints}></FootyPoints>
+                            <FootyPoints points={this.props.details.footyPoints} />
                         </Card.Content>
                 }
                 {
