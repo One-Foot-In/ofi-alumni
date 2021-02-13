@@ -29,9 +29,9 @@ export default function Polls(props) {
     const urlBuilder = (path) => {
         let prepend = ''
         let identifierParams = ''
-        if (props.country) {
+        if (props.currentRole === "COUNTRY_AMBASSADOR") {
             prepend = 'ambassador'
-            identifierParams = `${props.userDetails._id}/${props.country}`
+            identifierParams = `${props.userDetails._id}/${props.userDetails.school.country}`
         } else {
             prepend = 'admin'
             identifierParams = props.userDetails._id
@@ -63,7 +63,7 @@ export default function Polls(props) {
             .then(() => {
                 let schoolsRequestUrl = ''
                 if (props.currentRole === 'COUNTRY_AMBASSADOR') {
-                    schoolsRequestUrl = '/drop/schoolsOptionsForCountry/' + props.userDetails.country
+                    schoolsRequestUrl = '/drop/schoolsOptionsForCountry/' + props.userDetails.school.country
                 } else if (props.currentRole === 'ADMIN') {
                     schoolsRequestUrl = '/drop/schoolsOptions/'
                 }
@@ -156,10 +156,13 @@ export default function Polls(props) {
                 setPollOptions([])
                 setRoleSelection("")
                 setTypeSelection("")
-                setContextSelection("")
-                setCountrySelection([])
                 setSchoolSelection([])
                 setPrompt("")
+                if (props.currentRole === 'ADMIN') {
+                    // only reset context and countrySelection for global admins after request, since country ambassadors will still stay in the country context
+                    setCountrySelection([])
+                    setContextSelection("")
+                }
             }
         })
     }
@@ -168,7 +171,7 @@ export default function Polls(props) {
         setSendingRequest(true)
         let deletePath = ''
         if (props.currentRole === 'COUNTRY_AMBASSADOR') {
-            deletePath = `/ambassador/poll/${props.userDetails._id}/${pollId}`
+            deletePath = `/ambassador/poll/${props.userDetails._id}/${props.userDetails.school.country}/${pollId}`
         } else if (props.currentRole === 'ADMIN') {
             deletePath = `/admin/poll/${props.userDetails._id}/${pollId}`
         }
