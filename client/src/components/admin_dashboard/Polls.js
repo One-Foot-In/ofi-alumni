@@ -63,7 +63,7 @@ export default function Polls(props) {
             .then(() => {
                 let schoolsRequestUrl = ''
                 if (props.currentRole === 'COUNTRY_AMBASSADOR') {
-                    schoolsRequestUrl = '/drop/schoolsOptionsForCountry/' + props.userDetails.country
+                    schoolsRequestUrl = '/drop/schoolsOptionsForCountry/' + props.userDetails.school.country
                 } else if (props.currentRole === 'ADMIN') {
                     schoolsRequestUrl = '/drop/schoolsOptions/'
                 }
