@@ -69,10 +69,12 @@ router.get('/all/:id', passport.authenticate('jwt', {session: false}), async (re
         // this check can be removed
         conversations = conversations.filter(conversation => {
             let allAlumniExist = false
+            let alumniParticipantCount = 0
             conversation.alumni.forEach(alumnus => {
                 allAlumniExist = !!alumnus.name
+                alumniParticipantCount++
             })
-            return allAlumniExist
+            return allAlumniExist && alumniParticipantCount > 1
         })
         res.status(200).send({
             'conversations': conversations
