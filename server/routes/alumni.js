@@ -784,8 +784,8 @@ router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {ses
 router.patch('/collegesAcceptedInto/delete/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         const alumni = await alumniSchema.findOne({_id: req.params.id});
-        const collegeName = req.body.collegeToRemove.name;
-        const collegesInfoForFilter = await collegeSchema.findOne().where('name').in(collegeName).exec();
+        const collegeId = req.body.collegeToRemove._id;
+        const collegesInfoForFilter = await collegeSchema.findOne().where('_id').in(collegeId).exec();
         const theCollegeId = collegesInfoForFilter.id;
         let newCollegeList = [];
         for (let i = 0; i < alumni.collegesAcceptedInto.length; i++){
@@ -809,8 +809,7 @@ router.get('/collegesAcceptedInto/all/:id', /*passport.authenticate('jwt', {sess
             .populate('collegesAcceptedInto')
             .exec();
         let collegesAcceptedInto = alumni.collegesAcceptedInto;
-        console.log(collegesAcceptedInto);
-        res.status(200).json(collegesAcceptedInto)
+        res.status(200).json(collegesAcceptedInto);
     }
     catch (e){
         console.log('Unable to get collegesAcceptedInto at this time')

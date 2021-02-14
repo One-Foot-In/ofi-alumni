@@ -275,11 +275,12 @@ router.get('/approvedRequestsCount/:studentId', passport.authenticate('jwt', {se
     } catch (e) {
         console.log("Error: student#approvedRequestsCount", e);
         res.status(500).send({'error' : e});
+    }
+})
 
 router.patch('/collegeShortList/add/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         let student = await studentSchema.findOne({_id: req.params.id});
-
         const existingColleges = req.body.existingColleges || [];
         const newColleges = req.body.newColleges || [];
         let collegesToAdd = await generateNewAndExistingCollege(existingColleges, newColleges);
@@ -313,7 +314,7 @@ router.patch('/collegeShortList/remove/:id', /*passport.authenticate('jwt', {ses
     }
 })
 
-router.get('/collegeShortList/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
+router.get('/collegeShortList/all/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         const student = await studentSchema.findOne({_id: req.params.id}).populate('collegeShortList').exec();
         res.status(200).json(student.collegeShortList)
