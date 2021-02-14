@@ -14,12 +14,13 @@ var htmlBuilder = require('./emailBodyBuilder').buildBody
 sg.setApiKey(process.env.SENDGRID_KEY);
 
 const doNotSendEmails = process.env.DO_NOT_SEND_EMAILS && process.env.DO_NOT_SEND_EMAILS.toLowerCase() === 'true'
+const useTestDomain = (process.env.DEV_MODE && process.env.DEV_MODE.toLowerCase() === "true");
 
 const createPersonalization = (to, subject, html) => {
   return {
     to: to,
     from: {
-      email: 'no-reply@onefootin.com',
+      email: useTestDomain ?  'no-reply@test.onefootin.org' : 'no-reply@onefootin.org',
       name: 'One Foot In'
     },
     subject: subject,
