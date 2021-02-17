@@ -64,6 +64,18 @@ router.get('/all/:id', passport.authenticate('jwt', {session: false}), async (re
         for (let conversation of conversations) {
             conversation.timeFromMessage = moment(conversation.messages[0].dateSent).fromNow();
         }
+        // filter out stale conversations, aka conversations where at least one alumnus is deleted
+        // TODO: This is a bad data handling solution. Once we have nightly jobs for handling background processes,
+        // this check can be removed
+        conversations = conversations.filter(conversation => {
+            let allAlumniExist = false
+            let alumniParticipantCount = 0
+            conversation.alumni.forEach(alumnus => {
+                allAlumniExist = !!alumnus.name
+                alumniParticipantCount++
+            })
+            return allAlumniExist && alumniParticipantCount > 1
+        })
         res.status(200).send({
             'conversations': conversations
         });
