@@ -83,7 +83,8 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             verificationToken: verificationToken,
             role: role,
             emailVerified: emailVerified,
-            emailSubscribed: true
+            emailSubscribed: true,
+            accessContexts: ["INTRASCHOOL"],
         }
     );
     
@@ -134,6 +135,7 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
           verificationToken: verificationToken,
           role: role,
           emailVerified: emailVerified,
+          accessContexts: ["INTRASCHOOL"],
           emailSubscribed: true
         }
     );
@@ -341,7 +343,8 @@ router.post('/addAlumni/', async (req, res, next) => {
               role: role,
               emailVerified: emailVerified,
               approved: approved,
-              emailSubscribed: true
+              emailSubscribed: true,
+              accessContexts: ["INTRASCHOOL"],
             }
         );
         await user_instance.save();
@@ -428,7 +431,8 @@ router.post('/addStudent/', async (req, res, next) => {
               role: role,
               emailVerified: emailVerified,
               emailSubscribed: true,
-              approved: approved
+              approved: approved,
+              accessContexts: ["INTRASCHOOL"],
             }
         );
         await user_instance.save();
@@ -662,7 +666,8 @@ router.post('/newAdmin/', async (req, res) => {
               verificationToken: verificationToken,
               role: role,
               emailVerified: emailVerified,
-              emailSubscribed: true
+              emailSubscribed: true,
+              accessContexts: ["INTRASCHOOL"],
             }
         );
         await user_instance.save();
