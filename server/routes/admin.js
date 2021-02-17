@@ -10,7 +10,7 @@ var requestSchema = require('../models/requestSchema');
 var userSchema = require('../models/userSchema');
 var pollSchema = require('../models/polls/pollSchema');
 var pollOptionSchema = require('../models/polls/pollOptionSchema');
-const { sendPollAlert } = require('./helpers/emailHelpers');
+const { sendPollAlert, sendApprovalAlert } = require('./helpers/emailHelpers');
 require('mongoose').Promise = global.Promise
 
 async function isAdmin(id) {
@@ -141,16 +141,29 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
             return;
         }
         let dbData = []
+        let newApprovalState = false
+        let email = '', name = ''
         if (type === 'ALUMNI') {
             let alumni = await alumniSchema.findById(profileId);
-            alumni.approved = !alumni.approved;
+            newApprovalState = !alumni.approved
+            alumni.approved = newApprovalState;
+            let userRecordForAlumnus = await userSchema.findById(alumni.user, {email: 1})
+            email = userRecordForAlumnus.email
+            name = alumni.name
             await alumni.save()
             dbData = await fetchAllAlumniWithAccessContexts()
         } else if (type === 'STUDENT') {
             let student = await studentSchema.findById(profileId);
-            student.approved = !student.approved;
+            newApprovalState = !student.approved
+            student.approved = newApprovalState;
+            let userRecordForStudent = await userSchema.findById(student.user, {email: 1})
+            email = userRecordForStudent.email
+            name = student.name
             await student.save()
             dbData = await fetchAllStudentsWithAccessContexts()
+        }
+        if (newApprovalState) {
+            await sendApprovalAlert(email, name)
         }
         res.status(200).send({profiles: dbData})
         return;

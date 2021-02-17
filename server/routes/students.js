@@ -65,7 +65,8 @@ router.post('/', async (req, res, next) => {
               emailVerified: emailVerified,
               emailSubscribed: true,
               emailSubscriptionToken: emailSubscriptionToken,
-              approved: approved
+              approved: approved,
+              accessContexts: ["INTRASCHOOL"]
             }
         );
         await user_instance.save();
