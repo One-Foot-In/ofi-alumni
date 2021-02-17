@@ -626,6 +626,7 @@ router.post('/opportunity/:id', passport.authenticate('jwt', {session: false}), 
         })
         await newOpportunity.save()
         alumni.opportunities.push(newOpportunity)
+        alumni.footyPoints += 8;
         await alumni.save()
         // do not wait on finishing request
         queueOpportunities(alumni, newOpportunity)

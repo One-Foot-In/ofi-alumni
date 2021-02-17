@@ -7,7 +7,6 @@ var bcrypt = require('bcrypt');
 const cors = require('cors');
 var CronJob = require('cron').CronJob;
 var { sendWeeklyEmailDigest } = require('./routes/helpers/emailHelpers');
-
 // passport for authentication by local strategy
 var passport = require("passport");
 var LocalStrategy = require("passport-local").Strategy;
@@ -17,6 +16,7 @@ var indexRouter = require('./routes/index');
 var alumniRouter = require('./routes/alumni');
 var studentsRouter = require('./routes/students');
 var adminRouter = require('./routes/admin');
+var ambassadorRouter = require('./routes/country_ambassador');
 var collegeRepRouter = require('./routes/collegeRep');
 var userRouter = require('./routes/user');
 var dropdownRouter = require('./routes/dropdown');
@@ -146,6 +146,8 @@ async function main() {
     app.use('/student/', studentsRouter);
 
     app.use('/admin/', adminRouter);
+
+    app.use('/ambassador/', ambassadorRouter);
 
     app.use('/collegeRep/', collegeRepRouter);
 

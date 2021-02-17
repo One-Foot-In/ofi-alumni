@@ -18,6 +18,7 @@ const conversationSchema = require('../models/conversationSchema');
 const collegeRepSchema = require('../models/collegeRepSchema');
 require('mongoose').Promise = global.Promise
 var COUNTRIES = require("../countries").COUNTRIES
+const { v4: uuidv4 } = require('uuid');
 var sendTestEmail = require('../routes/helpers/emailHelpers').sendTestEmail
 
 const HASH_COST = 10;
@@ -82,7 +83,8 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             verificationToken: verificationToken,
             role: role,
             emailVerified: emailVerified,
-            emailSubscribed: true
+            emailSubscribed: true,
+            accessContexts: ["INTRASCHOOL"],
         }
     );
     
@@ -133,6 +135,7 @@ const createStudent = async (_email, _name, _picLink, timezone, _school, _school
           verificationToken: verificationToken,
           role: role,
           emailVerified: emailVerified,
+          accessContexts: ["INTRASCHOOL"],
           emailSubscribed: true
         }
     );
@@ -175,7 +178,10 @@ router.get('/seed/', async (req, res, next) => {
     try {
         // Create 3 schools
         for (let i = 0; i < SCHOOL_COUNT; i++) {
-            const schoolName = randomPickFromArray(schools)
+            let schoolName = randomPickFromArray(schools)
+            if (process.env.NODE_ENV === 'test') {
+                schoolName += ` (${uuidv4()})`
+            }
             const country = randomPickFromArray(countries)
             const logoUrl = `https://placedog.net/400/400?id=${Math.floor(Math.random()*20 + 1)}`
             await createSchool(schoolName, country, logoUrl)
@@ -184,7 +190,10 @@ router.get('/seed/', async (req, res, next) => {
 
         // create 10 colleges
         for (let i = 0; i < COLLEGE_COUNT; i++) {
-            const collegeName = colleges[i]
+            let collegeName = colleges[i]
+            if (process.env.NODE_ENV === 'test') {
+                collegeName += ` (${uuidv4()})`
+            }
             const country = randomPickFromArray(countries)
             const logoUrl = `https://placedog.net/400/400?id=${Math.floor(Math.random()*20 + 1)}`
             await createCollege(collegeName, country, logoUrl)
@@ -193,24 +202,36 @@ router.get('/seed/', async (req, res, next) => {
         
         // create 10 companies
         for (let i = 0; i < COMPANY_COUNT; i++) {
+            let companyName = companies[i]
+            if (process.env.NODE_ENV === 'test') {
+                companyName += ` (${uuidv4()})`
+            }
             let company_instance = new companySchema({
-                name: companies[i]
+                name: companyName
             })
             await company_instance.save()
         }
         let companiesSaved = await companySchema.find()
         // create 10 jobTitles
         for (let i = 0; i < JOB_TITLE_COUNT; i++) {
+            let jobTitleName = `${randomPickFromArray(professionFirst)} ${randomPickFromArray(professionSecond)} ${i}`
+            if (process.env.NODE_ENV === 'test') {
+                jobTitleName += ` (${uuidv4()})`
+            }
             let jobTitle_instance = new jobTitleSchema({
-                name: `${randomPickFromArray(professionFirst)} ${randomPickFromArray(professionSecond)} ${i}`
+                name: jobTitleName
             })
             await jobTitle_instance.save()
         }
         let jobTitlesSaved = await jobTitleSchema.find()
         // create majors
         for (let i = 0; i < majors.length; i++) {
+            let majorName = majors[i]
+            if (process.env.NODE_ENV === 'test') {
+                majorName += ` (${uuidv4()})`
+            }
             let major_instance = new majorSchema({
-                name: majors[i]
+                name: majorName
             })
             await major_instance.save()
         }
@@ -218,8 +239,12 @@ router.get('/seed/', async (req, res, next) => {
 
         // create interests
         for (let i = 0; i < interests.length; i++) {
+            let interestName = interests[i]
+            if (process.env.NODE_ENV === 'test') {
+                interestName += ` (${uuidv4()})`
+            }
             let interest_instance = new interestsSchema({
-                name: interests[i]
+                name: interestName
             })
             await interest_instance.save()
         }
@@ -318,7 +343,8 @@ router.post('/addAlumni/', async (req, res, next) => {
               role: role,
               emailVerified: emailVerified,
               approved: approved,
-              emailSubscribed: true
+              emailSubscribed: true,
+              accessContexts: ["INTRASCHOOL"],
             }
         );
         await user_instance.save();
@@ -405,7 +431,8 @@ router.post('/addStudent/', async (req, res, next) => {
               role: role,
               emailVerified: emailVerified,
               emailSubscribed: true,
-              approved: approved
+              approved: approved,
+              accessContexts: ["INTRASCHOOL"],
             }
         );
         await user_instance.save();
@@ -639,7 +666,8 @@ router.post('/newAdmin/', async (req, res) => {
               verificationToken: verificationToken,
               role: role,
               emailVerified: emailVerified,
-              emailSubscribed: true
+              emailSubscribed: true,
+              accessContexts: ["INTRASCHOOL"],
             }
         );
         await user_instance.save();

@@ -23,15 +23,16 @@ async function isAdmin(id) {
     Return all alumni with the school and access context information populated
     @return array of alumni objects
 */
-async function fetchAllAlumniWithAccessContexts() {
+async function fetchAllAlumniWithAccessContextsAndRoles() {
     let alumniData = await alumniSchema.find({}).populate('school')
     let alumni = []
     for (let alumnusModel of alumniData) {
         let alumnus = alumnusModel.toObject()
-        let userRecordWithAccessContext = await userSchema.findById(alumnusModel.user, {accessContexts: 1})
+        let userRecordWithAccessContextAndRoles = await userSchema.findById(alumnusModel.user, {accessContexts: 1, role: 1})
         // do not return alumni who do not have an associated user record
-        if (userRecordWithAccessContext) {            
-            alumnus.accessContexts = userRecordWithAccessContext.accessContexts
+        if (userRecordWithAccessContextAndRoles) {            
+            alumnus.accessContexts = userRecordWithAccessContextAndRoles.accessContexts
+            alumnus.roles = userRecordWithAccessContextAndRoles.role
             alumni.push(alumnus)
         }
     }
@@ -78,7 +79,7 @@ router.get('/allAlumni/:adminId', passport.authenticate('jwt', {session: false})
             res.status(400).send('Invalid Admin ID');
             return;
         }
-        let alumni = await fetchAllAlumniWithAccessContexts()
+        let alumni = await fetchAllAlumniWithAccessContextsAndRoles()
         res.status(200).send({'alumni': alumni})
     } catch (e) {
         console.log('admin/allAlumni error: ' + e);
@@ -151,7 +152,7 @@ router.patch('/toggleApprove/:adminId', passport.authenticate('jwt', {session: f
             email = userRecordForAlumnus.email
             name = alumni.name
             await alumni.save()
-            dbData = await fetchAllAlumniWithAccessContexts()
+            dbData = await fetchAllAlumniWithAccessContextsAndRoles()
         } else if (type === 'STUDENT') {
             let student = await studentSchema.findById(profileId);
             newApprovalState = !student.approved
@@ -216,7 +217,7 @@ router.patch('/changeAccess/:adminId', passport.authenticate('jwt', {session: fa
         await user.save()
         let dbData = []
         if (type === 'ALUMNI') {
-            dbData = await fetchAllAlumniWithAccessContexts()
+            dbData = await fetchAllAlumniWithAccessContextsAndRoles()
         } else if (type === 'STUDENT') {
             dbData = await fetchAllStudentsWithAccessContexts()
         }
@@ -486,7 +487,7 @@ router.post('/addPoll/:adminId', passport.authenticate('jwt', {session: false}),
 });
 
 router.delete('/poll/:adminId/:pollId',
-    // passport.authenticate('jwt', {session: false}),
+    passport.authenticate('jwt', {session: false}),
     async (req, res) => {
     let adminId = req.params.adminId
     try {
@@ -507,6 +508,27 @@ router.delete('/poll/:adminId/:pollId',
         res.status(500).send({'error' : 'Delete Poll Error' + e})
     }
 });
+
+router.patch('/makeAmbassador/:adminId/:userId',
+    passport.authenticate('jwt', {session: false}),
+    async (req, res) => {
+        let adminId = req.params.adminId
+        try {
+            if (!isAdmin(adminId)) {
+                res.status(400).send('Invalid Admin ID');
+                return;
+            }
+            let user = await userSchema.findById(req.params.userId)
+            user.role.push("COUNTRY_AMBASSADOR")
+            user.save()
+            let alumni = await fetchAllAlumniWithAccessContextsAndRoles()
+            res.status(200).json({profiles: alumni});
+        } catch (e) {
+            console.log('/makeAmbassador poll error:' + e);
+            res.status(500).send({'error' : 'Make Ambassador Error' + e})
+        }
+    }
+)
 
 
 module.exports = router;

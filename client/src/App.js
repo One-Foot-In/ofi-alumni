@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { connect } from 'react-redux';
-import { Container, Segment, Message , Button, Grid} from 'semantic-ui-react';
+import { Container, Segment, Message , Button, Grid } from 'semantic-ui-react';
 import { Route, BrowserRouter as Router, Switch, Redirect, Link } from 'react-router-dom'
 import Header from './components/Header';
-import LoginForm from './components/LoginForm';
 import AlumniDirectory from './components/AlumniDirectory'
 import { makeCall } from "./apis";
 import Navbar from './components/Navbar'
@@ -25,11 +24,13 @@ import StudentWorkspace from './components/StudentWorkspace';
 import * as actions from './redux/actions'
 import Polls from './components/admin_dashboard/Polls';
 import Footer from './components/Footer'
+import LandingPage from './landingPageContent/LandingPage';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
 export const ADMIN = "ADMIN"
 export const COLLEGE_REP = "COLLEGE_REP"
+export const COUNTRY_AMBASSADOR = "COUNTRY_AMBASSADOR"
 
 /*
   STORE SETUP
@@ -184,6 +185,36 @@ var adminNavBarItems = () => {
   return navBarItems;
 }
 
+var countryAmbassadorNavBarItems = () => {
+  let navBarItems = [
+    {
+      id: 'schools',
+      name: 'Schools',
+      navLink: '/',
+      icon: 'university'
+    },
+    {
+        id: 'students',
+        name: 'Students',
+        navLink: '/students',
+        icon: 'users'
+    },
+    {
+        id: 'alumni',
+        name: 'Alumni',
+        navLink: '/alumni',
+        icon: 'users'
+    },
+    {
+      id: 'polls',
+      name: 'Polls',
+      navLink: '/polls',
+      icon: 'chart bar'
+  }
+  ]
+  return navBarItems;
+}
+
 const studentNavBarItems = (isModerator, approvedRequestsCount) => {
   let navBarItems = [
     {
@@ -262,7 +293,7 @@ class App extends Component {
       userDetails: {},
       newRequestsCount: 0,
       unseenMessagesCount: 0,
-      approvedRequestsCount: 0
+      approvedRequestsCount: 0,
     };
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
@@ -272,10 +303,27 @@ class App extends Component {
     this.refreshProfile = this.refreshProfile.bind(this);
     this.liftRole = this.liftRole.bind(this);
     this.refreshMenuPopupCounters = this.refreshMenuPopupCounters.bind(this);
+    this.getPrimaryRole = this.getPrimaryRole.bind(this)
+  }
+
+  /**
+   * Gets roles available in order of priority
+   * Find Alumni first, then student, and if neither are present,
+   * return first value in array
+   * @param roles, all roles available to user
+   */
+  getPrimaryRole(roles) {
+    if (roles.includes(ALUMNI)) {
+      return ALUMNI
+    }
+    if (roles.includes(STUDENT)) {
+      return STUDENT
+    }
+    return roles[0]
   }
 
   async UNSAFE_componentWillMount() {
-    var role;
+    var roles;
     var profile;
     var id;
     this.setState({
@@ -289,18 +337,18 @@ class App extends Component {
       if (result && !result.error) {
         var jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
-        role = parsedJWT.role;
+        roles = parsedJWT.role;
         id = parsedJWT.id;
-        let result = await this.fetchProfile(role[0], id);
+        let result = await this.fetchProfile(this.getPrimaryRole(roles), id);
         profile = result.result
         this.setState({
           accessContexts: result.accessContexts,
-          role: role[0],
+          role: this.getPrimaryRole(roles),
           userDetails: profile,
           approved: profile.approved,
           loggedIn: true
         }, async () => {
-          await this.refreshMenuPopupCounters(role, profile._id)
+          await this.refreshMenuPopupCounters(roles, profile._id)
         })
       } else {
         this.setState({
@@ -325,9 +373,9 @@ class App extends Component {
     })
   }
 
-  async refreshMenuPopupCounters(role, id) {
-    if (role && role.length && id) {
-      if (role.includes(ALUMNI)) {
+  async refreshMenuPopupCounters(roles, id) {
+    if (roles && roles.length && id) {
+      if (roles.includes(ALUMNI)) {
         let newRequestsCountResponse = await makeCall({}, `/alumni/newRequestsCount/${id}`, 'get')
         let unseenMessagesCountResponse = await makeCall({}, `/alumni/unseenMessagesCount/${id}`, 'get')
         this.setState({
@@ -350,6 +398,9 @@ class App extends Component {
         result = await makeCall({}, ('/student/one/'+id), 'get');
         break;
       case ALUMNI:
+        result = await makeCall({}, ('/alumni/one/'+id), 'get')
+        break;
+      case COUNTRY_AMBASSADOR:
         result = await makeCall({}, ('/alumni/one/'+id), 'get')
         break;
       case ADMIN:
@@ -683,6 +734,7 @@ class App extends Component {
                       <ProfileList
                           viewing={'STUDENT'}
                           userDetails={this.state.userDetails}
+                          currentRole={ADMIN}
                       />
                   </> :
                     <Redirect to={"/login"}/>
@@ -701,6 +753,7 @@ class App extends Component {
                       <ProfileList
                           viewing={'ALUMNI'}
                           userDetails={this.state.userDetails}
+                          currentRole={ADMIN}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -734,7 +787,9 @@ class App extends Component {
                           activeItem={'schools'}
                       />
                       <SchoolsList
-                          userDetails={this.state.userDetails}
+                          currentRole={this.state.role}
+                          userId={this.state.userDetails._id}
+                          country={null}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -751,6 +806,7 @@ class App extends Component {
                           activeItem={'polls'}
                       />
                       <Polls
+                        currentRole={ADMIN}
                         userDetails={this.state.userDetails}
                       />
                   </> :
@@ -809,6 +865,86 @@ class App extends Component {
           />
         </>
         )
+      case COUNTRY_AMBASSADOR:
+        return (
+          <>
+          <Route exact path={`/`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={countryAmbassadorNavBarItems()}
+                          activeItem={'schools'}
+                      />
+                      <SchoolsList
+                          currentRole={this.state.role}
+                          userId={this.state.userDetails._id}
+                          country={this.state.userDetails.school.country}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/students`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={countryAmbassadorNavBarItems()}
+                          activeItem={'students'}
+                      />
+                      <ProfileList
+                          viewing={'STUDENT'}
+                          currentRole={COUNTRY_AMBASSADOR}
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                    <Redirect to={"/login"}/>
+                }
+          />
+          <Route exact path={`/alumni`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={countryAmbassadorNavBarItems()}
+                          activeItem={'alumni'}
+                      />
+                      <ProfileList
+                          viewing={'ALUMNI'}
+                          currentRole={COUNTRY_AMBASSADOR}
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={`/polls`} render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={countryAmbassadorNavBarItems()}
+                          activeItem={'polls'}
+                      />
+                      <Polls
+                        currentRole={COUNTRY_AMBASSADOR}
+                        userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+        </>
+        )
       default:
         return (
           <Redirect to={"/login"}/>
@@ -822,11 +958,15 @@ class App extends Component {
           <Route exact path={'/register'} render={
               (props) =>
               <>
-                  {registerButtonGroup(props)}
+                  {
+                    this.state.loggedIn ? <Redirect to={"/"}/> :
+                    registerButtonGroup(props)
+                  }
               </>
           }/>
           <Route exact path={`/register/alumni`} render={
-              (props) => 
+              (props) =>
+                  this.state.loggedIn ? <Redirect to={"/"}/> : 
                   <Signup
                       isAlumni={true}
                       match={props}
@@ -835,18 +975,15 @@ class App extends Component {
           />
           <Route exact path={`/register/student`} render={
               (props) => 
-                  <Signup
+                this.state.loggedIn ? <Redirect to={"/"}/> :
+                <Signup
                       isAlumni={false}
                       match={props}
                   />
               }
           />
-          <Route exact path={"/login"} render={(props) => 
-              <LoginForm
-                isLoggedIn={this.state.loggedIn}
-                completeLogin={this.completeLogin}
-                login={this.login}
-              />
+          <Route exact path={"/login"} render={(props) =>
+              this.state.loggedIn ? <Redirect to={"/"}/> : <LandingPage/>
             }
           />
           {this.renderLoggedInRoutes(role)}
@@ -882,18 +1019,22 @@ class App extends Component {
               </Segment>
             </> :
             <>
-            <Header
-              loggedIn={this.state.loggedIn}
-              logout={this.logout}
-              school={this.state.userDetails && this.state.userDetails.school}
-              userId={this.state.userDetails && this.state.userDetails.user}
-              role={this.state.role}
-              liftRole={this.liftRole}
-            />
-            <Container>
-              {this.renderScreens(this.state.role)}
-            </Container>
-            <Footer/>
+              <Header
+                loggedIn={this.state.loggedIn}
+                logout={this.logout}
+                school={this.state.userDetails && this.state.userDetails.school}
+                name={this.state.userDetails && this.state.userDetails.name}
+                userId={this.state.userDetails && this.state.userDetails.user}
+                role={this.state.role}
+                liftRole={this.liftRole}
+                completeLogin={this.completeLogin}
+                login={this.login}
+                currentRole={this.state.role}
+              />
+              <Container>
+                {this.renderScreens(this.state.role)}
+              </Container>
+              <Footer/>
             </>
           }
           {this.state.roleChanged && 

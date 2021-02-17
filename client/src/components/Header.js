@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
-import {Grid, Button, Modal, Form, Image, Label, Dropdown, Header} from 'semantic-ui-react';
+import {Grid, Button, Modal, Form, Image, Label, Dropdown, Header, Flag } from 'semantic-ui-react';
+import LoginForm from './LoginForm';
 import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
+import { flagCodeByCountry } from '../flags'
+import { black } from "../colors"
 
 function getErrorLabel(content) {
     return (
@@ -16,7 +19,9 @@ props:
 - loggedIn: boolean
 - logout: ()
 - userId
-- schoolLogo
+- name
+- school: Object
+- currentRole: ALUMNI | STUDENT | ADMIN | COUNTRY_AMBASSADOR
 */
 export default class HeaderComponent extends Component {
     constructor(props) {
@@ -29,7 +34,8 @@ export default class HeaderComponent extends Component {
             passwordsMatching: true,
             currRole: this.props.role,
             userId: this.props.userId,
-            availableRoles: []
+            availableRoles: [],
+            loginModalOpen: false
         }
         this.renderLoginStateInfo = this.renderLoginStateInfo.bind(this);
         this.sendNewPasswordRequest = this.sendNewPasswordRequest.bind(this);
@@ -39,6 +45,8 @@ export default class HeaderComponent extends Component {
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
         this.comparePasswords = this.comparePasswords.bind(this);
         this.renderRoleDropdown = this.renderRoleDropdown.bind(this);
+        this.toggleLoginModal = this.toggleLoginModal.bind(this);
+        this.welcomeBadge = this.welcomeBadge.bind(this)
     }
 
     async componentDidUpdate(prevProps) {
@@ -200,14 +208,13 @@ export default class HeaderComponent extends Component {
                 </Button>
             </Link>
             <br/>
-            <Link to="/login">
-                <Button 
-                    basic
-                    color='orange'
-                >
-                    Log In
-                </Button>
-            </Link>
+            <Button 
+                basic
+                color='orange'
+                onClick={this.toggleLoginModal}
+            >
+                Log In
+            </Button>
         </Button.Group>
         return (
         <Grid.Column
@@ -223,9 +230,7 @@ export default class HeaderComponent extends Component {
         let imageLink = this.props.loggedIn && this.state.currRole !== 'ADMIN' && this.state.currRole !== 'COLLEGE_REP' ? 
             this.props.school.logoURL : require('./logo.png');
         return (
-                <>
-                <Image centered src={imageLink} size='small'/>
-                </>         
+            <Image centered src={imageLink} size='small'/>    
         )
     }
 
@@ -237,7 +242,7 @@ export default class HeaderComponent extends Component {
                 <Label basic >Current Role:
                     <Dropdown
                         compact
-                        style={{'marginLeft': '5px'}}
+                        style={{'marginLeft': '5px', width: '100px'}}
                         selection
                         options={this.state.availableRoles}
                         value={this.state.currRole}
@@ -257,6 +262,13 @@ export default class HeaderComponent extends Component {
         })
     }
 
+
+    toggleLoginModal() {
+        this.setState({
+        loginModalOpen: !this.state.loginModalOpen
+        })
+    }
+
     async fetchUser() {
         return makeCall({}, '/user/one/' + this.state.userId, 'get');
     }
@@ -268,9 +280,11 @@ export default class HeaderComponent extends Component {
             userInfo = await this.fetchUser()
             availableRoles = userInfo.result.role.map(role => {
                 role = role.toLowerCase()
+                let roleWords = role.split('_')
+                roleWords = roleWords.map(word => word[0].toUpperCase() + word.slice(1))
                 return {
                     key: role,
-                    text: role.charAt(0).toUpperCase() + role.slice(1),
+                    text: roleWords.join(' '),
                     value: role.toUpperCase()
                 }
             })
@@ -278,45 +292,130 @@ export default class HeaderComponent extends Component {
         }
     }
 
+    welcomeBadge () {
+        switch (this.props.currentRole) {
+            case 'ALUMNI':
+                return (
+                    <Label
+                        style={{
+                            backgroundColor: black,
+                            color: 'white'
+                        }}
+                    >
+                        Welcome {this.props.name.split(' ')[0]} (Alumnus)
+                    </Label>
+                )
+            case 'STUDENT':
+                return (
+                    <Label
+                        style={{
+                            backgroundColor: black,
+                            color: 'white'
+                        }}
+                    >
+                        Welcome {this.props.name.split(' ')[0]} (Student)
+                    </Label>
+                )
+            case 'COUNTRY_AMBASSADOR':
+                return (
+                    <Label
+                        style={{
+                            backgroundColor: black,
+                            color: 'white'
+                        }}
+                    >
+                        <Flag name={this.props.school.country && flagCodeByCountry[this.props.school.country]} />
+                        Welcome Ambassador {this.props.name.split(' ')[0]}
+                    </Label>
+                )
+            case 'ADMIN':
+                return (
+                    <Label
+                        style={{
+                            backgroundColor: black,
+                            color: 'white'
+                        }}
+                    >
+                        Welcome {this.props.name.split(' ')[0]} (Admin)
+                    </Label>
+                )
+            default:
+                return null
+        }
+    }
+
     render () {
         return (
-            <Grid 
-                style={{
-                    'margin': '5px 0 20px 0'
-                }}
-                columns={3}
-                centered
-            >
-                <Grid.Row columns={"equal"}>
-                    <Grid.Column width={5} textAlign='right' verticalAlign='middle'>
-                        {this.props.loggedIn &&
-                            this.renderRoleDropdown()
-                        }
-                    </Grid.Column>
-                    <Grid.Column width={6}>
-                        {this.renderLogo()}
-                    </Grid.Column>
-                    <Grid.Column width={5} verticalAlign='middle' textAlign='left'>
-                        {this.renderLoginStateInfo()}
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row columns={"equal"}>
-                    <Grid.Column textAlign='center'>
-                        {this.props.school && this.props.loggedIn &&
-                            <Header as='h4'>
-                                {this.props.school.name}
-                                {
-                                    (process.env.REACT_APP_IS_BETA && process.env.REACT_APP_IS_BETA.toLowerCase() === 'true') ? 
-                                    <Label color='yellow'>
-                                        beta
-                                    </Label>
-                                    : null
+            <>
+                <Modal
+                    closeIcon
+                    open={this.state.loginModalOpen}
+                    onClose={this.toggleLoginModal}
+                    onOpen={this.toggleLoginModal}
+                >
+                    <Modal.Content>
+                        <LoginForm
+                            isLoggedIn={this.props.loggedIn}
+                            completeLogin={this.props.completeLogin}
+                            toggleLoginModal={this.toggleLoginModal}
+                            login={this.props.login}
+                        />
+                    </Modal.Content>
+                </Modal>
+                <Grid
+                    style={{
+                        'margin': '5px 0 20px 0'
+                    }}
+                    columns={3}
+                    centered
+                    padded={false}
+                >
+                    <Grid.Row columns={"equal"}>
+                        <Grid.Column width={5} textAlign='right' verticalAlign='middle' textAlign='center'>
+                            {this.props.loggedIn &&
+                                <Grid.Row
+                                    style={{
+                                        margin: '5px'
+                                    }}
+                                >
+                                    {this.renderRoleDropdown()}
+                                </Grid.Row>
+                            }
+                            <Grid.Row
+                                style={{
+                                    margin: '5px'
+                                }}
+                            >
+                                {this.welcomeBadge()}
+                            </Grid.Row>
+                        </Grid.Column>
+                        <Grid.Column width={6}>
+                            {this.renderLogo()}
+                        </Grid.Column>
+                        <Grid.Column width={5} verticalAlign='middle' textAlign='left'>
+                            {this.renderLoginStateInfo()}
+                        </Grid.Column>
+                    </Grid.Row>
+                    { this.props.loggedIn ?
+                        <Grid.Row columns={"equal"}>
+                            <Grid.Column textAlign='center'>
+                                {this.props.school && this.props.loggedIn &&
+                                    <Header as='h4'>
+                                        {this.props.school.name}
+                                        {
+                                            (process.env.REACT_APP_IS_BETA && process.env.REACT_APP_IS_BETA.toLowerCase() === 'true') ? 
+                                            <Label color='yellow'>
+                                                beta
+                                            </Label>
+                                            : null
+                                        }
+                                    </Header>
                                 }
-                            </Header>
-                        }  
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
+                            </Grid.Column>
+                        </Grid.Row> : null
+                    }
+                </Grid>
+            </>
         )
     }
 }

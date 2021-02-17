@@ -19,7 +19,7 @@ const createPersonalization = (to, subject, html) => {
   return {
     to: to,
     from: {
-      email: 'no-reply@onefootin.com',
+      email: 'no-reply@onefootin.org',
       name: 'One Foot In'
     },
     subject: subject,
