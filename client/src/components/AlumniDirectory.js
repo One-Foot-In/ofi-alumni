@@ -460,7 +460,7 @@ export default class AlumniDirectory extends Component {
             case 'gradYear':
                 return (
                     <Dropdown 
-                        placeholder={'Graduation Year'}
+                        placeholder='Graduation Year'
                         fluid
                         floating
                         selection
@@ -472,7 +472,7 @@ export default class AlumniDirectory extends Component {
             case 'interests':
                 return (
                     <Dropdown 
-                        placeholder={'Interest'}
+                        placeholder='Interest'
                         fluid
                         floating
                         selection
@@ -502,7 +502,7 @@ export default class AlumniDirectory extends Component {
                         showNoResults={false}
                         onSearchChange={this.handleSearchChange}
                         input={{fluid: true}}
-                        placeholder={"Search"}
+                        placeholder="Search"
                         value={this.state.searchValue}
                     />
                 )

@@ -329,6 +329,9 @@ router.get('/totalCounts', async (req, res, next) => {
   }
 })
 
+/**
+ * Returns a random assortment of 5 approved alumni from within the OFI network for the landing page
+ */
 router.get('/sampleSignUps', async (req, res, next) => {  
   try {
       let alumniRecords = await alumniSchema.find({approved: true},'imageURL name collegeName country city')
