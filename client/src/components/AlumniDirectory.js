@@ -70,7 +70,7 @@ export default class AlumniDirectory extends Component {
             activePage: 1,
             numEntries: 0,
             isLoading: false,
-            value: '',
+            searchValue: '',
             totalPages: 0,
             entries:[],
             gradYears: [],
@@ -373,7 +373,7 @@ export default class AlumniDirectory extends Component {
     }
 
     search(value) {
-        this.setState({value: value})
+        this.setState({searchValue: value})
         this.setState({results: 0})
         var numResults = 0;
         if (typeof(value) === 'string') {
@@ -429,7 +429,12 @@ export default class AlumniDirectory extends Component {
             // when called from the graduation year dropdown
             this.search(value)
         } else {
-            this.setState({ filter: value })
+            this.setState({
+                filter: value,
+                searchValue: ''
+            }, () => {
+                this.search('')
+            })
         }
     }
 
@@ -455,7 +460,7 @@ export default class AlumniDirectory extends Component {
             case 'gradYear':
                 return (
                     <Dropdown 
-                        placeholder='Year:'
+                        placeholder='Graduation Year'
                         fluid
                         floating
                         selection
@@ -497,7 +502,8 @@ export default class AlumniDirectory extends Component {
                         showNoResults={false}
                         onSearchChange={this.handleSearchChange}
                         input={{fluid: true}}
-                        placeholder={"Search"}
+                        placeholder="Search"
+                        value={this.state.searchValue}
                     />
                 )
         }
@@ -510,12 +516,12 @@ export default class AlumniDirectory extends Component {
             filter,
             numResults,
             display,
-            value,
+            searchValue,
         } = this.state
 
         /* results row */
         let resultsRow;
-        if (value !== '') {
+        if (searchValue !== '') {
             resultsRow = (
                 <Grid.Row centered>
                         Found {numResults} results
