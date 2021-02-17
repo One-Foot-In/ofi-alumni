@@ -66,6 +66,23 @@ router.get('/schoolsOptions', async (req, res) => {
     }
 })
 
+router.get('/schoolsOptionsForCountry/:country', async (req, res) => {
+  try {
+    let schools = await schoolSchema.find({country: req.params.country})
+    let schoolOptions = schools.map( school => {
+      return {
+        key: school.name,
+        value: school._id,
+        text: `${school.name} (${school.country})`,
+      }
+    })
+    res.status(200).send({options: schoolOptions})
+  } catch (e) {
+    console.log("Error index.js#schoolsOptions")
+    res.status(500).json({success:false, error: e})
+  }
+})
+
 router.get('/jobTitles', async (req, res) => {
   try {
     let jobTitles = await jobTitleSchema.find()

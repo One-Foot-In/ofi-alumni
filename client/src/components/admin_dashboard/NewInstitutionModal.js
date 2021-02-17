@@ -3,6 +3,13 @@ import { Modal, Input, Button, Dropdown } from 'semantic-ui-react'
 import swal from 'sweetalert'
 import { makeCall } from '../../apis';
 
+/**
+ * Allows an admin or a country ambassador to add a school or a college
+ * @param {*} props:
+ * country: the country is specified for a country ambassador, null for regular admin
+ * type: SCHOOL | COLLEGE
+ * userId: alumni Id of the admin
+ */
 export default function NewInstitutionModal(props) {
     const [name, setName] = useState('')
     const [countries, setCountries] = useState([])
@@ -19,6 +26,9 @@ export default function NewInstitutionModal(props) {
                 setName('')
                 setLoading(false)
             })
+        }
+        if (props.country) {
+            setCountry(props.country)    
         }
     }, [props]);
 
@@ -38,11 +48,24 @@ export default function NewInstitutionModal(props) {
         setLoading(false);
     }, [result])
 
+    const urlBuilder = (path) => {
+        let prepend = ''
+        let identifierParams = ''
+        if (props.country) {
+            prepend = 'ambassador'
+            identifierParams = `${props.userId}/${props.country}`
+        } else {
+            prepend = 'admin'
+            identifierParams = props.userId
+        }
+        return `/${prepend}/${path}/${identifierParams}`
+    }
+
     const handleClick = () => {
         setLoading(true)
         if (props.type === "SCHOOL") {
             makeCall({name: name, country: country},
-                '/admin/addSchool/' + props.userId, 'post').then((res) => {
+                urlBuilder('addSchool'), 'post').then((res) => {
                     setResult(res)
                 })
         } else if (props.type === "COLLEGE") {
@@ -55,16 +78,22 @@ export default function NewInstitutionModal(props) {
 
     return(
         <Modal open={props.modalOpen} onClose={props.toggleModal} closeIcon>
-            <Modal.Header>Add a New {props.type === "SCHOOL" ? "School" : "College"} </Modal.Header>
+            <Modal.Header>Add a New {props.type === "SCHOOL" ? "School" : "College"} {props.country ? `for ${props.country}` : ``}</Modal.Header>
             <Modal.Content>
-                <h3>Country:</h3>
-                <Dropdown
-                    fluid
-                    selection
-                    options={countries}
-                    placeholder={'Select Country'}
-                    onChange={(e, {value}) => setCountry(value)}
-                />
+                {
+                    props.country ? 
+                    null :
+                    <>
+                        <h3>Country:</h3>
+                        <Dropdown
+                            fluid
+                            selection
+                            options={countries}
+                            placeholder={'Select Country'}
+                            onChange={(e, {value}) => setCountry(value)}
+                        />
+                    </>
+                }
                 <h3>{props.type === "SCHOOL" ? "School" : "College"} Name:</h3>
                 <Input 
                     fluid 

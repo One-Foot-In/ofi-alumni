@@ -68,15 +68,16 @@ router.post('/login', (req, res, next) => {
             let cookie = null
             if (userRole.includes("ALUMNI")) {
               const alumni = await alumniSchema.findOne({user: user._id})
-              if (!alumni.approved) {
-                res.status(404).send({ error: `Your account is currently pending approval.` });
-                return;
-              }
+              // TODO: bar login for unapproved when users reach critical mass
+              // if (!alumni.approved) {
+              //   res.status(404).send({ error: `Your account is currently pending approval.` });
+              //   return;
+              // }
               payload.id = alumni._id
               cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
             } else if (userRole.includes("STUDENT")) {
               const student = await studentSchema.findOne({user: user._id});
-              // TODO: bar login when unapproved when users reach critical mass
+              // TODO: bar login for unapproved when users reach critical mass
               // if (!student.approved) {
               //   res.status(404).send({ error: `Your account is currently pending approval.` });
               //   return;

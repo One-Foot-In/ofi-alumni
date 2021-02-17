@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Segment, Form, Radio, Button, TextArea, Dropdown, List, Input, Header, Grid, Table, Label } from 'semantic-ui-react'
 import { makeCall } from '../../apis';
 
+/**
+ * Allows admins and country ambassadors to send out polls and announcements
+ * A country ambassador can only send polls to schools in their own countries
+ * @param {
+ *  userDetails: Object, the alumni record for the user
+ * } props 
+ */
 export default function Polls(props) {
     
     const [polls, setPolls] = useState([])
@@ -19,8 +26,21 @@ export default function Polls(props) {
     // form control
     const [sendingRequest, setSendingRequest] = useState(false)
 
+    const urlBuilder = (path) => {
+        let prepend = ''
+        let identifierParams = ''
+        if (props.currentRole === "COUNTRY_AMBASSADOR") {
+            prepend = 'ambassador'
+            identifierParams = `${props.userDetails._id}/${props.userDetails.school.country}`
+        } else {
+            prepend = 'admin'
+            identifierParams = props.userDetails._id
+        }
+        return `/${prepend}/${path}/${identifierParams}`
+    }
+
     const fetchPolls = () => {
-        return makeCall({}, '/admin/polls/' + props.userDetails._id, 'get')
+        return makeCall({}, urlBuilder('polls'), 'get')
         .then((res) => {
             // null check to ensure server-side error does not return a non-iterable
             if (res.polls) {
@@ -41,12 +61,21 @@ export default function Polls(props) {
                 }
             })
             .then(() => {
+                let schoolsRequestUrl = ''
+                if (props.currentRole === 'COUNTRY_AMBASSADOR') {
+                    schoolsRequestUrl = '/drop/schoolsOptionsForCountry/' + props.userDetails.school.country
+                } else if (props.currentRole === 'ADMIN') {
+                    schoolsRequestUrl = '/drop/schoolsOptions/'
+                }
                 // get all country options
-                makeCall({}, '/drop/schoolsOptions/', 'get')
+                makeCall({}, schoolsRequestUrl, 'get')
                 .then((res) => {
                     // null check to ensure server-side error does not return a non-iterable
                         if (res.options) {
                             setSchoolOptions(res.options)
+                        }
+                        if (props.currentRole === 'COUNTRY_AMBASSADOR') {
+                            setContextSelection('SCHOOL')
                         }
                 })
             })
@@ -112,7 +141,7 @@ export default function Polls(props) {
             prompt: prompt,
             pollOptions: pollOptions
         },
-        '/admin/addPoll/' + props.userDetails._id,
+        urlBuilder('addPoll'),
         'post'
         ).then((res) => {
             if (res.error) {
@@ -127,18 +156,27 @@ export default function Polls(props) {
                 setPollOptions([])
                 setRoleSelection("")
                 setTypeSelection("")
-                setContextSelection("")
-                setCountrySelection([])
                 setSchoolSelection([])
                 setPrompt("")
+                if (props.currentRole === 'ADMIN') {
+                    // only reset context and countrySelection for global admins after request, since country ambassadors will still stay in the country context
+                    setCountrySelection([])
+                    setContextSelection("")
+                }
             }
         })
     }
 
     const handleDeletePoll = (e, {pollId}) => {
         setSendingRequest(true)
+        let deletePath = ''
+        if (props.currentRole === 'COUNTRY_AMBASSADOR') {
+            deletePath = `/ambassador/poll/${props.userDetails._id}/${props.userDetails.school.country}/${pollId}`
+        } else if (props.currentRole === 'ADMIN') {
+            deletePath = `/admin/poll/${props.userDetails._id}/${pollId}`
+        }
         makeCall({},
-        `/admin/poll/${props.userDetails._id}/${pollId}`,
+        deletePath,
         'delete'
         ).then((res) => {
             if (res.error) {
@@ -410,7 +448,7 @@ export default function Polls(props) {
                 disabled={sendingRequest}
             >
                 <Form>
-                    {targetRadioGroup()}
+                    {props.currentRole === "ADMIN" ? targetRadioGroup() : null}
                     {
                         contextSelection === 'COUNTRY' ?
                         countrySelectionDropdown()

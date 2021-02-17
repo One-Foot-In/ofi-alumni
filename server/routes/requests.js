@@ -40,6 +40,18 @@ router.post('/addRequest', passport.authenticate('jwt', {session: false}), async
         const topic = req.body.topic;
         const status = 'Awaiting Confirmation';
         const studentNote = req.body.note;
+        let alumnusRequested = await alumniSchema.findById(mentorId)
+        if (!alumnusRequested.approved) {
+            res.status(500).json({
+                error: "Cannot request call with unapproved alumnus"
+            })
+        }
+        let studentRequesting = await studentSchema.findById(studentId)
+        if (!studentRequesting.approved) {
+            res.status(500).json({
+                error: "Cannot request call as unapproved student"
+            })
+        }
         if (!studentNote && !topic) {
             res.status(500).send({
                 success: false,
