@@ -13,6 +13,8 @@ var generateNewAndExistingInterests = require("./alumni").generateNewAndExisting
 var getUniqueInterests = require("./alumni").getUniqueInterests
 require('mongoose').Promise = global.Promise
 
+var logger = require("../logging")
+
 const HASH_COST = 10;
 
 async function isModerator(studentId) {
@@ -100,7 +102,7 @@ router.post('/', async (req, res, next) => {
             student: student_instance
         });
     } catch (e) {
-        console.error("Error: students#one", e)
+        logger.error(`POST | action=student/ | email=${email} | error=${e}`)
         res.status(500).send({
             message: 'Failed adding student: ' + e
         });
@@ -116,7 +118,7 @@ router.get('/one/:id', passport.authenticate('jwt', {session: false}), async (re
             accessContexts: userRecord.accessContexts || ["INTRASCHOOL"]
         });
     } catch (e) {
-        console.log("Error: util#oneStudent", e);
+        logger.error(`GET | action=/student/one | id=${req.params.id} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 });
@@ -130,7 +132,7 @@ router.get('/:studentId/moderator/:grade/unapproved', passport.authenticate('jwt
             res.status(400).send({message: 'Student does not have moderator access!'})
         }
     } catch (e) {
-        console.log("Error: util#moderator/unapproved", e);
+        logger.error(`GET | action=/student/moderator/unapproved | studentId=${req.params.studentId} | grade=${req.params.grade} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 });
@@ -144,7 +146,7 @@ router.post('/approve', passport.authenticate('jwt', {session: false}), async(re
         res.json({'unapproved': dbData, 'name': student.name})
 
     } catch (e) {
-        console.log("Error: util#approveStudent");
+        logger.error(`POST | action=/student/approve | studentId=${req.body.id} | error=${e}`)
         res.status(500).send({'error': e});
     }
 });
@@ -156,7 +158,7 @@ router.patch('/interests/remove/:id', async (req, res, next) => {
         await student.save()
         res.status(200).send({message: "Successfully removed student's interest"})
     } catch (e) {
-        console.log("Error: student#interests/remove", e);
+        logger.error(`PATCH | action=/student/interests/remove | studentId=${req.params.id} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })
@@ -172,7 +174,7 @@ router.patch('/interests/add/:id', async (req, res, next) => {
         await student.save()
         res.status(200).send({message: "Successfully added student's interests"})
     } catch (e) {
-        console.log("Error: student#interests/add", e);
+        logger.error(`PATCH | action=/student/interests/add | studentId=${req.params.id} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })
@@ -186,7 +188,7 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), async (req
         await studentSchema.findOneAndRemove({_id: student._id })
         res.status(200).send({message: "Successfully removed student"})
     } catch (e) {
-        console.log("Error: student#delete", e);
+        logger.error(`DELETE | action=/student/ | studentId=${req.params.id} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })
@@ -204,7 +206,7 @@ router.get('/opportunities/:studentId', passport.authenticate('jwt', {session: f
             opportunities: mostRecent10Opportunities
         })
     } catch (e) {
-        console.log("Error: student#opportunities", e);
+        logger.error(`GET | action=/student/opportunities | studentId=${req.params.studentId} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })
@@ -220,7 +222,7 @@ router.get('/bookmarkedOpportunities/:studentId', passport.authenticate('jwt', {
             opportunities: student.opportunitiesBookmarked
         })
     } catch (e) {
-        console.log("Error: student#opportunitiesBookmarked", e);
+        logger.error(`GET | action=/student/bookmarkedOpportunities | studentId=${req.params.studentId} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })
@@ -244,7 +246,7 @@ router.patch('/opportunity/interact/:studentId', passport.authenticate('jwt', {s
             message: 'Your response to this opportunity has been recorded!'
         })
     } catch (e) {
-        console.log("Error: student#opportunities", e);
+        logger.error(`PATCH | action=/student/opportunity/interact | studentId=${req.params.studentId} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })
@@ -260,7 +262,7 @@ router.patch('/unbookmarkOpportunity/:studentId/:opportunityId', passport.authen
             message: 'Opportunity is unbookmarked!'
         })
     } catch (e) {
-        console.log("Error: student#unbookmarkOpportunity", e);
+        logger.error(`GET | action=/student/unbookmarkOpportunity | studentId=${req.params.studentId} | opportunityId=${req.params.opportunityId} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })
@@ -271,7 +273,7 @@ router.get('/approvedRequestsCount/:studentId', passport.authenticate('jwt', {se
         let approvedRequestsCount = await requestSchema.count({student: student, status: 'Confirmed'})
         res.status(200).send({approvedRequestsCount: approvedRequestsCount})
     } catch (e) {
-        console.log("Error: student#approvedRequestsCount", e);
+        logger.error(`GET | action=/student/approvedRequestsCount | studentId=${req.params.studentId} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })
