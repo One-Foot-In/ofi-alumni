@@ -7,7 +7,6 @@ var bcrypt = require('bcrypt');
 const cors = require('cors');
 var CronJob = require('cron').CronJob;
 var { sendWeeklyEmailDigest } = require('./routes/helpers/emailHelpers');
-
 // passport for authentication by local strategy
 var passport = require("passport");
 var LocalStrategy = require("passport-local").Strategy;
