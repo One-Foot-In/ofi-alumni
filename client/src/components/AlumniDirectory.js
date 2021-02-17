@@ -253,6 +253,26 @@ export default class AlumniDirectory extends Component {
     }
 
     requestButton(post, i) {
+        if (!this.props.userDetails.approved) {
+            return (
+                <Button
+                    primary
+                    disabled
+                >
+                    Your account is pending approval
+                </Button>
+            )
+        }
+        if (!post.approved) {
+            return (
+                <Button
+                    primary
+                    disabled
+                >
+                    User is pending approval
+                </Button>
+            )
+        }
         if (post._id !== this.props.userDetails._id && (this.props.role === 'STUDENT')) {
             return (
                 <Button 
