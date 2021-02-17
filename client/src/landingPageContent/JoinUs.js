@@ -7,6 +7,9 @@ export default function JoinUs (props) {
     const [counts, setCounts] = useState({})
     const [sendingRequest, setSendingRequest] = useState(false)
     const [sampleSignUps, setSampleSignUps] = useState([])
+    /**
+     * Gets live count of mentors, students, and schools on our platform
+     */
     const fetchCounts = () => {
         setSendingRequest(true)
         return makeCall({}, `/totalCounts`, 'get')
