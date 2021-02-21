@@ -68,15 +68,16 @@ router.post('/login', (req, res, next) => {
             let cookie = null
             if (userRole.includes("ALUMNI")) {
               const alumni = await alumniSchema.findOne({user: user._id})
-              if (!alumni.approved) {
-                res.status(404).send({ error: `Your account is currently pending approval.` });
-                return;
-              }
+              // TODO: bar login for unapproved when users reach critical mass
+              // if (!alumni.approved) {
+              //   res.status(404).send({ error: `Your account is currently pending approval.` });
+              //   return;
+              // }
               payload.id = alumni._id
               cookie = jwt.sign(JSON.stringify(payload), JWT_SECRET);
             } else if (userRole.includes("STUDENT")) {
               const student = await studentSchema.findOne({user: user._id});
-              // TODO: bar login when unapproved when users reach critical mass
+              // TODO: bar login for unapproved when users reach critical mass
               // if (!student.approved) {
               //   res.status(404).send({ error: `Your account is currently pending approval.` });
               //   return;
@@ -325,6 +326,33 @@ router.get('/totalCounts', async (req, res, next) => {
       })
   } catch (e) {
       console.log("Error: index#totalCount", e);
+      res.status(500).send({'error' : e});
+  }
+})
+
+/**
+ * Returns a random assortment of 5 approved alumni from within the OFI network for the landing page
+ */
+router.get('/sampleSignUps', async (req, res, next) => {  
+  try {
+      let alumniRecords = await alumniSchema.find({approved: true},'imageURL name collegeName country city')
+      let randomIndices = []
+      while (randomIndices.length < 5) {
+        let newIndex = Math.floor(Math.random() * alumniRecords.length)
+        if (randomIndices.indexOf(newIndex) === -1) {
+          randomIndices.push(newIndex)
+        }
+      }
+      let alumniRecordsToSend = [
+        alumniRecords[randomIndices[0]],
+        alumniRecords[randomIndices[1]],
+        alumniRecords[randomIndices[2]],
+        alumniRecords[randomIndices[3]],
+        alumniRecords[randomIndices[4]],
+      ]
+      res.status(200).json({sampleSignUps: alumniRecordsToSend})
+  } catch (e) {
+      console.log("Error: index#sampleSignUps", e);
       res.status(500).send({'error' : e});
   }
 })

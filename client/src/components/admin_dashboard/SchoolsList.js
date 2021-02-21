@@ -4,6 +4,14 @@ import SchoolImageModal from './SchoolImageModal';
 import NewInstitutionModal from './NewInstitutionModal';
 import { makeCall } from '../../apis';
 
+/**
+ * Displays a list of school for administrative operations
+ * @param {*} props
+ * currentRole: ADMIN | COUNTRY_AMBASSADOR - allows different levels of access via different API calls
+ * country: specifies country for a COUNTRY_AMBASSADOR 
+ * userId: userId of the alumni admin
+ */
+
 export default function SchoolsList(props) {
     const [allSchools, setAllSchools] = useState([])
     const [filteredSchools, setFilteredSchools] = useState([])
@@ -18,10 +26,23 @@ export default function SchoolsList(props) {
 
     const pageSize = 4;
 
+    const urlBuilder = (path) => {
+        let prepend = ''
+        let identifierParams = ''
+        if (props.currentRole === 'COUNTRY_AMBASSADOR') {
+            prepend = 'ambassador'
+            identifierParams = `${props.userId}/${props.country}`
+        } else {
+            prepend = 'admin'
+            identifierParams = props.userId
+        }
+        return `/${prepend}/${path}/${identifierParams}`
+    }
+
     //Mounting
     useEffect(() => {
         if(!newInstitutionModalOpen) {
-            makeCall({}, '/admin/allSchools/' + props.userDetails._id, 'get')
+            makeCall({}, urlBuilder('allSchools'), 'get')
                 .then((res) => {
                     setAllSchools(res.schools)
                 })
@@ -147,7 +168,7 @@ export default function SchoolsList(props) {
             <SchoolImageModal 
                     id={currSchoolId}
                     school={currSchoolName}
-                    userId={props.userDetails._id}
+                    userId={props.userId}
                     modalOpen={imageModalOpen}
                     closeModal={() => setImageModalOpen(!setImageModalOpen)}
             />
@@ -156,7 +177,8 @@ export default function SchoolsList(props) {
                 type={"SCHOOL"}
                 modalOpen={newInstitutionModalOpen}
                 toggleModal={() => setNewInstitutionModalOpen(false)}
-                userId={props.userDetails._id}
+                userId={props.userId}
+                country={props.country}
             />
             {searchBar}
             {search && resultsBar}

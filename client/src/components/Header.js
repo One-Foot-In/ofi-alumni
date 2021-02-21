@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Grid, Button, Modal, Form, Image, Label, Dropdown, Header} from 'semantic-ui-react';
+import {Grid, Button, Modal, Form, Image, Label, Dropdown, Header, Flag } from 'semantic-ui-react';
 import LoginForm from './LoginForm';
 import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
@@ -7,6 +7,8 @@ import swal from "sweetalert";
 import { makeCall } from "../apis";
 import FootyPoints from './FootyPoints';
 
+import { flagCodeByCountry } from '../flags'
+import { black } from "../colors"
 
 function getErrorLabel(content) {
     return (
@@ -19,7 +21,9 @@ props:
 - loggedIn: boolean
 - logout: ()
 - userId
-- schoolLogo
+- name
+- school: Object
+- currentRole: ALUMNI | STUDENT | ADMIN | COUNTRY_AMBASSADOR
 */
 export default class HeaderComponent extends Component {
     constructor(props) {
@@ -44,6 +48,7 @@ export default class HeaderComponent extends Component {
         this.comparePasswords = this.comparePasswords.bind(this);
         this.renderRoleDropdown = this.renderRoleDropdown.bind(this);
         this.toggleLoginModal = this.toggleLoginModal.bind(this);
+        this.welcomeBadge = this.welcomeBadge.bind(this)
     }
 
     async componentDidUpdate(prevProps) {
@@ -239,7 +244,7 @@ export default class HeaderComponent extends Component {
                 <Label basic >Current Role:
                     <Dropdown
                         compact
-                        style={{'marginLeft': '5px'}}
+                        style={{'marginLeft': '5px', width: '100px'}}
                         selection
                         options={this.state.availableRoles}
                         value={this.state.currRole}
@@ -278,13 +283,67 @@ export default class HeaderComponent extends Component {
             userInfo = await this.fetchUser()
             availableRoles = userInfo.result.role.map(role => {
                 role = role.toLowerCase()
+                let roleWords = role.split('_')
+                roleWords = roleWords.map(word => word[0].toUpperCase() + word.slice(1))
                 return {
                     key: role,
-                    text: role.charAt(0).toUpperCase() + role.slice(1),
+                    text: roleWords.join(' '),
                     value: role.toUpperCase()
                 }
             })
             this.setState({availableRoles: availableRoles})
+        }
+    }
+
+    welcomeBadge () {
+        switch (this.props.currentRole) {
+            case 'ALUMNI':
+                return (
+                    <Label
+                        style={{
+                            backgroundColor: black,
+                            color: 'white'
+                        }}
+                    >
+                        Welcome {this.props.name.split(' ')[0]} (Alumnus)
+                    </Label>
+                )
+            case 'STUDENT':
+                return (
+                    <Label
+                        style={{
+                            backgroundColor: black,
+                            color: 'white'
+                        }}
+                    >
+                        Welcome {this.props.name.split(' ')[0]} (Student)
+                    </Label>
+                )
+            case 'COUNTRY_AMBASSADOR':
+                return (
+                    <Label
+                        style={{
+                            backgroundColor: black,
+                            color: 'white'
+                        }}
+                    >
+                        <Flag name={this.props.school.country && flagCodeByCountry[this.props.school.country]} />
+                        Welcome Ambassador {this.props.name.split(' ')[0]}
+                    </Label>
+                )
+            case 'ADMIN':
+                return (
+                    <Label
+                        style={{
+                            backgroundColor: black,
+                            color: 'white'
+                        }}
+                    >
+                        Welcome {this.props.name.split(' ')[0]} (Admin)
+                    </Label>
+                )
+            default:
+                return null
         }
     }
 
@@ -296,7 +355,6 @@ export default class HeaderComponent extends Component {
                     open={this.state.loginModalOpen}
                     onClose={this.toggleLoginModal}
                     onOpen={this.toggleLoginModal}
-                    dimmer='blurring'
                 >
                     <Modal.Content>
                         <LoginForm
@@ -316,10 +374,23 @@ export default class HeaderComponent extends Component {
                     padded={false}
                 >
                     <Grid.Row columns={"equal"}>
-                        <Grid.Column width={5} textAlign='right' verticalAlign='middle'>
+                        <Grid.Column width={5} textAlign='right' verticalAlign='middle' textAlign='center'>
                             {this.props.loggedIn &&
-                                this.renderRoleDropdown()
+                                <Grid.Row
+                                    style={{
+                                        margin: '5px'
+                                    }}
+                                >
+                                    {this.renderRoleDropdown()}
+                                </Grid.Row>
                             }
+                            <Grid.Row
+                                style={{
+                                    margin: '5px'
+                                }}
+                            >
+                                {this.welcomeBadge()}
+                            </Grid.Row>
                         </Grid.Column>
                         <Grid.Column width={6}>
                             {this.renderLogo()}
