@@ -5,10 +5,11 @@ import HeaderComponent from '../components/Header';
 import { BrowserRouter as Router } from 'react-router-dom'
 
 
-test('Footpoints shows up in header', () => {
+test('Footypoints shows up in header', () => {
     render(<Router><HeaderComponent footyPoints={10}
                                     loggedIn={true}
-                                    school={ {logoURL: 'example.com/logo'} }/>
+                                    school={ {logoURL: 'example.com/logo'} }
+                                    currentRole='ALUMNI'/>
            </Router>);
     expect(screen.getByText('10')).toBeTruthy();
 })
