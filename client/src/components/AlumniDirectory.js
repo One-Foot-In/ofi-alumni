@@ -408,21 +408,19 @@ export default class AlumniDirectory extends Component {
                 if (this.state.filter === 'interests') {
                     for (let interest of post.interests) {
                         isMatch = interest.name.toString().match(searchPattern) !== null
-                        if (isMatch) break
                     }
                 } else if (this.state.filter === 'topics') {
                     for (let topic of post.topics) {
                         isMatch = topic.toString().match(searchPattern) !== null
-                        if (isMatch) break
                     }
                 } else {
                     isMatch = post[this.state.filter].toString().match(searchPattern) !== null
                 }
                 if (isMatch) {
                     numResults += 1
-                    display.push(this.constructProfile(post));
+                    display.push(this.constructProfile(post, i));
                 }
-            } else {
+            } else if (this.state.filter === 'all') {
                 if (this.state.allText[i].match(searchPattern) !== null) {
                     numResults += 1
                     display.push(this.constructProfile(this.state.entries[i], i))
