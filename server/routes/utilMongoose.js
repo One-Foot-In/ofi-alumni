@@ -87,7 +87,7 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             accessContexts: ["INTRASCHOOL"],
         }
     );
-    
+
     await user_instance.save();
     var alumni_instance = new alumniSchema(
         {
@@ -97,9 +97,9 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             country: _country,
             city: _city,
             jobTitle: _profession,
-            jobTitleName: _profession.name,
+            jobTitleName: _profession && _profession.name,
             company: _company,
-            companyName: _company.name,
+            companyName: _company && _company.name,
             interests: _interests,
             college: _college,
             collegeName: _college.name,
@@ -323,53 +323,28 @@ router.post('/addAlumni/', async (req, res, next) => {
         const gradYear = parseInt(req.body.gradYear);
         const location = req.body.location;
         const profession = req.body.profession;
-        const company = req.body.company;
-        const college = req.body.college;
+        const country = req.body.country;
+        const city = req.body.city;
         const availabilities = [];
-        const timeZone = req.body.timeZone;
         const zoomLink = req.body.zoomLink;
         const password = req.body.password;
+        const accessContexts = req.body.accessContexts;
+        const hasZoom = req.body.hasZoom;
+        const interests = req.body.interests || [];
+        const schoolLogo = null;
+        const picLinkAlumni = null;
+        const timezone = req.body.timezone;
+        const jobTitle = req.body.jobTitleObj;
+        const company = req.body.companyObj;
+        // require fields for alumni creation
+        const college = req.body.collegeObj || await collegeSchema.findOne();
+        const major = req.body.majorObj || await majorSchema.findOne();
+        const school = req.body.school || await schoolSchema.findOne();
 
-        const role = ["ALUMNI"]
-        const emailVerified = false
-        const approved = false
-        const verificationToken = crypto({length: 16});
-        var passwordHash = await bcrypt.hash(password, HASH_COST)
-        const user_instance = new userSchema(
-            {
-              email: email,
-              passwordHash: passwordHash,
-              verificationToken: verificationToken,
-              role: role,
-              emailVerified: emailVerified,
-              approved: approved,
-              emailSubscribed: true,
-              accessContexts: ["INTRASCHOOL"],
-            }
-        );
-        await user_instance.save();
-
-        var alumni_instance = new alumniSchema(
-            {
-                name: name,
-                user: user_instance._id,
-                gradYear: gradYear,
-                location: location,
-                profession: profession,
-                company: company,
-                college: college,
-                //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-                //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
-                availabilities: availabilities,
-                timeZone: timeZone,
-                zoomLink: zoomLink
-            }
-        )        
-        let insert = await alumni_instance.save();
+        await createAlumni(email, name, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezone, school, schoolLogo, interests, major)
 
         res.status(200).send({
-            message: 'Successfully added alumni',
-            alumni: alumni_instance
+            message: 'Successfully added alumni'
         });
     } catch (e) {
         res.status(500).send({
@@ -499,6 +474,17 @@ router.get('/data/clear/user', async (req, res, next) => {
     }
 });
 
+router.put('/updateUser/:userId', async (req, res, next) => {
+    try {
+        var user = await userSchema.findById(req.params.userId)
+        Object.assign(user, req.body)
+        await user.save()
+        res.status(200).send({'message' : `updated user fields: ${Object.keys(req.body)}`});
+    } catch (e) {
+        res.status(500).send({error: e})
+    }
+});
+
 /* Request Routes */
 router.get('/allRequests', async (req, res, next) => {
     try {
@@ -542,6 +528,18 @@ router.get('/allSchools', async (req, res) => {
     try {
         let schools = await schoolSchema.find()
         res.status(200).send(schools)
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
+router.post('/addSchool', async (req, res) => {
+    try {
+        await createSchool(req.body.name, req.body.country, req.body.logoUrl)
+        var vat = await schoolSchema.find()
+        res.status(200).send({
+            message: 'Successfully added school'
+        });
     } catch (e) {
         res.status(500).send({'error': e});
     }
