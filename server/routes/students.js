@@ -110,7 +110,7 @@ router.post('/', async (req, res, next) => {
             student: student_instance
         });
     } catch (e) {
-        logger.error(`POST | action=student/ | email=${email} | error=${e}`)
+        logger.error(`POST | action=student/ | email=${req.body.email} | error=${e}`)
         res.status(500).send({
             message: 'Failed adding student: ' + e
         });

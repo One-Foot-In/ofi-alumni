@@ -31,12 +31,12 @@ const awardReferralPoints = async (referrerId) => {
     let referringUser = await userSchema.findById(referrerId);
     let referringProfile
     if (referringUser.role.includes("ALUMNI")) {
-        referringProfile = await alumniSchema.find({user: referringUser})
+        referringProfile = await alumniSchema.findOne({user: referringUser})
     } else {
-        referringProfile = await studentSchema.find({user: referringUser})
+        referringProfile = await studentSchema.findOne({user: referringUser})
     }
     referringProfile.footyPoints += 10 // TODO: create footyPoints chart
-    referringProfile.save()
+    await referringProfile.save()
 }
 
 /**
