@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Button } from 'semantic-ui-react'
+import { toast } from 'react-semantic-toasts'
 
 /**
  * Button group that allows a user to copy a referral link to share
@@ -12,7 +13,17 @@ export default function ReferralLinkGenerator (props) {
 
     const copyLink = (role) => {
         let referralLink = `${window.location.href}register/${role}/${props.userId}/${props.schoolId}`
-        navigator.clipboard.writeText(referralLink)
+        navigator.clipboard.writeText(referralLink).then(() => {
+            toast(
+                {
+                    title: 'Referral Link Copied',
+                    description: <p>Your {role.toUpperCase()} referral link has been copied to clipboard!</p>,
+                    color: role === 'alumni' ? 'orange' : 'yellow',
+                    time: 2000,
+                    icon: 'paper plane',
+                }
+            );
+        })
     }
 
     return (
@@ -28,17 +39,16 @@ export default function ReferralLinkGenerator (props) {
             <Card.Content extra>
                 <div className='ui two buttons'>
                 <Button
-                    id='alumni-referral-link'
                     basic
                     color='orange'
-                    onClick={copyLink('alumni')}
+                    onClick={() => copyLink('alumni')}
                 >
                     Refer Alumni
                 </Button>
                 <Button
                     basic
                     color='yellow'
-                    onClick={copyLink('student')}
+                    onClick={() => copyLink('student')}
                 >
                     Refer Student
                 </Button>

@@ -26,6 +26,7 @@ import Polls from './components/admin_dashboard/Polls';
 import Footer from './components/Footer'
 import LandingPage from './landingPageContent/LandingPage';
 import ReferralLinkGenerator from './ReferralLinkGenerator';
+import { SemanticToastContainer } from 'react-semantic-toasts'
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -1060,6 +1061,7 @@ class App extends Component {
                 currentRole={this.state.role}
               />
               <Container>
+                <SemanticToastContainer position="top-right"/>
                 {this.renderScreens(this.state.role)}
               </Container>
               <Footer/>
