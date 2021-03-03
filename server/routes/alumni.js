@@ -24,6 +24,22 @@ require('mongoose').Promise = global.Promise
 const HASH_COST = 10;
 
 /**
+ * Finds the alumnus or student account by the id of the referrer provided and awards footyPoints
+ * @param {*} referrerId 
+ */
+const awardReferralPoints = async (referrerId) => {
+    let referringUser = await userSchema.findById(referrerId);
+    let referringProfile
+    if (referringUser.role.includes("ALUMNI")) {
+        referringProfile = await alumniSchema.find({user: referringUser})
+    } else {
+        referringProfile = await studentSchema.find({user: referringUser})
+    }
+    referringProfile.footyPoints += 10 // TODO: create footyPoints chart
+    referringProfile.save()
+}
+
+/**
  * Prevents users from accidentally creating an existing item as a custom new entry
  * @param {String} newItem 
  * @param {MongooseSchema} schema 
@@ -75,6 +91,9 @@ const getUniqueInterests = (allInterests) => {
     return uniqueInterests
 }
 
+/**
+ * Sign ups a new alumnus
+ */
 router.post('/', async (req, res, next) => {
     try {
         const email = req.body.email;
@@ -172,6 +191,12 @@ router.post('/', async (req, res, next) => {
         const verificationToken = crypto({length: 16});
         const emailSubscriptionToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
+
+        // check if the user has been referred
+        const referrerId = req.body.referrerId;
+        if (referrerId) {
+            await awardReferralPoints(referrerId)
+        }
 
         const user_instance = new userSchema(
             {
@@ -723,3 +748,4 @@ router.get('/newRequestsCount/:alumniId', passport.authenticate('jwt', {session:
 module.exports = router;
 module.exports.generateNewAndExistingInterests = generateNewAndExistingInterests
 module.exports.getUniqueInterests = getUniqueInterests
+module.exports.awardReferralPoints = awardReferralPoints

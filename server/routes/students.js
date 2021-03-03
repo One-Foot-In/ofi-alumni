@@ -11,6 +11,7 @@ var requestSchema = require('../models/requestSchema');
 var sendStudentVerificationEmail = require('../routes/helpers/emailHelpers').sendStudentVerificationEmail
 var generateNewAndExistingInterests = require("./alumni").generateNewAndExistingInterests
 var getUniqueInterests = require("./alumni").getUniqueInterests
+var awardReferralPoints = require("./alumni").awardReferralPoints
 require('mongoose').Promise = global.Promise
 
 var logger = require("../logging")
@@ -56,6 +57,13 @@ router.post('/', async (req, res, next) => {
         var passwordHash = await bcrypt.hash(password, HASH_COST)
         // find schoolLogo
         let school = await schoolSchema.findOne({_id: schoolId})
+
+        // check if the user has been referred
+        const referrerId = req.body.referrerId;
+        if (referrerId) {
+            await awardReferralPoints(referrerId)
+        }
+
         const user_instance = new userSchema(
             {
               email: email,

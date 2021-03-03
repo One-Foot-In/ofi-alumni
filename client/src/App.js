@@ -25,6 +25,7 @@ import * as actions from './redux/actions'
 import Polls from './components/admin_dashboard/Polls';
 import Footer from './components/Footer'
 import LandingPage from './landingPageContent/LandingPage';
+import ReferralLinkGenerator from './ReferralLinkGenerator';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -459,6 +460,11 @@ class App extends Component {
                           timezoneActive={true}
                           navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
                           activeItem={'home'}
+                      />
+                      <ReferralLinkGenerator
+                        schoolId={this.state.userDetails.school._id}
+                        schoolName={this.state.userDetails.school.name}
+                        userId={this.state.userDetails.user}
                       />
                       <NewsFeed
                         userDetails={this.state.userDetails}
@@ -969,7 +975,18 @@ class App extends Component {
                   this.state.loggedIn ? <Redirect to={"/"}/> : 
                   <Signup
                       isAlumni={true}
-                      match={props}
+                      match={props.match}
+                      history={props.history}
+                  />
+              }
+          />
+          <Route exact path={`/register/alumni/:referrerId/:schoolId`} render={
+              (props) =>
+                  this.state.loggedIn ? <Redirect to={"/"}/> : 
+                  <Signup
+                      isAlumni={true}
+                      match={props.match}
+                      history={props.history}
                   />
               }
           />
@@ -977,9 +994,20 @@ class App extends Component {
               (props) => 
                 this.state.loggedIn ? <Redirect to={"/"}/> :
                 <Signup
-                      isAlumni={false}
-                      match={props}
-                  />
+                  isAlumni={false}
+                  match={props.match}
+                  history={props.history}
+                />
+              }
+          />
+          <Route exact path={`/register/student/:referrerId/:schoolId`} render={
+              (props) => 
+              this.state.loggedIn ? <Redirect to={"/"}/> :
+                <Signup
+                    isAlumni={false}
+                    match={props.match}
+                    history={props.history}
+                />
               }
           />
           <Route exact path={"/login"} render={(props) =>
