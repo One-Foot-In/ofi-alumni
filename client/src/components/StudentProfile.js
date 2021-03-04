@@ -195,6 +195,10 @@ export default class StudentProfile extends Component {
                 }
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
+                    <FootyPoints points={this.props.details.footyPoints} 
+                                 style={ {'margin-left': 0,
+                                          'margin-top': '3px',
+                                          'margin-bottom': '2px'} } />
                     <Card.Description>Grade: {details.grade || 'Unavailable'}</Card.Description>
                 </Card.Content>
                 {
@@ -208,12 +212,6 @@ export default class StudentProfile extends Component {
                                 {this.getInterests()}
                             </Segment>
                         </Card.Content>
-                }
-                {isViewOnly ? 
-                    null :
-                    <Card.Content>
-                        <FootyPoints points={this.props.details.footyPoints} />
-                    </Card.Content>
                 }
                 {
                     isViewOnly ?

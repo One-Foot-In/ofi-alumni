@@ -28,17 +28,18 @@ function WelcomeBadge(props) {
                     backgroundColor: 'black',
                     color: 'white'
                 }}>
-                    {welcomeMessage}
                     {showFlag ?
                         <Flag name={ country && flagCodeByCountry[country] }/> :
                         null
                     }
+                    {welcomeMessage}
                     <br/>
                     <br/>
                     <FootyPoints points={footyPoints}
-                                style={{
-                                    float: 'left'
-                                }} />
+                                 style={{
+                                    float: 'left',
+                                    'margin-left': 0
+                                 }} />
                 </Label>
             </div> :
             null
