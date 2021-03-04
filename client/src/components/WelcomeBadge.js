@@ -25,16 +25,15 @@ function WelcomeBadge(props) {
         role ? 
             <div>
                 <Label style={{
-                    backgroundColor: 'black',
-                    color: 'white'
+                    border: '2px solid'
                 }}>
-                    {showFlag ?
-                        <Flag name={ country && flagCodeByCountry[country] }/> :
-                        null
-                    }
-                    {welcomeMessage}
-                    <br/>
-                    <br/>
+                    
+                    <h5>
+                        { showFlag ?
+                          <Flag name={ country && flagCodeByCountry[country] }/> :
+                          null }
+                        {welcomeMessage}
+                    </h5>
                     <FootyPoints points={footyPoints}
                                  style={{
                                     float: 'left',
