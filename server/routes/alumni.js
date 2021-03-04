@@ -20,6 +20,7 @@ const opportunitySchema = require('../models/opportunitySchema');
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail;
 const { ObjectId } = require('mongodb');
 require('mongoose').Promise = global.Promise
+var FOOTY_POINTS_CHART = require('../footyPointsChart').FOOTY_POINTS_CHART
 
 const HASH_COST = 10;
 
@@ -35,7 +36,7 @@ const awardReferralPoints = async (referrerId) => {
     } else {
         referringProfile = await studentSchema.findOne({user: referringUser})
     }
-    referringProfile.footyPoints += 10 // TODO: create footyPoints chart
+    referringProfile.footyPoints += FOOTY_POINTS_CHART.userBringsInNewMemberByReferral
     await referringProfile.save()
 }
 
@@ -651,7 +652,7 @@ router.post('/opportunity/:id', passport.authenticate('jwt', {session: false}), 
         })
         await newOpportunity.save()
         alumni.opportunities.push(newOpportunity)
-        alumni.footyPoints += 8;
+        alumni.footyPoints += FOOTY_POINTS_CHART.alumniAddsOpportunity;
         await alumni.save()
         // do not wait on finishing request
         queueOpportunities(alumni, newOpportunity)

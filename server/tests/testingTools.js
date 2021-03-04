@@ -1,6 +1,7 @@
 const express = require("express");
 var indexRouter = require('../routes/index');
 var alumniRouter = require('../routes/alumni');
+var studentRouter = require('../routes/students');
 var mongooseUtilRouter = require('../routes/utilMongoose');
 
 
@@ -16,6 +17,7 @@ function createServer() {
     app.use(express.json());
     app.use('/', indexRouter);
     app.use('/alumni/', alumniRouter);
+    app.use('/student/', studentRouter);
     app.use('/util/', mongooseUtilRouter);
 	return app;
 }
