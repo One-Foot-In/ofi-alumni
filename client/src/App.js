@@ -507,6 +507,7 @@ class App extends Component {
                       />
                       <AlumniWorkspace 
                           userDetails={this.state.userDetails}
+                          refreshProfile={this.refreshProfile}
                       />
                   </> :
                   <Redirect to={"/login"}/>

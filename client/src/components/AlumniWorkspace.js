@@ -3,7 +3,8 @@ import { Message, Menu} from 'semantic-ui-react';
 import AlumniOpportunities from './AlumniOpportunities'
 import {makeCall} from '../apis';
 import { timeSlotOptions } from './RequestModal';
-import {Card, Icon} from 'semantic-ui-react';
+import {Card, Icon, Button} from 'semantic-ui-react';
+import CollegeUpdateModal from './alumni_profile_update_modals/CollegeUpdateModal';
 
 const ALUMNI = "ALUMNI"
 
@@ -17,15 +18,15 @@ export default class AlumniWorkspace extends Component {
         this.state = {
             activeItem: 'collegesAccepted',
             collegesAccepted: [],
-            
+            setCollegeModalOpen: false
         }
     }
 
-    handleMenuClick = (e, { id }) => this.setState({ activeItem: id })
+    handleMenuClick = (e, { id }) => this.setState({ activeItem: id });
 
     componentWillMount(){
         this.getCollegesAcceptedInto();
-    }
+    };
 
     getCollegesAcceptedInto = () => {
         const theEndPoint = `/alumni/collegesAcceptedInto/all/${this.props.userDetails._id}`;
@@ -37,6 +38,23 @@ export default class AlumniWorkspace extends Component {
         })
         .catch(e => {
             console.log('Error #getCollegeAcceptedInto', e)
+        })
+    };
+
+    handleDeleteColleges = (e, theId) => {
+        //e.preventDefault();
+        console.log(theId)
+        const theEndPoint = `alumni/collegesAcceptedInto/remove/${this.props.userDetails._id}`;
+        makeCall({'collegeToRemove': theId}, theEndPoint,`PATCH`)
+        .then(() => {
+            this.props.refreshProfile(ALUMNI, this.props.userDetails._id)
+        })
+        .catch((err) => console.log(err))
+    }
+
+    handleCollegeModal = () => {
+        this.setState({
+            setCollegeModalOpen: !this.state.setCollegeModalOpen
         })
     }
 
@@ -53,26 +71,46 @@ export default class AlumniWorkspace extends Component {
             )
         } else {
             return (
-                colleges.map(college => {
-                    return(
-                            <>
-                                <Card
-                                key = {college._id}
-                                style={{
-                                    'margin': '3px'
-                                }}
-                                color='blue'
-                                >
-                                    {college.name}
-                                </Card>
-                                <Icon name="add"
+                <>
+                    {
+                        colleges.map(college => {
+                        return(
+                                <>
+                                    <Card
+                                    key = {college._id}
                                     style={{
                                         'margin': '3px'
-                                    }} 
-                                />
-                            </>
-                        )
-                    })
+                                    }}
+                                    color='blue'
+                                    >
+                                        {college.name}
+                                    </Card>
+                                    <Icon name="add"
+                                        style={{
+                                            'margin': '3px'
+                                        }}
+                                        onClick={(e) => this.handleDeleteColleges(e, college._id)}
+                                    />
+                                </>
+                            )
+                        })
+                    }
+                <Button
+                    primary
+                    color="blue"
+                    type="button"
+                    size="mini"
+                    onClick={() => this.setState({setCollegeModalOpen: true})}
+                >
+                    {colleges.length ? `Add more collges` : `Add college`}
+                </Button>
+                <CollegeUpdateModal
+                    role={'alumni'}
+                    modalOpen={this.state.setCollegeModalOpen}
+                    closeModal={this.handleCollegeModal}
+                    id={this.props.userDetails._id}
+                />
+                </>
             )
         }
         }
@@ -101,15 +139,7 @@ export default class AlumniWorkspace extends Component {
                 {
                     this.state.activeItem === 'collegesAccepted' &&
                     <div style={{paddingLeft: 13, paddingRight: 13}}>
-                        {
-                            !this.state.collegesAccepted.length &&
-                            <Message info>
-                                <Message.Header>No colleges in accepted college list.</Message.Header>
-                                {
-                                    <Message.Content>Please add any colleges you have been offered an admission into. </Message.Content>
-                                }
-                            </Message>
-                        }
+                        {this.renderCollegesAcceptedInto()}
                     </div>
                 }
                 {
