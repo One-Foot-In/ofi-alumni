@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 import { Message, Menu} from 'semantic-ui-react';
 import AlumniOpportunities from './AlumniOpportunities'
+import Library from './Library';
 
-/*
-props:
-    userDetails
-*/
+/**
+ * The Workspaces Directory has subtabs that enable the alumni to browse and add content that would be helpful for students
+ * props:
+ * userDetails: profile information for the alumnus
+ * articleId: articleId for the article the alumnus is trying to view (optional)
+ */
 export default class AlumniWorkspace extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            activeItem: 'collegesAccepted',
+            activeItem: this.props.articleId ? 'library' : 'collegesAccepted',
             collegesAccepted: []
         }
     }
@@ -37,6 +40,14 @@ export default class AlumniWorkspace extends Component {
                     >
                         Opportunities             
                     </Menu.Item>
+                    <Menu.Item
+                        id='library'
+                        name='Library'
+                        active={this.state.activeItem === 'library'}
+                        onClick={this.handleMenuClick}
+                    >
+                        Library             
+                    </Menu.Item>
                 </Menu>
                 {
                     this.state.activeItem === 'collegesAccepted' &&
@@ -56,6 +67,13 @@ export default class AlumniWorkspace extends Component {
                     this.state.activeItem === 'opportunities' &&
                     <AlumniOpportunities
                         alumniId={this.props.userDetails._id}
+                    />
+                }
+                {
+                    this.state.activeItem === 'library' &&
+                    <Library
+                        userId={this.props.userDetails.user}
+                        articleId={this.props.articleId}
                     />
                 }
             </div>                

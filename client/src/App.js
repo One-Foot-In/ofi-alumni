@@ -333,9 +333,6 @@ class App extends Component {
     }) 
     try {
       const result = await makeCall({}, '/isLoggedIn', 'get')
-      this.setState({
-        fetchingAuth: false
-      });
       if (result && !result.error) {
         var jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
@@ -348,7 +345,8 @@ class App extends Component {
           role: this.getPrimaryRole(roles),
           userDetails: profile,
           approved: profile.approved,
-          loggedIn: true
+          loggedIn: true,
+          fetchingAuth: false
         }, async () => {
           await this.refreshMenuPopupCounters(roles, profile._id)
         })
@@ -564,6 +562,41 @@ class App extends Component {
                       />
                       <AlumniWorkspace 
                           userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/library`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/library/:articleId`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                          articleId={props.match.params.articleId}
                       />
                   </> :
                   <Redirect to={"/login"}/>
