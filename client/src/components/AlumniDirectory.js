@@ -4,6 +4,7 @@ import { makeCall } from '../apis';
 import RequestModal from './RequestModal'
 import AlumniContactModal from './AlumniContactModal'
 import AccessControlDropdown from './AccessContextDropdown'
+import FootyPoints from './FootyPoints';
 
 // Filter dropdown options
 const searchOptions = [
@@ -235,6 +236,11 @@ export default class AlumniDirectory extends Component {
                                 </Grid.Row>
                             </Grid>
                             </Card.Header>
+                            <FootyPoints points={ post.footyPoints } 
+                                                 style={{
+                                                    'margin-left': 0,
+                                                    'margin-top': '3px'
+                                                 }}/>
                                             
                             <Card.Meta>{post.profession}</Card.Meta>
                             <Card.Description>College: {post.collegeName}</Card.Description>
@@ -243,6 +249,7 @@ export default class AlumniDirectory extends Component {
                             <Card.Description>Company: {post.companyName || 'Unavailable'}</Card.Description>
                             {post.interests && post.interests.length ? <Card.Description>Interests: {this.getInterests(post.interests)}</Card.Description> : null}
                             {post.topics && post.topics.length ? <Card.Description>Topics of Consultancy: {this.getTopics(post.topics)}</Card.Description> : null}
+
                             <br />
                         </Card.Content>
                         {this.requestButton(post, i)}

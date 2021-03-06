@@ -4,6 +4,7 @@ import ImageUpdateModal from './ImageUpdateModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
 import { makeCall } from "../apis";
+import FootyPoints from './FootyPoints';
 
 const STUDENT = "STUDENT"
 
@@ -194,6 +195,10 @@ export default class StudentProfile extends Component {
                 }
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
+                    <FootyPoints points={this.props.details.footyPoints} 
+                                 style={ {'margin-left': 0,
+                                          'margin-top': '3px',
+                                          'margin-bottom': '2px'} } />
                     <Card.Description>Grade: {details.grade || 'Unavailable'}</Card.Description>
                 </Card.Content>
                 {

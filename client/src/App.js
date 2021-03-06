@@ -1029,6 +1029,7 @@ class App extends Component {
                 liftRole={this.liftRole}
                 completeLogin={this.completeLogin}
                 login={this.login}
+                footyPoints={this.state.userDetails && this.state.userDetails.footyPoints}
                 currentRole={this.state.role}
               />
               <Container>
