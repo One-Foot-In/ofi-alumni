@@ -20,8 +20,25 @@ const opportunitySchema = require('../models/opportunitySchema');
 var sendAlumniVerificationEmail = require('../routes/helpers/emailHelpers').sendAlumniVerificationEmail;
 const { ObjectId } = require('mongodb');
 require('mongoose').Promise = global.Promise
+var FOOTY_POINTS_CHART = require('../footyPointsChart').FOOTY_POINTS_CHART
 
 const HASH_COST = 10;
+
+/**
+ * Finds the alumnus or student account by the id of the referrer provided and awards footyPoints
+ * @param {*} referrerId 
+ */
+const awardReferralPoints = async (referrerId) => {
+    let referringUser = await userSchema.findById(referrerId);
+    let referringProfile
+    if (referringUser.role.includes("ALUMNI")) {
+        referringProfile = await alumniSchema.findOne({user: referringUser})
+    } else {
+        referringProfile = await studentSchema.findOne({user: referringUser})
+    }
+    referringProfile.footyPoints += FOOTY_POINTS_CHART.userBringsInNewMemberByReferral
+    await referringProfile.save()
+}
 
 /**
  * Prevents users from accidentally creating an existing item as a custom new entry
@@ -75,6 +92,9 @@ const getUniqueInterests = (allInterests) => {
     return uniqueInterests
 }
 
+/**
+ * Sign ups a new alumnus
+ */
 router.post('/', async (req, res, next) => {
     try {
         const email = req.body.email;
@@ -172,6 +192,12 @@ router.post('/', async (req, res, next) => {
         const verificationToken = crypto({length: 16});
         const emailSubscriptionToken = crypto({length: 16});
         var passwordHash = await bcrypt.hash(password, HASH_COST)
+
+        // check if the user has been referred
+        const referrerId = req.body.referrerId;
+        if (referrerId) {
+            await awardReferralPoints(referrerId)
+        }
 
         const user_instance = new userSchema(
             {
@@ -626,7 +652,7 @@ router.post('/opportunity/:id', passport.authenticate('jwt', {session: false}), 
         })
         await newOpportunity.save()
         alumni.opportunities.push(newOpportunity)
-        alumni.footyPoints += 8;
+        alumni.footyPoints += FOOTY_POINTS_CHART.alumniAddsOpportunity;
         await alumni.save()
         // do not wait on finishing request
         queueOpportunities(alumni, newOpportunity)
@@ -723,3 +749,4 @@ router.get('/newRequestsCount/:alumniId', passport.authenticate('jwt', {session:
 module.exports = router;
 module.exports.generateNewAndExistingInterests = generateNewAndExistingInterests
 module.exports.getUniqueInterests = getUniqueInterests
+module.exports.awardReferralPoints = awardReferralPoints

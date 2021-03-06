@@ -96,7 +96,8 @@ export default class Signup extends React.Component {
             imageModalOpen: false,
             termsModalOpen: false,
             userAgreedTerms: false,
-            error: ''
+            error: '',
+            referrerId: '' // mongoId for referrer
         }
 
         this.handleChange = this.handleChange.bind(this);
@@ -438,6 +439,15 @@ export default class Signup extends React.Component {
     }
 
     async UNSAFE_componentWillMount() {
+        let referrerId = this.props.match.params && this.props.match.params.referrerId
+        let schoolId = this.props.match.params && this.props.match.params.schoolId
+        if (referrerId && schoolId) {
+            this.setState({
+                referrerId
+            }, () => {
+                this.handleSchoolSelection(null, {value: schoolId})
+            })
+        }
         let result = await makeCall(null, '/drop/schoolsOptions', 'get')
         let topicOptions = await makeCall(null, `/alumni/topicOptions`, 'get')
         this.setState({
@@ -460,8 +470,12 @@ export default class Signup extends React.Component {
         })
     }
 
+    /**
+     * Handles school selection for sign up form submission
+     * @param {*} e React Event object
+     * @param {*} value the mongoId of the school selected either via dropdown or obtained as url param from referral link 
+     */
     handleSchoolSelection(e, {value}) {
-        e.preventDefault()
         this.setState({schoolSelection : value})
     }
 
@@ -723,7 +737,8 @@ export default class Signup extends React.Component {
                 password: this.state.password,
                 timeZone: ((new Date().getTimezoneOffset())*100)/60, // getTimezoneOffset fetches offset in minutes
                 schoolId: this.state.schoolSelection,
-                imageURL: this.state.imageUrl
+                imageURL: this.state.imageUrl,
+                referrerId: this.state.referrerId // empty for when a signup happens without referral
             }
             if (!this.props.isAlumni) {
                 payload = Object.assign({}, payload, {
@@ -777,7 +792,7 @@ export default class Signup extends React.Component {
                             text: "Your submission was successful! Please check your email to confirm your account.",
                             icon: "success",
                         }).then(() => 
-                            this.props.match.history.push('/login')
+                            this.props.history.push('/login')
                         );
                     })
                     
@@ -801,7 +816,7 @@ export default class Signup extends React.Component {
 
     goBack(e) {
         e.preventDefault();
-        this.props.match.history.goBack();
+        this.props.history.goBack();
     }
 
     render() {
@@ -869,7 +884,7 @@ export default class Signup extends React.Component {
                             search
                             selection
                             options={this.state.schoolOptions}
-                            value={this.state.value}
+                            value={this.state.schoolSelection}
                             onChange={this.handleSchoolSelection}
                         >
                         </Form.Dropdown>
