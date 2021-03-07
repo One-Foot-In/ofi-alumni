@@ -136,6 +136,12 @@ var alumniNavBarItems = (approved, newRequestCount, unseenMessagesCount) => {
         name: 'Workspaces',
         navLink: '/workspaces',
         icon: 'briefcase'
+    },
+    {
+        id: 'events',
+        name: 'Events',
+        navLink: '/events',
+        icon: 'events'
     }
   ]
   if (approved) {
@@ -450,16 +456,15 @@ class App extends Component {
       case ALUMNI:
         return (
           <>
+          <Navbar
+              userDetails={this.state.userDetails}
+              role={role}
+              timezoneActive={true}
+              navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+          />
           <Route exact path={`/`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
-                          activeItem={'home'}
-                      />
                       <NewsFeed
                         userDetails={this.state.userDetails}
                         userRole={role}
@@ -471,13 +476,6 @@ class App extends Component {
           <Route exact path={`/profile`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
-                          activeItem={'profile'}
-                      />
                       <AlumniProfile
                         isViewOnly={false}
                         details={this.state.userDetails}
@@ -491,13 +489,6 @@ class App extends Component {
           <Route exact path={`/alumniDirectory`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
-                          activeItem={'alumniDirectory'}
-                      />
                       <AlumniDirectory
                         schoolId={this.state.userDetails.school._id}
                         userDetails={this.state.userDetails}
@@ -511,13 +502,6 @@ class App extends Component {
           <Route exact path={`/mentorship`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
-                          activeItem={'mentorship'}
-                      />
                       <AlumniMentorship 
                           userDetails={this.state.userDetails}
                           refreshProfile={this.refreshProfile}
@@ -530,13 +514,6 @@ class App extends Component {
           <Route exact path={`/networking`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
-                          activeItem={'networking'}
-                      />
                       <AlumniNetworking 
                           userDetails={this.state.userDetails}
                           refreshMenuPopupCounters={this.refreshMenuPopupCounters}
@@ -548,18 +525,19 @@ class App extends Component {
           <Route exact path = {`/workspaces`} render={(props) =>
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
-                          activeItem={'workspaces'}
-                      />
                       <AlumniWorkspace 
                           userDetails={this.state.userDetails}
                       />
                   </> :
                   <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path={ '/events' } render={(props) => 
+                  this.state.loggedIn ?
+                  <>
+                      <p>hi</p>
+                  </> :
+                  <Redirect to={ '/login' } />
               }
           />
 
@@ -568,13 +546,6 @@ class App extends Component {
                   this.state.loggedIn ?
                     (this.state.approved ?
                       <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
-                          activeItem={'verify'}
-                      />
                         <AlumniVerification
                           gradYear={this.state.userDetails.gradYear}
                           schoolId={this.state.userDetails.school._id}
@@ -590,16 +561,16 @@ class App extends Component {
       case STUDENT:
         return (
           <>
+          <Navbar
+              userDetails={this.state.userDetails}
+              role={role}
+              timezoneActive={true}
+              navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
+          />
           <Route exact path={`/`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
-                          activeItem={'home'}
-                      />
+                      
                       <NewsFeed
                         userDetails={this.state.userDetails}
                         userRole={role}
@@ -611,19 +582,12 @@ class App extends Component {
           <Route exact path={`/profile`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
-                          activeItem={'profile'}
-                      />
                       <StudentProfile
                         isViewOnly={false}
                         details={this.state.userDetails}
                         logout={this.logout}
                         refreshProfile={this.refreshProfile}
-                      />
+                      />  
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -631,13 +595,6 @@ class App extends Component {
           <Route exact path={`/alumniDirectory`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
-                          activeItem={'alumniDirectory'}
-                      />
                       <AlumniDirectory
                         schoolId={this.state.userDetails.school._id}
                         userDetails={this.state.userDetails}
@@ -651,13 +608,6 @@ class App extends Component {
           <Route exact path={`/mentorship`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
-                          activeItem={'mentorship'}
-                      />
                       <StudentMentorship 
                           userDetails={this.state.userDetails}
                           refreshMenuPopupCounters={this.refreshMenuPopupCounters}
@@ -669,13 +619,6 @@ class App extends Component {
           <Route exact path={`/workspaces`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
-                          activeItem={'workspaces'}
-                      />
                         <StudentWorkspace 
                             userDetails={this.state.userDetails}
                         />
@@ -687,10 +630,10 @@ class App extends Component {
                   this.state.loggedIn ?
                     (this.state.userDetails.isModerator ?
                       <>
-                        <Navbar
+                        {/* <Navbar
                           navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
                           activeItem={'verification'}
-                        />
+                        /> */}
                         <StudentVerification
                           grade={this.state.userDetails.grade}
                           schoolId={this.state.userDetails.school._id}
@@ -706,16 +649,15 @@ class App extends Component {
       case ADMIN:
         return (
           <>
+          <Navbar
+              userDetails={this.state.userDetails}
+              role={role}
+              timezoneActive={true}
+              navItems={adminNavBarItems()}
+          />
           <Route exact path={`/`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={adminNavBarItems()}
-                          activeItem={'data'}
-                      />
                       <p>Data Management</p>
                   </> :
                   <Redirect to={"/login"}/>
@@ -724,13 +666,6 @@ class App extends Component {
           <Route exact path={`/students`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={adminNavBarItems()}
-                          activeItem={'students'}
-                      />
                       <ProfileList
                           viewing={'STUDENT'}
                           userDetails={this.state.userDetails}
@@ -743,13 +678,6 @@ class App extends Component {
           <Route exact path={`/alumni`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={adminNavBarItems()}
-                          activeItem={'alumni'}
-                      />
                       <ProfileList
                           viewing={'ALUMNI'}
                           userDetails={this.state.userDetails}
@@ -762,13 +690,6 @@ class App extends Component {
           <Route exact path={`/colleges`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={adminNavBarItems()}
-                          activeItem={'colleges'}
-                      />
                       <CollegesList
                           userDetails={this.state.userDetails}
                       />
@@ -779,13 +700,6 @@ class App extends Component {
           <Route exact path={`/schools`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={adminNavBarItems()}
-                          activeItem={'schools'}
-                      />
                       <SchoolsList
                           currentRole={this.state.role}
                           userId={this.state.userDetails._id}
@@ -798,13 +712,6 @@ class App extends Component {
           <Route exact path={`/polls`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={adminNavBarItems()}
-                          activeItem={'polls'}
-                      />
                       <Polls
                         currentRole={ADMIN}
                         userDetails={this.state.userDetails}
@@ -818,16 +725,15 @@ class App extends Component {
       case COLLEGE_REP:
         return (
           <>
+          <Navbar
+              userDetails={this.state.userDetails}
+              role={role}
+              timezoneActive={true}
+              navItems={collegeRepNavBarItems()}
+          />
           <Route exact path={`/`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={collegeRepNavBarItems()}
-                          activeItem={'announcements'}
-                      />
                       <p>Announcements</p>
                   </> :
                   <Redirect to={"/login"}/>
@@ -836,13 +742,6 @@ class App extends Component {
           <Route exact path={`/profile`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={collegeRepNavBarItems()}
-                          activeItem={'profile'}
-                      />
                       <p>Profile</p>
                   </> :
                     <Redirect to={"/login"}/>
@@ -851,13 +750,6 @@ class App extends Component {
           <Route exact path={`/shortlists`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={collegeRepNavBarItems()}
-                          activeItem={'shortlists'}
-                      />
                       <p>Shortlists</p>
                   </> :
                   <Redirect to={"/login"}/>
@@ -868,16 +760,15 @@ class App extends Component {
       case COUNTRY_AMBASSADOR:
         return (
           <>
+          <Navbar
+              userDetails={this.state.userDetails}
+              role={role}
+              timezoneActive={true}
+              navItems={countryAmbassadorNavBarItems()}
+          />
           <Route exact path={`/`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={countryAmbassadorNavBarItems()}
-                          activeItem={'schools'}
-                      />
                       <SchoolsList
                           currentRole={this.state.role}
                           userId={this.state.userDetails._id}
@@ -890,13 +781,6 @@ class App extends Component {
           <Route exact path={`/students`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={countryAmbassadorNavBarItems()}
-                          activeItem={'students'}
-                      />
                       <ProfileList
                           viewing={'STUDENT'}
                           currentRole={COUNTRY_AMBASSADOR}
@@ -909,13 +793,6 @@ class App extends Component {
           <Route exact path={`/alumni`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={countryAmbassadorNavBarItems()}
-                          activeItem={'alumni'}
-                      />
                       <ProfileList
                           viewing={'ALUMNI'}
                           currentRole={COUNTRY_AMBASSADOR}
@@ -928,13 +805,6 @@ class App extends Component {
           <Route exact path={`/polls`} render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <Navbar
-                          userDetails={this.state.userDetails}
-                          role={role}
-                          timezoneActive={true}
-                          navItems={countryAmbassadorNavBarItems()}
-                          activeItem={'polls'}
-                      />
                       <Polls
                         currentRole={COUNTRY_AMBASSADOR}
                         userDetails={this.state.userDetails}
