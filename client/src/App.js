@@ -25,6 +25,7 @@ import * as actions from './redux/actions'
 import Polls from './components/admin_dashboard/Polls';
 import Footer from './components/Footer'
 import LandingPage from './landingPageContent/LandingPage';
+import VirtualEventHome from './components/VirtualEventHome';
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -141,7 +142,7 @@ var alumniNavBarItems = (approved, newRequestCount, unseenMessagesCount) => {
         id: 'events',
         name: 'Events',
         navLink: '/events',
-        icon: 'events'
+        icon: 'calendar'
     }
   ]
   if (approved) {
@@ -535,7 +536,7 @@ class App extends Component {
           <Route exact path={ '/events' } render={(props) => 
                   this.state.loggedIn ?
                   <>
-                      <p>hi</p>
+                      <VirtualEventHome />
                   </> :
                   <Redirect to={ '/login' } />
               }
