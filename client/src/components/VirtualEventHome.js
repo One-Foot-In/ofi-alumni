@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Button, Dropdown } from 'semantic-ui-react';
+import DatePicker from 'react-datetime';
+import moment from 'moment';
+import 'react-datetime/css/react-datetime.css';
+
+
 
 import { makeCall } from '../apis';
 
@@ -8,6 +13,7 @@ function VirtualEventHome() {
     const [description, setDescription] = useState('');
     const [link, setLink] = useState('');
     const [gradYears, setGradYears] = useState([]);
+    const [datetime, setDatetime] = useState(moment());
 
     const years = [2000, 2001, 2002] // TODO: Update
 
@@ -34,7 +40,9 @@ function VirtualEventHome() {
             title: eventName,
             description: description,
             link: link,
-            years: gradYears
+            years: gradYears,
+            scheduledDate: datetime
+
         }, '/events/create', 'POST');
     }
 
@@ -60,13 +68,18 @@ function VirtualEventHome() {
                           selection
                           onChange={handleGradYearChange}
                           options={ years.map(year => (
-                            {
+                            {   
                                 key: year,
                                 text: year,
                                 value: year
                             }
                           )) }
                 />
+                <div>
+                    <label>Choose the date for the event</label>
+                    <DatePicker value={datetime}
+                                onChange={val => setDatetime(val)}/>
+                </div>
 
                 <Form.Field control={Button} type='submit'>Submit</Form.Field>
 
