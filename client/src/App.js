@@ -562,6 +562,8 @@ class App extends Component {
                       />
                       <AlumniWorkspace 
                           userDetails={this.state.userDetails}
+                          history={props.history}
+                          activeItem={'opportunities'}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -579,6 +581,46 @@ class App extends Component {
                       />
                       <AlumniWorkspace 
                           userDetails={this.state.userDetails}
+                          activeItem={'library'}
+                          history={props.history}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/opportunities`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                          activeItem={'opportunities'}
+                          history={props.history}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/collegesAccepted`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                          activeItem={'collegesAccepted'}
+                          history={props.history}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -596,7 +638,9 @@ class App extends Component {
                       />
                       <AlumniWorkspace 
                           userDetails={this.state.userDetails}
+                          history={props.history}
                           articleId={props.match.params.articleId}
+                          activeItem={'library'}
                       />
                   </> :
                   <Redirect to={"/login"}/>
