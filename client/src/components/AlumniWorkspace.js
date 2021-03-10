@@ -79,6 +79,7 @@ export default class AlumniWorkspace extends Component {
                         userId={this.props.userDetails.user}
                         articleId={this.props.articleId}
                         history={this.props.history}
+                        viewingAs={'ALUMNI'}
                     />
                 }
             </div>                

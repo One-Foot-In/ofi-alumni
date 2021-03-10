@@ -70,17 +70,23 @@ export default function Article (props) {
                 </Message>
                 {renderInputs()}
             </Feed>
-            <Divider/>
-            {
-                userContributed ?
-                <Message color='yellow'>
-                    You have already contributed to this article.
-                </Message> :
-                <NewArticleInput
-                    articleId={props.articleId}
-                    userId={props.userId}
-                    refreshArticle={refreshArticle}
-                />
+            {   
+                props.viewingAs === 'ALUMNI' ?
+                <>
+                    <Divider/>
+                    {
+                        userContributed ?
+                        <Message color='yellow'>
+                            You have already contributed to this article.
+                        </Message> :
+                        <NewArticleInput
+                            articleId={props.articleId}
+                            userId={props.userId}
+                            refreshArticle={refreshArticle}
+                        />
+                    }
+                </> :
+                null
             }
         </Segment>
     )

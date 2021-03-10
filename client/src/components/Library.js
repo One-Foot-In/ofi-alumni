@@ -10,6 +10,7 @@ import Article from './Article';
  * userId, the id of the alumnus or student who is viewing the library
  * articleId, the article idea that user is trying to view
  * history object to allow navigation
+ * viewingAs, ALUMNI | STUDENT , determines if the user can add input
  */
 export default function Library (props) {
     const [articles, setArticles] = useState([])
@@ -74,11 +75,16 @@ export default function Library (props) {
                     userId={props.userId}
                     articleId={props.articleId}
                     history={props.history}
+                    viewingAs={props.viewingAs}
                 /> :
                 <>
-                    <NewArticlePrompt
-                        userId={props.userId}
-                    />
+                    {
+                        props.viewingAs === 'ALUMNI' ?        
+                        <NewArticlePrompt
+                            userId={props.userId}
+                        /> :
+                        null
+                    }
                     <Feed size='large'>
                         {renderArticles()}
                     </Feed>
