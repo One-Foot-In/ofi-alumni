@@ -9,6 +9,7 @@ import CompanyUpdateModal from './alumni_profile_update_modals/CompanyUpdateModa
 import MajorUpdateModal from './alumni_profile_update_modals/MajorUpdateModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import { makeCall } from "../apis";
+import FootyPoints from './FootyPoints';
 
 const ALUMNI = "ALUMNI"
 
@@ -308,6 +309,7 @@ export default class AlumniProfile extends Component {
                 }
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
+                    <FootyPoints points={this.props.details.footyPoints} style={{'margin-left': 0, 'margin-top': '3px'}} />
                     <Card.Meta>{details.jobTitleName || 'Unavailable'}
                         {
                             !isViewOnly ?
