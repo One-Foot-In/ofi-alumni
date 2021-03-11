@@ -6,12 +6,14 @@ var articleSchema = require('../models/articles/articleSchema');
 var userSchema = require('../models/userSchema');
 const articleInputSchema = require('../models/articles/articleInputSchema');
 const articleCommentSchema = require('../models/articles/articleCommentSchema');
+var newsSchema = require('../models/newsSchema');
 
 require('mongoose').Promise = global.Promise
 
 var logger = require("../logging");
 const alumniSchema = require('../models/alumniSchema');
 const studentSchema = require('../models/studentSchema');
+const { FOOTY_POINTS_CHART } = require('../footyPointsChart');
 
 const userCanAddInput = async (userId) => {
     let user = await alumniSchema.find({user : userId})
@@ -117,6 +119,19 @@ router.post('/:userId', passport.authenticate('jwt', {session: false}), async (r
         })
         await article.save()
         logger.info(`POST | action=/ | userId=${userId} | message='User added new article'`)
+        let alumnusAuthor = await alumniSchema.findOne({user: userId})
+        alumnusAuthor.footyPoints += FOOTY_POINTS_CHART.alumnusAddedArticle
+        alumnusAuthor.save()
+        // create a global news item
+        const newArticleNews = new newsSchema({
+            event: 'New Article',
+            alumni: [alumnusAuthor._id],
+            supportData: {
+                articleId: article._id,
+                articlePrompt: prompt
+            }
+        })
+        await newArticleNews.save();
         res.status(200).json({
             message: 'User added new article prompt'
         })
@@ -150,6 +165,32 @@ router.patch('/addInput/:userId/:articleId', passport.authenticate('jwt', {sessi
             await articleInput.save()
             article.inputs.push(articleInput)
             await article.save()
+            alumnus.footyPoints += FOOTY_POINTS_CHART.alumnusAddedArticleInput
+            alumnus.save()
+            // create a global news item
+            let newArticleNews 
+            if (!isAnonymous) {
+                newArticleNews = new newsSchema({
+                    event: 'New Article Input',
+                    alumni: [],
+                    supportData: {
+                        articleId: articleId,
+                        articlePrompt: article.prompt,
+                        isAnonymous: true
+                    }
+                })
+            } else {
+                newArticleNews = new newsSchema({
+                    event: 'New Article Input',
+                    alumni: [alumnus._id],
+                    supportData: {
+                        articleId: articleId,
+                        articlePrompt: article.prompt,
+                        isAnonymous: false
+                    }
+                })
+            }
+            await newArticleNews.save();
             logger.info(`PATCH | action=/addInput | userId=${userId} | articleId=${articleId} | message='User added input to article'`)
             res.status(200).json({
                 message: 'Successfully added input for article'
@@ -188,6 +229,14 @@ router.patch('/addComment/:userId/:articleInputId', passport.authenticate('jwt',
         await comment.save()
         articleInput.comments.push(comment)
         await articleInput.save()
+        let profile = await alumniSchema.findOne({user: userId})
+        if (profile) {
+            profile.footyPoints += FOOTY_POINTS_CHART.alumnusAddedArticleComment
+        } else {
+            profile = await studentSchema.findOne({user: userId})
+            profile.footyPoints += FOOTY_POINTS_CHART.studentAddedArticleComment
+        }
+        await profile.save()
         logger.info(`PATCH | action=/addComment | userId=${userId} | articleId=${articleInputId} | message='User added comment to article input'`)
         res.status(200).json({
             message: 'User added comment to article input'
@@ -221,6 +270,17 @@ router.patch('/likeArticle/:userId/:articleInputId', passport.authenticate('jwt'
             articleInput.usersLiked.push(userId)
         }
         await articleInput.save()
+        let likerProfile = await alumniSchema.findOne({user: userId})
+        if (likerProfile) {
+            likerProfile.footyPoints += FOOTY_POINTS_CHART.alumnusLikedInput
+        } else {
+            likerProfile = await studentSchema.findOne({user: userId})
+            likerProfile.footyPoints += FOOTY_POINTS_CHART.studentLikedInput
+        }
+        await likerProfile.save()
+        let likedProfile = await alumniSchema.findById(articleInput.author)
+        likedProfile.footyPoints += FOOTY_POINTS_CHART.alumnusHasInputLiked
+        await likedProfile.save()
         res.status(200).json({
             message: 'Successfully liked article input'
         })

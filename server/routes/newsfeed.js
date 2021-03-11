@@ -28,6 +28,14 @@ router.get('/getNews/:role/:id', async (req, res, next) => {
             itemObj.timeElapsed = moment(item.dateCreated).fromNow()
             return itemObj
         })
+        // find article-related news items
+        let globalNewsItems = await newsSchema.find({event: {$in: ['New Article', 'New Article Input']}}).populate('alumni')
+        let globalNewsItemObjs = globalNewsItems.map(newsItem => {
+            let newsItemObj = newsItem.toObject()
+            newsItemObj.timeElapsed = moment(newsItem.dateCreated).fromNow()
+            return newsItemObj
+        })
+        objData = [...objData, ...globalNewsItemObjs]
         res.json({'news' : objData});
     } catch (e) {
         console.log('getNews error: ' + e)

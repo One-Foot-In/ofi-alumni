@@ -6,6 +6,7 @@ import { makeCall } from '../apis';
  * Form to create a new article
  * @param {*} props 
  * userId
+ * refetchArticles, () triggers a refetch or articles in parent component
  * @returns 
  */
 export default function NewArticlePrompt (props) {
@@ -17,6 +18,8 @@ export default function NewArticlePrompt (props) {
             if (res && res.error) {
                 // TODO: error toast
             }
+            setPrompt('')
+            props.refetchArticles()
             setSendingRequest(false)
         })
     }

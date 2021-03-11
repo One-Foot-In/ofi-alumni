@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, Segment, Button } from 'semantic-ui-react'
+import { Feed, Segment, Button, Transition } from 'semantic-ui-react'
 import { makeCall } from "../apis";
 import NewArticlePrompt from './NewArticlePrompt';
 import Article from './Article';
@@ -14,10 +14,13 @@ import Article from './Article';
  */
 export default function Library (props) {
     const [articles, setArticles] = useState([])
-    const [articleId, setArticleId] = useState('')
     const [sendingRequest, setSendingRequest] = useState(false)
     useEffect(() => {
         setSendingRequest(true)
+        refetchArticles()
+    }, props)
+
+    const refetchArticles = () => {
         makeCall({}, `/articles/${props.userId}`, 'get')
             .then(articlesResponse => {
                 if (articlesResponse) {
@@ -29,7 +32,7 @@ export default function Library (props) {
                     setSendingRequest(false)
                 }
             })
-    }, props)
+    }
 
     const navigateToArticle = (articleId) => {
         props.history.push(`/workspaces/library/${articleId}`)
@@ -82,6 +85,7 @@ export default function Library (props) {
                         props.viewingAs === 'ALUMNI' ?        
                         <NewArticlePrompt
                             userId={props.userId}
+                            refetchArticles={refetchArticles}
                         /> :
                         null
                     }
