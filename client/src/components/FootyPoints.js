@@ -6,7 +6,13 @@ function FootyPoints (props) {
     return (
         <Label image color='black' style={props.style}>
             <img src={logo}/>
-            {props.points}
+            <span
+                style={{
+                    color: 'orange'
+                }}
+            >
+                {props.points}
+            </span>
         </Label>
     )
 

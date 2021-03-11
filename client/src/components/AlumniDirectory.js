@@ -228,19 +228,21 @@ export default class AlumniDirectory extends Component {
                         <Card.Content>
                             <Card.Header>
                             <Grid>
-                                <Grid.Row columns={2}>
-                                    <Grid.Column>{post.name}</Grid.Column>
-                                    <Grid.Column textAlign='right'>
+                                <Grid.Row columns={3}>
+                                    <Grid.Column width={8}>{post.name}</Grid.Column>
+                                    <Grid.Column textAlign='right' width={4}>
                                         Graduated: {post.gradYear}
+                                    </Grid.Column>
+                                    <Grid.Column width={4}>
+                                        <FootyPoints points={ post.footyPoints } 
+                                                    style={{
+                                                        'margin-left': 0,
+                                                        'margin-top': '3px'
+                                                    }}/>
                                     </Grid.Column>
                                 </Grid.Row>
                             </Grid>
                             </Card.Header>
-                            <FootyPoints points={ post.footyPoints } 
-                                                 style={{
-                                                    'margin-left': 0,
-                                                    'margin-top': '3px'
-                                                 }}/>
                                             
                             <Card.Meta>{post.profession}</Card.Meta>
                             <Card.Description>College: {post.collegeName}</Card.Description>
