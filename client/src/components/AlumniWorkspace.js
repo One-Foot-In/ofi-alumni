@@ -5,6 +5,8 @@ import {makeCall} from '../apis';
 import { timeSlotOptions } from './RequestModal';
 import {Card, Icon, Button} from 'semantic-ui-react';
 import CollegeUpdateModal from './alumni_profile_update_modals/CollegeUpdateModal';
+import AddCollegeModal from './AddCollegeModal';
+import CollegeDropDown from './CollegeDropdown';
 
 const ALUMNI = "ALUMNI"
 
@@ -18,7 +20,8 @@ export default class AlumniWorkspace extends Component {
         this.state = {
             activeItem: 'collegesAccepted',
             collegesAccepted: [],
-            setCollegeModalOpen: false
+            setCollegeModalOpen: false,
+            removingCollege: false
         }
     }
 
@@ -29,6 +32,7 @@ export default class AlumniWorkspace extends Component {
     };
 
     getCollegesAcceptedInto = () => {
+        console.log(this.props.userDetails._id)
         const theEndPoint = `/alumni/collegesAcceptedInto/all/${this.props.userDetails._id}`;
         makeCall({}, theEndPoint, `GET`)
         .then(res => {
@@ -42,14 +46,20 @@ export default class AlumniWorkspace extends Component {
     };
 
     handleDeleteColleges = (e, theId) => {
-        //e.preventDefault();
+        e.preventDefault();
         console.log(theId)
-        const theEndPoint = `alumni/collegesAcceptedInto/remove/${this.props.userDetails._id}`;
+        const theEndPoint = `/alumni/collegesAcceptedInto/delete/${this.props.userDetails._id}`;
+        this.setState({removingCollege: true},
+            async () => {
+                await makeCall({'collegeToRemove': theId}, theEndPoint,`PATCH`)
+                this.setState({
+                    removingCollege: false
+                }, () => {
+                    this.props.refreshProfile(ALUMNI, this.props.userDetails._id)
+                })
+            })
         makeCall({'collegeToRemove': theId}, theEndPoint,`PATCH`)
-        .then(() => {
-            this.props.refreshProfile(ALUMNI, this.props.userDetails._id)
-        })
-        .catch((err) => console.log(err))
+        // this.props.refreshProfile(ALUMNI, this.props.userDetails._id);
     }
 
     handleCollegeModal = () => {
@@ -104,11 +114,11 @@ export default class AlumniWorkspace extends Component {
                 >
                     {colleges.length ? `Add more collges` : `Add college`}
                 </Button>
-                <CollegeUpdateModal
-                    role={'alumni'}
+                <AddCollegeModal
+                    _id={this.props.userDetails._id}
+                    existingColleges={this.state.collegesAccepted}
                     modalOpen={this.state.setCollegeModalOpen}
                     closeModal={this.handleCollegeModal}
-                    id={this.props.userDetails._id}
                 />
                 </>
             )

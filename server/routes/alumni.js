@@ -784,15 +784,20 @@ router.patch('/collegesAcceptedInto/add/:id', /*passport.authenticate('jwt' {ses
 router.patch('/collegesAcceptedInto/delete/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         const alumni = await alumniSchema.findOne({_id: req.params.id});
-        const collegeId = req.body.collegeToRemove._id;
+        console.log(alumni)
+        const collegeId = req.body.collegeToRemove;
+        console.log(collegeId)
         const collegesInfoForFilter = await collegeSchema.findOne().where('_id').in(collegeId).exec();
+        console.log(collegesInfoForFilter)
         const theCollegeId = collegesInfoForFilter.id;
+        console.log(theCollegeId)
         let newCollegeList = [];
         for (let i = 0; i < alumni.collegesAcceptedInto.length; i++){
             if (alumni.collegesAcceptedInto[i].toString() !== theCollegeId.toString()){
                 newCollegeList.push(alumni.collegesAcceptedInto[i])
             }
         };
+        console.log(newCollegeList)
         alumni.collegesAcceptedInto = newCollegeList;
         await alumni.save();
         res.status(200).json({message: "Successfully removed college from list!"});

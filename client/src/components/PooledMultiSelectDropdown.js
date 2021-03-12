@@ -32,15 +32,18 @@ export default class PooledMultiSelectDropdown extends Component {
         this.setState({
             options: result.options,
         })
+        console.log(this.state.options)
     }
 
     customValueAlreadyAdded() {
+        console.log('customValueAlreadyAdded() activated')
         let oldCustomSelections = this.state.customSelections
         let oldCustomSelectionsValues = oldCustomSelections.map(selection => selection.value).flat()
         return oldCustomSelectionsValues.includes(this.state.customValue)
     }
 
     commitCustomValue(e) {
+        console.log('this one activated')
         e.preventDefault()
         let oldCustomSelections = this.state.customSelections
         oldCustomSelections.push({
@@ -95,7 +98,7 @@ export default class PooledMultiSelectDropdown extends Component {
     removeCustomValue(e, toRemove) {
         e.preventDefault()
         this.setState({
-            customSelections: this.state.customSelections.filter( selection => selection.value !== toRemove)
+            customSelections: this.state.customSelections.filter(selection => selection.value !== toRemove)
         }, () => {
             this.props.getInputs({
                 old: this.state.options

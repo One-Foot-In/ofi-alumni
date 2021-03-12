@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Menu} from 'semantic-ui-react';
 import StudentOpportunities from './StudentOpportunities'
 import { Message, Menu, Card, Grid, Label, Dropdown, Button, Icon} from 'semantic-ui-react';
 import { makeCall } from '../apis'

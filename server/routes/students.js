@@ -317,7 +317,7 @@ router.patch('/collegeShortList/remove/:id', /*passport.authenticate('jwt', {ses
 router.get('/collegeShortList/all/:id', /*passport.authenticate('jwt', {session: false}),*/ async (req, res, next) => {
     try{
         const student = await studentSchema.findOne({_id: req.params.id}).populate('collegeShortList').exec();
-        res.status(200).json(student.collegeShortList)
+        res.status(200).json(student.collegeShortList);
     } catch(e){
         console.log("Error: can't find a college shortlist", e);
         res.status(500).send({'error' : e});
