@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, Accordion, Icon } from 'semantic-ui-react'
+import { Feed, Accordion, Icon, Label } from 'semantic-ui-react'
 import { makeCall } from "../apis";
 import ArticleInputComments from './ArticleInputComments'
 
@@ -42,7 +42,57 @@ export default function ArticleInput (props) {
                         {input.timeElapsed}
                     </Feed.Date>
                     <Feed.Meta>
-                        { (input.isAnonymous ? `Anonymous User` : input.author.name) + `, ` + [input.author.majorName, input.author.jobTitleName].join(' | ') }
+                        { (input.isAnonymous ? `Anonymous User` : input.author.name) }
+                    </Feed.Meta>
+                    <Feed.Meta>
+                        {
+                            input.author.majorName &&
+                            <Label
+                                size='tiny'
+                                color='orange'
+                                style={{
+                                    margin: '2px'
+                                }}
+                            >
+                                {input.author.majorName}
+                            </Label>
+                        }
+                        {
+                            input.author.jobTitleName &&
+                            <Label
+                                size='tiny'
+                                color='yellow'
+                                style={{
+                                    margin: '2px'
+                                }}
+                            >
+                                {input.author.jobTitleName}
+                            </Label>
+                        }
+                        {
+                            input.author.country &&
+                            <Label
+                                size='tiny'
+                                color='teal'
+                                style={{
+                                    margin: '2px'
+                                }}
+                            >
+                                {input.author.country}
+                            </Label>
+                        }
+                        {
+                            input.author.collegeName &&
+                            <Label
+                                size='tiny'
+                                color='blue'
+                                style={{
+                                    margin: '2px'
+                                }}
+                            >
+                                {input.author.collegeName}
+                            </Label>
+                        }
                     </Feed.Meta>
                     <Feed.Summary>
                         {input.input}

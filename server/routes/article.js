@@ -83,9 +83,9 @@ router.get('/:userId/:articleId', passport.authenticate('jwt', {session: false})
         for (let input of article.inputs) {
             await input.populate('comments').execPopulate()
             if (input.isAnonymous) {
-                await input.populate('author', 'majorName jobTitleName user').execPopulate()
+                await input.populate('author', 'majorName jobTitleName collegeName country user').execPopulate()
             } else {
-                await input.populate('author', 'name imageURL majorName jobTitleName user').execPopulate()
+                await input.populate('author', 'name imageURL majorName jobTitleName collegeName country user').execPopulate()
             }
             let commentObjects = []
             for (let comment of input.comments) {
@@ -169,7 +169,7 @@ router.patch('/addInput/:userId/:articleId', passport.authenticate('jwt', {sessi
             alumnus.save()
             // create a global news item
             let newArticleNews 
-            if (!isAnonymous) {
+            if (isAnonymous) {
                 newArticleNews = new newsSchema({
                     event: 'New Article Input',
                     alumni: [],

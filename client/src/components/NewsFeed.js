@@ -73,7 +73,7 @@ export default class NewsFeed extends Component {
                     }
                     break;
                 case 'New Article Input':
-                    if (feedItem.alumni[0]) {
+                    if (feedItem.alumni[0] || (feedItem.supportData && feedItem.supportData.isAnonymous)) {
                         display.push(<Divider key={i}/>)
                         display.push(this.createNewArticleInputPost(feedItem))
                     }
@@ -363,8 +363,7 @@ export default class NewsFeed extends Component {
                                     <AlumniProfile details={alumniDetails} isViewOnly={true} />
                                 </Modal.Content>
                             </Modal>
-                        }
-                        has added input to an article!
+                        } has added input to an article!
                         <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
                     </Feed.Summary>
                     <Feed.Extra>
