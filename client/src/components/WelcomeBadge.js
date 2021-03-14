@@ -37,7 +37,7 @@ function WelcomeBadge(props) {
                     <FootyPoints points={footyPoints}
                                  style={{
                                     float: 'left',
-                                    'margin-left': 0
+                                    'marginLeft': 0
                                  }} />
                 </Label>
             </div> :

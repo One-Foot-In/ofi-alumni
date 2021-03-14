@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react'
+import React, { useState } from 'react'
 import { Menu, Responsive, Sidebar, Button, Icon, Label } from 'semantic-ui-react'
 import { Link, withRouter } from 'react-router-dom'
 import  TimeZoneDropdown  from './TimeZoneDropdown'
@@ -32,7 +32,6 @@ function Navbar (props) {
     const [sidebarVisable, setSidebarVisible] = useState(true);
     
     function getActiveItem(path) {
-        console.log(path)
         if (path === '/') {
             if (role === 'ADMIN') {
                 return 'data';
