@@ -27,7 +27,7 @@ import Footer from './components/Footer'
 import LandingPage from './landingPageContent/LandingPage';
 import ReferralLinkGenerator from './ReferralLinkGenerator';
 import { SemanticToastContainer } from 'react-semantic-toasts'
-import { initGA } from './GaTracking'
+import { initGA, Event as GaEvent } from './GaTracking'
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -65,6 +65,7 @@ let registerButtonGroup = (props) =>
                 <Link to={`register/student`}>
                     <Button 
                         color='yellow'
+                        onClick={() => {GaEvent('UNREGISTERED_TRAFFIC', 'User began registration as a student', '')}}
                     >
                       Student
                     </Button>
@@ -73,6 +74,7 @@ let registerButtonGroup = (props) =>
                 <Link to={`register/alumni`}>
                     <Button
                         color='orange'
+                        onClick={() => {GaEvent('UNREGISTERED_TRAFFIC', 'User began registration as an alumnus', '')}}
                     >
                       Alumni
                     </Button>

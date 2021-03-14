@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Button } from 'semantic-ui-react'
 import { toast } from 'react-semantic-toasts'
+import { Event as GaEvent } from './GaTracking'
 
 /**
  * Button group that allows a user to copy a referral link to share
@@ -12,6 +13,7 @@ import { toast } from 'react-semantic-toasts'
 export default function ReferralLinkGenerator (props) {
 
     const copyLink = (role) => {
+        GaEvent('USER_GROWTH', `User copied ${role} referral link to clipboard`, `schoolId='${props.schoolId}'`)
         let referralLink = `${window.location.href}register/${role}/${props.userId}/${props.schoolId}`
         navigator.clipboard.writeText(referralLink).then(() => {
             toast(

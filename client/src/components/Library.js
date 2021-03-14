@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, Segment, Button, Transition } from 'semantic-ui-react'
+import { Feed, Segment, Button } from 'semantic-ui-react'
 import { makeCall } from "../apis";
 import NewArticlePrompt from './NewArticlePrompt';
 import Article from './Article';
+import { Event as GaEvent } from '../GaTracking'
 
 /**
  * Sub-section of Workspaces that has all collaborative articles
@@ -35,6 +36,7 @@ export default function Library (props) {
     }
 
     const navigateToArticle = (articleId) => {
+        GaEvent('DAILY_ACTIVITY', 'User clicked view article from Library subtab', `role=${props.viewingAs}`)
         props.history.push(`/workspaces/library/${articleId}`)
     }
 

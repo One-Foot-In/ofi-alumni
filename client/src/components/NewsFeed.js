@@ -4,6 +4,7 @@ import { makeCall } from '../apis';
 import AlumniProfile from './AlumniProfile';
 import StudentProfile from './StudentProfile';
 import PollCarousel from './carousels/PollCarousel';
+import { Event as GaEvent } from '../GaTracking'
 
 /*
  * DETAILS:
@@ -309,6 +310,7 @@ export default class NewsFeed extends Component {
                             size='tiny'
                             primary
                             href={articleLink}
+                            onClick={() => {GaEvent('DAILY_ACTIVITY', 'User clicked View article from newsfeed for New Article post', `role=${this.props.userRole} schoolId=${this.props.userDetails.school._id}`)}}
                         >
                             View Article
                         </Button>
@@ -374,6 +376,7 @@ export default class NewsFeed extends Component {
                             size='tiny'
                             primary
                             href={articleLink}
+                            onClick={() => {GaEvent('DAILY_ACTIVITY', 'User clicked View article from newsfeed for New Article Input post', `role=${this.props.userRole} schoolId=${this.props.userDetails.school._id}`)}}
                         >
                             View Article
                         </Button>

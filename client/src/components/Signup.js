@@ -11,6 +11,7 @@ import CompanySelectionModal from './CompanySelectionModal';
 import JobTitleSelectionModal from './JobTitleSelectionModal';
 import ImageSelectModal from './ImageSelectModal';
 import TermsOfAgreementModal from'./TermsOfAgreementModal';
+import { Event as GaEvent } from './../GaTracking'
 
 let fieldStyle = {
     width: '90%',
@@ -787,6 +788,7 @@ export default class Signup extends React.Component {
                     this.setState({
                         submitting: false
                     }, () => {
+                        GaEvent('NEW_USER', `User submitted registration as ${this.props.isAlumni ? 'an alumnus' : 'a student'}`, `schoolId='${this.state.schoolSelection}'`)
                         swal({
                             title: "Congratulations!",
                             text: "Your submission was successful! Please check your email to confirm your account.",

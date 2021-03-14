@@ -4,6 +4,7 @@ import { Form, Button, Icon, Message, Grid, Modal, Label } from 'semantic-ui-rea
 import { Redirect } from 'react-router-dom'
 import { makeCall } from "../apis";
 import swal from "sweetalert";
+import { Event as GaEvent } from '../GaTracking'
 
 import { connect } from 'react-redux';
 import * as actions from '../redux/actions'
@@ -85,6 +86,7 @@ class LoginForm extends React.Component {
                 this.setState({
                     loginLoading: false,
                 }, () => {
+                    GaEvent('DAILY_ACTIVITY', 'User logged in', '');
                     this.props.completeLogin();
                     this.props.toggleLoginModal();
                     this.props.login();
@@ -263,7 +265,11 @@ class LoginForm extends React.Component {
                         <Button
                             disabled={this.state.sendingRequest}
                             style={{'height':'80%', 'margin': '2px 0 2px 0'}}
-                            onClick={(e) => this.openPasswordModal(e)}
+                            onClick={(e) => {
+                                this.openPasswordModal(e);
+                                GaEvent('ACCOUNT_MANAGEMENT', 'User clicked Forgot Password', '');
+                                }
+                            }
                         >
                             Forgot Password
                         </Button>
