@@ -27,6 +27,7 @@ import Footer from './components/Footer'
 import LandingPage from './landingPageContent/LandingPage';
 import ReferralLinkGenerator from './ReferralLinkGenerator';
 import { SemanticToastContainer } from 'react-semantic-toasts'
+import { initGA } from './GaTracking'
 
 export const ALUMNI = "ALUMNI"
 export const STUDENT = "STUDENT"
@@ -282,7 +283,6 @@ const collegeRepNavBarItems = () => {
   ]
   return navBarItems;
 }
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -328,6 +328,7 @@ class App extends Component {
     var roles;
     var profile;
     var id;
+    initGA() // initialize GA event to use anywhere in the application
     this.setState({
       fetchingAuth: true
     }) 

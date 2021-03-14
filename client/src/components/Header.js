@@ -5,10 +5,8 @@ import { Link } from "react-router-dom"
 import 'semantic-ui-css/semantic.min.css';
 import swal from "sweetalert";
 import { makeCall } from "../apis";
-import FootyPoints from './FootyPoints';
+import {Event as GaEvent } from './../GaTracking'
 
-import { flagCodeByCountry } from '../flags'
-import { black } from "../colors"
 import WelcomeBadge from './WelcomeBadge';
 
 function getErrorLabel(content) {
@@ -49,6 +47,7 @@ export default class HeaderComponent extends Component {
         this.comparePasswords = this.comparePasswords.bind(this);
         this.renderRoleDropdown = this.renderRoleDropdown.bind(this);
         this.toggleLoginModal = this.toggleLoginModal.bind(this);
+        this.trackRegister = this.trackRegister.bind(this);
     }
 
     async componentDidUpdate(prevProps) {
@@ -205,6 +204,7 @@ export default class HeaderComponent extends Component {
                     disabled={this.state.sendingRequest}
                     basic
                     color='yellow'
+                    onClick={this.trackRegister}
                 >
                     Register
                 </Button>
@@ -270,6 +270,10 @@ export default class HeaderComponent extends Component {
         this.setState({
         loginModalOpen: !this.state.loginModalOpen
         })
+    }
+
+    trackRegister() {
+        GaEvent("UNREGISTERED_TRAFFIC", "User clicked Register button", "")
     }
 
     async fetchUser() {
