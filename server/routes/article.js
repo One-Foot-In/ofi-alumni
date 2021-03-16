@@ -62,7 +62,23 @@ router.get('/:userId', passport.authenticate('jwt', {session: false}), async (re
             articleObjects.push(articleObject)
         }
         res.status(200).json({
-            articles: articleObjects
+            articles: articleObjects.sort((articleA, articleB) => {
+                if (articleA.totalLikes === articleB.totalLikes) {
+                    if (articleA.totalComments > articleB.totalComments) {
+                        return -1
+                    } else if (articleA.totalComments < articleB.totalComments) {
+                        return 1
+                    }
+                    return 0
+                }
+                if (articleA.totalLikes > articleB.totalLikes) {
+                    return -1
+                } else if (articleA.totalLikes < articleB.totalLikes) {
+                    return 1
+                }
+                return 0
+                }
+            )
         })
     } catch (e) {
         logger.error(`GET | action=/articles | userId=${req.params.userId} | error=${e}`)
@@ -99,7 +115,22 @@ router.get('/:userId/:articleId', passport.authenticate('jwt', {session: false})
             inputObject.timeElapsed = moment(inputObject.dateCreated).fromNow()
             inputObjects.push(inputObject)
         }
-        articleObject.inputs = inputObjects
+        articleObject.inputs = inputObjects.sort((inputA, inputB) => {
+            if (inputA.usersLiked.length === inputB.usersLiked.length) {
+                if (inputA.comments.length > inputB.comments.length) {
+                    return -1
+                } else if (inputA.comments.length < inputB.comments.length) {
+                    return 1
+                }
+                return 0
+            }
+            if (inputA.usersLiked.length > inputB.usersLiked.length) {
+                return -1
+            } else if (inputA.usersLiked.length < inputB.usersLiked.length) {
+                return 1
+            }
+            return 0
+        })
         res.status(200).json({
             article: articleObject
         })
