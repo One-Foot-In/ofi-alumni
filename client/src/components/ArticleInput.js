@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, Accordion, Icon, Label } from 'semantic-ui-react'
+import { Feed, Accordion, Icon, Label, Divider } from 'semantic-ui-react'
 import { makeCall } from "../apis";
 import ArticleInputComments from './ArticleInputComments'
 
@@ -121,6 +121,7 @@ export default function ArticleInput (props) {
                     />
                 </Accordion.Content>
             </Accordion>
+            <Divider/>
         </>
     )
 }
