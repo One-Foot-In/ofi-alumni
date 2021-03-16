@@ -3,9 +3,6 @@ module.exports.FOOTY_POINTS_CHART = {
     userBringsInNewMemberByReferral: 10,
     alumnusAddedArticle: 8, 
     alumnusAddedArticleInput: 8, 
-    alumnusAddedArticleComment: 3, 
-    alumnusHasInputLiked: 2,
-    studentLikedInput: 2,
-    alumnusLikedInput: 2,
+    alumnusAddedArticleComment: 3,
     studentAddedArticleComment: 3,
 }

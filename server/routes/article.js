@@ -270,17 +270,6 @@ router.patch('/likeArticle/:userId/:articleInputId', passport.authenticate('jwt'
             articleInput.usersLiked.push(userId)
         }
         await articleInput.save()
-        let likerProfile = await alumniSchema.findOne({user: userId})
-        if (likerProfile) {
-            likerProfile.footyPoints += FOOTY_POINTS_CHART.alumnusLikedInput
-        } else {
-            likerProfile = await studentSchema.findOne({user: userId})
-            likerProfile.footyPoints += FOOTY_POINTS_CHART.studentLikedInput
-        }
-        await likerProfile.save()
-        let likedProfile = await alumniSchema.findById(articleInput.author)
-        likedProfile.footyPoints += FOOTY_POINTS_CHART.alumnusHasInputLiked
-        await likedProfile.save()
         res.status(200).json({
             message: 'Successfully liked article input'
         })
