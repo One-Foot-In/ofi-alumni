@@ -67,7 +67,7 @@ router.get('/:userId', passport.authenticate('jwt', {session: false}), async (re
             articleObjects.push(articleObject)
         }
         res.status(200).json({
-            articles: articleObjects
+            articles: articleObjects.reverse()
         })
     } catch (e) {
         logger.error(`GET | action=/articles | userId=${req.params.userId} | error=${e}`)
@@ -100,11 +100,11 @@ router.get('/:userId/:articleId', passport.authenticate('jwt', {session: false})
                 commentObjects.push(commentObject)
             }
             let inputObject = input.toObject()
-            inputObject.comments = commentObjects
+            inputObject.comments = commentObjects.reverse()
             inputObject.timeElapsed = moment(inputObject.dateCreated).fromNow()
             inputObjects.push(inputObject)
         }
-        articleObject.inputs = inputObjects
+        articleObject.inputs = inputObjects.reverse()
         res.status(200).json({
             article: articleObject
         })
