@@ -9,6 +9,7 @@ import { makeCall } from "../apis";
  * inputId, the id of the parent input
  * userId
  * refreshArticle, () method that refetches the article
+ * approved, boolean for whether user is approved
  * @returns 
  */
 export default function ArticleInputComments (props) {
@@ -62,13 +63,13 @@ export default function ArticleInputComments (props) {
                 rows={1}
                 value={comment}
                 onChange={handleCommentInput}
-                disabled={sendingRequest}
+                disabled={sendingRequest || !props.approved}
             />
             <Button
                 content='Add Comment'
                 primary
                 onClick={addComment}
-                disabled={sendingRequest}
+                disabled={sendingRequest || !props.approved}
             />
         </Form>
         </Comment.Group>

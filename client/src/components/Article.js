@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, Segment, Button, Message, Divider, Icon } from 'semantic-ui-react'
+import { Feed, Segment, Button, Message } from 'semantic-ui-react'
 import { makeCall } from "../apis";
 import ArticleInput from './ArticleInput';
 import NewArticleInput from './NewArticleInput';
@@ -10,6 +10,7 @@ import NewArticleInput from './NewArticleInput';
  * userId
  * articleId
  * history
+ * approved, boolean for whether user is approved
  */
 export default function Article (props) {
     const [sendingRequest, setSendingRequest] = useState(false)
@@ -46,6 +47,7 @@ export default function Article (props) {
                     input={input}
                     userId={props.userId}
                     refreshArticle={refreshArticle}
+                    approved={props.approved}
                 />
             )
         })
@@ -73,17 +75,22 @@ export default function Article (props) {
             {   
                 props.viewingAs === 'ALUMNI' ?
                 <>
-                    <Divider/>
                     {
                         userContributed ?
                         <Message color='yellow'>
                             You have already contributed to this article.
-                        </Message> :
-                        <NewArticleInput
-                            articleId={props.articleId}
-                            userId={props.userId}
-                            refreshArticle={refreshArticle}
-                        />
+                        </Message>
+                        :
+                        props.approved ? 
+                            <NewArticleInput
+                                articleId={props.articleId}
+                                userId={props.userId}
+                                refreshArticle={refreshArticle}
+                            />
+                            :
+                            <Message color='yellow'>
+                                An Alumnus must be approved before they can add an article input!
+                            </Message>
                     }
                 </> :
                 null

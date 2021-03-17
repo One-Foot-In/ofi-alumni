@@ -8,6 +8,7 @@ import ArticleInputComments from './ArticleInputComments'
  * @param {*} props 
  * input, input to an article
  * refreshArticle, () method that refetches article
+ * approved, boolean for whether user is approved
  */
 export default function ArticleInput (props) {
     const [revealComments, setRevealComments] = useState(false)
@@ -118,6 +119,7 @@ export default function ArticleInput (props) {
                         userId={props.userId}
                         comments={input.comments}
                         refreshArticle={props.refreshArticle}
+                        approved={props.approved}
                     />
                 </Accordion.Content>
             </Accordion>

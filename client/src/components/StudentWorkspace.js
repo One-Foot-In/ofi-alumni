@@ -60,6 +60,7 @@ export default class StudentWorkspace extends Component {
                         articleId={this.props.articleId}
                         history={this.props.history}
                         viewingAs={'STUDENT'}
+                        approved={this.props.userDetails.approved}
                     />
                 }
             </>

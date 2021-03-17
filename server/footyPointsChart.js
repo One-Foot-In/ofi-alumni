@@ -4,5 +4,5 @@ module.exports.FOOTY_POINTS_CHART = {
     alumnusAddedArticle: 8, 
     alumnusAddedArticleInput: 8, 
     alumnusAddedArticleComment: 3,
-    studentAddedArticleComment: 3,
+    studentAddedArticleComment: 5,
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, Segment, Button, Transition } from 'semantic-ui-react'
+import { Feed, Segment, Button, Message } from 'semantic-ui-react'
 import { makeCall } from "../apis";
 import NewArticlePrompt from './NewArticlePrompt';
 import Article from './Article';
@@ -11,6 +11,7 @@ import Article from './Article';
  * articleId, the article idea that user is trying to view
  * history object to allow navigation
  * viewingAs, ALUMNI | STUDENT , determines if the user can add input
+ * approved, boolean for whether user is approved
  */
 export default function Library (props) {
     const [articles, setArticles] = useState([])
@@ -79,14 +80,20 @@ export default function Library (props) {
                     articleId={props.articleId}
                     history={props.history}
                     viewingAs={props.viewingAs}
+                    approved={props.approved}
                 /> :
                 <>
                     {
                         props.viewingAs === 'ALUMNI' ?        
-                        <NewArticlePrompt
-                            userId={props.userId}
-                            refetchArticles={refetchArticles}
-                        /> :
+                            props.approved ? 
+                            <NewArticlePrompt
+                                userId={props.userId}
+                                refetchArticles={refetchArticles}
+                            /> :
+                            <Message color='yellow'>
+                                Alumnus must be approved before they can add an article prompt!
+                            </Message>
+                        :
                         null
                     }
                     <Feed size='large'>

@@ -15,9 +15,14 @@ const alumniSchema = require('../models/alumniSchema');
 const studentSchema = require('../models/studentSchema');
 const { FOOTY_POINTS_CHART } = require('../footyPointsChart');
 
+/**
+ * Confirms the user is an alumnus and is approved
+ * @param {*} userId 
+ * @returns 
+ */
 const userCanAddInput = async (userId) => {
-    let user = await alumniSchema.find({user : userId})
-    return !!user
+    let user = await alumniSchema.findOne({user : userId})
+    return user && user.approved
 }
 
 const getAuthorFromUser = async (userId) => {
@@ -62,23 +67,7 @@ router.get('/:userId', passport.authenticate('jwt', {session: false}), async (re
             articleObjects.push(articleObject)
         }
         res.status(200).json({
-            articles: articleObjects.sort((articleA, articleB) => {
-                if (articleA.totalLikes === articleB.totalLikes) {
-                    if (articleA.totalComments > articleB.totalComments) {
-                        return -1
-                    } else if (articleA.totalComments < articleB.totalComments) {
-                        return 1
-                    }
-                    return 0
-                }
-                if (articleA.totalLikes > articleB.totalLikes) {
-                    return -1
-                } else if (articleA.totalLikes < articleB.totalLikes) {
-                    return 1
-                }
-                return 0
-                }
-            )
+            articles: articleObjects
         })
     } catch (e) {
         logger.error(`GET | action=/articles | userId=${req.params.userId} | error=${e}`)
@@ -115,22 +104,7 @@ router.get('/:userId/:articleId', passport.authenticate('jwt', {session: false})
             inputObject.timeElapsed = moment(inputObject.dateCreated).fromNow()
             inputObjects.push(inputObject)
         }
-        articleObject.inputs = inputObjects.sort((inputA, inputB) => {
-            if (inputA.usersLiked.length === inputB.usersLiked.length) {
-                if (inputA.comments.length > inputB.comments.length) {
-                    return -1
-                } else if (inputA.comments.length < inputB.comments.length) {
-                    return 1
-                }
-                return 0
-            }
-            if (inputA.usersLiked.length > inputB.usersLiked.length) {
-                return -1
-            } else if (inputA.usersLiked.length < inputB.usersLiked.length) {
-                return 1
-            }
-            return 0
-        })
+        articleObject.inputs = inputObjects
         res.status(200).json({
             article: articleObject
         })
@@ -144,13 +118,19 @@ router.post('/:userId', passport.authenticate('jwt', {session: false}), async (r
     try {
         let userId = req.params.userId
         let prompt = req.body.prompt
+        let alumnusAuthor = await alumniSchema.findOne({user: userId})
+        if (!alumnusAuthor.approved) {
+            res.status(400).json({
+                message: 'An unapproved alumnus may not create an article.'
+            })
+            return
+        }
         let article = new articleSchema({
             prompt: prompt,
             author: userId
         })
         await article.save()
         logger.info(`POST | action=/ | userId=${userId} | message='User added new article'`)
-        let alumnusAuthor = await alumniSchema.findOne({user: userId})
         alumnusAuthor.footyPoints += FOOTY_POINTS_CHART.alumnusAddedArticle
         alumnusAuthor.save()
         // create a global news item
@@ -253,6 +233,19 @@ router.patch('/addComment/:userId/:articleInputId', passport.authenticate('jwt',
         }
         let commentText = req.body.comment
         let user = await userSchema.findById(userId)
+        let isAlumnus = user.role.includes("ALUMNI")
+        let profile
+        if (isAlumnus) {
+            profile = await alumniSchema.findOne({user: userId})
+        } else {
+            profile = await studentSchema.findOne({user: userId})
+        }
+        if (!profile.approved) {
+            res.status(400).json({
+                message: 'An unapproved user may not add a comment.'
+            })
+            return
+        }
         let comment = new articleCommentSchema({
             comment: commentText,
             author: user
@@ -260,13 +253,7 @@ router.patch('/addComment/:userId/:articleInputId', passport.authenticate('jwt',
         await comment.save()
         articleInput.comments.push(comment)
         await articleInput.save()
-        let profile = await alumniSchema.findOne({user: userId})
-        if (profile) {
-            profile.footyPoints += FOOTY_POINTS_CHART.alumnusAddedArticleComment
-        } else {
-            profile = await studentSchema.findOne({user: userId})
-            profile.footyPoints += FOOTY_POINTS_CHART.studentAddedArticleComment
-        }
+        profile.footyPoints += (isAlumnus ? FOOTY_POINTS_CHART.alumnusAddedArticleComment : FOOTY_POINTS_CHART.studentAddedArticleComment)
         await profile.save()
         logger.info(`PATCH | action=/addComment | userId=${userId} | articleId=${articleInputId} | message='User added comment to article input'`)
         res.status(200).json({
