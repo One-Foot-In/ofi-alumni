@@ -37,7 +37,7 @@ export default function NewArticlePrompt (props) {
                 width={10}
             >
                 <TextArea
-                    placeholder='Add a prompt for your new article'
+                    placeholder='Add a prompt for your new article. Any alumnus can then add an input to your prompt to create a collaborative article.'
                     onChange={handlePromptChange}
                     value={prompt}
                     maxLength="300"
