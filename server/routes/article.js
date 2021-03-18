@@ -7,6 +7,7 @@ var userSchema = require('../models/userSchema');
 const articleInputSchema = require('../models/articles/articleInputSchema');
 const articleCommentSchema = require('../models/articles/articleCommentSchema');
 var newsSchema = require('../models/newsSchema');
+const { sendInputAuthorNewInputEmail, sendArticleAuthorNewInputEmail, sendStudentCommenterNewInputEmail } = require('./helpers/emailHelpers')
 
 require('mongoose').Promise = global.Promise
 
@@ -23,6 +24,54 @@ const { FOOTY_POINTS_CHART } = require('../footyPointsChart');
 const userCanAddInput = async (userId) => {
     let user = await alumniSchema.findOne({user : userId})
     return user && user.approved
+}
+
+/**
+ * Alerts alumnus author or article, alumnus input contributors of article, and student commenters on the article
+ * In order to limit emails explosion, only send to last 5 student commenters and last 5 alumni inputers
+ * @param {*} article, with alumni reference for author and reference for inputs
+ * @param {*} articleInputerName, name of alumnus who added the input
+ * @param {*} articlePrompt, prompt for article that just received the input
+ * @param {*} numMostRecentToAlert, number of most recent alumni and student emails to extract 
+ */
+const notifyNewArticleInput = async (article, articleInputerName, articlePrompt, numMostRecentToAlert = 3) => {
+    await article.populate('author inputs').execPopulate()
+    // each input will always be by a unique alumnus
+    let mostRecentInputs = article.inputs.slice((article.inputs.length - numMostRecentToAlert))
+    let last5AlumniContributorUserIds = []
+    for (let input of mostRecentInputs) {
+        await input.populate('author').execPopulate()
+        last5AlumniContributorUserIds.push(input.author.user)
+    }
+    let last5AlumniContributorUsers = await userSchema.find({_id: {$in: last5AlumniContributorUserIds}})
+    let last5AlumniContributorEmails = last5AlumniContributorUsers.map(user => user.email)
+    let uniqueStudentCommentersEmails = new Set()
+    outerloop:
+    for (let input of article.inputs) {
+        await input.populate('comments').execPopulate()
+        innerloop:
+        for (let comment of input.comments.reverse()) {
+            await comment.populate('author', 'email role').execPopulate()
+            if (comment.author.role.includes("STUDENT") && !uniqueStudentCommentersEmails.has(comment.author.email)) {
+                uniqueStudentCommentersEmails.add(comment.author.email)
+                if (uniqueStudentCommentersEmails.size === numMostRecentToAlert) {
+                    break outerloop
+                }
+            }
+        }
+    }
+    // email author of article about input
+    if (!last5AlumniContributorEmails.includes(article.author.email)) {
+        await sendArticleAuthorNewInputEmail(article.author.email, articleInputerName, articlePrompt)
+    }
+    // email other authors who have contributed of input
+    for (let alumnusEmail of last5AlumniContributorEmails) {
+        await sendInputAuthorNewInputEmail(alumnusEmail, articleInputerName, articlePrompt)
+    }
+    // email student comments on inputs
+    for (let studentEmail of Array.from(uniqueStudentCommentersEmails)) {
+        await sendStudentCommenterNewInputEmail(studentEmail, articleInputerName, articlePrompt)
+    }
 }
 
 const getAuthorFromUser = async (userId) => {
@@ -178,6 +227,8 @@ router.patch('/addInput/:userId/:articleId', passport.authenticate('jwt', {sessi
             await article.save()
             alumnus.footyPoints += FOOTY_POINTS_CHART.alumnusAddedArticleInput
             alumnus.save()
+            // do not wait on async email sending to complete
+            notifyNewArticleInput(article, alumnus.name, article.prompt, 3)
             // create a global news item
             let newArticleNews 
             if (isAnonymous) {
@@ -298,3 +349,4 @@ router.patch('/likeArticle/:userId/:articleInputId', passport.authenticate('jwt'
 })
 
 module.exports = router;
+module.exports.notifyNewArticleInput = notifyNewArticleInput;
