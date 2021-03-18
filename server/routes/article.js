@@ -34,7 +34,7 @@ const userCanAddInput = async (userId) => {
  * @param {*} articlePrompt, prompt for article that just received the input
  * @param {*} numMostRecentToAlert, number of most recent alumni and student emails to extract 
  */
-const notifyNewArticleInput = async (article, articleInputerName, articlePrompt, numMostRecentToAlert = 3) => {
+const notifyNewArticleInput = async (article, articleInputerEmail, articleInputerName, articlePrompt, numMostRecentToAlert = 3) => {
     await article.populate('author inputs').execPopulate()
     // each input will always be by a unique alumnus
     let mostRecentInputs = article.inputs.slice((article.inputs.length - numMostRecentToAlert))
@@ -44,7 +44,8 @@ const notifyNewArticleInput = async (article, articleInputerName, articlePrompt,
         last5AlumniContributorUserIds.push(input.author.user)
     }
     let last5AlumniContributorUsers = await userSchema.find({_id: {$in: last5AlumniContributorUserIds}})
-    let last5AlumniContributorEmails = last5AlumniContributorUsers.map(user => user.email)
+    // remove email notification for inputer
+    let last5AlumniContributorEmails = last5AlumniContributorUsers.map(user => user.email).filter(email => email !== articleInputerEmail)
     let uniqueStudentCommentersEmails = new Set()
     outerloop:
     for (let input of article.inputs) {
@@ -217,6 +218,7 @@ router.patch('/addInput/:userId/:articleId', passport.authenticate('jwt', {sessi
             let input = req.body.input
             let isAnonymous = req.body.isAnonymous
             let alumnus = await alumniSchema.findOne({user: userId})
+            let alumnusUser = await userSchema.findById(userId)
             let articleInput = new articleInputSchema({
                 input: input,
                 isAnonymous: isAnonymous,
@@ -228,7 +230,7 @@ router.patch('/addInput/:userId/:articleId', passport.authenticate('jwt', {sessi
             alumnus.footyPoints += FOOTY_POINTS_CHART.alumnusAddedArticleInput
             alumnus.save()
             // do not wait on async email sending to complete
-            notifyNewArticleInput(article, alumnus.name, article.prompt, 3)
+            notifyNewArticleInput(article, alumnusUser.email, alumnus.name, article.prompt, 3)
             // create a global news item
             let newArticleNews 
             if (isAnonymous) {

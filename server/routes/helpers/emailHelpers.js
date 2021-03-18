@@ -315,7 +315,7 @@ const sendArticleAuthorNewInputEmail = async (to, inputerName, articleTitle) => 
 const sendInputAuthorNewInputEmail = async (to, inputerName, articleTitle) => {
   let emailObject = createPersonalization(
     to,
-    `New Input on your article contributed to!`,
+    `New Input on an article you contributed to!`,
     htmlBuilder(
       `${inputerName} has added new input to article <b>${articleTitle}</b>! You also contributed to this article. Check out what other alumni have to say.`,
       `Check out input in app!`,
@@ -333,7 +333,7 @@ const sendInputAuthorNewInputEmail = async (to, inputerName, articleTitle) => {
 const sendStudentCommenterNewInputEmail = async (to, inputerName, articleTitle) => {
   let emailObject = createPersonalization(
     to,
-    `New Input on your article you engaged with!`,
+    `New Input on an article you engaged with!`,
     htmlBuilder(
       `${inputerName} has added new input to article <b>${articleTitle}</b>! You have also engaged with this article.`,
       `Check out input in app!`,

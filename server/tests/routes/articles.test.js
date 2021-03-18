@@ -144,6 +144,6 @@ const setupArticleWithInputsAndComments = async () => {
 
 test('email alerts on new article input', async () => {
     let articleSetup = await setupArticleWithInputsAndComments()
-    await notifyNewArticleInput(articleSetup.article, articleSetup.inputAuthors[0].name, articleSetup.article.prompt)
+    await notifyNewArticleInput(articleSetup.article, 'alumni1@ofi.com', articleSetup.inputAuthors[0].name, articleSetup.article.prompt)
     // check console.logs for emails sent to alumni and students
 })
