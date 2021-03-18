@@ -319,7 +319,7 @@ router.patch('/addComment/:userId/:articleInputId', passport.authenticate('jwt',
 })
 
 /**
- * Allows liking and unlike comment
+ * Allows liking and unlike article input
  */
 router.patch('/likeArticle/:userId/:articleInputId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
@@ -346,6 +346,73 @@ router.patch('/likeArticle/:userId/:articleInputId', passport.authenticate('jwt'
         })
     } catch (e) {
         logger.error(`PATCH | action=/likeArticle | userId=${req.params.userId} | error=${e}`)
+        res.status(500).send({'error' : e});
+    }
+})
+
+/**
+ * Currently unused
+ */
+router.patch('/editInput/:userId/:articleInputId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let userId = req.params.userId
+        let articleInputId = req.params.articleInputId
+        let newInput = req.body.newInput
+        let articleInput = await articleInputSchema.findById(articleInputId)
+        if (!articleInput) {
+            logger.error(`PATCH | action=/editInput | userId=${req.params.userId} | message='Article input not found with id='${articleInputId}'`)
+            res.status(404).json({
+                message: `Article input not found with id='${articleInputId}`
+            })
+            return
+        }
+        await articleInput.populate('author').execPopulate()
+        if (articleInput.author.user !== userId) {
+            res.status(400).json({
+                message: 'Only author of article input may edit it'
+            })
+            return
+        }
+        articleInput.input = newInput
+        await articleInput.save()
+        res.status(200).json({
+            message: 'Successfully saved article input'
+        })
+    } catch (e) {
+        logger.error(`PATCH | action=/editInput | userId=${req.params.userId} | error=${e}`)
+        res.status(500).send({'error' : e});
+    }
+})
+
+router.delete('/input/:userId/:articleInputId', 
+    passport.authenticate('jwt', {session: false}),
+    async (req, res, next) => {
+    try {
+        let userId = req.params.userId
+        let articleInputId = req.params.articleInputId
+        let articleInput = await articleInputSchema.findById(articleInputId)
+        if (!articleInput) {
+            logger.error(`DELETE | action=/input | userId=${req.params.userId} | message='Article input not found with id='${articleInputId}'`)
+            res.status(404).json({
+                message: `Article input not found with id='${articleInputId}`
+            })
+            return
+        }
+        await articleInput.populate('author').execPopulate()
+        if ((articleInput.author.user).toString() !== userId) {
+            res.status(400).json({
+                message: 'Only author of article input may delete it'
+            })
+            return
+        }
+        // delete comments
+        await articleCommentSchema.deleteMany({_id: {$in: articleInput.comments}})
+        await articleInputSchema.deleteOne({_id: articleInputId})
+        res.status(200).json({
+            message: 'Successfully deleted article input'
+        })
+    } catch (e) {
+        logger.error(`DELETE | action=/input | userId=${req.params.userId} | error=${e}`)
         res.status(500).send({'error' : e});
     }
 })

@@ -11,10 +11,13 @@ const request = require('supertest');
 
 const app = createServer();
 
+let articleSetup
+
 beforeAll(async (done) => {
     process.env.NODE_ENV = 'test';
     mongoose.connect("mongodb://localhost:27017/test-test", { useNewUrlParser: true });
     await request(app).get('/util/seed/');
+    articleSetup = await setupArticleWithInputsAndComments()
     done()
 });
 
@@ -142,8 +145,19 @@ const setupArticleWithInputsAndComments = async () => {
     }
 }
 
+test('deleting article inputs deletes all associated comments with input', async () => {
+    let inputerUserId = articleSetup.inputAuthors[0].user.toString()
+    let inputId = articleSetup.inputs[0]._id.toString()
+    let commentsOnInputBeingDeleted = [articleSetup.comments[0], articleSetup.comments[1], articleSetup.comments[8]].map(comment => comment.comment)
+    const res = await request(app).delete(`/articles/input/${inputerUserId}/${inputId}`)
+    expect(res.status).toEqual(200)
+    let deletedComments = await articleCommentSchema.find({comment: {$in: commentsOnInputBeingDeleted}})
+    expect(deletedComments).toEqual([])
+    let deletedInput = await articleInputSchema.findById(inputId)
+    expect(!deletedInput)
+})
+
 test('email alerts on new article input', async () => {
-    let articleSetup = await setupArticleWithInputsAndComments()
     await notifyNewArticleInput(articleSetup.article, 'alumni1@ofi.com', articleSetup.inputAuthors[0].name, articleSetup.article.prompt)
     // check console.logs for emails sent to alumni and students
 })

@@ -9,6 +9,7 @@ import ArticleInputComments from './ArticleInputComments'
  * input, input to an article
  * refreshArticle, () method that refetches article
  * approved, boolean for whether user is approved
+ * userId, userId for current user
  */
 export default function ArticleInput (props) {
     const [revealComments, setRevealComments] = useState(false)
@@ -21,6 +22,27 @@ export default function ArticleInput (props) {
                 props.refreshArticle()
             }
         })
+    }
+
+    const deleteInput = (inputId) => {
+        makeCall({},`/articles/input/${props.userId}/${inputId}`, 'delete').then(res => {
+            if (!res && res.error) {
+                // TODO error
+            } else {
+                props.refreshArticle()
+            }
+        })
+    }
+
+    const getRevealCommentsText = () => {
+        let numComments = props.input.comments.length
+        if (numComments === 0) {
+            return 'Add Comment'
+        } else if (numComments === 1) {
+            return 'Show 1 Comment'
+        } else {
+            return `Show ${numComments} Comments`
+        }
     }
 
     const input = props.input
@@ -102,6 +124,19 @@ export default function ArticleInput (props) {
                         <Feed.Like>
                             <Icon name='like' onClick={() => likeInput(input._id)}/> {input.usersLiked ? (input.usersLiked.length).toString() : '0' }
                         </Feed.Like>
+                        {
+                            input.author.user === props.userId ?
+                                <Icon
+                                    circular
+                                    color='red'
+                                    name='trash alternate'
+                                    onClick={() => deleteInput(input._id)}
+                                    style={{
+                                        marginLeft: '3px'
+                                    }}
+                                />
+                            : null
+                        }
                     </Feed.Extra>
                 </Feed.Content>
             </Feed.Event>
@@ -111,7 +146,7 @@ export default function ArticleInput (props) {
                     active={revealComments}
                 >
                     <Icon name='dropdown' />
-                    Show Comments
+                    {getRevealCommentsText()}
                 </Accordion.Title>
                 <Accordion.Content active={revealComments}>
                     <ArticleInputComments
