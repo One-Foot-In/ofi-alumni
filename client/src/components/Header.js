@@ -51,13 +51,16 @@ export default class HeaderComponent extends Component {
         this.toggleLoginModal = this.toggleLoginModal.bind(this);
     }
 
+    async componentDidMount() {
+        await this.fetchRoles()
+    }
+
     async componentDidUpdate(prevProps) {
         if (prevProps.role !== this.props.role && prevProps.userId !== this.props.userId) {
             await this.setState({
                 currRole: this.props.role,
                 userId: this.props.userId
             })
-            await this.fetchRoles()
         }
     }
 
