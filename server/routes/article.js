@@ -17,13 +17,14 @@ const studentSchema = require('../models/studentSchema');
 const { FOOTY_POINTS_CHART } = require('../footyPointsChart');
 
 /**
- * Confirms the user is an alumnus and is approved
+ * Confirms the user is an alumnus, is approved, and that the alumnus belongs to same school is article is school specific
  * @param {*} userId 
+ * @param {*} articleSchool 
  * @returns 
  */
-const userCanAddInput = async (userId) => {
-    let user = await alumniSchema.findOne({user : userId})
-    return user && user.approved
+const userCanAddInput = async (userId, articleSchool) => {
+    let alumnusProfile = await alumniSchema.findOne({user : userId})
+    return alumnusProfile && alumnusProfile.approved && (!articleSchool || articleSchool.toString() === alumnusProfile.school.toString())
 }
 
 /**
@@ -96,13 +97,26 @@ const getAuthorFromUser = async (userId) => {
     }
 }
 
+const getSchoolFromUser = async (userId) => {
+    let profile = await alumniSchema.findOne({user: userId})
+    if (profile) {
+        return profile.school
+    }
+    profile = await studentSchema.findOne({user: userId})
+    return profile.school
+}
+
 router.get('/:userId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
         /**
          * Add check to see if user has access to article later
          */
         logger.info(`GET | action=/articles | userId=${req.params.userId} | message='User fetching articles'`)
-        let articles = await articleSchema.find({}).populate('inputs').populate('author')
+        let articles = await articleSchema.find({}).populate('inputs').populate('author').populate('school')
+        let school = await getSchoolFromUser(req.params.userId)
+        articles = articles.filter(article => {
+            return !article.school || article.school._id.toString() === school.toString()
+        })
         let articleObjects = []
         for (let article of articles) {
             let articleObject = article.toObject()
@@ -131,7 +145,14 @@ router.get('/:userId/:articleId', passport.authenticate('jwt', {session: false})
          * Add check to see if user has access to article later
          */
         logger.info(`GET | action=/articles/ | userId=${req.params.userId} | articleId=${req.params.articleId} | message='User viewed article'`)
-        let article = await articleSchema.findById(req.params.articleId).populate('inputs').populate('author')
+        let school = await getSchoolFromUser(req.params.userId)
+        let article = await articleSchema.findById(req.params.articleId).populate('inputs').populate('author').populate('school')
+        if (school && article.school && article.school._id.toString() !== school.toString()) {
+            res.status(400).json({
+                message: `User trying to access an article that is not available to their school`
+            })
+            return
+        }
         let articleObject = article.toObject()
         articleObject.author = await getAuthorFromUser(article.author)
         let inputObjects = []
@@ -168,6 +189,7 @@ router.post('/:userId', passport.authenticate('jwt', {session: false}), async (r
     try {
         let userId = req.params.userId
         let prompt = req.body.prompt
+        let isSchoolSpecific = req.body.isSchoolSpecific
         let alumnusAuthor = await alumniSchema.findOne({user: userId})
         if (!alumnusAuthor.approved) {
             res.status(400).json({
@@ -177,7 +199,8 @@ router.post('/:userId', passport.authenticate('jwt', {session: false}), async (r
         }
         let article = new articleSchema({
             prompt: prompt,
-            author: userId
+            author: userId,
+            school: isSchoolSpecific ? alumnusAuthor.school : null
         })
         await article.save()
         logger.info(`POST | action=/ | userId=${userId} | message='User added new article'`)
@@ -187,6 +210,7 @@ router.post('/:userId', passport.authenticate('jwt', {session: false}), async (r
         const newArticleNews = new newsSchema({
             event: 'New Article',
             alumni: [alumnusAuthor._id],
+            school: alumnusAuthor.school,
             supportData: {
                 articleId: article._id,
                 articlePrompt: prompt
@@ -204,10 +228,10 @@ router.post('/:userId', passport.authenticate('jwt', {session: false}), async (r
 
 router.patch('/addInput/:userId/:articleId', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        if (await userCanAddInput(req.params.userId)) {
+        let article = await articleSchema.findById(articleId)
+        if (await userCanAddInput(req.params.userId, article.school)) {
             let userId = req.params.userId
             let articleId = req.params.articleId
-            let article = await articleSchema.findById(articleId)
             if (!article) {
                 logger.error(`PATCH | action=/addInput | userId=${req.params.userId} | message='Article not found with id='${articleId}'`)
                 res.status(404).json({

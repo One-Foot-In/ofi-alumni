@@ -7,7 +7,8 @@ const articleSchema = new Schema(
   {
     author: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     prompt: {type: String, maxlength: 300, required: true},
-    dateCreated: {type: Date, default: () => moment()}, 
+    dateCreated: {type: Date, default: () => moment()},
+    school: {type: Schema.Types.ObjectId, ref: 'School', required: false},
     inputs: [
         {
             type: Schema.Types.ObjectId,

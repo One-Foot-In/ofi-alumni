@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, Segment, Button, Message } from 'semantic-ui-react'
+import { Feed, Segment, Button, Message, Label } from 'semantic-ui-react'
 import { makeCall } from "../apis";
 import ArticleInput from './ArticleInput';
 import NewArticleInput from './NewArticleInput';
@@ -69,6 +69,21 @@ export default function Article (props) {
                     info
                 >
                     <Message.Header>{article.prompt}</Message.Header>
+                    {
+                        article.school ?
+                        <Label
+                            color='blue'
+                            size='tiny'
+                            image
+                            style={{
+                                margin: '3px'
+                            }}
+                        >
+                            <img src={article.school.logoURL}/>
+                            {article.school.name}
+                        </Label> :
+                        null
+                    }
                 </Message>
                 {renderInputs()}
             </Feed>

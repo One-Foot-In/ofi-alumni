@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, TextArea, Button } from 'semantic-ui-react'
+import { Grid, TextArea, Button, Checkbox } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 
 /**
@@ -11,10 +11,11 @@ import { makeCall } from '../apis';
  */
 export default function NewArticlePrompt (props) {
     const [prompt, setPrompt] = useState('')
+    const [restrictToMySchool, setRestrictToMySchool] = useState(false)
     const [sendingRequest, setSendingRequest] = useState(false)
     const addArticle = async () => {
         setSendingRequest(true)
-        makeCall({prompt}, `/articles/${props.userId}`, 'post').then(res => {
+        makeCall({prompt, isSchoolSpecific: restrictToMySchool}, `/articles/${props.userId}`, 'post').then(res => {
             if (res && res.error) {
                 // TODO: error toast
             }
@@ -56,7 +57,16 @@ export default function NewArticlePrompt (props) {
                     disabled={sendingRequest || !prompt}
                 >
                     Add Article
-                </Button>                
+                </Button>
+                <Checkbox 
+                    checked={restrictToMySchool}
+                    label='Only allow input from my school'
+                    onChange={() => setRestrictToMySchool(!restrictToMySchool)}
+                    disabled={sendingRequest}
+                    style={{
+                        margin: '3px'
+                    }}
+                />         
             </Grid.Column>
         </Grid>
     )

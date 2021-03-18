@@ -11,13 +11,14 @@ router.get('/getNews/:role/:id', async (req, res, next) => {
     let id = req.params.id
     try {
         let dbData;
+        let profile
         if (role == 'ALUMNI') {
-            userInfo = await alumniSchema.findById(id)
-            dbData = await newsSchema.find({role: {$ne: 'STUDENT'}, school: userInfo.school})
+            profile = await alumniSchema.findById(id)
+            dbData = await newsSchema.find({role: {$ne: 'STUDENT'}, school: profile.school})
                 .populate('alumni').populate('students')
         } else {
-            userInfo = await studentSchema.findById(id)
-            dbData = await newsSchema.find({role: {$ne: 'ALUMNI'}, school: userInfo.school, grade: {$in: [null, userInfo.grade]}})
+            profile = await studentSchema.findById(id)
+            dbData = await newsSchema.find({role: {$ne: 'ALUMNI'}, school: profile.school, grade: {$in: [null, profile.grade]}})
                 .populate('alumni').populate('students')
         }
         let objData = dbData.map(item => {
@@ -30,6 +31,9 @@ router.get('/getNews/:role/:id', async (req, res, next) => {
         })
         // find article-related news items
         let globalNewsItems = await newsSchema.find({event: {$in: ['New Article', 'New Article Input']}}).populate('alumni')
+        globalNewsItems = globalNewsItems.filter(newsItem => {
+            return !newsItem.school || newsItem.school.toString() === profile.school.toString()
+        })
         let globalNewsItemObjs = globalNewsItems.map(newsItem => {
             let newsItemObj = newsItem.toObject()
             newsItemObj.timeElapsed = moment(newsItem.dateCreated).fromNow()

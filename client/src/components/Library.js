@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Feed, Segment, Button, Message } from 'semantic-ui-react'
+import { Feed, Segment, Button, Message, Label } from 'semantic-ui-react'
 import { makeCall } from "../apis";
 import NewArticlePrompt from './NewArticlePrompt';
 import Article from './Article';
@@ -50,6 +50,21 @@ export default function Library (props) {
                         <Feed.Date>{article.timeElapsed}</Feed.Date>
                         <Feed.Summary>
                             {article.prompt}
+                            {
+                                article.school ?
+                                <Label
+                                    color='blue'
+                                    size='tiny'
+                                    style={{
+                                        margin: '3px'
+                                    }}
+                                    image
+                                >
+                                    <img src={article.school.logoURL}/>
+                                    {article.school.name}
+                                </Label> :
+                                null
+                            }
                         </Feed.Summary>
                         <Feed.Extra text>
                             {article.inputs.length} inputs | {article.totalLikes} likes | {article.totalComments} comments
