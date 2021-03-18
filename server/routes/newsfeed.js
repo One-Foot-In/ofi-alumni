@@ -25,7 +25,7 @@ router.get('/getNews/:role/:id', async (req, res, next) => {
                 item.depopulate('students') 
             }
             let itemObj = item.toObject()
-            itemObj.timeElapsed = moment(item.dateCreated).fromNow()
+            itemObj.timeElapsed = moment(itemObj.dateCreated).fromNow()
             return itemObj
         })
         // find article-related news items
@@ -36,6 +36,14 @@ router.get('/getNews/:role/:id', async (req, res, next) => {
             return newsItemObj
         })
         objData = [...objData, ...globalNewsItemObjs]
+        objData.sort((objA, objB) => {
+            if (objA.dateCreated > objB.dateCreated) {
+                return 1
+            } else if (objA.dateCreated < objB.dateCreated) {
+                return -1
+            }
+            return 0
+        })
         res.json({'news' : objData});
     } catch (e) {
         console.log('getNews error: ' + e)
