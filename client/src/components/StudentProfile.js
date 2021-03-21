@@ -196,9 +196,9 @@ export default class StudentProfile extends Component {
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
                     <FootyPoints points={this.props.details.footyPoints} 
-                                 style={ {'margin-left': 0,
-                                          'margin-top': '3px',
-                                          'margin-bottom': '2px'} } />
+                                 style={ {'marginLeft': 0,
+                                          'marginTop': '3px',
+                                          'marginBottom': '2px'} } />
                     <Card.Description>Grade: {details.grade || 'Unavailable'}</Card.Description>
                 </Card.Content>
                 {

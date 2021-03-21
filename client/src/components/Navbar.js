@@ -1,9 +1,10 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import { Menu, Responsive, Sidebar, Button, Icon, Label } from 'semantic-ui-react'
-import { Link } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import  TimeZoneDropdown  from './TimeZoneDropdown'
 
 /*
+    TODO: update
     props:
     - userDetails - profile object
     - role
@@ -24,22 +25,28 @@ import  TimeZoneDropdown  from './TimeZoneDropdown'
     ]
     - activeItem
 */
-export default class Navbar extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            sidebarVisible: false
+function Navbar (props) {
+    const { navItems, role } = props
+    const activeItem = getActiveItem(props.history.location.pathname);
+
+    const [sidebarVisable, setSidebarVisible] = useState(true);
+    
+    function getActiveItem(path) {
+        if (path === '/') {
+            if (role === 'ADMIN') {
+                return 'data';
+            } else if (role === 'COLLEGE_REP') {
+                return 'announcements';
+            } else if (role === 'COUNTRY_AMBASSADOR') {
+                return 'schools';
+            } else {
+                return 'home';
+            }
         }
-        this.renderMenuItems = this.renderMenuItems.bind(this);
-        this.handleOffsetChange = this.handleOffsetChange.bind(this);
-        this.handleClick = this.handleClick.bind(this)
+        return path.substring(1);
     }
 
-    UNSAFE_componentWillMount() {
-        this.setState({sidebarVisible: false})
-    }
-
-    renderMenuItems(items, activeItem) {
+    function renderMenuItems(items, activeItem) {
         return items && items.map( item => {
             return (
                 <Menu.Item
@@ -72,51 +79,52 @@ export default class Navbar extends Component {
         })
     }
 
-    handleOffsetChange() {
+    async function handleClick() {
+        setSidebarVisible((visible) => !visible)
+    }
+
+    function handleOffsetChange() {
         window.location.reload()
     }
 
-    async handleClick() {
-        this.setState({sidebarVisible: !this.state.sidebarVisible})
-    }
 
-    render() {
-        const { navItems, activeItem, role } = this.props
-        return (
-            <>
-            <Responsive as={Menu} minWidth={726}>
-                {this.renderMenuItems(navItems, activeItem)}
-                {this.props.timezoneActive &&
+    return (
+        <>
+        <Responsive as={Menu} minWidth={726}>
+            {renderMenuItems(navItems, activeItem)}
+            {props.timezoneActive &&
+                <TimeZoneDropdown
+                    userDetails={props.userDetails}
+                    userRole={role}
+                    liftTimezone={handleOffsetChange}
+                />
+            }
+        </Responsive>
+        <Responsive maxWidth={726}>
+            <Sidebar
+                as={Menu}
+                animation='overlay'
+                icon='labeled'
+                inverted
+                vertical
+                visible={sidebarVisable}
+                width='thin'
+            >
+                {renderMenuItems(navItems, activeItem)}
+                {props.timezoneActive &&
                     <TimeZoneDropdown
-                        userDetails={this.props.userDetails}
+                        userDetails={props.userDetails}
                         userRole={role}
-                        liftTimezone={this.handleOffsetChange}
+                        liftTimezone={handleOffsetChange}
                     />
                 }
-            </Responsive>
-            <Responsive maxWidth={726}>
-                <Sidebar
-                    as={Menu}
-                    animation='overlay'
-                    icon='labeled'
-                    inverted
-                    vertical
-                    visible={this.state.sidebarVisible}
-                    width='thin'
-                >
-                    {this.renderMenuItems(navItems, activeItem)}
-                    {this.props.timezoneActive &&
-                        <TimeZoneDropdown
-                            userDetails={this.props.userDetails}
-                            userRole={role}
-                            liftTimezone={this.handleOffsetChange}
-                        />
-                    }
-                    <Button icon='close' as={Menu.Item} onClick={this.handleClick}/>
-                </Sidebar>
-                <Button icon='bars' onClick={this.handleClick} fluid style={{'marginBottom': '18px'}}/>
-            </Responsive>
-            </>
-        )
-    }
+                <Button icon='close' as={Menu.Item} onClick={handleClick}/>
+            </Sidebar>
+            <Button icon='bars' onClick={handleClick} fluid style={{'marginBottom': '18px'}}/>
+        </Responsive>
+        </>
+    )
+
 }
+
+export default withRouter(Navbar);

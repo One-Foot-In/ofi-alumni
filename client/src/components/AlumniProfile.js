@@ -309,7 +309,7 @@ export default class AlumniProfile extends Component {
                 }
                 <Card.Content>
                     <Card.Header>{details.name || 'Unavailable'}</Card.Header>
-                    <FootyPoints points={this.props.details.footyPoints} style={{'margin-left': 0, 'margin-top': '3px'}} />
+                    <FootyPoints points={this.props.details.footyPoints} style={{'marginLeft': 0, 'marginTop': '3px'}} />
                     <Card.Meta>{details.jobTitleName || 'Unavailable'}
                         {
                             !isViewOnly ?
