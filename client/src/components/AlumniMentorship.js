@@ -611,7 +611,7 @@ class RequestCards extends Component {
     render() {
         return(
             <>
-            {this.state.showFeedbackModal && 
+            {this.state.showFeedbackModal &&  this.state.requestDetails && 
                 <Modal open={this.state.showFeedbackModal}>
                     <Modal.Header>Leave a final note for {this.state.requestDetails.student.name}</Modal.Header>
                     <Modal.Content>
@@ -649,7 +649,7 @@ class RequestCards extends Component {
                     </Modal.Actions>
                 </Modal>
             }
-            {this.state.showAlumniNoteModal &&
+            {this.state.showAlumniNoteModal &&  this.state.requestDetails && 
                 <Modal open={this.state.showAlumniNoteModal}>
                     <Modal.Header>Leave a pre-meeting note for {this.state.requestDetails.student.name}</Modal.Header>
                     <Modal.Content>
@@ -679,7 +679,7 @@ class RequestCards extends Component {
                 </Modal.Content>
                     <Modal.Actions>
                         <Button onClick={this.toggleFeedbackModal.bind(this)}>
-                            Done
+                            Close
                         </Button>
                         <Button onClick={this.submitAlumniNote.bind(this)} disabled={!this.state.alumniNote} primary>
                             Submit

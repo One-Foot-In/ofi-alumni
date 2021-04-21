@@ -294,6 +294,60 @@ const sendApprovalAlert = async (to, name) => {
   }
 }
 
+const sendArticleAuthorNewInputEmail = async (to, inputerName, articleTitle) => {
+  let emailObject = createPersonalization(
+    to,
+    `New Input on your article!`,
+    htmlBuilder(
+      `${inputerName} has added new input to your article <b>${articleTitle}</b>!`,
+      `Check out input in app!`,
+      'Go To App',
+      APP
+    )
+  )
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
+}
+
+const sendInputAuthorNewInputEmail = async (to, inputerName, articleTitle) => {
+  let emailObject = createPersonalization(
+    to,
+    `New Input on an article you contributed to!`,
+    htmlBuilder(
+      `${inputerName} has added new input to article <b>${articleTitle}</b>! You also contributed to this article. Check out what other alumni have to say.`,
+      `Check out input in app!`,
+      'Go To App',
+      APP
+    )
+  )
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
+}
+
+const sendStudentCommenterNewInputEmail = async (to, inputerName, articleTitle) => {
+  let emailObject = createPersonalization(
+    to,
+    `New Input on an article you engaged with!`,
+    htmlBuilder(
+      `${inputerName} has added new input to article <b>${articleTitle}</b>! You have also engaged with this article.`,
+      `Check out input in app!`,
+      'Go To App',
+      APP
+    )
+  )
+  if (doNotSendEmails) {
+    console.log("Sending email to ", emailObject.to, " with subject: ", emailObject.subject)
+  } else {
+    await sg.send(emailObject, true)
+  }
+}
+
 exports.sendTestEmail = sendTestEmail
 exports.sendAlumniVerificationEmail = sendAlumniVerificationEmail
 exports.sendStudentVerificationEmail = sendStudentVerificationEmail
@@ -307,3 +361,6 @@ exports.getNewMessagesForAlumniString = getNewMessagesForAlumniString
 exports.sendNewMessageAlert = sendNewMessageAlert
 exports.sendPollAlert = sendPollAlert
 exports.sendApprovalAlert = sendApprovalAlert
+exports.sendInputAuthorNewInputEmail = sendInputAuthorNewInputEmail
+exports.sendArticleAuthorNewInputEmail = sendArticleAuthorNewInputEmail
+exports.sendStudentCommenterNewInputEmail = sendStudentCommenterNewInputEmail

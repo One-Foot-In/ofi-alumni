@@ -2,6 +2,7 @@ const express = require("express");
 var indexRouter = require('../routes/index');
 var alumniRouter = require('../routes/alumni');
 var studentRouter = require('../routes/students');
+var articlesRouter = require('../routes/article');
 var mongooseUtilRouter = require('../routes/utilMongoose');
 
 
@@ -19,6 +20,7 @@ function createServer() {
     app.use('/alumni/', alumniRouter);
     app.use('/student/', studentRouter);
     app.use('/util/', mongooseUtilRouter);
+    app.use('/articles/', articlesRouter);
 	return app;
 }
 

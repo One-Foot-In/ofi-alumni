@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Message, Segment, Feed, Image, Header, Icon, Divider, Modal, Grid, Menu} from 'semantic-ui-react'
+import { Message, Segment, Feed, Image, Header, Icon, Divider, Modal, Grid, Menu, Button } from 'semantic-ui-react'
 import { makeCall } from '../apis';
 import AlumniProfile from './AlumniProfile';
 import StudentProfile from './StudentProfile';
@@ -64,6 +64,18 @@ export default class NewsFeed extends Component {
                     if (feedItem.alumni[0]) {
                         display.push(<Divider key={i}/>)
                         display.push(this.createNewTopicsPost(feedItem))
+                    }
+                    break;
+                case 'New Article':
+                    if (feedItem.alumni[0]) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createNewArticlePost(feedItem))
+                    }
+                    break;
+                case 'New Article Input':
+                    if (feedItem.alumni[0] || (feedItem.supportData && feedItem.supportData.isAnonymous)) {
+                        display.push(<Divider key={i}/>)
+                        display.push(this.createNewArticleInputPost(feedItem))
                     }
                     break;
                 default:
@@ -250,6 +262,121 @@ export default class NewsFeed extends Component {
                     </Feed.Summary>
                     <Feed.Extra>
                         {alumniDetails.name} is now consulting on: {topicsString}
+                    </Feed.Extra>
+                </Feed.Content>
+            </Feed.Event>
+        )
+    }
+
+    /*
+     * EVENT: 'New Article'
+     * Display to: 'BOTH'
+     * Contains: Alumni[0] and time (stored as string) ONLY
+     * On Click: Opens a profile modal that can not be interacted with
+     */
+    createNewArticlePost(feedItem) {
+        let alumniDetails = feedItem.alumni[0];
+        var articleLink = `${window.location.href}workspaces/library/${feedItem.supportData.articleId}`
+        return(
+            <Feed.Event key={feedItem._id}>
+                <Feed.Label>
+                    <Image src={alumniDetails.imageURL} />
+                </Feed.Label>
+                <Feed.Content>
+                    <Feed.Summary>
+                        <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
+                            <Feed.User>{alumniDetails.name}</Feed.User>
+                        }>
+                            <Header>
+                                <Grid>
+                                    <Grid.Row columns={2}>
+                                        <Grid.Column width={7}>Details for {alumniDetails.name}</Grid.Column>
+                                        <Grid.Column textAlign='right'>Graduated: {alumniDetails.gradYear}</Grid.Column>
+                                    </Grid.Row>
+                                </Grid>
+                            </Header>
+                            <Modal.Content>
+                                <AlumniProfile details={alumniDetails} isViewOnly={true} />
+                            </Modal.Content>
+                        </Modal> has added a new article!
+                        <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
+                    </Feed.Summary>
+                    <Feed.Extra>
+                        Article: {feedItem.supportData.articlePrompt}
+                    </Feed.Extra>
+                    <Feed.Extra>
+                        <Button
+                            size='tiny'
+                            primary
+                            href={articleLink}
+                        >
+                            View Article
+                        </Button>
+                    </Feed.Extra>
+                </Feed.Content>
+            </Feed.Event>
+        )
+    }
+
+    /*
+     * EVENT: 'New Article Input'
+     * Display to: 'BOTH'
+     * Contains: Alumni[0] and time (stored as string) ONLY
+     * On Click: Opens a profile modal that can not be interacted with
+     */
+    createNewArticleInputPost(feedItem) {
+        let isAnonymous = feedItem.supportData.isAnonymous
+        let alumniDetails
+        if (!isAnonymous) {
+            alumniDetails = feedItem.alumni[0];
+        }
+        var articleLink = `${window.location.href}workspaces/library/${feedItem.supportData.articleId}`
+
+        return(
+            <Feed.Event key={feedItem._id}>
+                {
+                    <Feed.Label>
+                        {
+                            isAnonymous ?
+                            <Icon name='user'/> :
+                            <Image src={alumniDetails.imageURL} />
+                        }
+                    </Feed.Label>
+                }
+                <Feed.Content>
+                    <Feed.Summary>
+                        {
+                        isAnonymous ?
+                            `An alumnus ` :
+                            <Modal closeIcon onClose={this.close} dimmer='blurring' trigger={
+                                <Feed.User>{alumniDetails.name}</Feed.User>
+                            }>
+                                <Header>
+                                    <Grid>
+                                        <Grid.Row columns={2}>
+                                            <Grid.Column width={7}>Details for {alumniDetails.name}</Grid.Column>
+                                            <Grid.Column textAlign='right'>Graduated: {alumniDetails.gradYear}</Grid.Column>
+                                        </Grid.Row>
+                                    </Grid>
+                                </Header>
+                                <Modal.Content>
+                                    <AlumniProfile details={alumniDetails} isViewOnly={true} />
+                                </Modal.Content>
+                            </Modal>
+                        } has added input to an article!
+                        <Feed.Date>{feedItem.timeElapsed}</Feed.Date>
+                    </Feed.Summary>
+                    <Feed.Extra>
+                        Article: {feedItem.supportData.articlePrompt}
+                    </Feed.Extra>
+                    <Feed.Extra>
+                        <Button
+                            size='tiny'
+                            primary
+                            href={articleLink}
+                        >
+                            View Article
+                        </Button>
                     </Feed.Extra>
                 </Feed.Content>
             </Feed.Event>

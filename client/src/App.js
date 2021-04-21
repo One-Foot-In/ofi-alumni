@@ -333,9 +333,6 @@ class App extends Component {
     }) 
     try {
       const result = await makeCall({}, '/isLoggedIn', 'get')
-      this.setState({
-        fetchingAuth: false
-      });
       if (result && !result.error) {
         var jwtVal = document.cookie.replace(/(?:(?:^|.*;\s*)jwt\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         const parsedJWT = JSON.parse(atob(jwtVal.split('.')[1]));
@@ -348,7 +345,8 @@ class App extends Component {
           role: this.getPrimaryRole(roles),
           userDetails: profile,
           approved: profile.approved,
-          loggedIn: true
+          loggedIn: true,
+          fetchingAuth: false
         }, async () => {
           await this.refreshMenuPopupCounters(roles, profile._id)
         })
@@ -564,6 +562,85 @@ class App extends Component {
                       />
                       <AlumniWorkspace 
                           userDetails={this.state.userDetails}
+                          history={props.history}
+                          activeItem={'opportunities'}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/library`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                          activeItem={'library'}
+                          history={props.history}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/opportunities`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                          activeItem={'opportunities'}
+                          history={props.history}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/collegesAccepted`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                          activeItem={'collegesAccepted'}
+                          history={props.history}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/library/:articleId`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={alumniNavBarItems(this.state.approved, this.state.newRequestsCount, this.state.unseenMessagesCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <AlumniWorkspace 
+                          userDetails={this.state.userDetails}
+                          history={props.history}
+                          articleId={props.match.params.articleId}
+                          activeItem={'library'}
                       />
                   </> :
                   <Redirect to={"/login"}/>
@@ -683,9 +760,69 @@ class App extends Component {
                           navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
                           activeItem={'workspaces'}
                       />
-                        <StudentWorkspace 
-                            userDetails={this.state.userDetails}
-                        />
+                      <StudentWorkspace 
+                          userDetails={this.state.userDetails}
+                          activeItem={'opportunities'}
+                          history={props.history}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/opportunities`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <StudentWorkspace 
+                          userDetails={this.state.userDetails}
+                          activeItem={'opportunities'}
+                          history={props.history}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/library`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <StudentWorkspace 
+                          userDetails={this.state.userDetails}
+                          activeItem={'library'}
+                          history={props.history}
+                      />
+                  </> :
+                  <Redirect to={"/login"}/>
+              }
+          />
+          <Route exact path = {`/workspaces/library/:articleId`} render={(props) =>
+                  this.state.loggedIn ?
+                  <>
+                      <Navbar
+                          userDetails={this.state.userDetails}
+                          role={role}
+                          timezoneActive={true}
+                          navItems={studentNavBarItems(this.state.userDetails.isModerator, this.state.approvedRequestsCount)}
+                          activeItem={'workspaces'}
+                      />
+                      <StudentWorkspace 
+                          userDetails={this.state.userDetails}
+                          history={props.history}
+                          articleId={props.match.params.articleId}
+                          activeItem={'library'}
+                      />
                   </> :
                   <Redirect to={"/login"}/>
               }
@@ -1058,6 +1195,7 @@ class App extends Component {
                 liftRole={this.liftRole}
                 completeLogin={this.completeLogin}
                 login={this.login}
+                footyPoints={this.state.userDetails && this.state.userDetails.footyPoints}
                 currentRole={this.state.role}
               />
               <Container>

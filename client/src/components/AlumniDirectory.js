@@ -4,6 +4,7 @@ import { makeCall } from '../apis';
 import RequestModal from './RequestModal'
 import AlumniContactModal from './AlumniContactModal'
 import AccessControlDropdown from './AccessContextDropdown'
+import FootyPoints from './FootyPoints';
 
 // Filter dropdown options
 const searchOptions = [
@@ -227,10 +228,17 @@ export default class AlumniDirectory extends Component {
                         <Card.Content>
                             <Card.Header>
                             <Grid>
-                                <Grid.Row columns={2}>
-                                    <Grid.Column>{post.name}</Grid.Column>
-                                    <Grid.Column textAlign='right'>
+                                <Grid.Row columns={3}>
+                                    <Grid.Column width={8}>{post.name}</Grid.Column>
+                                    <Grid.Column textAlign='right' width={4}>
                                         Graduated: {post.gradYear}
+                                    </Grid.Column>
+                                    <Grid.Column width={4}>
+                                        <FootyPoints points={ post.footyPoints } 
+                                                    style={{
+                                                        'margin-left': 0,
+                                                        'margin-top': '3px'
+                                                    }}/>
                                     </Grid.Column>
                                 </Grid.Row>
                             </Grid>
@@ -243,6 +251,7 @@ export default class AlumniDirectory extends Component {
                             <Card.Description>Company: {post.companyName || 'Unavailable'}</Card.Description>
                             {post.interests && post.interests.length ? <Card.Description>Interests: {this.getInterests(post.interests)}</Card.Description> : null}
                             {post.topics && post.topics.length ? <Card.Description>Topics of Consultancy: {this.getTopics(post.topics)}</Card.Description> : null}
+
                             <br />
                         </Card.Content>
                         {this.requestButton(post, i)}

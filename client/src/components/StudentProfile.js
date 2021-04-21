@@ -4,6 +4,7 @@ import ImageUpdateModal from './ImageUpdateModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import InterestsUpdateModal from './InterestsUpdateModal';
 import { makeCall } from "../apis";
+import FootyPoints from './FootyPoints';
 
 const STUDENT = "STUDENT"
 
@@ -193,7 +194,10 @@ export default class StudentProfile extends Component {
                     dimmableImage
                 }
                 <Card.Content>
-                    <Card.Header>{details.name || 'Unavailable'}</Card.Header>
+                    <Card.Header>
+                        {details.name || 'Unavailable'}
+                        <FootyPoints floated='right' points={this.props.details.footyPoints} style={{margin: '3px 0 0 3px'}} />
+                    </Card.Header>
                     <Card.Description>Grade: {details.grade || 'Unavailable'}</Card.Description>
                 </Card.Content>
                 {

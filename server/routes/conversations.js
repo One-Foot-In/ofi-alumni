@@ -66,11 +66,19 @@ router.get('/all/:id', passport.authenticate('jwt', {session: false}), async (re
     try {
         const alumniId = req.params.id;
         var conversations = await conversationSchema.find({alumni: alumniId}).populate('alumni', 'name imageURL');
+
         for (let conversation of conversations) {
             conversation.timeFromMessage = moment(conversation.messages[0].dateSent).fromNow();
         }
         res.status(200).send({
-            'conversations': conversations
+            'conversations': conversations.sort((convoA, convoB) => {
+                if (convoA.messages[0].dateSent > convoB.messages[0].dateSent) {
+                    return -1
+                } else if (convoA.messages[0].dateSent < convoB.messages[0].dateSent) {
+                    return 1
+                }
+                return 0
+            })
         });
     } catch (e) {
         console.log('conversations/all/:id Error: ' + e)
