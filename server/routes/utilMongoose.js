@@ -14,6 +14,7 @@ var jobTitleSchema = require('../models/jobTitleSchema');
 var majorSchema = require('../models/majorSchema');
 var interestsSchema = require('../models/interestsSchema');
 var newsSchema = require('../models/newsSchema');
+var eventSchema = require('../models/eventSchema');
 const conversationSchema = require('../models/conversationSchema');
 const collegeRepSchema = require('../models/collegeRepSchema');
 require('mongoose').Promise = global.Promise
@@ -57,9 +58,17 @@ const timezones = [
 const interests = [
     "3D Printing", "Entrepreneurship", "Sleuthing", "Quantum Computing", "Bird Watching", "Drums", "Guitar", "Social Justice", "Politics", "Community Service", "Mental Health Awareness"
 ]
+const events = [
+    "3D Printing", "Entrepreneurship", "Sleuthing", "Quantum Computing", "Bird Watching", "Drums", "Guitar", "Social Justice", "Politics", "Community Service", "Mental Health Awareness"
+]
+
 
 const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
+}
+
+const randomDate = (start, end) => {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
 const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _schoolLogo, _interests, _major) => {
@@ -174,6 +183,20 @@ const createCollege = async (_name, _country, _logoURL) => {
     await college_instance.save()
 }
 
+const createEvent = async (_creator, _title, _date, _link, _description, _school, _startYear, _endYear) => {
+    var event_instance = new eventSchema({
+        creator: _creator,
+        title: _title,
+        date: _date,
+        link: _link,
+        description: _description,
+        school: _school,
+        startYear: _startYear,
+        endYear: _endYear
+    })
+    await event_instance.save()
+}
+
 router.get('/seed/', async (req, res, next) => {
     try {
         // Create 3 schools
@@ -274,6 +297,29 @@ router.get('/seed/', async (req, res, next) => {
             let timezoneStudent = randomPickFromArray(timezones)
             await createStudent(studentEmail, studentName, picLinkStudent, timezoneStudent, school, school.logoURL)
         }
+
+        // create events
+        var eventCreatorAlum = await alumniSchema.findOne()
+        var minYear = await alumniSchema.findOne().sort({ gradYear: 1 }).gradYear
+        for (let i = 0; i < events.length; i++) {
+            let eventName = events[i]
+            if (process.env.NODE_ENV === 'test') {
+                eventName += ` (${uuidv4()})`
+            }
+            startYear = minYear + Math.floor((Math.random() * 5))
+            endYear = startYear + Math.floor((Math.random() * 10))
+            await createEvent(
+                eventCreatorAlum.user,
+                eventName,
+                {type: Date, required: true},
+                "https://zoom.link/link/",
+                "event description ${i}",
+                randomPickFromArray(schoolsSaved),
+                startYear,
+                endYear
+            )
+        }
+
         res.status(200).send({'message' : `Successfully created ${USER_COUNT} alumni and ${USER_COUNT} students`});
     } catch (e) {
         console.log("Error: util#seed", e);
@@ -536,7 +582,6 @@ router.get('/allSchools', async (req, res) => {
 router.post('/addSchool', async (req, res) => {
     try {
         await createSchool(req.body.name, req.body.country, req.body.logoUrl)
-        var vat = await schoolSchema.find()
         res.status(200).send({
             message: 'Successfully added school'
         });
@@ -782,6 +827,17 @@ router.get('/data/clear/collegeRep', async (req, res) => {
     }
 })
 
+router.post('/addEvent', async (req, res) => {
+    try {
+        await createEvent(req.body.creator, req.body.title, req.body.date, req.body.link, req.body.description, req.body.school, req.body.startYear, req.body.endYear)
+        res.status(200).send({
+            message: 'Successfully added event'
+        });
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
 /* Clear All */
 router.get('/data/clear/all', async (req, res, next) => {
     try {
@@ -799,6 +855,7 @@ router.get('/data/clear/all', async (req, res, next) => {
         await newsSchema.deleteMany({});
         await majorSchema.deleteMany({});
         await conversationSchema.deleteMany({});
+        await eventSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});

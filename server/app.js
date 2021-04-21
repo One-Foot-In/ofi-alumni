@@ -26,6 +26,7 @@ var requestRouter = require('./routes/requests');
 var newsRouter = require('./routes/newsfeed');
 var imageRouter = require('./routes/image');
 var conversationsRouter = require('./routes/conversations')
+var eventRouter = require('./routes/events')
 
 require('dotenv').config();
 
@@ -160,6 +161,8 @@ async function main() {
     app.use('/image/', imageRouter);
 
     app.use('/conversations/', conversationsRouter);
+
+    app.use('/event/', eventRouter);
 
     // app will cause the frontend to be served
     // for any end-point path that it cannot resolve

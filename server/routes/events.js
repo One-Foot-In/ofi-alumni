@@ -25,15 +25,81 @@ const isValidAccessContext = ({ accessContexts, userSchool, school }) => {
     }
 }
 
+/*
+    Helper function to ensure user has access to a given school
+    @param accessContexts - list of access levels for the given user
+    @param gradYear - user graduation yeat
+    @param school - user school
+    @return List of events the alumus has access to
+*/
+const getEventsForAlum = async ({ accessContexts, gradYear, school }) => {
+    // find all events based on graduation year
+    var events = await eventSchema.find({
+      $and: [
+        {
+          $or: [
+            { startYear: null },
+            { startYear: { $lte: gradYear }}
+          ],
+        },
+        {
+          $or: [
+            { endYear: null},
+            { endYear: { $gte: gradYear }}
+          ]
+        },
+      ],
+    })
+    .populate({ path: 'school', select: '_id' })
+    .populate({ path: 'school', select: 'country' })
+
+    // return events based on user access contexts
+    if (accessContexts.includes("GLOBAL")) {
+        return events;
+    } else if (accessContexts.includes("INTERSCHOOL")) {
+        return events.filter(event => event.school.country === school.country)
+    } else {
+        return events.filter(event => {
+            return event.school._id.toString() === school._id.toString()
+        })
+    }
+}
+
+/*
+    API to use
+    @return the user created event
+*/
+router.get('/', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
+    try {
+        let isAlumni = req.user.role.includes("ALUMNI")
+        // event restricted to alumni only
+        if (!isAlumni) {
+            res.status(403).json({ message: "User must be an alumnus to access event" })
+            return
+        }
+        let userRecord = await userSchema.findById(req.user.id)
+        let alumnus = await alumniSchema.findOne({ user: req.user.id })
+        let eventSchool = await schoolSchema.findOne(alumnus.school)
+        let events = await getEventsForAlum({
+            accessContexts: userRecord.accessContexts,
+            gradYear: alumnus.gradYear,
+            school: eventSchool
+        })
+        res.status(200).json({ events })
+    } catch (error) {
+        console.error("Error: events#find", error)
+        res.status(500).send({ error })
+    }
+})
+
 
 /*
     API used by alumni to create alumni accessible events
     @return the user created event
 */
-router.post('/create/:userId', async (req, res, next) => {
+router.post('/create', passport.authenticate('jwt', {session: false}), async (req, res, next) => {
     try {
-        let userRecord = await userSchema.findById(req.params.userId)
-        let isAlumni = userRecord.role.includes("ALUMNI")
+        let isAlumni = req?.user?.role?.includes("ALUMNI")
         // event creation restricted to alumni only
         if (!isAlumni) {
             res.status(403).json({
@@ -41,53 +107,60 @@ router.post('/create/:userId', async (req, res, next) => {
             })
             return
         }
-        var alumnus = await alumniSchema.findOne({ user: userRecord._id })
+        let userRecord = await userSchema.findById(req.user.id)
+        let alumnus = await alumniSchema.findOne({ user: req.user.id })
         // school validation
-        var school = null
-        var userSchoolId = alumnus.school
-        var userSchool = await schoolSchema.findById(userSchoolId)
+        let inputSchool = null
+        let userSchoolId = alumnus.school
+        let userSchool = await schoolSchema.findById(userSchoolId)
+        if (req.body.startYear && req.body.endYear && req.body.startYear > req.body.endYear) {
+            res.status(404).json({
+                message: "Event start year must come before end year"
+            })
+            return
+        }
         if (req.body.school) {
-            school = await schoolSchema.findById(req.body.school)
-            if (!school) {
+            inputSchool = await schoolSchema.findById(req.body.school)
+            if (!inputSchool) {
                 res.status(404).json({
-                    message: `Could not find school with id ${school.id}`
+                    message: `Could not find school with id ${inputSchool.id}`
                 })
                 return
-            } else if (!isValidAccessContext({ accessContexts: userRecord.accessContexts, userSchool, school })) {
+            } else if (!isValidAccessContext({ accessContexts: userRecord.accessContexts, userSchool, school: inputSchool })) {
                 res.status(403).json({
-                    message: `User does not have access level to create event in ${school.country}`
+                    message: `User does not have access level to create event in ${inputSchool.country}`
                 })
                 return
             }            
         }
-        if (!(school || userSchool)) {
+        if (!(inputSchool || userSchool)) {
             console.error("Error: events#create. Invalid school saved on user object.")
             res.status(404).json({
                 message: `Could not find school with id ${userSchoolId}`
             })
             return
         }
-        school = school || userSchool
+        inputSchool = inputSchool || userSchool
         // event body validation
-        if (!req.body.name || !req.body.date || !req.body.description) {
+        if (!req.body.title || !req.body.date || !req.body.description) {
             res.status(400).json({
-                message: "Event must contain have name, description and date fields provided"
+                message: "Event must contain have title, description and date fields provided"
             })
             return
         }
         // event creation
-        var event = new eventSchema({
+        let event = new eventSchema({
             creator: userRecord._id,
-            name: req.body.name,
+            title: req.body.title,
             date: req.body.date,
             link: req.body.link,
             description: req.body.description,
-            school: school._id,
+            school: inputSchool._id,
             years: req.body.years
         })
         await event.save()
 
-        res.status(200).json({ event })
+        res.status(200)
     } catch (error) {
         console.error("Error: events#create", error)
         res.status(500).send({ error })
@@ -95,4 +168,3 @@ router.post('/create/:userId', async (req, res, next) => {
 })
 
 module.exports = router;
-
