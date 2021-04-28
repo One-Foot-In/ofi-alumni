@@ -14,6 +14,7 @@ var jobTitleSchema = require('../models/jobTitleSchema');
 var majorSchema = require('../models/majorSchema');
 var interestsSchema = require('../models/interestsSchema');
 var newsSchema = require('../models/newsSchema');
+var eventSchema = require('../models/eventSchema');
 const conversationSchema = require('../models/conversationSchema');
 const collegeRepSchema = require('../models/collegeRepSchema');
 require('mongoose').Promise = global.Promise
@@ -57,9 +58,17 @@ const timezones = [
 const interests = [
     "3D Printing", "Entrepreneurship", "Sleuthing", "Quantum Computing", "Bird Watching", "Drums", "Guitar", "Social Justice", "Politics", "Community Service", "Mental Health Awareness"
 ]
+const events = [
+    "3D Printing", "Entrepreneurship", "Sleuthing", "Quantum Computing", "Bird Watching", "Drums", "Guitar", "Social Justice", "Politics", "Community Service", "Mental Health Awareness"
+]
+
 
 const randomPickFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
+}
+
+const randomDate = (start, end) => {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
 const createAlumni = async (_email, _name, _country, _city, _profession, _company, _college, _picLink, _hasZoom, timezone, _school, _schoolLogo, _interests, _major) => {
@@ -87,7 +96,7 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             accessContexts: ["INTRASCHOOL"],
         }
     );
-    
+
     await user_instance.save();
     var alumni_instance = new alumniSchema(
         {
@@ -97,9 +106,9 @@ const createAlumni = async (_email, _name, _country, _city, _profession, _compan
             country: _country,
             city: _city,
             jobTitle: _profession,
-            jobTitleName: _profession.name,
+            jobTitleName: _profession && _profession.name,
             company: _company,
-            companyName: _company.name,
+            companyName: _company && _company.name,
             interests: _interests,
             college: _college,
             collegeName: _college.name,
@@ -172,6 +181,20 @@ const createCollege = async (_name, _country, _logoURL) => {
         logoURL: _logoURL
     })
     await college_instance.save()
+}
+
+const createEvent = async (_creator, _title, _date, _link, _description, _school, _startYear, _endYear) => {
+    var event_instance = new eventSchema({
+        creator: _creator,
+        title: _title,
+        date: _date,
+        link: _link,
+        description: _description,
+        school: _school,
+        startYear: _startYear,
+        endYear: _endYear
+    })
+    await event_instance.save()
 }
 
 router.get('/seed/', async (req, res, next) => {
@@ -274,6 +297,29 @@ router.get('/seed/', async (req, res, next) => {
             let timezoneStudent = randomPickFromArray(timezones)
             await createStudent(studentEmail, studentName, picLinkStudent, timezoneStudent, school, school.logoURL)
         }
+
+        // create events
+        var eventCreatorAlum = await alumniSchema.findOne()
+        var minYear = await alumniSchema.findOne().sort({ gradYear: 1 }).gradYear
+        for (let i = 0; i < events.length; i++) {
+            let eventName = events[i]
+            if (process.env.NODE_ENV === 'test') {
+                eventName += ` (${uuidv4()})`
+            }
+            startYear = minYear + Math.floor((Math.random() * 5))
+            endYear = startYear + Math.floor((Math.random() * 10))
+            await createEvent(
+                eventCreatorAlum.user,
+                eventName,
+                {type: Date, required: true},
+                "https://zoom.link/link/",
+                "event description ${i}",
+                randomPickFromArray(schoolsSaved),
+                startYear,
+                endYear
+            )
+        }
+
         res.status(200).send({'message' : `Successfully created ${USER_COUNT} alumni and ${USER_COUNT} students`});
     } catch (e) {
         console.log("Error: util#seed", e);
@@ -323,53 +369,28 @@ router.post('/addAlumni/', async (req, res, next) => {
         const gradYear = parseInt(req.body.gradYear);
         const location = req.body.location;
         const profession = req.body.profession;
-        const company = req.body.company;
-        const college = req.body.college;
+        const country = req.body.country;
+        const city = req.body.city;
         const availabilities = [];
-        const timeZone = req.body.timeZone;
         const zoomLink = req.body.zoomLink;
         const password = req.body.password;
+        const accessContexts = req.body.accessContexts;
+        const hasZoom = req.body.hasZoom;
+        const interests = req.body.interests || [];
+        const schoolLogo = null;
+        const picLinkAlumni = null;
+        const timezone = req.body.timezone;
+        const jobTitle = req.body.jobTitleObj;
+        const company = req.body.companyObj;
+        // require fields for alumni creation
+        const college = req.body.collegeObj || await collegeSchema.findOne();
+        const major = req.body.majorObj || await majorSchema.findOne();
+        const school = req.body.school || await schoolSchema.findOne();
 
-        const role = ["ALUMNI"]
-        const emailVerified = false
-        const approved = false
-        const verificationToken = crypto({length: 16});
-        var passwordHash = await bcrypt.hash(password, HASH_COST)
-        const user_instance = new userSchema(
-            {
-              email: email,
-              passwordHash: passwordHash,
-              verificationToken: verificationToken,
-              role: role,
-              emailVerified: emailVerified,
-              approved: approved,
-              emailSubscribed: true,
-              accessContexts: ["INTRASCHOOL"],
-            }
-        );
-        await user_instance.save();
-
-        var alumni_instance = new alumniSchema(
-            {
-                name: name,
-                user: user_instance._id,
-                gradYear: gradYear,
-                location: location,
-                profession: profession,
-                company: company,
-                college: college,
-                //requests: [{type: Schema.Types.ObjectId, ref: 'requestSchema'}]
-                //posts: [{type: Schema.Types.ObjectId, ref: 'postSchema'}]
-                availabilities: availabilities,
-                timeZone: timeZone,
-                zoomLink: zoomLink
-            }
-        )        
-        let insert = await alumni_instance.save();
+        await createAlumni(email, name, country, city, jobTitle, company, college, picLinkAlumni, hasZoom, timezone, school, schoolLogo, interests, major)
 
         res.status(200).send({
-            message: 'Successfully added alumni',
-            alumni: alumni_instance
+            message: 'Successfully added alumni'
         });
     } catch (e) {
         res.status(500).send({
@@ -499,6 +520,17 @@ router.get('/data/clear/user', async (req, res, next) => {
     }
 });
 
+router.put('/updateUser/:userId', async (req, res, next) => {
+    try {
+        var user = await userSchema.findById(req.params.userId)
+        Object.assign(user, req.body)
+        await user.save()
+        res.status(200).send({'message' : `updated user fields: ${Object.keys(req.body)}`});
+    } catch (e) {
+        res.status(500).send({error: e})
+    }
+});
+
 /* Request Routes */
 router.get('/allRequests', async (req, res, next) => {
     try {
@@ -542,6 +574,17 @@ router.get('/allSchools', async (req, res) => {
     try {
         let schools = await schoolSchema.find()
         res.status(200).send(schools)
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
+router.post('/addSchool', async (req, res) => {
+    try {
+        await createSchool(req.body.name, req.body.country, req.body.logoUrl)
+        res.status(200).send({
+            message: 'Successfully added school'
+        });
     } catch (e) {
         res.status(500).send({'error': e});
     }
@@ -784,6 +827,17 @@ router.get('/data/clear/collegeRep', async (req, res) => {
     }
 })
 
+router.post('/addEvent', async (req, res) => {
+    try {
+        await createEvent(req.body.creator, req.body.title, req.body.date, req.body.link, req.body.description, req.body.school, req.body.startYear, req.body.endYear)
+        res.status(200).send({
+            message: 'Successfully added event'
+        });
+    } catch (e) {
+        res.status(500).send({'error': e});
+    }
+})
+
 /* Clear All */
 router.get('/data/clear/all', async (req, res, next) => {
     try {
@@ -801,6 +855,7 @@ router.get('/data/clear/all', async (req, res, next) => {
         await newsSchema.deleteMany({});
         await majorSchema.deleteMany({});
         await conversationSchema.deleteMany({});
+        await eventSchema.deleteMany({});
         res.status(200).send({'message' : 'deleted all records!'});
     } catch (e) {
         res.status(500).send({'error' : e});
