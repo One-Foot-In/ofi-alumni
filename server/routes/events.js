@@ -26,7 +26,7 @@ const isValidAccessContext = ({ accessContexts, userSchool, school }) => {
 }
 
 /*
-    Helper function to ensure user has access to a given school
+    Get all events for an alum filtered by user access and graduation year
     @param accessContexts - list of access levels for the given user
     @param gradYear - user graduation yeat
     @param school - user school
